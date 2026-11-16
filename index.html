@@ -43,14 +43,68 @@ body {
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
 }
-.tabs { display: flex; gap: 5px; padding: 10px 12px 8px; overflow-x: auto; }
-.tab {
-  flex: 1; min-width: 90px; padding: 10px 6px; border: none; border-radius: 12px;
-  background: var(--card); color: var(--hint); font-size: 13px; font-weight: 600;
-  cursor: pointer; box-shadow: var(--shadow); white-space: nowrap;
-}
-.tab.on { background: var(--btn); color: var(--btnfg); }
 main { padding: 0 14px 24px; }
+
+/* Landing */
+.landing {
+  padding: 30px 10px 20px;
+  text-align: center;
+}
+.landing h2 {
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+.landing p {
+  color: var(--hint);
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+.role-btn {
+  display: block;
+  width: 100%;
+  padding: 18px 16px;
+  margin-bottom: 14px;
+  border: none;
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.1s;
+}
+.role-btn:active { transform: scale(0.98); }
+.role-btn .icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+.role-btn .title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fg);
+}
+.role-btn .desc {
+  font-size: 13px;
+  color: var(--hint);
+  margin-top: 2px;
+}
+.role-btn.employer { border-left: 4px solid #0284c7; }
+.role-btn.worker { border-left: 4px solid #059669; }
+.role-btn.admin { border-left: 4px solid #d97706; }
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--btn);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 8px 0 12px;
+  padding: 4px 0;
+}
+
 .skills-wrap { margin: 6px 0 12px; overflow-x: auto; scrollbar-width: none; }
 .skills-wrap::-webkit-scrollbar { display: none; }
 .skills { display: flex; gap: 8px; width: max-content; }
@@ -90,7 +144,6 @@ main { padding: 0 14px 24px; }
 .admin-card.due { border: 2px solid var(--warning); background: #fffbeb; }
 .admin-card.pending { border: 2px solid #93c5fd; background: #eff6ff; }
 label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 3px; font-weight: 500; }
-.field-hint { font-size: 12px; color: var(--hint); margin: -4px 0 10px; }
 input, select, textarea {
   width: 100%; padding: 10px 11px; margin-bottom: 11px;
   border: 1px solid var(--border); border-radius: 10px;
@@ -152,70 +205,96 @@ textarea { min-height: 70px; resize: vertical; }
   <button class="lang-btn" id="langBtn">አማርኛ</button>
 </header>
 
-<div class="tabs">
-  <button class="tab on" id="tabE" data-view="E">Find Worker</button>
-  <button class="tab" id="tabR" data-view="R">Register as Worker</button>
-  <button class="tab" id="tabA" data-view="A">Admin</button>
-</div>
-
 <main>
-  <!-- EMPLOYER VIEW -->
-  <section id="vE">
+  <!-- ========== LANDING (Role Selection) ========== -->
+  <section id="vLanding">
+    <div class="landing">
+      <h2 id="landingTitle">Welcome</h2>
+      <p id="landingSub">Please select what you want to do</p>
+
+      <button class="role-btn employer" id="btnEmployer">
+        <div class="icon">🔍</div>
+        <div class="title" id="btnEmployerTitle">Find a Worker</div>
+        <div class="desc" id="btnEmployerDesc">I want to hire a house maid, driver, cook, etc.</div>
+      </button>
+
+      <button class="role-btn worker" id="btnWorker">
+        <div class="icon">👷</div>
+        <div class="title" id="btnWorkerTitle">Register as Worker</div>
+        <div class="desc" id="btnWorkerDesc">I want to offer my service and get hired</div>
+      </button>
+
+      <button class="role-btn admin" id="btnAdmin">
+        <div class="icon">🔐</div>
+        <div class="title" id="btnAdminTitle">Admin Panel</div>
+        <div class="desc" id="btnAdminDesc">For manager only</div>
+      </button>
+    </div>
+  </section>
+
+  <!-- ========== EMPLOYER VIEW ========== -->
+  <section id="vE" class="hid">
+    <button class="back-btn" id="backFromE">← <span id="backText1">Back</span></button>
+
     <div id="empRegisterGate" class="form-card hid">
       <h3 style="margin-bottom:10px" id="empRegTitle">Register to Hire</h3>
       <p class="who" id="empRegNote">Please register first before hiring a worker.</p>
-      <label>Full Name *</label>
-      <input id="emp_name" maxlength="80" placeholder="Your full name">
-      <label>Phone Number *</label>
-      <input id="emp_phone" maxlength="20" placeholder="09xxxxxxxx">
-      <label>Location / City *</label>
-      <input id="emp_location" maxlength="60" placeholder="e.g. Addis Ababa, Bole">
+      <label id="lblEmpName">Full Name *</label>
+      <input id="emp_name" maxlength="80" placeholder="">
+      <label id="lblEmpPhone">Phone Number *</label>
+      <input id="emp_phone" maxlength="20" placeholder="0912123456">
+      <label id="lblEmpLoc">Location / City *</label>
+      <input id="emp_location" maxlength="60" placeholder="">
       <button class="btn-primary" id="empSaveBtn">Save & Continue</button>
     </div>
+
     <div id="empMain">
       <div class="skills-wrap"><div class="skills" id="skillChips"></div></div>
       <div id="list">
-        <div class="state"><div class="state-icon">⏳</div><h3>Loading...</h3></div>
+        <div class="state"><div class="state-icon">⏳</div><h3 id="loadingText">Loading...</h3></div>
       </div>
     </div>
   </section>
 
-  <!-- WORKER SELF-REGISTRATION -->
+  <!-- ========== WORKER SELF-REGISTRATION ========== -->
   <section id="vR" class="hid">
+    <button class="back-btn" id="backFromR">← <span id="backText2">Back</span></button>
+
     <div class="form-card" id="wrFormCard">
       <h3 style="margin-bottom:12px" id="workerRegTitle">Register as Worker</h3>
       <p class="who" id="workerRegNote">Fill the form. Admin will review and approve you.</p>
-      <label>Full Name *</label>
+
+      <label id="lblWrName">Full Name *</label>
       <input id="wr_name" maxlength="80">
-      <label>Age *</label>
+      <label id="lblWrAge">Age *</label>
       <input id="wr_age" type="number" min="14" max="80">
-      <label>Skill *</label>
+      <label id="lblWrSkill">Skill *</label>
       <select id="wr_skill"></select>
-      <label>Location *</label>
-      <input id="wr_location" maxlength="60" placeholder="e.g. Addis Ababa">
-      <label>Experience *</label>
-      <input id="wr_experience" maxlength="120" placeholder="e.g. 2 years">
-      <label>Payment Type *</label>
+      <label id="lblWrLoc">Location *</label>
+      <input id="wr_location" maxlength="60">
+      <label id="lblWrExp">Experience *</label>
+      <input id="wr_experience" maxlength="120">
+      <label id="lblWrPayType">Payment Type *</label>
       <select id="wr_paymentType">
         <option value="monthly">Monthly</option>
         <option value="hourly">Hourly</option>
         <option value="daily">Daily</option>
       </select>
-      <label>Expected Pay (optional)</label>
-      <input id="wr_pay" maxlength="60" placeholder="e.g. 5000 ETB / month">
+      <label id="lblWrPay">Expected Pay (optional)</label>
+      <input id="wr_pay" maxlength="60">
       <div class="divider"></div>
-      <label>National ID Number *</label>
+      <label id="lblWrId">National ID Number *</label>
       <input id="wr_nationalId" maxlength="30">
-      <label>Phone Number *</label>
+      <label id="lblWrPhone">Phone Number *</label>
       <input id="wr_phone" maxlength="20" placeholder="09xxxxxxxx">
-      <label>Profile Photo</label>
+      <label id="lblWrPhoto">Profile Photo</label>
       <input id="wr_photo" type="file" accept="image/*">
       <div class="divider"></div>
-      <label>Guarantor Name (optional)</label>
+      <label id="lblWrGName">Guarantor Name (optional)</label>
       <input id="wr_guarantorName" maxlength="80">
-      <label>Guarantor Phone (optional)</label>
+      <label id="lblWrGPhone">Guarantor Phone (optional)</label>
       <input id="wr_guarantorPhone" maxlength="20">
-      <label>Police Clearance</label>
+      <label id="lblWrPolice">Police Clearance</label>
       <select id="wr_police">
         <option value="no">Not available</option>
         <option value="yes">Available</option>
@@ -224,66 +303,70 @@ textarea { min-height: 70px; resize: vertical; }
     </div>
     <div id="wrSuccess" class="form-card hid" style="text-align:center">
       <div style="font-size:40px;margin-bottom:8px">✅</div>
-      <h3>Registration Submitted!</h3>
-      <p class="who">Admin will review your profile. You will become visible after approval.</p>
+      <h3 id="wrSuccessTitle">Registration Submitted!</h3>
+      <p class="who" id="wrSuccessText">Admin will review your profile. You will become visible after approval.</p>
+      <button class="btn-secondary" id="wrBackHome" style="margin-top:12px">Back to Home</button>
     </div>
   </section>
 
-  <!-- ADMIN VIEW -->
+  <!-- ========== ADMIN VIEW ========== -->
   <section id="vA" class="hid">
+    <button class="back-btn" id="backFromA">← <span id="backText3">Back</span></button>
+
     <div id="login" class="form-card">
       <p id="loginNote" class="who" style="margin-bottom:12px"></p>
       <button class="btn-primary" id="signIn">Sign in with Google</button>
       <button class="btn-primary hid" id="openBrowser">Open in browser to sign in</button>
     </div>
+
     <div id="panel" class="hid">
       <div class="who" id="who"></div>
       <button class="btn-secondary" id="signOut">Sign out</button>
 
-      <h2 class="section-title">⏳ Pending Workers (Need Approval)</h2>
+      <h2 class="section-title" id="pendingTitle">⏳ Pending Workers</h2>
       <div id="pendingList"></div>
 
-      <h2 class="section-title">⭐ Rating Follow-up Due</h2>
+      <h2 class="section-title" id="dueTitle">⭐ Rating Follow-up Due</h2>
       <div id="dueList"></div>
 
-      <h2 class="section-title">📋 Hire Requests</h2>
+      <h2 class="section-title" id="reqTitle">📋 Hire Requests</h2>
       <div id="reqs"></div>
 
-      <h2 class="section-title">👷 All Workers</h2>
+      <h2 class="section-title" id="allWTitle">👷 All Workers</h2>
       <div id="wl"></div>
 
-      <h2 class="section-title">➕ Add Worker Manually</h2>
+      <h2 class="section-title" id="addWTitle">➕ Add Worker Manually</h2>
       <form id="wf" class="form-card">
         <input type="hidden" id="f_id">
-        <label>Full name *</label>
+        <label id="lblFName">Full name *</label>
         <input id="f_name" required maxlength="80">
-        <label>Age *</label>
+        <label id="lblFAge">Age *</label>
         <input id="f_age" type="number" min="14" max="80" required>
-        <label>Skill *</label>
+        <label id="lblFSkill">Skill *</label>
         <select id="f_skill" required></select>
-        <label>Location *</label>
+        <label id="lblFLoc">Location *</label>
         <input id="f_location" required maxlength="60">
-        <label>Experience *</label>
+        <label id="lblFExp">Experience *</label>
         <input id="f_experience" required maxlength="120">
-        <label>Payment type *</label>
+        <label id="lblFPayType">Payment type *</label>
         <select id="f_paymentType">
           <option value="monthly">Monthly</option>
           <option value="hourly">Hourly</option>
           <option value="daily">Daily</option>
         </select>
-        <label>Pay (optional)</label>
+        <label id="lblFPay">Pay (optional)</label>
         <input id="f_pay" maxlength="60">
-        <label>National ID *</label>
+        <label id="lblFId">National ID *</label>
         <input id="f_nationalId" required maxlength="30">
-        <label>Phone *</label>
+        <label id="lblFPhone">Phone *</label>
         <input id="f_phone" required maxlength="20">
-        <label>Police Clearance</label>
+        <label id="lblFPolice">Police Clearance</label>
         <select id="f_police"><option value="no">No</option><option value="yes">Yes</option></select>
-        <label>Guarantor Name</label>
+        <label id="lblFGName">Guarantor Name</label>
         <input id="f_guarantorName" maxlength="80">
-        <label>Guarantor Phone</label>
+        <label id="lblFGPhone">Guarantor Phone</label>
         <input id="f_guarantorPhone" maxlength="20">
-        <label>Photo</label>
+        <label id="lblFPhoto">Photo</label>
         <input id="f_photo" type="file" accept="image/*">
         <button class="btn-primary" id="saveBtn" type="submit">Save Worker</button>
         <button class="btn-secondary hid" id="cancelEdit" type="button">Cancel</button>
@@ -298,7 +381,7 @@ textarea { min-height: 70px; resize: vertical; }
     <h3 id="doneTitle">Request Delivered!</h3>
     <p id="doneText">Your request has been sent successfully. Our team will contact you shortly.</p>
     <div class="phone-box">
-      <div style="font-size:12px;color:#166534;margin-bottom:4px">Call Admin now</div>
+      <div style="font-size:12px;color:#166534;margin-bottom:4px" id="callAdminLabel">Call Admin now</div>
       <a id="adminPhoneLink" href="tel:">09xxxxxxxx</a>
     </div>
     <button class="btn-primary" id="doneBtn" style="margin-bottom:8px">Message Admin on Telegram</button>
@@ -309,9 +392,9 @@ textarea { min-height: 70px; resize: vertical; }
 <!-- Rating modal -->
 <div id="ratingModal" class="modal-overlay hid">
   <div class="modal-box" style="text-align:left">
-    <h3 style="text-align:center">Save Rating</h3>
+    <h3 style="text-align:center" id="ratingModalTitle">Save Rating</h3>
     <p class="who" id="ratingWorkerName" style="text-align:center"></p>
-    <label>Stars (1-5)</label>
+    <label id="lblStars">Stars (1-5)</label>
     <select id="ratingStars">
       <option value="5">5 ★★★★★</option>
       <option value="4">4 ★★★★</option>
@@ -319,7 +402,7 @@ textarea { min-height: 70px; resize: vertical; }
       <option value="2">2 ★★</option>
       <option value="1">1 ★</option>
     </select>
-    <label>Comment / Recommendation</label>
+    <label id="lblComment">Comment / Recommendation</label>
     <textarea id="ratingComment"></textarea>
     <button class="btn-primary" id="saveRatingBtn">Save Rating</button>
     <button class="btn-secondary" id="cancelRatingBtn" style="width:100%;margin-top:8px">Cancel</button>
@@ -365,26 +448,128 @@ const SKILLS = [
 
 const i18n = {
   en: {
-    tagline: "Trusted Workers", findWorker: "Find Worker", registerWorker: "Register as Worker", admin: "Admin",
-    allSkills: "All", noWorkers: "No workers available", noWorkersSub: "Please check again soon",
-    hire: "Hire this worker", age: "Age", experience: "Experience", pay: "Pay", negotiable: "Negotiable",
-    requestTitle: "Request Delivered!", requestText: "Your request has been sent successfully. Our team will contact you shortly.",
-    messageAdmin: "Message Admin on Telegram", close: "Close", confirmHire: "Send hire request for this worker?",
-    langBtn: "አማርኛ", verifiedId: "ID Verified", policeClearance: "Police Clearance",
+    tagline: "Trusted Workers",
+    landingTitle: "Welcome to Tamagn Delala",
+    landingSub: "Please select what you want to do",
+    btnEmployerTitle: "Find a Worker",
+    btnEmployerDesc: "I want to hire a house maid, driver, cook, etc.",
+    btnWorkerTitle: "Register as Worker",
+    btnWorkerDesc: "I want to offer my service and get hired",
+    btnAdminTitle: "Admin Panel",
+    btnAdminDesc: "For manager only",
+    back: "Back",
+    allSkills: "All",
+    noWorkers: "No workers available",
+    noWorkersSub: "Please check again soon",
+    loading: "Loading...",
+    hire: "Hire this worker",
+    age: "Age", experience: "Experience", pay: "Pay", negotiable: "Negotiable",
+    requestTitle: "Request Delivered!",
+    requestText: "Your request has been sent successfully. Our team will contact you shortly.",
+    callAdmin: "Call Admin now",
+    messageAdmin: "Message Admin on Telegram",
+    close: "Close",
+    confirmHire: "Send hire request for this worker?",
+    langBtn: "አማርኛ",
+    verifiedId: "ID Verified",
+    policeClearance: "Police Clearance",
     monthly: "Monthly", hourly: "Hourly", daily: "Daily",
-    empRegTitle: "Register to Hire", empRegNote: "Please register first before hiring a worker.",
-    workerRegTitle: "Register as Worker", workerRegNote: "Fill the form. Admin will review and approve you."
+    empRegTitle: "Register to Hire",
+    empRegNote: "Please register first before hiring a worker.",
+    empName: "Full Name *",
+    empPhone: "Phone Number *",
+    empLoc: "Location / City *",
+    empSave: "Save & Continue",
+    workerRegTitle: "Register as Worker",
+    workerRegNote: "Fill the form. Admin will review and approve you.",
+    wrName: "Full Name *", wrAge: "Age *", wrSkill: "Skill *", wrLoc: "Location *",
+    wrExp: "Experience *", wrPayType: "Payment Type *", wrPay: "Expected Pay (optional)",
+    wrId: "National ID Number *", wrPhone: "Phone Number *", wrPhoto: "Profile Photo",
+    wrGName: "Guarantor Name (optional)", wrGPhone: "Guarantor Phone (optional)",
+    wrPolice: "Police Clearance",
+    wrSubmit: "Submit Registration",
+    wrSuccessTitle: "Registration Submitted!",
+    wrSuccessText: "Admin will review your profile. You will become visible after approval.",
+    wrBackHome: "Back to Home",
+    policeNo: "Not available", policeYes: "Available",
+    pendingTitle: "⏳ Pending Workers",
+    dueTitle: "⭐ Rating Follow-up Due",
+    reqTitle: "📋 Hire Requests",
+    allWTitle: "👷 All Workers",
+    addWTitle: "➕ Add Worker Manually",
+    saveWorker: "Save Worker",
+    cancel: "Cancel",
+    signIn: "Sign in with Google",
+    openBrowser: "Open in browser to sign in",
+    signOut: "Sign out",
+    loginNoteTg: "Admin login does not work inside Telegram. Open this page in Chrome/Safari.",
+    loginNoteWeb: "Sign in with the admin Google account.",
+    ratingTitle: "Save Rating",
+    stars: "Stars (1-5)",
+    comment: "Comment / Recommendation",
+    saveRating: "Save Rating"
   },
   am: {
-    tagline: "ታማኝ ሰራተኞች", findWorker: "ሰራተኛ ፈልግ", registerWorker: "እንደ ሰራተኛ ይመዝገቡ", admin: "አስተዳዳሪ",
-    allSkills: "ሁሉም", noWorkers: "በአሁኑ ጊዜ ሰራተኛ የለም", noWorkersSub: "እባክዎ ቆይተው ይመልከቱ",
-    hire: "ይህን ሰራተኛ ቅጠር", age: "ዕድሜ", experience: "ልምድ", pay: "ክፍያ", negotiable: "በድርድር",
-    requestTitle: "ጥያቄዎ ተልኳል!", requestText: "ጥያቄዎ በተሳካ ሁኔታ ተልኳል። ቡድናችን በቅርቡ ያገኝዎታል።",
-    messageAdmin: "አድሚንን በቴሌግራም ያግኙ", close: "ዝጋ", confirmHire: "የቅጥር ጥያቄ መላክ ይፈልጋሉ?",
-    langBtn: "English", verifiedId: "መታወቂያ አረጋግጧል", policeClearance: "የፖሊስ ማረጋገጫ",
+    tagline: "ታማኝ ሰራተኞች",
+    landingTitle: "እንኳን ወደ ታማኝ ደላላ በደህና መጡ",
+    landingSub: "እባክዎ የሚፈልጉትን ይምረጡ",
+    btnEmployerTitle: "ሰራተኛ ፈልግ",
+    btnEmployerDesc: "የቤት ሰራተኛ፣ ሹፌር፣ ምግብ አብሳይ ወዘተ መቅጠር እፈልጋለሁ",
+    btnWorkerTitle: "እንደ ሰራተኛ ይመዝገቡ",
+    btnWorkerDesc: "አገልግሎቴን ማቅረብ እና መቅጠር እፈልጋለሁ",
+    btnAdminTitle: "የአስተዳዳሪ ገጽ",
+    btnAdminDesc: "ለማኔጀር ብቻ",
+    back: "ተመለስ",
+    allSkills: "ሁሉም",
+    noWorkers: "በአሁኑ ጊዜ ሰራተኛ የለም",
+    noWorkersSub: "እባክዎ ቆይተው እንደገና ይመልከቱ",
+    loading: "በመጫን ላይ...",
+    hire: "ይህን ሰራተኛ ቅጠር",
+    age: "ዕድሜ", experience: "ልምድ", pay: "ክፍያ", negotiable: "በድርድር",
+    requestTitle: "ጥያቄዎ ተልኳል!",
+    requestText: "ጥያቄዎ በተሳካ ሁኔታ ተልኳል። ቡድናችን በቅርቡ ያገኝዎታል።",
+    callAdmin: "አሁን አድሚንን ይደውሉ",
+    messageAdmin: "አድሚንን በቴሌግራም ያግኙ",
+    close: "ዝጋ",
+    confirmHire: "የቅጥር ጥያቄ መላክ ይፈልጋሉ?",
+    langBtn: "English",
+    verifiedId: "መታወቂያ አረጋግጧል",
+    policeClearance: "የፖሊስ ማረጋገጫ",
     monthly: "ወርሃዊ", hourly: "በሰዓት", daily: "ዕለታዊ",
-    empRegTitle: "ለመቅጠር ይመዝገቡ", empRegNote: "ሰራተኛ ከመቅጠርዎ በፊት እባክዎ ይመዝገቡ።",
-    workerRegTitle: "እንደ ሰራተኛ ይመዝገቡ", workerRegNote: "ቅጹን ይሙሉ። አስተዳዳሪው ከገመገመ በኋላ ይፀድቃል።"
+    empRegTitle: "ለመቅጠር ይመዝገቡ",
+    empRegNote: "ሰራተኛ ከመቅጠርዎ በፊት እባክዎ ይመዝገቡ።",
+    empName: "ሙሉ ስም *",
+    empPhone: "ስልክ ቁጥር *",
+    empLoc: "አካባቢ / ከተማ *",
+    empSave: "አስቀምጥ እና ቀጥል",
+    workerRegTitle: "እንደ ሰራተኛ ይመዝገቡ",
+    workerRegNote: "ቅጹን ይሙሉ። አስተዳዳሪው ከገመገመ በኋላ ይፀድቃል።",
+    wrName: "ሙሉ ስም *", wrAge: "ዕድሜ *", wrSkill: "ክህሎት *", wrLoc: "አካባቢ *",
+    wrExp: "ልምድ *", wrPayType: "የክፍያ አይነት *", wrPay: "የሚጠበቅ ክፍያ (አማራጭ)",
+    wrId: "የመታወቂያ ቁጥር *", wrPhone: "ስልክ ቁጥር *", wrPhoto: "ፎቶ",
+    wrGName: "የዋስ ስም (አማራጭ)", wrGPhone: "የዋስ ስልክ (አማራጭ)",
+    wrPolice: "የፖሊስ ማረጋገጫ",
+    wrSubmit: "ምዝገባ አስገባ",
+    wrSuccessTitle: "ምዝገባዎ ተልኳል!",
+    wrSuccessText: "አስተዳዳሪው መገለጫዎን ይገመግማል። ከተፈቀደ በኋላ ይታያሉ።",
+    wrBackHome: "ወደ መነሻ ተመለስ",
+    policeNo: "የለም", policeYes: "አለ",
+    pendingTitle: "⏳ በመጠባበቅ ላይ ያሉ ሰራተኞች",
+    dueTitle: "⭐ የደረጃ ጥያቄ የሚያስፈልጋቸው",
+    reqTitle: "📋 የቅጥር ጥያቄዎች",
+    allWTitle: "👷 ሁሉም ሰራተኞች",
+    addWTitle: "➕ ሰራተኛ በእጅ ጨምር",
+    saveWorker: "ሰራተኛ አስቀምጥ",
+    cancel: "ሰርዝ",
+    signIn: "በጎግል ይግቡ",
+    openBrowser: "ለመግባት በብራውዘር ይክፈቱ",
+    signOut: "ውጣ",
+    loginNoteTg: "የአድሚን መግቢያ በቴሌግራም ውስጥ አይሰራም። በChrome/Safari ይክፈቱ።",
+    loginNoteWeb: "በአድሚን ጎግል አካውንት ይግቡ።",
+    ratingTitle: "ደረጃ አስቀምጥ",
+    stars: "ኮከቦች (1-5)",
+    comment: "አስተያየት / ምክር",
+    saveRating: "ደረጃ አስቀምጥ"
   }
 };
 
@@ -410,36 +595,127 @@ const skillLabel = en => { const s = SKILLS.find(x => x.en === en); return s ? (
 
 function applyLang() {
   $("tagline").textContent = t("tagline");
-  $("tabE").textContent = t("findWorker");
-  $("tabR").textContent = t("registerWorker");
-  $("tabA").textContent = t("admin");
   $("langBtn").textContent = t("langBtn");
-  $("doneTitle").textContent = t("requestTitle");
-  $("doneText").textContent = t("requestText");
-  $("doneBtn").textContent = t("messageAdmin");
-  $("doneClose").textContent = t("close");
+  $("landingTitle").textContent = t("landingTitle");
+  $("landingSub").textContent = t("landingSub");
+  $("btnEmployerTitle").textContent = t("btnEmployerTitle");
+  $("btnEmployerDesc").textContent = t("btnEmployerDesc");
+  $("btnWorkerTitle").textContent = t("btnWorkerTitle");
+  $("btnWorkerDesc").textContent = t("btnWorkerDesc");
+  $("btnAdminTitle").textContent = t("btnAdminTitle");
+  $("btnAdminDesc").textContent = t("btnAdminDesc");
+  ["backText1","backText2","backText3"].forEach(id => { if($(id)) $(id).textContent = t("back"); });
+
   $("empRegTitle").textContent = t("empRegTitle");
   $("empRegNote").textContent = t("empRegNote");
+  $("lblEmpName").textContent = t("empName");
+  $("lblEmpPhone").textContent = t("empPhone");
+  $("lblEmpLoc").textContent = t("empLoc");
+  $("empSaveBtn").textContent = t("empSave");
+
   $("workerRegTitle").textContent = t("workerRegTitle");
   $("workerRegNote").textContent = t("workerRegNote");
+  $("lblWrName").textContent = t("wrName");
+  $("lblWrAge").textContent = t("wrAge");
+  $("lblWrSkill").textContent = t("wrSkill");
+  $("lblWrLoc").textContent = t("wrLoc");
+  $("lblWrExp").textContent = t("wrExp");
+  $("lblWrPayType").textContent = t("wrPayType");
+  $("lblWrPay").textContent = t("wrPay");
+  $("lblWrId").textContent = t("wrId");
+  $("lblWrPhone").textContent = t("wrPhone");
+  $("lblWrPhoto").textContent = t("wrPhoto");
+  $("lblWrGName").textContent = t("wrGName");
+  $("lblWrGPhone").textContent = t("wrGPhone");
+  $("lblWrPolice").textContent = t("wrPolice");
+  $("wrSubmitBtn").textContent = t("wrSubmit");
+  $("wrSuccessTitle").textContent = t("wrSuccessTitle");
+  $("wrSuccessText").textContent = t("wrSuccessText");
+  $("wrBackHome").textContent = t("wrBackHome");
+
+  // payment type options
+  const payOpts = [
+    ["monthly", t("monthly")],
+    ["hourly", t("hourly")],
+    ["daily", t("daily")]
+  ];
+  ["wr_paymentType","f_paymentType"].forEach(selId => {
+    const sel = $(selId);
+    const prev = sel.value;
+    sel.innerHTML = payOpts.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
+    sel.value = prev || "monthly";
+  });
+  // police options
+  $("wr_police").innerHTML = `<option value="no">${t("policeNo")}</option><option value="yes">${t("policeYes")}</option>`;
+  $("f_police").innerHTML = `<option value="no">${t("policeNo")}</option><option value="yes">${t("policeYes")}</option>`;
+
+  $("doneTitle").textContent = t("requestTitle");
+  $("doneText").textContent = t("requestText");
+  $("callAdminLabel").textContent = t("callAdmin");
+  $("doneBtn").textContent = t("messageAdmin");
+  $("doneClose").textContent = t("close");
   $("adminPhoneLink").textContent = ADMIN_PHONE;
   $("adminPhoneLink").href = "tel:" + ADMIN_PHONE;
+
+  $("pendingTitle").textContent = t("pendingTitle");
+  $("dueTitle").textContent = t("dueTitle");
+  $("reqTitle").textContent = t("reqTitle");
+  $("allWTitle").textContent = t("allWTitle");
+  $("addWTitle").textContent = t("addWTitle");
+  $("saveBtn").textContent = t("saveWorker");
+  $("cancelEdit").textContent = t("cancel");
+  $("signIn").textContent = t("signIn");
+  $("openBrowser").textContent = t("openBrowser");
+  $("signOut").textContent = t("signOut");
+  $("loginNote").textContent = inTelegram ? t("loginNoteTg") : t("loginNoteWeb");
+
+  $("ratingModalTitle").textContent = t("ratingTitle");
+  $("lblStars").textContent = t("stars");
+  $("lblComment").textContent = t("comment");
+  $("saveRatingBtn").textContent = t("saveRating");
+  $("cancelRatingBtn").textContent = t("cancel");
+
+  // skill dropdowns
   const opts = SKILLS.map(s => `<option value="${esc(s.en)}">${lang==="am"?s.am:s.en}</option>`).join("");
   $("wr_skill").innerHTML = opts;
   $("f_skill").innerHTML = opts;
+
+  // admin form labels
+  $("lblFName").textContent = t("wrName");
+  $("lblFAge").textContent = t("wrAge");
+  $("lblFSkill").textContent = t("wrSkill");
+  $("lblFLoc").textContent = t("wrLoc");
+  $("lblFExp").textContent = t("wrExp");
+  $("lblFPayType").textContent = t("wrPayType");
+  $("lblFPay").textContent = t("wrPay");
+  $("lblFId").textContent = t("wrId");
+  $("lblFPhone").textContent = t("wrPhone");
+  $("lblFPolice").textContent = t("wrPolice");
+  $("lblFGName").textContent = t("wrGName");
+  $("lblFGPhone").textContent = t("wrGPhone");
+  $("lblFPhoto").textContent = t("wrPhoto");
+
   renderSkillChips();
   renderWorkers();
 }
 $("langBtn").onclick = () => { lang = lang === "en" ? "am" : "en"; localStorage.setItem("td_lang", lang); applyLang(); };
 
+// Navigation
 function show(view) {
-  ["E","R","A"].forEach(v => {
-    $("v"+v).classList.toggle("hid", v !== view);
-    $("tab"+v).classList.toggle("on", v === view);
+  ["Landing","E","R","A"].forEach(v => {
+    const el = $("v" + v);
+    if (el) el.classList.toggle("hid", v !== view);
   });
 }
-document.querySelectorAll(".tab").forEach(btn => btn.onclick = () => show(btn.dataset.view));
+$("btnEmployer").onclick = () => { show("E"); checkEmployer(); };
+$("btnWorker").onclick = () => show("R");
+$("btnAdmin").onclick = () => show("A");
+$("backFromE").onclick = () => show("Landing");
+$("backFromR").onclick = () => show("Landing");
+$("backFromA").onclick = () => show("Landing");
+$("wrBackHome").onclick = () => show("Landing");
 
+// Employer registration
 async function checkEmployer() {
   if (!tgUser.id) {
     currentEmployer = { name: "Guest", phone: "", location: "" };
@@ -467,16 +743,17 @@ $("empSaveBtn").onclick = async () => {
   const name = $("emp_name").value.trim();
   const phone = $("emp_phone").value.trim();
   const location = $("emp_location").value.trim();
-  if (!name || !phone || !location) return alert("Please fill all fields");
+  if (!name || !phone || !location) return alert(lang==="am"?"እባክዎ ሁሉንም ይሙሉ":"Please fill all fields");
   try {
     const data = { name, phone, location, tgId: Number(tgUser.id)||0, username: tgUser.username||"", createdAt: serverTimestamp() };
     await setDoc(doc(db, "employers", String(tgUser.id || Date.now())), data);
     currentEmployer = data;
     $("empRegisterGate").classList.add("hid");
     $("empMain").classList.remove("hid");
-  } catch (e) { alert("Registration failed: " + e.message); }
+  } catch (e) { alert("Error: " + e.message); }
 };
 
+// Workers list
 let workers = [];
 async function loadWorkers() {
   try {
@@ -486,7 +763,7 @@ async function loadWorkers() {
     renderWorkers();
   } catch (e) {
     console.error(e);
-    $("list").innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Could not load</h3></div>`;
+    $("list").innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Error</h3></div>`;
   }
 }
 
@@ -561,7 +838,7 @@ async function hire(id) {
       followUpSent: false, status: "open", paymentReceived: false, rating: null, ratingComment: null
     });
     showDone(w);
-  } catch (e) { console.error(e); alert("Could not send request."); }
+  } catch (e) { console.error(e); alert("Error"); }
 }
 
 function showDone(w) {
@@ -602,8 +879,10 @@ $("wrSubmitBtn").onclick = async () => {
   const pay = $("wr_pay").value.trim() || "Negotiable";
   const nationalId = $("wr_nationalId").value.trim();
   const phone = $("wr_phone").value.trim();
-  if (!name||!age||!skill||!location||!experience||!nationalId||!phone) return alert("Please fill all required fields");
-  const btn = $("wrSubmitBtn"); btn.disabled = true; btn.textContent = "Submitting...";
+  if (!name||!age||!skill||!location||!experience||!nationalId||!phone) {
+    return alert(lang==="am"?"እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ":"Please fill all required fields");
+  }
+  const btn = $("wrSubmitBtn"); btn.disabled = true; btn.textContent = "...";
   try {
     let photo = "";
     if ($("wr_photo").files[0]) photo = await shrink($("wr_photo").files[0]);
@@ -624,16 +903,17 @@ $("wrSubmitBtn").onclick = async () => {
     $("wrSuccess").classList.remove("hid");
     $("wrFormCard").classList.add("hid");
   } catch (e) { console.error(e); alert("Failed: "+e.message); }
-  btn.disabled = false; btn.textContent = "Submit Registration";
+  btn.disabled = false; btn.textContent = t("wrSubmit");
 };
 
+// Admin
 let allW = [], reqs = [], pending = [];
 if (inTelegram) {
-  $("loginNote").textContent = "Admin login does not work inside Telegram. Open this page in Chrome/Safari.";
   $("signIn").classList.add("hid");
   $("openBrowser").classList.remove("hid");
 } else {
-  $("loginNote").textContent = "Sign in with the admin Google account.";
+  $("openBrowser").classList.add("hid");
+  $("signIn").classList.remove("hid");
 }
 $("signIn").onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.code));
 $("openBrowser").onclick = () => tg.openLink(location.href.split("#")[0]);
@@ -641,7 +921,7 @@ $("signOut").onclick = () => signOut(auth);
 
 onAuthStateChanged(auth, async user => {
   if (!user) { $("login").classList.remove("hid"); $("panel").classList.add("hid"); return; }
-  if (user.email !== ADMIN_EMAIL) { alert("This account is not the admin."); signOut(auth); return; }
+  if (user.email !== ADMIN_EMAIL) { alert("Not admin"); signOut(auth); return; }
   $("who").textContent = "Signed in: " + user.email;
   $("login").classList.add("hid"); $("panel").classList.remove("hid");
   await loadAdmin();
@@ -668,25 +948,25 @@ function isDue(r) {
 function renderAdmin() {
   $("pendingList").innerHTML = pending.length ? pending.map(w => `
     <div class="admin-card pending">
-      <div class="pending-label">PENDING APPROVAL</div>
+      <div class="pending-label">PENDING</div>
       <b>${esc(w.name)}</b> · ${esc(w.skill)} · ${esc(w.location)}
-      <div class="who">Age ${esc(w.age)} · ${esc(w.experience)} · ${esc(w.pay||"Negotiable")}</div>
+      <div class="who">Age ${esc(w.age)} · ${esc(w.experience)}</div>
       <button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button>
       <button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ Reject</button>
-    </div>`).join("") : `<div class="state" style="padding:16px"><p>No pending workers</p></div>`;
+    </div>`).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
 
   const due = reqs.filter(isDue);
   $("dueList").innerHTML = due.length ? due.map(r => {
-    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : (r.employerTgId?`tg://user?id=${r.employerTgId}`:"#");
+    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : "#";
     return `<div class="admin-card due">
       <div class="due-label">RATING DUE</div>
       <b>${esc(r.workerName)}</b>
-      <div class="who">Employer: <a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")}</div>
-      <button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask via Telegram</button>
-      <button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Save Rating</button>
+      <div class="who"><a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")}</div>
+      <button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask</button>
+      <button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Rate</button>
       <button class="btn-secondary" data-marksent="${esc(r.id)}">Mark Sent</button>
     </div>`;
-  }).join("") : `<div class="state" style="padding:16px"><p>No follow-ups due</p></div>`;
+  }).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
 
   $("reqs").innerHTML = reqs.length ? reqs.map(r => {
     const when = r.createdAt ? new Date(ts(r.createdAt)*1000).toLocaleString() : "";
@@ -695,25 +975,24 @@ function renderAdmin() {
     return `<div class="admin-card">
       <b>${esc(r.workerName)}</b>
       <div class="who"><a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")} · ${when}</div>
-      <div class="who">Status: <span class="${stClass}">${esc(r.status||"open")}</span> · Payment: ${r.paymentReceived?"✅":"❌"}</div>
+      <div class="who">Status: <span class="${stClass}">${esc(r.status||"open")}</span> · Pay: ${r.paymentReceived?"✅":"❌"}</div>
       <button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>
       <button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button>
       <button class="btn-secondary" data-pay="${esc(r.id)}">Mark Paid</button>
-      <button class="btn-secondary" data-showphone="${esc(r.workerId)}">Show Worker Phone</button>
+      <button class="btn-secondary" data-showphone="${esc(r.workerId)}">Show Phone</button>
       <button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">Delete</button>
     </div>`;
-  }).join("") : `<div class="state" style="padding:16px"><p>No requests yet</p></div>`;
+  }).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
 
   $("wl").innerHTML = allW.length ? allW.map(w => `
     <div class="admin-card">
       <b>${esc(w.name)}</b>
-      <span class="who"> · ${esc(w.skill)} · ${w.status} · ${w.available?"available":"unavailable"}</span>
-      <div class="who">${esc(w.pay||"Negotiable")} · ${esc(w.paymentType||"monthly")}</div>
+      <span class="who"> · ${esc(w.skill)} · ${w.status}</span>
       ${starsHtml(w.ratingAvg, w.ratingCount)}
-      <button class="btn-secondary" data-tg="${esc(w.id)}">${w.available?"Mark unavailable":"Mark available"}</button>
+      <button class="btn-secondary" data-tg="${esc(w.id)}">${w.available?"Unavailable":"Available"}</button>
       <button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button>
       <button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>
-    </div>`).join("") : `<div class="state"><p>No workers</p></div>`;
+    </div>`).join("") : `<div class="state"><p>—</p></div>`;
 }
 
 $("panel").onclick = async e => {
@@ -723,7 +1002,7 @@ $("panel").onclick = async e => {
     else if (d.reject) { if(!confirm("Reject?"))return; await updateDoc(doc(db,"workers",d.reject),{status:"rejected",available:false}); }
     else if (d.ask) {
       const r = reqs.find(x=>x.id===d.ask); if(!r)return;
-      const msg = `ሰላም ${r.employerName}\n\nከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።\n\nእባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ፡\n⭐️⭐️⭐️⭐️⭐️`;
+      const msg = `ሰላም ${r.employerName}\n\nከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።\n\nእባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ።`;
       const url = r.employerUsername ? `https://t.me/${r.employerUsername}?text=${encodeURIComponent(msg)}` : `tg://user?id=${r.employerTgId}`;
       window.open(url,"_blank"); return;
     }
@@ -738,18 +1017,18 @@ $("panel").onclick = async e => {
     else if (d.pay) await updateDoc(doc(db,"requests",d.pay),{paymentReceived:true});
     else if (d.showphone) {
       const p = await getDoc(doc(db,"workers_private",d.showphone));
-      alert("Worker phone: "+(p.exists()?p.data().phone:"Not found")); return;
+      alert("Phone: "+(p.exists()?p.data().phone:"N/A")); return;
     }
     else if (d.dr) { if(!confirm("Delete?"))return; await deleteDoc(doc(db,"requests",d.dr)); }
     else if (d.tg) { const w=allW.find(x=>x.id===d.tg); await updateDoc(doc(db,"workers",d.tg),{available:!w.available}); }
     else if (d.dw) {
-      if(!confirm("Delete permanently?"))return;
+      if(!confirm("Delete?"))return;
       const b=writeBatch(db); b.delete(doc(db,"workers",d.dw)); b.delete(doc(db,"workers_private",d.dw)); await b.commit();
     }
     else if (d.ed) return startEdit(d.ed);
     else return;
     await loadAdmin(); loadWorkers();
-  } catch(err) { console.error(err); alert("Error: "+(err.code||err.message)); }
+  } catch(err) { alert(err.message); }
 };
 
 $("saveRatingBtn").onclick = async () => {
@@ -763,7 +1042,7 @@ $("saveRatingBtn").onclick = async () => {
       const avg=(((w.ratingAvg||0)*(cnt-1))+stars)/cnt;
       await updateDoc(wRef,{ratingAvg:Math.round(avg*10)/10,ratingCount:cnt});
     }
-    $("ratingModal").classList.add("hid"); await loadAdmin(); loadWorkers(); alert("Rating saved!");
+    $("ratingModal").classList.add("hid"); await loadAdmin(); loadWorkers();
   } catch(e){alert(e.message);}
 };
 $("cancelRatingBtn").onclick = () => $("ratingModal").classList.add("hid");
@@ -781,7 +1060,7 @@ async function startEdit(id) {
 $("cancelEdit").onclick = () => { $("wf").reset(); $("f_id").value=""; $("cancelEdit").classList.add("hid"); };
 
 $("wf").onsubmit = async e => {
-  e.preventDefault(); const btn=$("saveBtn"); btn.disabled=true; btn.textContent="Saving...";
+  e.preventDefault(); const btn=$("saveBtn"); btn.disabled=true;
   try {
     const id=$("f_id").value; const ref=id?doc(db,"workers",id):doc(collection(db,"workers"));
     const publicData={
@@ -801,11 +1080,10 @@ $("wf").onsubmit = async e => {
     $("wf").reset(); $("f_id").value=""; $("cancelEdit").classList.add("hid");
     await loadAdmin(); loadWorkers();
   } catch(err){alert(err.message);}
-  btn.disabled=false; btn.textContent="Save Worker";
+  btn.disabled=false; btn.textContent=t("saveWorker");
 };
 
 applyLang();
-checkEmployer();
 loadWorkers();
 </script>
 </body>
