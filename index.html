@@ -2,86 +2,332 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tamagn Delala</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Tamagn Delala | ታማኝ ደላላ</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{--bg:var(--tg-theme-bg-color,#fff);--fg:var(--tg-theme-text-color,#111);--hint:var(--tg-theme-hint-color,#6b7280);--card:var(--tg-theme-secondary-bg-color,#f3f4f6);--btn:var(--tg-theme-button-color,#2481cc);--btnfg:var(--tg-theme-button-text-color,#fff);--danger:#d33}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,sans-serif;padding-bottom:40px}
-header{padding:14px 16px 8px}
-h1{font-size:18px;margin:0}
-h2{font-size:16px;margin:18px 0 4px}
-.tabs{display:flex;gap:8px;padding:0 16px 8px}
-.tab{flex:1;padding:9px;border:0;border-radius:10px;background:var(--card);color:var(--fg);font-size:14px}
-.tab.on{background:var(--btn);color:var(--btnfg)}
-main{padding:0 16px}
-.card{background:var(--card);border-radius:14px;margin:10px 0;overflow:hidden}
-.card img{width:100%;max-height:220px;object-fit:cover;display:block}
-.pad{padding:12px 14px}
-.row{color:var(--hint);font-size:13px}
-.msg{padding:14px;text-align:center;color:var(--hint)}
-button.p{width:100%;padding:11px;border:0;border-radius:10px;background:var(--btn);color:var(--btnfg);font-size:15px;margin-top:10px}
-button.s{padding:7px 10px;border:0;border-radius:8px;background:var(--bg);color:var(--fg);font-size:13px;margin:6px 6px 0 0}
-button.d{color:var(--danger)}
-input,select{width:100%;padding:10px;margin:4px 0 10px;border:1px solid var(--hint);border-radius:10px;background:var(--bg);color:var(--fg);font-size:15px}
-label{font-size:13px;color:var(--hint)}
-.hid{display:none}
-#done{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px}
-#done.hid{display:none}
-.box{background:var(--bg);border-radius:16px;padding:18px;max-width:340px;width:100%}
+:root {
+  --bg: var(--tg-theme-bg-color, #f1f5f9);
+  --fg: var(--tg-theme-text-color, #0f172a);
+  --hint: var(--tg-theme-hint-color, #64748b);
+  --card: var(--tg-theme-secondary-bg-color, #ffffff);
+  --btn: var(--tg-theme-button-color, #0284c7);
+  --btnfg: var(--tg-theme-button-text-color, #ffffff);
+  --danger: #ef4444;
+  --success: #059669;
+  --warning: #d97706;
+  --border: #e2e8f0;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding-bottom: 48px;
+  -webkit-font-smoothing: antialiased;
+}
+.header {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, #0ea5e9, #0369a1);
+  border-radius: 12px; display: grid; place-items: center;
+  color: white; font-weight: 800; font-size: 15px;
+}
+.logo h1 { font-size: 16px; font-weight: 700; line-height: 1.2; }
+.logo span { font-size: 12px; color: var(--hint); font-weight: 500; }
+.lang-btn {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 20px; padding: 6px 14px;
+  font-size: 13px; font-weight: 600; color: var(--fg); cursor: pointer;
+}
+.tabs { display: flex; gap: 6px; padding: 12px 16px 8px; }
+.tab {
+  flex: 1; padding: 11px; border: none; border-radius: 12px;
+  background: var(--card); color: var(--hint); font-size: 14px; font-weight: 600;
+  cursor: pointer; box-shadow: var(--shadow);
+}
+.tab.on { background: var(--btn); color: var(--btnfg); }
+main { padding: 0 16px 24px; }
+
+/* Skill chips */
+.skills-wrap { margin: 6px 0 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.skills-wrap::-webkit-scrollbar { display: none; }
+.skills { display: flex; gap: 8px; width: max-content; padding: 2px 0; }
+.chip {
+  padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--card); color: var(--fg); font-size: 13px; font-weight: 500;
+  white-space: nowrap; cursor: pointer;
+}
+.chip.active { background: var(--btn); color: var(--btnfg); border-color: var(--btn); }
+
+/* Cards */
+.card {
+  background: var(--card); border-radius: var(--radius); margin-bottom: 14px;
+  overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.card-img { width: 100%; height: 170px; object-fit: cover; display: block; background: #e2e8f0; }
+.card-body { padding: 14px 16px 16px; }
+.card-name { font-size: 17px; font-weight: 700; }
+.card-skill {
+  display: inline-block; background: #e0f2fe; color: #0369a1;
+  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-top: 4px;
+}
+.badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
+.badge-id { background: #dcfce7; color: #166534; }
+.badge-police { background: #fef3c7; color: #92400e; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 8px 0; font-size: 13px; color: var(--hint); }
+.pay { font-weight: 600; color: var(--success); font-size: 14px; margin: 6px 0 12px; }
+.btn-hire {
+  width: 100%; padding: 12px; border: none; border-radius: 12px;
+  background: var(--btn); color: var(--btnfg); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.state { text-align: center; padding: 48px 20px; color: var(--hint); }
+.state-icon { font-size: 42px; margin-bottom: 12px; opacity: 0.7; }
+.state h3 { font-size: 16px; color: var(--fg); margin-bottom: 6px; }
+
+/* Admin */
+.admin-card {
+  background: var(--card); border-radius: var(--radius); padding: 16px;
+  margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.admin-card.due {
+  border: 2px solid var(--warning);
+  background: #fffbeb;
+}
+label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 4px; font-weight: 500; }
+.field-hint { font-size: 12px; color: var(--hint); margin: -6px 0 10px; }
+input, select, textarea {
+  width: 100%; padding: 11px 12px; margin-bottom: 12px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg); color: var(--fg); font-size: 15px;
+}
+textarea { min-height: 70px; resize: vertical; }
+.btn-primary {
+  width: 100%; padding: 12px; border: none; border-radius: 12px;
+  background: var(--btn); color: var(--btnfg); font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px;
+}
+.btn-secondary {
+  padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--fg); font-size: 13px; font-weight: 500; cursor: pointer; margin: 4px 6px 0 0;
+}
+.btn-warning {
+  background: #fef3c7; border-color: #fbbf24; color: #92400e; font-weight: 600;
+}
+.btn-success {
+  background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 600;
+}
+.btn-danger { color: var(--danger); border-color: #fecaca; }
+.hid { display: none !important; }
+.section-title { font-size: 15px; font-weight: 700; margin: 20px 0 10px; }
+.who { font-size: 13px; color: var(--hint); margin-bottom: 6px; }
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+.due-label {
+  display: inline-block; background: #fef3c7; color: #92400e;
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px;
+}
+
+/* Modal */
+#done {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55);
+  display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 100;
+}
+#done.hid { display: none !important; }
+.modal-box {
+  background: var(--card); border-radius: 20px; padding: 24px;
+  max-width: 340px; width: 100%; text-align: center;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+}
+.modal-box h3 { font-size: 18px; margin-bottom: 8px; }
+.modal-box p { color: var(--hint); font-size: 14px; margin-bottom: 20px; }
+.stars { color: #eab308; letter-spacing: 1px; font-size: 14px; }
+
+/* Rating modal */
+#ratingModal {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55);
+  display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 110;
+}
+#ratingModal.hid { display: none !important; }
 </style>
 </head>
 <body>
-<header><h1>ታማኝ ደላላ | Tamagn Delala</h1></header>
-<div class="tabs"><button class="tab on" id="tabW">Workers</button><button class="tab" id="tabA">Admin</button></div>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">TD</div>
+    <div>
+      <h1>Tamagn Delala</h1>
+      <span id="tagline">Trusted Workers</span>
+    </div>
+  </div>
+  <button class="lang-btn" id="langBtn">አማርኛ</button>
+</header>
+
+<div class="tabs">
+  <button class="tab on" id="tabW">Workers</button>
+  <button class="tab" id="tabA">Admin</button>
+</div>
+
 <main>
-<section id="vW">
-<select id="skillF"><option value="">All skills</option></select>
-<div id="list" class="msg">Loading…</div>
-</section>
-<section id="vA" class="hid">
-<div id="login" class="card pad">
-<p id="loginNote" class="row"></p>
-<button class="p" id="signIn">Sign in with Google</button>
-<button class="p hid" id="openBrowser">Open in browser to sign in</button>
-</div>
-<div id="panel" class="hid">
-<div class="row" id="who"></div>
-<button class="s" id="signOut" type="button">Sign out</button>
-<h2 id="formTitle">Add worker</h2>
-<form id="wf" class="card pad">
-<input type="hidden" id="f_id">
-<label>Full name</label><input id="f_name" required maxlength="80">
-<label>Age</label><input id="f_age" type="number" min="14" max="80" required>
-<label>Skill (e.g. housemaid, cook, driver)</label><input id="f_skill" required maxlength="40">
-<label>Location</label><input id="f_location" required maxlength="60">
-<label>Experience</label><input id="f_experience" required maxlength="120">
-<label>Pay (e.g. 5000 ETB / month, or Negotiable)</label><input id="f_pay" maxlength="60">
-<label>Phone (private, only you see it)</label><input id="f_phone" maxlength="30">
-<label>Photo</label><input id="f_photo" type="file" accept="image/*">
-<button class="p" id="saveBtn" type="submit">Save worker</button>
-<button class="s hid" id="cancelEdit" type="button">Cancel edit</button>
-</form>
-<h2>Requests</h2>
-<div id="reqs"></div>
-<h2>Workers</h2>
-<div id="wl"></div>
-</div>
-</section>
+  <!-- WORKERS VIEW -->
+  <section id="vW">
+    <div class="skills-wrap">
+      <div class="skills" id="skillChips"></div>
+    </div>
+    <div id="list">
+      <div class="state">
+        <div class="state-icon">⏳</div>
+        <h3>Loading workers...</h3>
+      </div>
+    </div>
+  </section>
+
+  <!-- ADMIN VIEW -->
+  <section id="vA" class="hid">
+    <div id="login" class="admin-card">
+      <p id="loginNote" class="who" style="margin-bottom:14px"></p>
+      <button class="btn-primary" id="signIn">Sign in with Google</button>
+      <button class="btn-primary hid" id="openBrowser">Open in browser to sign in</button>
+    </div>
+
+    <div id="panel" class="hid">
+      <div class="who" id="who"></div>
+      <button class="btn-secondary" id="signOut" type="button">Sign out</button>
+
+      <h2 class="section-title" id="formTitle">Add worker</h2>
+      <form id="wf" class="admin-card">
+        <input type="hidden" id="f_id">
+
+        <label>Full name *</label>
+        <input id="f_name" required maxlength="80" placeholder="e.g. Abebe Kebede">
+
+        <label>Age *</label>
+        <input id="f_age" type="number" min="14" max="80" required placeholder="25">
+
+        <label>Skill *</label>
+        <select id="f_skill" required></select>
+
+        <label>Location *</label>
+        <input id="f_location" required maxlength="60" placeholder="e.g. Addis Ababa, Bole">
+
+        <label>Experience *</label>
+        <input id="f_experience" required maxlength="120" placeholder="e.g. 3 years">
+
+        <label>Payment type *</label>
+        <select id="f_paymentType" required>
+          <option value="monthly">Monthly</option>
+          <option value="hourly">Hourly</option>
+          <option value="daily">Daily</option>
+        </select>
+
+        <label>Pay amount (optional)</label>
+        <input id="f_pay" maxlength="60" placeholder="e.g. 5000 ETB / month">
+
+        <div class="divider"></div>
+
+        <label>National ID Number *</label>
+        <input id="f_nationalId" required maxlength="30" placeholder="Mandatory">
+        <p class="field-hint">Required for all workers</p>
+
+        <label>ID Photo (optional)</label>
+        <input id="f_idPhoto" type="file" accept="image/*">
+
+        <label>Police Clearance</label>
+        <select id="f_police">
+          <option value="no">Not available</option>
+          <option value="yes">Available</option>
+        </select>
+        <p class="field-hint">Optional – shows as strength badge</p>
+
+        <label>Police Clearance Photo (if available)</label>
+        <input id="f_policePhoto" type="file" accept="image/*">
+
+        <div class="divider"></div>
+
+        <label>Guarantor Full Name (optional)</label>
+        <input id="f_guarantorName" maxlength="80">
+
+        <label>Guarantor ID (optional)</label>
+        <input id="f_guarantorId" maxlength="30">
+
+        <label>Guarantor Phone (optional)</label>
+        <input id="f_guarantorPhone" maxlength="20" placeholder="09xxxxxxxx">
+        <p class="field-hint">Becomes important when the worker is hired</p>
+
+        <div class="divider"></div>
+
+        <label>Worker Phone (private) *</label>
+        <input id="f_phone" required maxlength="20" placeholder="09xxxxxxxx">
+
+        <label>Profile Photo</label>
+        <input id="f_photo" type="file" accept="image/*">
+
+        <button class="btn-primary" id="saveBtn" type="submit">Save worker</button>
+        <button class="btn-secondary hid" id="cancelEdit" type="button">Cancel edit</button>
+      </form>
+
+      <!-- FOLLOW-UP DUE SECTION -->
+      <h2 class="section-title">⏰ Follow-up due (Rating needed)</h2>
+      <div id="dueList"></div>
+
+      <h2 class="section-title">All Requests</h2>
+      <div id="reqs"></div>
+
+      <h2 class="section-title">All Workers</h2>
+      <div id="wl"></div>
+    </div>
+  </section>
 </main>
-<div id="done" class="hid"><div class="box">
-<b>Request received</b>
-<p class="row">Our team will contact you shortly. To speed things up, message the manager now.</p>
-<button class="p" id="doneBtn">Message the manager</button>
-<button class="s" id="doneClose">Close</button>
-</div></div>
+
+<!-- Hire success modal -->
+<div id="done" class="hid">
+  <div class="modal-box">
+    <h3 id="doneTitle">Request received!</h3>
+    <p id="doneText">Our team will contact you shortly. You can also message the manager now.</p>
+    <button class="btn-primary" id="doneBtn" style="margin-bottom:10px">Message the manager</button>
+    <button class="btn-secondary" id="doneClose" style="width:100%">Close</button>
+  </div>
+</div>
+
+<!-- Rating entry modal (for manager) -->
+<div id="ratingModal" class="hid">
+  <div class="modal-box" style="text-align:left">
+    <h3 style="text-align:center;margin-bottom:12px">Save Rating</h3>
+    <p class="who" id="ratingWorkerName" style="text-align:center;margin-bottom:14px"></p>
+    
+    <label>Stars (1-5)</label>
+    <select id="ratingStars">
+      <option value="5">5 ★★★★★</option>
+      <option value="4">4 ★★★★</option>
+      <option value="3">3 ★★★</option>
+      <option value="2">2 ★★</option>
+      <option value="1">1 ★</option>
+    </select>
+
+    <label>Recommendation / Comment</label>
+    <textarea id="ratingComment" placeholder="Employer's feedback..."></textarea>
+
+    <button class="btn-primary" id="saveRatingBtn">Save Rating</button>
+    <button class="btn-secondary" id="cancelRatingBtn" style="width:100%;margin-top:8px">Cancel</button>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, orderBy, limit, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const MANAGER = "YOUR_TELEGRAM_USERNAME";
+// ========== CONFIG ==========
+const MANAGER = "TamagnDelalaETBot";
 const firebaseConfig = {
   apiKey: "AIzaSyDOzRzt9k35kokQOD1rEIpkIVPjNyd0Q3c",
   authDomain: "tamagn-delala.firebaseapp.com",
@@ -91,82 +337,232 @@ const firebaseConfig = {
   appId: "1:996483381337:web:f20127638e8da2aee7d948"
 };
 
+const SKILLS = [
+  { en: "House Maid", am: "የቤት ሰራተኛ" },
+  { en: "Babysitter", am: "ህጻናት አሳዳጊ" },
+  { en: "Cook / Chef", am: "ምግብ አብሳይ" },
+  { en: "Gardener", am: "አትክልተኛ" },
+  { en: "Security Guard", am: "ጠባቂ" },
+  { en: "Plumber", am: "የቧንቧ ሰራተኛ" },
+  { en: "Electrician", am: "ኤሌክትሪሺያን" },
+  { en: "Construction Worker", am: "የግንባታ ሰራተኛ" },
+  { en: "Daily Laborer", am: "ዕለታዊ ሰራተኛ" },
+  { en: "Driver", am: "ሹፌር" },
+  { en: "Cleaner", am: "ጽዳት ሰራተኛ" },
+  { en: "Laundry Worker", am: "የልብስ ማጠቢያ" },
+  { en: "Waiter / Waitress", am: "አስተናጋጅ" },
+  { en: "Office Assistant", am: "የቢሮ ረዳት" },
+  { en: "Nanny", am: "ሞግዚት" },
+  { en: "Other", am: "ሌላ" }
+];
+
+const i18n = {
+  en: {
+    tagline: "Trusted Workers",
+    workers: "Workers", admin: "Admin",
+    allSkills: "All",
+    noWorkers: "No workers available right now",
+    noWorkersSub: "Please check again soon",
+    hire: "Hire this worker",
+    age: "Age", experience: "Experience", pay: "Pay",
+    negotiable: "Negotiable",
+    requestTitle: "Request received!",
+    requestText: "Our team will contact you shortly. You can also message the manager now.",
+    messageManager: "Message the manager", close: "Close",
+    confirmHire: "Request this worker?",
+    langBtn: "አማርኛ",
+    verifiedId: "ID Verified",
+    policeClearance: "Police Clearance",
+    monthly: "Monthly", hourly: "Hourly", daily: "Daily"
+  },
+  am: {
+    tagline: "ታማኝ ሰራተኞች",
+    workers: "ሰራተኞች", admin: "አስተዳዳሪ",
+    allSkills: "ሁሉም",
+    noWorkers: "በአሁኑ ጊዜ ሰራተኛ የለም",
+    noWorkersSub: "እባክዎ ቆይተው እንደገና ይመልከቱ",
+    hire: "ይህን ሰራተኛ ቅጠር",
+    age: "ዕድሜ", experience: "ልምድ", pay: "ክፍያ",
+    negotiable: "በድርድር",
+    requestTitle: "ጥያቄዎ ተቀብሏል!",
+    requestText: "ቡድናችን በቅርቡ ያገኝዎታል። አሁን ማኔጀሩን መልዕክት መላክ ይችላሉ።",
+    messageManager: "ማኔጀሩን መልዕክት ላክ", close: "ዝጋ",
+    confirmHire: "ይህን ሰራተኛ መጠየቅ ይፈልጋሉ?",
+    langBtn: "English",
+    verifiedId: "መታወቂያ አረጋግጧል",
+    policeClearance: "የፖሊስ ማረጋገጫ",
+    monthly: "ወርሃዊ", hourly: "በሰዓት", daily: "ዕለታዊ"
+  }
+};
+
+let lang = localStorage.getItem("td_lang") || "en";
+let currentSkill = "";
+let ratingRequestId = null;
+let ratingWorkerId = null;
+
 const tg = window.Telegram && window.Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 const inTelegram = !!(tg && tg.initData);
+
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 const auth = getAuth(fbApp);
-const $ = id => document.getElementById(id);
-const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const imgTag = p => (typeof p === "string" && p.startsWith("data:image/")) ? `<img src="${p}" alt="">` : "";
-const ts = x => (x && x.seconds) ? x.seconds : 0;
 
-function show(t) {
-  $("vW").classList.toggle("hid", t !== "W");
-  $("vA").classList.toggle("hid", t !== "A");
-  $("tabW").classList.toggle("on", t === "W");
-  $("tabA").classList.toggle("on", t === "A");
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+const ts = x => (x && x.seconds) ? x.seconds : 0;
+function t(key) { return i18n[lang][key] || key; }
+function skillLabel(skillEn) {
+  const found = SKILLS.find(s => s.en === skillEn);
+  return found ? (lang === "am" ? found.am : found.en) : skillEn;
+}
+
+function applyLang() {
+  $("tagline").textContent = t("tagline");
+  $("tabW").textContent = t("workers");
+  $("tabA").textContent = t("admin");
+  $("langBtn").textContent = t("langBtn");
+  $("doneTitle").textContent = t("requestTitle");
+  $("doneText").textContent = t("requestText");
+  $("doneBtn").textContent = t("messageManager");
+  $("doneClose").textContent = t("close");
+  renderSkillChips();
+  renderWorkers();
+  const sel = $("f_skill");
+  const prev = sel.value;
+  sel.innerHTML = SKILLS.map(s => `<option value="${esc(s.en)}">${lang === "am" ? s.am : s.en}</option>`).join("");
+  if (prev) sel.value = prev;
+}
+$("langBtn").onclick = () => {
+  lang = lang === "en" ? "am" : "en";
+  localStorage.setItem("td_lang", lang);
+  applyLang();
+};
+
+function show(view) {
+  $("vW").classList.toggle("hid", view !== "W");
+  $("vA").classList.toggle("hid", view !== "A");
+  $("tabW").classList.toggle("on", view === "W");
+  $("tabA").classList.toggle("on", view === "A");
 }
 $("tabW").onclick = () => show("W");
 $("tabA").onclick = () => show("A");
 
-// ---------- EMPLOYER SIDE ----------
+function renderSkillChips() {
+  $("skillChips").innerHTML = [
+    `<button class="chip ${currentSkill === "" ? "active" : ""}" data-skill="">${t("allSkills")}</button>`,
+    ...SKILLS.map(s => {
+      const label = lang === "am" ? s.am : s.en;
+      return `<button class="chip ${currentSkill === s.en ? "active" : ""}" data-skill="${esc(s.en)}">${esc(label)}</button>`;
+    })
+  ].join("");
+}
+$("skillChips").onclick = e => {
+  const btn = e.target.closest(".chip");
+  if (!btn) return;
+  currentSkill = btn.dataset.skill || "";
+  renderSkillChips();
+  renderWorkers();
+};
+
+// ========== Workers ==========
 let workers = [];
+
 async function loadWorkers() {
   try {
     const snap = await getDocs(query(collection(db, "workers"), where("available", "==", true), limit(100)));
     workers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     workers.sort((a, b) => ts(b.createdAt) - ts(a.createdAt));
-    const keep = $("skillF").value;
-    const skills = [...new Set(workers.map(w => w.skill))].sort();
-    $("skillF").innerHTML = '<option value="">All skills</option>' + skills.map(s => `<option>${esc(s)}</option>`).join("");
-    $("skillF").value = skills.includes(keep) ? keep : "";
     renderWorkers();
   } catch (e) {
     console.error(e);
-    $("list").className = "msg";
-    $("list").textContent = "Could not load workers. Please try again.";
+    $("list").innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Could not load workers</h3></div>`;
   }
 }
+
+function starsHtml(avg, count) {
+  if (!count || count === 0) return "";
+  const full = Math.round(avg || 0);
+  return `<div class="stars">${"★".repeat(full)}${"☆".repeat(5 - full)} <span style="color:var(--hint);font-size:12px">(${count})</span></div>`;
+}
+
 function renderWorkers() {
-  const f = $("skillF").value;
-  const rows = workers.filter(w => !f || w.skill === f);
-  if (!rows.length) {
-    $("list").className = "msg";
-    $("list").textContent = "No workers available right now. Please check again soon.";
+  const filtered = currentSkill ? workers.filter(w => w.skill === currentSkill) : workers;
+  if (!filtered.length) {
+    $("list").innerHTML = `<div class="state"><div class="state-icon">👷</div><h3>${t("noWorkers")}</h3><p>${t("noWorkersSub")}</p></div>`;
     return;
   }
-  $("list").className = "";
-  $("list").innerHTML = rows.map(w => `
-    <div class="card">${imgTag(w.photo)}
-      <div class="pad">
-        <b>${esc(w.name)}</b> <span class="row">· ${esc(w.skill)}</span>
-        <div class="row">Age ${esc(w.age)} · ${esc(w.location)}</div>
-        <div class="row">Experience: ${esc(w.experience)}</div>
-        <div class="row">Pay: ${esc(w.pay || "Negotiable")}</div>
-        <button class="p" data-hire="${esc(w.id)}">Hire this worker</button>
-      </div>
-    </div>`).join("");
+
+  $("list").innerHTML = filtered.map(w => {
+    const img = (typeof w.photo === "string" && w.photo.startsWith("data:image/"))
+      ? `<img class="card-img" src="${w.photo}" alt="">`
+      : `<div class="card-img" style="display:grid;place-items:center;font-size:48px;color:#94a3b8">👤</div>`;
+
+    const badges = [];
+    if (w.hasNationalId) badges.push(`<span class="badge badge-id">✓ ${t("verifiedId")}</span>`);
+    if (w.hasPoliceClearance) badges.push(`<span class="badge badge-police">🛡 ${t("policeClearance")}</span>`);
+
+    return `
+      <div class="card">
+        ${img}
+        <div class="card-body">
+          <div class="card-name">${esc(w.name)}</div>
+          <div class="card-skill">${esc(skillLabel(w.skill))}</div>
+          <div class="badges">${badges.join("")}</div>
+          ${starsHtml(w.ratingAvg, w.ratingCount)}
+          <div class="meta">
+            <span>🎂 ${t("age")} ${esc(w.age)}</span>
+            <span>📍 ${esc(w.location)}</span>
+          </div>
+          <div class="meta">
+            <span>💼 ${t("experience")}: ${esc(w.experience)}</span>
+          </div>
+          <div class="pay">💰 ${esc(w.pay || t("negotiable"))} · ${t(w.paymentType || "monthly")}</div>
+          <button class="btn-hire" data-hire="${esc(w.id)}">${t("hire")}</button>
+        </div>
+      </div>`;
+  }).join("");
 }
-$("skillF").onchange = renderWorkers;
-$("list").onclick = e => { const id = e.target.dataset.hire; if (id) hire(id); };
+
+$("list").onclick = e => {
+  const id = e.target.dataset.hire;
+  if (id) hire(id);
+};
 
 async function hire(id) {
   const w = workers.find(x => x.id === id);
   if (!w) return;
-  const ok = inTelegram ? await new Promise(r => tg.showConfirm("Request " + w.name + "?", r)) : confirm("Request " + w.name + "?");
+
+  const ok = inTelegram
+    ? await new Promise(r => tg.showConfirm(t("confirmHire") + "\n" + w.name, r))
+    : confirm(t("confirmHire") + "\n" + w.name);
   if (!ok) return;
+
   const u = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
   try {
+    const now = new Date();
+    let followUpAt;
+    if (w.paymentType === "hourly" || w.paymentType === "daily") {
+      followUpAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // +1 day
+    } else {
+      followUpAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // +30 days
+    }
+
     await addDoc(collection(db, "requests"), {
       workerId: id,
       workerName: String(w.name).slice(0, 90),
+      paymentType: w.paymentType || "monthly",
       employerTgId: Number(u.id) || 0,
       employerName: ([u.first_name, u.last_name].filter(Boolean).join(" ") || "Unknown").slice(0, 90),
       employerUsername: String(u.username || "").slice(0, 60),
       createdAt: serverTimestamp(),
-      status: "new"
+      followUpAt: Timestamp.fromDate(followUpAt),
+      followUpSent: false,
+      status: "new",
+      rating: null,
+      ratingComment: null
     });
     showDone(w);
   } catch (e) {
@@ -174,18 +570,24 @@ async function hire(id) {
     alert("Could not send the request. Please try again.");
   }
 }
+
 function showDone(w) {
-  const text = "Hello, I want to hire " + w.name + " (ID " + w.id.slice(0, 6) + ") from Tamagn Delala.";
+  const text = lang === "am"
+    ? `ሰላም፣ ከታማኝ ደላላ ${w.name} (ID ${w.id.slice(0,6)}) መቅጠር እፈልጋለሁ።`
+    : `Hello, I want to hire ${w.name} (ID ${w.id.slice(0,6)}) from Tamagn Delala.`;
+
   $("doneBtn").onclick = () => {
     const url = "https://t.me/" + MANAGER + "?text=" + encodeURIComponent(text);
-    if (inTelegram) tg.openTelegramLink(url); else window.open(url, "_blank");
+    if (inTelegram) tg.openTelegramLink(url);
+    else window.open(url, "_blank");
   };
   $("done").classList.remove("hid");
 }
 $("doneClose").onclick = () => $("done").classList.add("hid");
 
-// ---------- ADMIN SIDE ----------
+// ========== ADMIN ==========
 let allW = [], reqs = [];
+
 if (inTelegram) {
   $("loginNote").textContent = "Admin sign-in does not work inside Telegram. Open this page in your phone's browser.";
   $("signIn").classList.add("hid");
@@ -193,6 +595,7 @@ if (inTelegram) {
 } else {
   $("loginNote").textContent = "Sign in with the admin Google account.";
 }
+
 $("signIn").onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert("Sign-in failed: " + e.code));
 $("openBrowser").onclick = () => tg.openLink(location.href.split("#")[0]);
 $("signOut").onclick = () => signOut(auth);
@@ -216,33 +619,138 @@ onAuthStateChanged(auth, async user => {
 });
 
 async function loadAdmin() {
-  const rs = await getDocs(query(collection(db, "requests"), orderBy("createdAt", "desc"), limit(50)));
+  const rs = await getDocs(query(collection(db, "requests"), orderBy("createdAt", "desc"), limit(80)));
   const ws = await getDocs(collection(db, "workers"));
   reqs = rs.docs.map(d => ({ id: d.id, ...d.data() }));
   allW = ws.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => ts(b.createdAt) - ts(a.createdAt));
   renderAdmin();
 }
-function renderAdmin() {
-  $("reqs").innerHTML = reqs.length ? reqs.map(r => {
-    const when = r.createdAt ? new Date(ts(r.createdAt) * 1000).toLocaleString() : "";
-    const href = r.employerUsername ? "https://t.me/" + esc(r.employerUsername) : "tg://user?id=" + esc(r.employerTgId);
-    const un = r.employerUsername ? " (@" + esc(r.employerUsername) + ")" : "";
-    return `<div class="card pad"><b>${esc(r.workerName)}</b>
-      <div class="row"><a href="${href}">${esc(r.employerName)}</a>${un} · ${esc(when)}</div>
-      <button class="s" data-na="${esc(r.workerId)}">Mark worker unavailable</button>
-      <button class="s d" data-dr="${esc(r.id)}">Delete request</button></div>`;
-  }).join("") : '<div class="msg">No requests yet.</div>';
-  $("wl").innerHTML = allW.length ? allW.map(w => `
-    <div class="card pad"><b>${esc(w.name)}</b> <span class="row">· ${esc(w.skill)} · ${w.available ? "available" : "unavailable"}</span>
-      <div class="row">${esc(w.pay || "Negotiable")}</div>
-      <button class="s" data-tg="${esc(w.id)}">${w.available ? "Mark unavailable" : "Mark available"}</button>
-      <button class="s" data-ed="${esc(w.id)}">Edit</button>
-      <button class="s d" data-dw="${esc(w.id)}">Delete</button></div>`).join("") : '<div class="msg">No workers yet. Add one above.</div>';
+
+function isDue(r) {
+  if (r.followUpSent || r.rating) return false;
+  if (!r.followUpAt) return false;
+  const followUpDate = r.followUpAt.toDate ? r.followUpAt.toDate() : new Date(ts(r.followUpAt) * 1000);
+  return followUpDate <= new Date();
 }
 
+function renderAdmin() {
+  // --- Follow-up due list (highlighted) ---
+  const due = reqs.filter(isDue);
+  if (due.length === 0) {
+    $("dueList").innerHTML = `<div class="state" style="padding:20px"><p>No follow-ups due right now.</p></div>`;
+  } else {
+    $("dueList").innerHTML = due.map(r => {
+      const when = r.createdAt ? new Date(ts(r.createdAt) * 1000).toLocaleDateString() : "";
+      const href = r.employerUsername
+        ? "https://t.me/" + esc(r.employerUsername)
+        : (r.employerTgId ? "tg://user?id=" + esc(r.employerTgId) : "#");
+      const un = r.employerUsername ? "@" + esc(r.employerUsername) : "No username";
+
+      return `
+        <div class="admin-card due">
+          <div class="due-label">⏰ RATING DUE</div>
+          <b>${esc(r.workerName)}</b>
+          <div class="who">Employer: <a href="${href}">${esc(r.employerName)}</a> (${un})</div>
+          <div class="who">Hired: ${esc(when)} · Type: ${esc(r.paymentType || "monthly")}</div>
+          <button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask for Rating via Telegram</button>
+          <button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Save Rating</button>
+          <button class="btn-secondary" data-marksent="${esc(r.id)}">Mark as Sent</button>
+        </div>`;
+    }).join("");
+  }
+
+  // --- All requests ---
+  $("reqs").innerHTML = reqs.length ? reqs.map(r => {
+    const when = r.createdAt ? new Date(ts(r.createdAt) * 1000).toLocaleString() : "";
+    const href = r.employerUsername
+      ? "https://t.me/" + esc(r.employerUsername)
+      : (r.employerTgId ? "tg://user?id=" + esc(r.employerTgId) : "#");
+    const un = r.employerUsername ? " (@" + esc(r.employerUsername) + ")" : "";
+    const dueBadge = isDue(r) ? `<span class="due-label">DUE</span>` : "";
+    const rated = r.rating ? `★ ${r.rating}/5` : (r.followUpSent ? "Follow-up sent" : "");
+
+    return `<div class="admin-card">
+      ${dueBadge}
+      <b>${esc(r.workerName)}</b>
+      <div class="who"><a href="${href}">${esc(r.employerName)}</a>${un} · ${esc(when)}</div>
+      <div class="who">Type: ${esc(r.paymentType || "monthly")} · ${rated}</div>
+      <button class="btn-secondary" data-na="${esc(r.workerId)}">Mark worker unavailable</button>
+      <button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">Delete</button>
+    </div>`;
+  }).join("") : `<div class="state"><p>No requests yet.</p></div>`;
+
+  // --- Workers ---
+  $("wl").innerHTML = allW.length ? allW.map(w => `
+    <div class="admin-card">
+      <b>${esc(w.name)}</b>
+      <span class="who"> · ${esc(w.skill)} · ${w.available ? "available" : "unavailable"}</span>
+      <div class="who">${esc(w.pay || "Negotiable")} · ${esc(w.paymentType || "monthly")}</div>
+      <div class="who">ID: ${w.hasNationalId ? "Yes" : "No"} · Police: ${w.hasPoliceClearance ? "Yes" : "No"}</div>
+      ${starsHtml(w.ratingAvg, w.ratingCount)}
+      <button class="btn-secondary" data-tg="${esc(w.id)}">${w.available ? "Mark unavailable" : "Mark available"}</button>
+      <button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button>
+      <button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>
+    </div>`).join("") : `<div class="state"><p>No workers yet.</p></div>`;
+}
+
+// Admin actions
 $("panel").onclick = async e => {
   const d = e.target.dataset;
   try {
+    // Ask for rating via Telegram
+    if (d.ask) {
+      const r = reqs.find(x => x.id === d.ask);
+      if (!r) return;
+
+      const msg = `ሰላም ${r.employerName} 👋
+
+ከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።
+
+እባክዎ ከ1 እስከ 5 ኮከብ ይስጡ እና አጭር ምክር / አስተያየት ይጻፉ፡
+
+⭐️⭐️⭐️⭐️⭐️
+
+ምሳሌ፦
+"4 ኮከብ - በጣም ጥሩ ሰራተኛ ነው፣ በሰዓቱ ይመጣል እና ሥራውን በደንብ ያከናውናል።"
+
+Thank you!`;
+
+      let url;
+      if (r.employerUsername) {
+        url = "https://t.me/" + r.employerUsername + "?text=" + encodeURIComponent(msg);
+      } else if (r.employerTgId) {
+        // Fallback – opens chat but text may not prefill on all clients
+        url = "tg://user?id=" + r.employerTgId;
+        // Copy message to clipboard as backup
+        try { await navigator.clipboard.writeText(msg); alert("Message copied! Paste it in the chat."); } catch(_){}
+      } else {
+        alert("No Telegram contact available for this employer.");
+        return;
+      }
+      window.open(url, "_blank");
+      return;
+    }
+
+    // Open rating modal
+    if (d.rate) {
+      const r = reqs.find(x => x.id === d.rate);
+      if (!r) return;
+      ratingRequestId = d.rate;
+      ratingWorkerId = d.wid;
+      $("ratingWorkerName").textContent = r.workerName + " ← " + r.employerName;
+      $("ratingStars").value = "5";
+      $("ratingComment").value = "";
+      $("ratingModal").classList.remove("hid");
+      return;
+    }
+
+    // Mark follow-up as sent
+    if (d.marksent) {
+      await updateDoc(doc(db, "requests", d.marksent), { followUpSent: true });
+      await loadAdmin();
+      return;
+    }
+
     if (d.na) {
       await updateDoc(doc(db, "workers", d.na), { available: false });
     } else if (d.dr) {
@@ -252,16 +760,15 @@ $("panel").onclick = async e => {
       const w = allW.find(x => x.id === d.tg);
       await updateDoc(doc(db, "workers", d.tg), { available: !w.available });
     } else if (d.dw) {
-      if (!confirm("Delete this worker? This cannot be undone.")) return;
+      if (!confirm("Delete this worker permanently?")) return;
       const b = writeBatch(db);
       b.delete(doc(db, "workers", d.dw));
       b.delete(doc(db, "workers_private", d.dw));
       await b.commit();
     } else if (d.ed) {
       return startEdit(d.ed);
-    } else {
-      return;
-    }
+    } else return;
+
     await loadAdmin();
     loadWorkers();
   } catch (err) {
@@ -270,17 +777,81 @@ $("panel").onclick = async e => {
   }
 };
 
+// Save rating
+$("saveRatingBtn").onclick = async () => {
+  if (!ratingRequestId || !ratingWorkerId) return;
+  const stars = Number($("ratingStars").value);
+  const comment = $("ratingComment").value.trim();
+
+  try {
+    // Update request
+    await updateDoc(doc(db, "requests", ratingRequestId), {
+      rating: stars,
+      ratingComment: comment,
+      followUpSent: true,
+      ratedAt: serverTimestamp()
+    });
+
+    // Update worker average
+    const wRef = doc(db, "workers", ratingWorkerId);
+    const wSnap = await getDoc(wRef);
+    if (wSnap.exists()) {
+      const w = wSnap.data();
+      const oldCount = w.ratingCount || 0;
+      const oldAvg = w.ratingAvg || 0;
+      const newCount = oldCount + 1;
+      const newAvg = ((oldAvg * oldCount) + stars) / newCount;
+      await updateDoc(wRef, {
+        ratingAvg: Math.round(newAvg * 10) / 10,
+        ratingCount: newCount
+      });
+    }
+
+    $("ratingModal").classList.add("hid");
+    ratingRequestId = null;
+    ratingWorkerId = null;
+    await loadAdmin();
+    loadWorkers();
+    alert("Rating saved successfully!");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to save rating: " + err.message);
+  }
+};
+$("cancelRatingBtn").onclick = () => {
+  $("ratingModal").classList.add("hid");
+  ratingRequestId = null;
+  ratingWorkerId = null;
+};
+
 async function startEdit(id) {
   const w = allW.find(x => x.id === id);
   const p = await getDoc(doc(db, "workers_private", id));
+  const priv = p.exists() ? p.data() : {};
+
   $("f_id").value = id;
-  for (const k of ["name", "age", "skill", "location", "experience", "pay"]) $("f_" + k).value = w[k] == null ? "" : w[k];
-  $("f_phone").value = p.exists() ? (p.data().phone || "") : "";
+  $("f_name").value = w.name || "";
+  $("f_age").value = w.age || "";
+  $("f_skill").value = w.skill || "";
+  $("f_location").value = w.location || "";
+  $("f_experience").value = w.experience || "";
+  $("f_paymentType").value = w.paymentType || "monthly";
+  $("f_pay").value = w.pay || "";
+  $("f_nationalId").value = priv.nationalId || "";
+  $("f_police").value = w.hasPoliceClearance ? "yes" : "no";
+  $("f_guarantorName").value = priv.guarantorName || "";
+  $("f_guarantorId").value = priv.guarantorId || "";
+  $("f_guarantorPhone").value = priv.guarantorPhone || "";
+  $("f_phone").value = priv.phone || "";
   $("f_photo").value = "";
+  $("f_idPhoto").value = "";
+  $("f_policePhoto").value = "";
+
   $("formTitle").textContent = "Edit worker";
   $("cancelEdit").classList.remove("hid");
   $("wf").scrollIntoView({ behavior: "smooth" });
 }
+
 function resetForm() {
   $("wf").reset();
   $("f_id").value = "";
@@ -289,17 +860,17 @@ function resetForm() {
 }
 $("cancelEdit").onclick = resetForm;
 
-function shrink(file) {
+function shrink(file, maxSize = 400) {
   return new Promise((res, rej) => {
     const img = new Image();
     img.onload = () => {
-      const s = Math.min(1, 360 / Math.max(img.width, img.height));
+      const s = Math.min(1, maxSize / Math.max(img.width, img.height));
       const c = document.createElement("canvas");
       c.width = Math.round(img.width * s);
       c.height = Math.round(img.height * s);
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
       URL.revokeObjectURL(img.src);
-      res(c.toDataURL("image/jpeg", 0.7));
+      res(c.toDataURL("image/jpeg", 0.65));
     };
     img.onerror = () => rej(new Error("Bad image"));
     img.src = URL.createObjectURL(file);
@@ -311,24 +882,56 @@ $("wf").onsubmit = async e => {
   const btn = $("saveBtn");
   btn.disabled = true;
   btn.textContent = "Saving…";
+
   try {
     const id = $("f_id").value;
     const ref = id ? doc(db, "workers", id) : doc(collection(db, "workers"));
-    const data = {
+
+    const publicData = {
       name: $("f_name").value.trim(),
       age: Number($("f_age").value),
-      skill: $("f_skill").value.trim(),
+      skill: $("f_skill").value,
       location: $("f_location").value.trim(),
       experience: $("f_experience").value.trim(),
-      pay: $("f_pay").value.trim() || "Negotiable"
+      paymentType: $("f_paymentType").value,
+      pay: $("f_pay").value.trim() || "Negotiable",
+      hasNationalId: !!$("f_nationalId").value.trim(),
+      hasPoliceClearance: $("f_police").value === "yes"
     };
-    const file = $("f_photo").files[0];
-    if (file) data.photo = await shrink(file);
+
+    const profileFile = $("f_photo").files[0];
+    if (profileFile) publicData.photo = await shrink(profileFile);
+
+    const privateData = {
+      phone: $("f_phone").value.trim(),
+      nationalId: $("f_nationalId").value.trim(),
+      guarantorName: $("f_guarantorName").value.trim(),
+      guarantorId: $("f_guarantorId").value.trim(),
+      guarantorPhone: $("f_guarantorPhone").value.trim()
+    };
+
+    const idPhotoFile = $("f_idPhoto").files[0];
+    if (idPhotoFile) privateData.idPhoto = await shrink(idPhotoFile, 500);
+
+    const policeFile = $("f_policePhoto").files[0];
+    if (policeFile) privateData.policePhoto = await shrink(policeFile, 500);
+
     const b = writeBatch(db);
-    if (id) b.update(ref, data);
-    else b.set(ref, { ...data, photo: data.photo || "", available: true, createdAt: serverTimestamp() });
-    b.set(doc(db, "workers_private", ref.id), { phone: $("f_phone").value.trim() });
+    if (id) {
+      b.update(ref, publicData);
+    } else {
+      b.set(ref, {
+        ...publicData,
+        photo: publicData.photo || "",
+        available: true,
+        ratingAvg: 0,
+        ratingCount: 0,
+        createdAt: serverTimestamp()
+      });
+    }
+    b.set(doc(db, "workers_private", ref.id), privateData, { merge: true });
     await b.commit();
+
     resetForm();
     await loadAdmin();
     loadWorkers();
@@ -340,6 +943,8 @@ $("wf").onsubmit = async e => {
   btn.textContent = "Save worker";
 };
 
+// Init
+applyLang();
 loadWorkers();
 </script>
 </body>
