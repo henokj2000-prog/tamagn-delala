@@ -45,52 +45,112 @@ body {
 }
 main { padding: 0 14px 24px; }
 
-/* Landing */
-.landing {
-  padding: 30px 10px 20px;
-  text-align: center;
+/* Landing - Hero */
+#vLanding {
+  margin: 0 -14px;
+  padding: 0;
 }
-.landing h2 {
-  font-size: 20px;
-  margin-bottom: 6px;
+.hero {
+  position: relative;
+  min-height: 70vh;
+  overflow: hidden;
+  border-radius: 0 0 24px 24px;
 }
-.landing p {
-  color: var(--hint);
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(2,30,60,0.82) 0%, rgba(3,50,90,0.75) 50%, rgba(2,40,70,0.85) 100%),
+    url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=900&q=80') center/cover no-repeat;
+  filter: brightness(0.85);
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 12px;
+  padding: 24px 16px 28px;
+  min-height: 70vh;
+}
+.hero-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #fff;
+}
+.hero-left h2 {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.hero-left p {
   font-size: 14px;
-  margin-bottom: 28px;
+  opacity: 0.9;
+  margin-bottom: 22px;
 }
 .role-btn {
   display: block;
   width: 100%;
-  padding: 18px 16px;
-  margin-bottom: 14px;
+  padding: 14px 14px;
+  margin-bottom: 10px;
   border: none;
-  border-radius: 16px;
-  background: var(--card);
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
   cursor: pointer;
   text-align: left;
-  transition: transform 0.1s;
+  transition: transform 0.12s, box-shadow 0.12s;
 }
-.role-btn:active { transform: scale(0.98); }
-.role-btn .icon {
-  font-size: 28px;
-  margin-bottom: 6px;
-}
+.role-btn:active { transform: scale(0.97); }
+.role-btn .icon { font-size: 22px; margin-bottom: 2px; }
 .role-btn .title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  color: var(--fg);
+  color: #0f172a;
 }
 .role-btn .desc {
-  font-size: 13px;
-  color: var(--hint);
-  margin-top: 2px;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 1px;
 }
 .role-btn.employer { border-left: 4px solid #0284c7; }
 .role-btn.worker { border-left: 4px solid #059669; }
-.role-btn.admin { border-left: 4px solid #d97706; }
+.role-btn.admin { border-left: 4px solid #d97706; background: rgba(255,255,255,0.85); }
+
+/* Right side skill list */
+.hero-right {
+  width: 118px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 4px 0;
+  scrollbar-width: thin;
+}
+.skill-pill {
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 8px 6px;
+  border-radius: 10px;
+  text-align: center;
+  line-height: 1.25;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.skill-pill span {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
 .back-btn {
   display: inline-flex;
   align-items: center;
@@ -208,27 +268,36 @@ textarea { min-height: 70px; resize: vertical; }
 <main>
   <!-- ========== LANDING (Role Selection) ========== -->
   <section id="vLanding">
-    <div class="landing">
-      <h2 id="landingTitle">Welcome</h2>
-      <p id="landingSub">Please select what you want to do</p>
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-content">
+        <div class="hero-left">
+          <h2 id="landingTitle">Welcome</h2>
+          <p id="landingSub">Please select what you want to do</p>
 
-      <button class="role-btn employer" id="btnEmployer">
-        <div class="icon">🔍</div>
-        <div class="title" id="btnEmployerTitle">Find a Worker</div>
-        <div class="desc" id="btnEmployerDesc">I want to hire a house maid, driver, cook, etc.</div>
-      </button>
+          <button class="role-btn employer" id="btnEmployer">
+            <div class="icon">🔍</div>
+            <div class="title" id="btnEmployerTitle">Find a Worker</div>
+            <div class="desc" id="btnEmployerDesc">I want to hire a house maid, driver, cook, etc.</div>
+          </button>
 
-      <button class="role-btn worker" id="btnWorker">
-        <div class="icon">👷</div>
-        <div class="title" id="btnWorkerTitle">Register as Worker</div>
-        <div class="desc" id="btnWorkerDesc">I want to offer my service and get hired</div>
-      </button>
+          <button class="role-btn worker" id="btnWorker">
+            <div class="icon">👷</div>
+            <div class="title" id="btnWorkerTitle">Register as Worker</div>
+            <div class="desc" id="btnWorkerDesc">I want to offer my service and get hired</div>
+          </button>
 
-      <button class="role-btn admin" id="btnAdmin">
-        <div class="icon">🔐</div>
-        <div class="title" id="btnAdminTitle">Admin Panel</div>
-        <div class="desc" id="btnAdminDesc">For manager only</div>
-      </button>
+          <button class="role-btn admin" id="btnAdmin">
+            <div class="icon">🔐</div>
+            <div class="title" id="btnAdminTitle">Admin Panel</div>
+            <div class="desc" id="btnAdminDesc">For manager only</div>
+          </button>
+        </div>
+
+        <div class="hero-right" id="heroSkills">
+          <!-- filled by JS -->
+        </div>
+      </div>
     </div>
   </section>
 
@@ -242,7 +311,7 @@ textarea { min-height: 70px; resize: vertical; }
       <label id="lblEmpName">Full Name *</label>
       <input id="emp_name" maxlength="80" placeholder="">
       <label id="lblEmpPhone">Phone Number *</label>
-      <input id="emp_phone" maxlength="20" placeholder="0912123456">
+      <input id="emp_phone" maxlength="20" placeholder="09xxxxxxxx">
       <label id="lblEmpLoc">Location / City *</label>
       <input id="emp_location" maxlength="60" placeholder="">
       <button class="btn-primary" id="empSaveBtn">Save & Continue</button>
@@ -331,6 +400,9 @@ textarea { min-height: 70px; resize: vertical; }
 
       <h2 class="section-title" id="reqTitle">📋 Hire Requests</h2>
       <div id="reqs"></div>
+
+      <h2 class="section-title" id="empListTitle">👔 Registered Employers</h2>
+      <div id="empList"></div>
 
       <h2 class="section-title" id="allWTitle">👷 All Workers</h2>
       <div id="wl"></div>
@@ -495,8 +567,11 @@ const i18n = {
     pendingTitle: "⏳ Pending Workers",
     dueTitle: "⭐ Rating Follow-up Due",
     reqTitle: "📋 Hire Requests",
+    empListTitle: "👔 Registered Employers",
     allWTitle: "👷 All Workers",
     addWTitle: "➕ Add Worker Manually",
+    noEmployers: "No employers registered yet",
+    deleteEmp: "Delete",
     saveWorker: "Save Worker",
     cancel: "Cancel",
     signIn: "Sign in with Google",
@@ -557,8 +632,11 @@ const i18n = {
     pendingTitle: "⏳ በመጠባበቅ ላይ ያሉ ሰራተኞች",
     dueTitle: "⭐ የደረጃ ጥያቄ የሚያስፈልጋቸው",
     reqTitle: "📋 የቅጥር ጥያቄዎች",
+    empListTitle: "👔 የተመዘገቡ አሰሪዎች",
     allWTitle: "👷 ሁሉም ሰራተኞች",
     addWTitle: "➕ ሰራተኛ በእጅ ጨምር",
+    noEmployers: "እስካሁን የተመዘገበ አሰሪ የለም",
+    deleteEmp: "ሰርዝ",
     saveWorker: "ሰራተኛ አስቀምጥ",
     cancel: "ሰርዝ",
     signIn: "በጎግል ይግቡ",
@@ -660,6 +738,7 @@ function applyLang() {
   $("pendingTitle").textContent = t("pendingTitle");
   $("dueTitle").textContent = t("dueTitle");
   $("reqTitle").textContent = t("reqTitle");
+  $("empListTitle").textContent = t("empListTitle");
   $("allWTitle").textContent = t("allWTitle");
   $("addWTitle").textContent = t("addWTitle");
   $("saveBtn").textContent = t("saveWorker");
@@ -696,8 +775,24 @@ function applyLang() {
   $("lblFPhoto").textContent = t("wrPhoto");
 
   renderSkillChips();
+  renderHeroSkills();
   renderWorkers();
 }
+
+function renderHeroSkills() {
+  const icons = {
+    "House Maid": "🧹", "Babysitter": "👶", "Cook / Chef": "👨‍🍳", "Gardener": "🌱",
+    "Security Guard": "🛡️", "Plumber": "🔧", "Electrician": "⚡", "Construction Worker": "🏗️",
+    "Daily Laborer": "💪", "Driver": "🚗", "Cleaner": "✨", "Laundry Worker": "👕",
+    "Waiter / Waitress": "🍽️", "Office Assistant": "📁", "Nanny": "🧸", "Other": "📋"
+  };
+  $("heroSkills").innerHTML = SKILLS.map(s => {
+    const label = lang === "am" ? s.am : s.en;
+    const icon = icons[s.en] || "•";
+    return `<div class="skill-pill"><span>${icon}</span>${esc(label)}</div>`;
+  }).join("");
+}
+
 $("langBtn").onclick = () => { lang = lang === "en" ? "am" : "en"; localStorage.setItem("td_lang", lang); applyLang(); };
 
 // Navigation
@@ -907,7 +1002,7 @@ $("wrSubmitBtn").onclick = async () => {
 };
 
 // Admin
-let allW = [], reqs = [], pending = [];
+let allW = [], reqs = [], pending = [], employers = [];
 if (inTelegram) {
   $("signIn").classList.add("hid");
   $("openBrowser").classList.remove("hid");
@@ -928,13 +1023,15 @@ onAuthStateChanged(auth, async user => {
 });
 
 async function loadAdmin() {
-  const [rs, ws] = await Promise.all([
+  const [rs, ws, es] = await Promise.all([
     getDocs(query(collection(db,"requests"), orderBy("createdAt","desc"), limit(80))),
-    getDocs(collection(db,"workers"))
+    getDocs(collection(db,"workers")),
+    getDocs(collection(db,"employers"))
   ]);
   reqs = rs.docs.map(d => ({id:d.id, ...d.data()}));
   allW = ws.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>ts(b.createdAt)-ts(a.createdAt));
   pending = allW.filter(w => w.status === "pending");
+  employers = es.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>ts(b.createdAt)-ts(a.createdAt));
   renderAdmin();
 }
 
@@ -984,6 +1081,18 @@ function renderAdmin() {
     </div>`;
   }).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
 
+  // Registered Employers (stay forever until deleted)
+  $("empList").innerHTML = employers.length ? employers.map(e => {
+    const when = e.createdAt ? new Date(ts(e.createdAt)*1000).toLocaleDateString() : "";
+    const un = e.username ? "@" + esc(e.username) : "";
+    return `<div class="admin-card">
+      <b>${esc(e.name)}</b>
+      <div class="who">📞 ${esc(e.phone||"—")} · 📍 ${esc(e.location||"—")}</div>
+      <div class="who">${un} · Registered: ${when}</div>
+      <button class="btn-secondary btn-danger" data-de="${esc(e.id)}">${t("deleteEmp")}</button>
+    </div>`;
+  }).join("") : `<div class="state" style="padding:16px"><p>${t("noEmployers")}</p></div>`;
+
   $("wl").innerHTML = allW.length ? allW.map(w => `
     <div class="admin-card">
       <b>${esc(w.name)}</b>
@@ -1020,6 +1129,7 @@ $("panel").onclick = async e => {
       alert("Phone: "+(p.exists()?p.data().phone:"N/A")); return;
     }
     else if (d.dr) { if(!confirm("Delete?"))return; await deleteDoc(doc(db,"requests",d.dr)); }
+    else if (d.de) { if(!confirm("Delete this employer permanently?"))return; await deleteDoc(doc(db,"employers",d.de)); }
     else if (d.tg) { const w=allW.find(x=>x.id===d.tg); await updateDoc(doc(db,"workers",d.tg),{available:!w.available}); }
     else if (d.dw) {
       if(!confirm("Delete?"))return;
