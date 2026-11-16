@@ -117,7 +117,6 @@ main { padding: 0 14px 24px; }
 }
 .role-btn.employer { border-left: 4px solid #0284c7; }
 .role-btn.worker { border-left: 4px solid #059669; }
-.role-btn.admin { border-left: 4px solid #d97706; }
 
 .hero-skills-wrap { margin-top: auto; }
 .hero-skills-title {
@@ -346,12 +345,6 @@ textarea { min-height: 70px; resize: vertical; }
             <div class="title" id="btnWorkerTitle">Register as Worker</div>
             <div class="desc" id="btnWorkerDesc">I want to offer my service and get hired</div>
           </button>
-
-          <button class="role-btn admin" id="btnAdmin">
-            <div class="icon">🔐</div>
-            <div class="title" id="btnAdminTitle">Admin Panel</div>
-            <div class="desc" id="btnAdminDesc">For manager only</div>
-          </button>
         </div>
 
         <div class="hero-skills-wrap">
@@ -444,74 +437,6 @@ textarea { min-height: 70px; resize: vertical; }
       <button class="btn-secondary" id="wrBackHome" style="margin-top:12px">Back to Home</button>
     </div>
   </section>
-
-  <!-- ========== ADMIN VIEW ========== -->
-  <section id="vA" class="hid">
-    <button class="back-btn" id="backFromA">← <span id="backText3">Back</span></button>
-
-    <div id="login" class="form-card">
-      <p id="loginNote" class="who" style="margin-bottom:12px"></p>
-      <button class="btn-primary" id="signIn">Sign in with Google</button>
-      <button class="btn-primary hid" id="openBrowser">Open in browser to sign in</button>
-    </div>
-
-    <div id="panel" class="hid">
-      <div class="who" id="who"></div>
-      <button class="btn-secondary" id="signOut">Sign out</button>
-
-      <h2 class="section-title" id="pendingTitle">⏳ Pending Workers</h2>
-      <div id="pendingList"></div>
-
-      <h2 class="section-title" id="dueTitle">⭐ Rating Follow-up Due</h2>
-      <div id="dueList"></div>
-
-      <h2 class="section-title" id="reqTitle">📋 Hire Requests</h2>
-      <div id="reqs"></div>
-
-      <h2 class="section-title" id="empListTitle">👔 Registered Employers</h2>
-      <div id="empList"></div>
-
-      <h2 class="section-title" id="allWTitle">👷 All Workers</h2>
-      <div id="wl"></div>
-
-      <h2 class="section-title" id="addWTitle">➕ Add Worker Manually</h2>
-      <form id="wf" class="form-card">
-        <input type="hidden" id="f_id">
-        <label id="lblFName">Full name *</label>
-        <input id="f_name" required maxlength="80">
-        <label id="lblFAge">Age *</label>
-        <input id="f_age" type="number" min="14" max="80" required>
-        <label id="lblFSkill">Skill *</label>
-        <select id="f_skill" required></select>
-        <label id="lblFLoc">Location *</label>
-        <input id="f_location" required maxlength="60">
-        <label id="lblFExp">Experience *</label>
-        <input id="f_experience" required maxlength="120">
-        <label id="lblFPayType">Payment type *</label>
-        <select id="f_paymentType">
-          <option value="monthly">Monthly</option>
-          <option value="hourly">Hourly</option>
-          <option value="daily">Daily</option>
-        </select>
-        <label id="lblFPay">Pay (optional)</label>
-        <input id="f_pay" maxlength="60">
-        <label id="lblFId">National ID *</label>
-        <input id="f_nationalId" required maxlength="30">
-        <label id="lblFPhone">Phone *</label>
-        <input id="f_phone" required maxlength="20">
-        <label id="lblFPolice">Police Clearance</label>
-        <select id="f_police"><option value="no">No</option><option value="yes">Yes</option></select>
-        <label id="lblFGName">Guarantor Name</label>
-        <input id="f_guarantorName" maxlength="80">
-        <label id="lblFGPhone">Guarantor Phone</label>
-        <input id="f_guarantorPhone" maxlength="20">
-        <label id="lblFPhoto">Photo</label>
-        <input id="f_photo" type="file" accept="image/*">
-        <button class="btn-primary" id="saveBtn" type="submit">Save Worker</button>
-        <button class="btn-secondary hid" id="cancelEdit" type="button">Cancel</button>
-      </form>
-    </div>
-  </section>
 </main>
 
 <!-- Hire success modal -->
@@ -528,34 +453,13 @@ textarea { min-height: 70px; resize: vertical; }
   </div>
 </div>
 
-<!-- Rating modal -->
-<div id="ratingModal" class="modal-overlay hid">
-  <div class="modal-box" style="text-align:left">
-    <h3 style="text-align:center" id="ratingModalTitle">Save Rating</h3>
-    <p class="who" id="ratingWorkerName" style="text-align:center"></p>
-    <label id="lblStars">Stars (1-5)</label>
-    <select id="ratingStars">
-      <option value="5">5 ★★★★★</option>
-      <option value="4">4 ★★★★</option>
-      <option value="3">3 ★★★</option>
-      <option value="2">2 ★★</option>
-      <option value="1">1 ★</option>
-    </select>
-    <label id="lblComment">Comment / Recommendation</label>
-    <textarea id="ratingComment"></textarea>
-    <button class="btn-primary" id="saveRatingBtn">Save Rating</button>
-    <button class="btn-secondary" id="cancelRatingBtn" style="width:100%;margin-top:8px">Cancel</button>
-  </div>
-</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, orderBy, limit, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const MANAGER = "TamagnDelalaETBot";
 const ADMIN_PHONE = "09xxxxxxxx";
-const ADMIN_EMAIL = "henokj2000@gmail.com";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDOzRzt9k35kokQOD1rEIpkIVPjNyd0Q3c",
@@ -723,7 +627,6 @@ const i18n = {
 let lang = localStorage.getItem("td_lang") || "en";
 let currentSkill = "";
 let currentEmployer = null;
-let ratingRequestId = null, ratingWorkerId = null;
 
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
@@ -732,7 +635,6 @@ const tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
 
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
-const auth = getAuth(fbApp);
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -750,9 +652,7 @@ function applyLang() {
   $("btnEmployerDesc").textContent = t("btnEmployerDesc");
   $("btnWorkerTitle").textContent = t("btnWorkerTitle");
   $("btnWorkerDesc").textContent = t("btnWorkerDesc");
-  $("btnAdminTitle").textContent = t("btnAdminTitle");
-  $("btnAdminDesc").textContent = t("btnAdminDesc");
-  ["backText1","backText2","backText3"].forEach(id => { if($(id)) $(id).textContent = t("back"); });
+  ["backText1","backText2"].forEach(id => { if($(id)) $(id).textContent = t("back"); });
 
   $("empRegTitle").textContent = t("empRegTitle");
   $("empRegNote").textContent = t("empRegNote");
@@ -787,7 +687,7 @@ function applyLang() {
     ["hourly", t("hourly")],
     ["daily", t("daily")]
   ];
-  ["wr_paymentType","f_paymentType"].forEach(selId => {
+  ["wr_paymentType"].forEach(selId => {
     const sel = $(selId);
     const prev = sel.value;
     sel.innerHTML = payOpts.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
@@ -795,7 +695,6 @@ function applyLang() {
   });
   // police options
   $("wr_police").innerHTML = `<option value="no">${t("policeNo")}</option><option value="yes">${t("policeYes")}</option>`;
-  $("f_police").innerHTML = `<option value="no">${t("policeNo")}</option><option value="yes">${t("policeYes")}</option>`;
 
   $("doneTitle").textContent = t("requestTitle");
   $("doneText").textContent = t("requestText");
@@ -805,44 +704,12 @@ function applyLang() {
   $("adminPhoneLink").textContent = ADMIN_PHONE;
   $("adminPhoneLink").href = "tel:" + ADMIN_PHONE;
 
-  $("pendingTitle").textContent = t("pendingTitle");
-  $("dueTitle").textContent = t("dueTitle");
-  $("reqTitle").textContent = t("reqTitle");
-  $("empListTitle").textContent = t("empListTitle");
-  $("allWTitle").textContent = t("allWTitle");
-  $("addWTitle").textContent = t("addWTitle");
-  $("saveBtn").textContent = t("saveWorker");
-  $("cancelEdit").textContent = t("cancel");
-  $("signIn").textContent = t("signIn");
-  $("openBrowser").textContent = t("openBrowser");
-  $("signOut").textContent = t("signOut");
-  $("loginNote").textContent = inTelegram ? t("loginNoteTg") : t("loginNoteWeb");
 
-  $("ratingModalTitle").textContent = t("ratingTitle");
-  $("lblStars").textContent = t("stars");
-  $("lblComment").textContent = t("comment");
-  $("saveRatingBtn").textContent = t("saveRating");
-  $("cancelRatingBtn").textContent = t("cancel");
 
   // skill dropdowns
   const opts = SKILLS.map(s => `<option value="${esc(s.en)}">${lang==="am"?s.am:s.en}</option>`).join("");
   $("wr_skill").innerHTML = opts;
-  $("f_skill").innerHTML = opts;
 
-  // admin form labels
-  $("lblFName").textContent = t("wrName");
-  $("lblFAge").textContent = t("wrAge");
-  $("lblFSkill").textContent = t("wrSkill");
-  $("lblFLoc").textContent = t("wrLoc");
-  $("lblFExp").textContent = t("wrExp");
-  $("lblFPayType").textContent = t("wrPayType");
-  $("lblFPay").textContent = t("wrPay");
-  $("lblFId").textContent = t("wrId");
-  $("lblFPhone").textContent = t("wrPhone");
-  $("lblFPolice").textContent = t("wrPolice");
-  $("lblFGName").textContent = t("wrGName");
-  $("lblFGPhone").textContent = t("wrGPhone");
-  $("lblFPhoto").textContent = t("wrPhoto");
 
   renderSkillChips();
   renderHeroSkills();
@@ -876,17 +743,15 @@ $("langBtn").onclick = () => { lang = lang === "en" ? "am" : "en"; localStorage.
 
 // Navigation
 function show(view) {
-  ["Landing","E","R","A"].forEach(v => {
+  ["Landing","E","R"].forEach(v => {
     const el = $("v" + v);
     if (el) el.classList.toggle("hid", v !== view);
   });
 }
 $("btnEmployer").onclick = () => { show("E"); checkEmployer(); };
 $("btnWorker").onclick = () => show("R");
-$("btnAdmin").onclick = () => show("A");
 $("backFromE").onclick = () => show("Landing");
 $("backFromR").onclick = () => show("Landing");
-$("backFromA").onclick = () => show("Landing");
 $("wrBackHome").onclick = () => show("Landing");
 
 // Employer registration
@@ -1078,198 +943,6 @@ $("wrSubmitBtn").onclick = async () => {
     $("wrFormCard").classList.add("hid");
   } catch (e) { console.error(e); alert("Failed: "+e.message); }
   btn.disabled = false; btn.textContent = t("wrSubmit");
-};
-
-// Admin
-let allW = [], reqs = [], pending = [], employers = [];
-if (inTelegram) {
-  $("signIn").classList.add("hid");
-  $("openBrowser").classList.remove("hid");
-} else {
-  $("openBrowser").classList.add("hid");
-  $("signIn").classList.remove("hid");
-}
-$("signIn").onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.code));
-$("openBrowser").onclick = () => tg.openLink(location.href.split("#")[0]);
-$("signOut").onclick = () => signOut(auth);
-
-onAuthStateChanged(auth, async user => {
-  if (!user) { $("login").classList.remove("hid"); $("panel").classList.add("hid"); return; }
-  if (user.email !== ADMIN_EMAIL) { alert("Not admin"); signOut(auth); return; }
-  $("who").textContent = "Signed in: " + user.email;
-  $("login").classList.add("hid"); $("panel").classList.remove("hid");
-  await loadAdmin();
-});
-
-async function loadAdmin() {
-  const [rs, ws, es] = await Promise.all([
-    getDocs(query(collection(db,"requests"), orderBy("createdAt","desc"), limit(80))),
-    getDocs(collection(db,"workers")),
-    getDocs(collection(db,"employers"))
-  ]);
-  reqs = rs.docs.map(d => ({id:d.id, ...d.data()}));
-  allW = ws.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>ts(b.createdAt)-ts(a.createdAt));
-  pending = allW.filter(w => w.status === "pending");
-  employers = es.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>ts(b.createdAt)-ts(a.createdAt));
-  renderAdmin();
-}
-
-function isDue(r) {
-  if (r.followUpSent || r.rating || r.status==="closed") return false;
-  if (!r.followUpAt) return false;
-  const d = r.followUpAt.toDate ? r.followUpAt.toDate() : new Date(ts(r.followUpAt)*1000);
-  return d <= new Date();
-}
-
-function renderAdmin() {
-  $("pendingList").innerHTML = pending.length ? pending.map(w => `
-    <div class="admin-card pending">
-      <div class="pending-label">PENDING</div>
-      <b>${esc(w.name)}</b> · ${esc(w.skill)} · ${esc(w.location)}
-      <div class="who">Age ${esc(w.age)} · ${esc(w.experience)}</div>
-      <button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button>
-      <button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ Reject</button>
-    </div>`).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
-
-  const due = reqs.filter(isDue);
-  $("dueList").innerHTML = due.length ? due.map(r => {
-    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : "#";
-    return `<div class="admin-card due">
-      <div class="due-label">RATING DUE</div>
-      <b>${esc(r.workerName)}</b>
-      <div class="who"><a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")}</div>
-      <button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask</button>
-      <button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Rate</button>
-      <button class="btn-secondary" data-marksent="${esc(r.id)}">Mark Sent</button>
-    </div>`;
-  }).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
-
-  $("reqs").innerHTML = reqs.length ? reqs.map(r => {
-    const when = r.createdAt ? new Date(ts(r.createdAt)*1000).toLocaleString() : "";
-    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : "#";
-    const stClass = r.status==="open"?"status-open":r.status==="on_process"?"status-process":"status-closed";
-    return `<div class="admin-card">
-      <b>${esc(r.workerName)}</b>
-      <div class="who"><a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")} · ${when}</div>
-      <div class="who">Status: <span class="${stClass}">${esc(r.status||"open")}</span> · Pay: ${r.paymentReceived?"✅":"❌"}</div>
-      <button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>
-      <button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button>
-      <button class="btn-secondary" data-pay="${esc(r.id)}">Mark Paid</button>
-      <button class="btn-secondary" data-showphone="${esc(r.workerId)}">Show Phone</button>
-      <button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">Delete</button>
-    </div>`;
-  }).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
-
-  // Registered Employers (stay forever until deleted)
-  $("empList").innerHTML = employers.length ? employers.map(e => {
-    const when = e.createdAt ? new Date(ts(e.createdAt)*1000).toLocaleDateString() : "";
-    const un = e.username ? "@" + esc(e.username) : "";
-    return `<div class="admin-card">
-      <b>${esc(e.name)}</b>
-      <div class="who">📞 ${esc(e.phone||"—")} · 📍 ${esc(e.location||"—")}</div>
-      <div class="who">${un} · Registered: ${when}</div>
-      <button class="btn-secondary btn-danger" data-de="${esc(e.id)}">${t("deleteEmp")}</button>
-    </div>`;
-  }).join("") : `<div class="state" style="padding:16px"><p>${t("noEmployers")}</p></div>`;
-
-  $("wl").innerHTML = allW.length ? allW.map(w => `
-    <div class="admin-card">
-      <b>${esc(w.name)}</b>
-      <span class="who"> · ${esc(w.skill)} · ${w.status}</span>
-      ${starsHtml(w.ratingAvg, w.ratingCount)}
-      <button class="btn-secondary" data-tg="${esc(w.id)}">${w.available?"Unavailable":"Available"}</button>
-      <button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button>
-      <button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>
-    </div>`).join("") : `<div class="state"><p>—</p></div>`;
-}
-
-$("panel").onclick = async e => {
-  const d = e.target.dataset;
-  try {
-    if (d.approve) await updateDoc(doc(db,"workers",d.approve),{status:"approved",available:true});
-    else if (d.reject) { if(!confirm("Reject?"))return; await updateDoc(doc(db,"workers",d.reject),{status:"rejected",available:false}); }
-    else if (d.ask) {
-      const r = reqs.find(x=>x.id===d.ask); if(!r)return;
-      const msg = `ሰላም ${r.employerName}\n\nከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።\n\nእባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ።`;
-      const url = r.employerUsername ? `https://t.me/${r.employerUsername}?text=${encodeURIComponent(msg)}` : `tg://user?id=${r.employerTgId}`;
-      window.open(url,"_blank"); return;
-    }
-    else if (d.rate) {
-      ratingRequestId=d.rate; ratingWorkerId=d.wid;
-      const r=reqs.find(x=>x.id===d.rate);
-      $("ratingWorkerName").textContent=(r?.workerName||"")+" ← "+(r?.employerName||"");
-      $("ratingModal").classList.remove("hid"); return;
-    }
-    else if (d.marksent) await updateDoc(doc(db,"requests",d.marksent),{followUpSent:true});
-    else if (d.status) await updateDoc(doc(db,"requests",d.status),{status:d.val});
-    else if (d.pay) await updateDoc(doc(db,"requests",d.pay),{paymentReceived:true});
-    else if (d.showphone) {
-      const p = await getDoc(doc(db,"workers_private",d.showphone));
-      alert("Phone: "+(p.exists()?p.data().phone:"N/A")); return;
-    }
-    else if (d.dr) { if(!confirm("Delete?"))return; await deleteDoc(doc(db,"requests",d.dr)); }
-    else if (d.de) { if(!confirm("Delete this employer permanently?"))return; await deleteDoc(doc(db,"employers",d.de)); }
-    else if (d.tg) { const w=allW.find(x=>x.id===d.tg); await updateDoc(doc(db,"workers",d.tg),{available:!w.available}); }
-    else if (d.dw) {
-      if(!confirm("Delete?"))return;
-      const b=writeBatch(db); b.delete(doc(db,"workers",d.dw)); b.delete(doc(db,"workers_private",d.dw)); await b.commit();
-    }
-    else if (d.ed) return startEdit(d.ed);
-    else return;
-    await loadAdmin(); loadWorkers();
-  } catch(err) { alert(err.message); }
-};
-
-$("saveRatingBtn").onclick = async () => {
-  if (!ratingRequestId||!ratingWorkerId) return;
-  const stars=Number($("ratingStars").value), comment=$("ratingComment").value.trim();
-  try {
-    await updateDoc(doc(db,"requests",ratingRequestId),{rating:stars,ratingComment:comment,followUpSent:true,ratedAt:serverTimestamp()});
-    const wRef=doc(db,"workers",ratingWorkerId); const wSnap=await getDoc(wRef);
-    if (wSnap.exists()) {
-      const w=wSnap.data(); const cnt=(w.ratingCount||0)+1;
-      const avg=(((w.ratingAvg||0)*(cnt-1))+stars)/cnt;
-      await updateDoc(wRef,{ratingAvg:Math.round(avg*10)/10,ratingCount:cnt});
-    }
-    $("ratingModal").classList.add("hid"); await loadAdmin(); loadWorkers();
-  } catch(e){alert(e.message);}
-};
-$("cancelRatingBtn").onclick = () => $("ratingModal").classList.add("hid");
-
-async function startEdit(id) {
-  const w=allW.find(x=>x.id===id); const p=await getDoc(doc(db,"workers_private",id)); const priv=p.exists()?p.data():{};
-  $("f_id").value=id; $("f_name").value=w.name||""; $("f_age").value=w.age||"";
-  $("f_skill").value=w.skill||""; $("f_location").value=w.location||""; $("f_experience").value=w.experience||"";
-  $("f_paymentType").value=w.paymentType||"monthly"; $("f_pay").value=w.pay||"";
-  $("f_nationalId").value=priv.nationalId||""; $("f_phone").value=priv.phone||"";
-  $("f_police").value=w.hasPoliceClearance?"yes":"no";
-  $("f_guarantorName").value=priv.guarantorName||""; $("f_guarantorPhone").value=priv.guarantorPhone||"";
-  $("cancelEdit").classList.remove("hid"); $("wf").scrollIntoView({behavior:"smooth"});
-}
-$("cancelEdit").onclick = () => { $("wf").reset(); $("f_id").value=""; $("cancelEdit").classList.add("hid"); };
-
-$("wf").onsubmit = async e => {
-  e.preventDefault(); const btn=$("saveBtn"); btn.disabled=true;
-  try {
-    const id=$("f_id").value; const ref=id?doc(db,"workers",id):doc(collection(db,"workers"));
-    const publicData={
-      name:$("f_name").value.trim(), age:Number($("f_age").value), skill:$("f_skill").value,
-      location:$("f_location").value.trim(), experience:$("f_experience").value.trim(),
-      paymentType:$("f_paymentType").value, pay:$("f_pay").value.trim()||"Negotiable",
-      hasNationalId:true, hasPoliceClearance:$("f_police").value==="yes", status:"approved", available:true
-    };
-    if ($("f_photo").files[0]) publicData.photo=await shrink($("f_photo").files[0]);
-    const privateData={ phone:$("f_phone").value.trim(), nationalId:$("f_nationalId").value.trim(),
-      guarantorName:$("f_guarantorName").value.trim(), guarantorPhone:$("f_guarantorPhone").value.trim() };
-    const b=writeBatch(db);
-    if (id) b.update(ref,publicData);
-    else b.set(ref,{...publicData, photo:publicData.photo||"", ratingAvg:0, ratingCount:0, createdAt:serverTimestamp(), source:"admin"});
-    b.set(doc(db,"workers_private",ref.id), privateData, {merge:true});
-    await b.commit();
-    $("wf").reset(); $("f_id").value=""; $("cancelEdit").classList.add("hid");
-    await loadAdmin(); loadWorkers();
-  } catch(err){alert(err.message);}
-  btn.disabled=false; btn.textContent=t("saveWorker");
 };
 
 applyLang();
