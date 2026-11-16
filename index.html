@@ -17,146 +17,126 @@
   --success: #059669;
   --warning: #d97706;
   --border: #e2e8f0;
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06);
   --radius: 16px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  background: var(--bg);
-  color: var(--fg);
-  font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  padding-bottom: 48px;
-  -webkit-font-smoothing: antialiased;
+  background: var(--bg); color: var(--fg);
+  font: 15px/1.5 system-ui, -apple-system, sans-serif;
+  padding-bottom: 50px; -webkit-font-smoothing: antialiased;
 }
 .header {
   position: sticky; top: 0; z-index: 50;
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 16px;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
 }
 .logo { display: flex; align-items: center; gap: 10px; }
 .logo-icon {
-  width: 40px; height: 40px;
+  width: 40px; height: 40px; border-radius: 12px;
   background: linear-gradient(135deg, #0ea5e9, #0369a1);
-  border-radius: 12px; display: grid; place-items: center;
-  color: white; font-weight: 800; font-size: 15px;
+  display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px;
 }
-.logo h1 { font-size: 16px; font-weight: 700; line-height: 1.2; }
-.logo span { font-size: 12px; color: var(--hint); font-weight: 500; }
+.logo h1 { font-size: 16px; font-weight: 700; }
+.logo span { font-size: 12px; color: var(--hint); }
 .lang-btn {
   background: var(--bg); border: 1px solid var(--border);
-  border-radius: 20px; padding: 6px 14px;
-  font-size: 13px; font-weight: 600; color: var(--fg); cursor: pointer;
+  border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
 }
-.tabs { display: flex; gap: 6px; padding: 12px 16px 8px; }
+.tabs { display: flex; gap: 5px; padding: 10px 12px 8px; overflow-x: auto; }
 .tab {
-  flex: 1; padding: 11px; border: none; border-radius: 12px;
-  background: var(--card); color: var(--hint); font-size: 14px; font-weight: 600;
-  cursor: pointer; box-shadow: var(--shadow);
+  flex: 1; min-width: 90px; padding: 10px 6px; border: none; border-radius: 12px;
+  background: var(--card); color: var(--hint); font-size: 13px; font-weight: 600;
+  cursor: pointer; box-shadow: var(--shadow); white-space: nowrap;
 }
 .tab.on { background: var(--btn); color: var(--btnfg); }
-main { padding: 0 16px 24px; }
-
-/* Skill chips */
-.skills-wrap { margin: 6px 0 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+main { padding: 0 14px 24px; }
+.skills-wrap { margin: 6px 0 12px; overflow-x: auto; scrollbar-width: none; }
 .skills-wrap::-webkit-scrollbar { display: none; }
-.skills { display: flex; gap: 8px; width: max-content; padding: 2px 0; }
+.skills { display: flex; gap: 8px; width: max-content; }
 .chip {
-  padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border);
-  background: var(--card); color: var(--fg); font-size: 13px; font-weight: 500;
-  white-space: nowrap; cursor: pointer;
+  padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--card); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
 }
 .chip.active { background: var(--btn); color: var(--btnfg); border-color: var(--btn); }
-
-/* Cards */
 .card {
-  background: var(--card); border-radius: var(--radius); margin-bottom: 14px;
+  background: var(--card); border-radius: var(--radius); margin-bottom: 12px;
   overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border);
 }
-.card-img { width: 100%; height: 170px; object-fit: cover; display: block; background: #e2e8f0; }
-.card-body { padding: 14px 16px 16px; }
-.card-name { font-size: 17px; font-weight: 700; }
+.card-img { width: 100%; height: 160px; object-fit: cover; background: #e2e8f0; }
+.card-body { padding: 13px 14px 15px; }
+.card-name { font-size: 16px; font-weight: 700; }
 .card-skill {
   display: inline-block; background: #e0f2fe; color: #0369a1;
-  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-top: 4px;
+  font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 20px; margin-top: 3px;
 }
-.badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
-.badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
+.badges { display: flex; flex-wrap: wrap; gap: 5px; margin: 7px 0 3px; }
+.badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px; }
 .badge-id { background: #dcfce7; color: #166534; }
 .badge-police { background: #fef3c7; color: #92400e; }
-.meta { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 8px 0; font-size: 13px; color: var(--hint); }
-.pay { font-weight: 600; color: var(--success); font-size: 14px; margin: 6px 0 12px; }
-.btn-hire {
-  width: 100%; padding: 12px; border: none; border-radius: 12px;
+.meta { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 6px 0; font-size: 13px; color: var(--hint); }
+.pay { font-weight: 600; color: var(--success); font-size: 14px; margin: 4px 0 10px; }
+.btn-hire, .btn-primary {
+  width: 100%; padding: 11px; border: none; border-radius: 11px;
   background: var(--btn); color: var(--btnfg); font-size: 15px; font-weight: 600; cursor: pointer;
 }
-.state { text-align: center; padding: 48px 20px; color: var(--hint); }
-.state-icon { font-size: 42px; margin-bottom: 12px; opacity: 0.7; }
-.state h3 { font-size: 16px; color: var(--fg); margin-bottom: 6px; }
-
-/* Admin */
-.admin-card {
-  background: var(--card); border-radius: var(--radius); padding: 16px;
-  margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border);
+.state { text-align: center; padding: 40px 16px; color: var(--hint); }
+.state-icon { font-size: 40px; margin-bottom: 10px; opacity: 0.7; }
+.state h3 { font-size: 15px; color: var(--fg); margin-bottom: 4px; }
+.admin-card, .form-card {
+  background: var(--card); border-radius: var(--radius); padding: 15px;
+  margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--border);
 }
-.admin-card.due {
-  border: 2px solid var(--warning);
-  background: #fffbeb;
-}
-label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 4px; font-weight: 500; }
-.field-hint { font-size: 12px; color: var(--hint); margin: -6px 0 10px; }
+.admin-card.due { border: 2px solid var(--warning); background: #fffbeb; }
+.admin-card.pending { border: 2px solid #93c5fd; background: #eff6ff; }
+label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 3px; font-weight: 500; }
+.field-hint { font-size: 12px; color: var(--hint); margin: -4px 0 10px; }
 input, select, textarea {
-  width: 100%; padding: 11px 12px; margin-bottom: 12px;
+  width: 100%; padding: 10px 11px; margin-bottom: 11px;
   border: 1px solid var(--border); border-radius: 10px;
   background: var(--bg); color: var(--fg); font-size: 15px;
 }
 textarea { min-height: 70px; resize: vertical; }
-.btn-primary {
-  width: 100%; padding: 12px; border: none; border-radius: 12px;
-  background: var(--btn); color: var(--btnfg); font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px;
-}
 .btn-secondary {
-  padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
-  background: var(--bg); color: var(--fg); font-size: 13px; font-weight: 500; cursor: pointer; margin: 4px 6px 0 0;
+  padding: 7px 11px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--fg); font-size: 13px; font-weight: 500;
+  cursor: pointer; margin: 3px 5px 0 0;
 }
-.btn-warning {
-  background: #fef3c7; border-color: #fbbf24; color: #92400e; font-weight: 600;
-}
-.btn-success {
-  background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 600;
-}
+.btn-warning { background: #fef3c7; border-color: #fbbf24; color: #92400e; font-weight: 600; }
+.btn-success { background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 600; }
 .btn-danger { color: var(--danger); border-color: #fecaca; }
+.btn-info { background: #e0f2fe; border-color: #7dd3fc; color: #0369a1; font-weight: 600; }
 .hid { display: none !important; }
-.section-title { font-size: 15px; font-weight: 700; margin: 20px 0 10px; }
-.who { font-size: 13px; color: var(--hint); margin-bottom: 6px; }
-.divider { height: 1px; background: var(--border); margin: 16px 0; }
-.due-label {
-  display: inline-block; background: #fef3c7; color: #92400e;
-  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px;
+.section-title { font-size: 15px; font-weight: 700; margin: 18px 0 9px; }
+.who { font-size: 13px; color: var(--hint); margin-bottom: 5px; }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+.due-label, .pending-label {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 2px 7px; border-radius: 6px; margin-bottom: 5px;
 }
-
-/* Modal */
-#done {
-  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55);
-  display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 100;
+.due-label { background: #fef3c7; color: #92400e; }
+.pending-label { background: #dbeafe; color: #1e40af; }
+.status-open { color: #0369a1; font-weight: 600; }
+.status-process { color: #d97706; font-weight: 600; }
+.status-closed { color: #059669; font-weight: 600; }
+.stars { color: #eab308; letter-spacing: 1px; font-size: 13px; }
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px; z-index: 100;
 }
-#done.hid { display: none !important; }
+.modal-overlay.hid { display: none !important; }
 .modal-box {
-  background: var(--card); border-radius: 20px; padding: 24px;
-  max-width: 340px; width: 100%; text-align: center;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  background: var(--card); border-radius: 18px; padding: 22px;
+  max-width: 340px; width: 100%; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
 }
-.modal-box h3 { font-size: 18px; margin-bottom: 8px; }
-.modal-box p { color: var(--hint); font-size: 14px; margin-bottom: 20px; }
-.stars { color: #eab308; letter-spacing: 1px; font-size: 14px; }
-
-/* Rating modal */
-#ratingModal {
-  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55);
-  display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 110;
+.modal-box h3 { font-size: 17px; margin-bottom: 8px; text-align: center; }
+.modal-box p { color: var(--hint); font-size: 14px; margin-bottom: 14px; text-align: center; }
+.phone-box {
+  background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px;
+  padding: 12px; text-align: center; margin-bottom: 14px;
 }
-#ratingModal.hid { display: none !important; }
+.phone-box a { font-size: 18px; font-weight: 700; color: #166534; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -173,137 +153,164 @@ textarea { min-height: 70px; resize: vertical; }
 </header>
 
 <div class="tabs">
-  <button class="tab on" id="tabW">Workers</button>
-  <button class="tab" id="tabA">Admin</button>
+  <button class="tab on" id="tabE" data-view="E">Find Worker</button>
+  <button class="tab" id="tabR" data-view="R">Register as Worker</button>
+  <button class="tab" id="tabA" data-view="A">Admin</button>
 </div>
 
 <main>
-  <!-- WORKERS VIEW -->
-  <section id="vW">
-    <div class="skills-wrap">
-      <div class="skills" id="skillChips"></div>
+  <!-- EMPLOYER VIEW -->
+  <section id="vE">
+    <div id="empRegisterGate" class="form-card hid">
+      <h3 style="margin-bottom:10px" id="empRegTitle">Register to Hire</h3>
+      <p class="who" id="empRegNote">Please register first before hiring a worker.</p>
+      <label>Full Name *</label>
+      <input id="emp_name" maxlength="80" placeholder="Your full name">
+      <label>Phone Number *</label>
+      <input id="emp_phone" maxlength="20" placeholder="09xxxxxxxx">
+      <label>Location / City *</label>
+      <input id="emp_location" maxlength="60" placeholder="e.g. Addis Ababa, Bole">
+      <button class="btn-primary" id="empSaveBtn">Save & Continue</button>
     </div>
-    <div id="list">
-      <div class="state">
-        <div class="state-icon">⏳</div>
-        <h3>Loading workers...</h3>
+    <div id="empMain">
+      <div class="skills-wrap"><div class="skills" id="skillChips"></div></div>
+      <div id="list">
+        <div class="state"><div class="state-icon">⏳</div><h3>Loading...</h3></div>
       </div>
+    </div>
+  </section>
+
+  <!-- WORKER SELF-REGISTRATION -->
+  <section id="vR" class="hid">
+    <div class="form-card" id="wrFormCard">
+      <h3 style="margin-bottom:12px" id="workerRegTitle">Register as Worker</h3>
+      <p class="who" id="workerRegNote">Fill the form. Admin will review and approve you.</p>
+      <label>Full Name *</label>
+      <input id="wr_name" maxlength="80">
+      <label>Age *</label>
+      <input id="wr_age" type="number" min="14" max="80">
+      <label>Skill *</label>
+      <select id="wr_skill"></select>
+      <label>Location *</label>
+      <input id="wr_location" maxlength="60" placeholder="e.g. Addis Ababa">
+      <label>Experience *</label>
+      <input id="wr_experience" maxlength="120" placeholder="e.g. 2 years">
+      <label>Payment Type *</label>
+      <select id="wr_paymentType">
+        <option value="monthly">Monthly</option>
+        <option value="hourly">Hourly</option>
+        <option value="daily">Daily</option>
+      </select>
+      <label>Expected Pay (optional)</label>
+      <input id="wr_pay" maxlength="60" placeholder="e.g. 5000 ETB / month">
+      <div class="divider"></div>
+      <label>National ID Number *</label>
+      <input id="wr_nationalId" maxlength="30">
+      <label>Phone Number *</label>
+      <input id="wr_phone" maxlength="20" placeholder="09xxxxxxxx">
+      <label>Profile Photo</label>
+      <input id="wr_photo" type="file" accept="image/*">
+      <div class="divider"></div>
+      <label>Guarantor Name (optional)</label>
+      <input id="wr_guarantorName" maxlength="80">
+      <label>Guarantor Phone (optional)</label>
+      <input id="wr_guarantorPhone" maxlength="20">
+      <label>Police Clearance</label>
+      <select id="wr_police">
+        <option value="no">Not available</option>
+        <option value="yes">Available</option>
+      </select>
+      <button class="btn-primary" id="wrSubmitBtn" style="margin-top:8px">Submit Registration</button>
+    </div>
+    <div id="wrSuccess" class="form-card hid" style="text-align:center">
+      <div style="font-size:40px;margin-bottom:8px">✅</div>
+      <h3>Registration Submitted!</h3>
+      <p class="who">Admin will review your profile. You will become visible after approval.</p>
     </div>
   </section>
 
   <!-- ADMIN VIEW -->
   <section id="vA" class="hid">
-    <div id="login" class="admin-card">
-      <p id="loginNote" class="who" style="margin-bottom:14px"></p>
+    <div id="login" class="form-card">
+      <p id="loginNote" class="who" style="margin-bottom:12px"></p>
       <button class="btn-primary" id="signIn">Sign in with Google</button>
       <button class="btn-primary hid" id="openBrowser">Open in browser to sign in</button>
     </div>
-
     <div id="panel" class="hid">
       <div class="who" id="who"></div>
-      <button class="btn-secondary" id="signOut" type="button">Sign out</button>
+      <button class="btn-secondary" id="signOut">Sign out</button>
 
-      <h2 class="section-title" id="formTitle">Add worker</h2>
-      <form id="wf" class="admin-card">
+      <h2 class="section-title">⏳ Pending Workers (Need Approval)</h2>
+      <div id="pendingList"></div>
+
+      <h2 class="section-title">⭐ Rating Follow-up Due</h2>
+      <div id="dueList"></div>
+
+      <h2 class="section-title">📋 Hire Requests</h2>
+      <div id="reqs"></div>
+
+      <h2 class="section-title">👷 All Workers</h2>
+      <div id="wl"></div>
+
+      <h2 class="section-title">➕ Add Worker Manually</h2>
+      <form id="wf" class="form-card">
         <input type="hidden" id="f_id">
-
         <label>Full name *</label>
-        <input id="f_name" required maxlength="80" placeholder="e.g. Abebe Kebede">
-
+        <input id="f_name" required maxlength="80">
         <label>Age *</label>
-        <input id="f_age" type="number" min="14" max="80" required placeholder="25">
-
+        <input id="f_age" type="number" min="14" max="80" required>
         <label>Skill *</label>
         <select id="f_skill" required></select>
-
         <label>Location *</label>
-        <input id="f_location" required maxlength="60" placeholder="e.g. Addis Ababa, Bole">
-
+        <input id="f_location" required maxlength="60">
         <label>Experience *</label>
-        <input id="f_experience" required maxlength="120" placeholder="e.g. 3 years">
-
+        <input id="f_experience" required maxlength="120">
         <label>Payment type *</label>
-        <select id="f_paymentType" required>
+        <select id="f_paymentType">
           <option value="monthly">Monthly</option>
           <option value="hourly">Hourly</option>
           <option value="daily">Daily</option>
         </select>
-
-        <label>Pay amount (optional)</label>
-        <input id="f_pay" maxlength="60" placeholder="e.g. 5000 ETB / month">
-
-        <div class="divider"></div>
-
-        <label>National ID Number *</label>
-        <input id="f_nationalId" required maxlength="30" placeholder="Mandatory">
-        <p class="field-hint">Required for all workers</p>
-
-        <label>ID Photo (optional)</label>
-        <input id="f_idPhoto" type="file" accept="image/*">
-
+        <label>Pay (optional)</label>
+        <input id="f_pay" maxlength="60">
+        <label>National ID *</label>
+        <input id="f_nationalId" required maxlength="30">
+        <label>Phone *</label>
+        <input id="f_phone" required maxlength="20">
         <label>Police Clearance</label>
-        <select id="f_police">
-          <option value="no">Not available</option>
-          <option value="yes">Available</option>
-        </select>
-        <p class="field-hint">Optional – shows as strength badge</p>
-
-        <label>Police Clearance Photo (if available)</label>
-        <input id="f_policePhoto" type="file" accept="image/*">
-
-        <div class="divider"></div>
-
-        <label>Guarantor Full Name (optional)</label>
+        <select id="f_police"><option value="no">No</option><option value="yes">Yes</option></select>
+        <label>Guarantor Name</label>
         <input id="f_guarantorName" maxlength="80">
-
-        <label>Guarantor ID (optional)</label>
-        <input id="f_guarantorId" maxlength="30">
-
-        <label>Guarantor Phone (optional)</label>
-        <input id="f_guarantorPhone" maxlength="20" placeholder="09xxxxxxxx">
-        <p class="field-hint">Becomes important when the worker is hired</p>
-
-        <div class="divider"></div>
-
-        <label>Worker Phone (private) *</label>
-        <input id="f_phone" required maxlength="20" placeholder="09xxxxxxxx">
-
-        <label>Profile Photo</label>
+        <label>Guarantor Phone</label>
+        <input id="f_guarantorPhone" maxlength="20">
+        <label>Photo</label>
         <input id="f_photo" type="file" accept="image/*">
-
-        <button class="btn-primary" id="saveBtn" type="submit">Save worker</button>
-        <button class="btn-secondary hid" id="cancelEdit" type="button">Cancel edit</button>
+        <button class="btn-primary" id="saveBtn" type="submit">Save Worker</button>
+        <button class="btn-secondary hid" id="cancelEdit" type="button">Cancel</button>
       </form>
-
-      <!-- FOLLOW-UP DUE SECTION -->
-      <h2 class="section-title">⏰ Follow-up due (Rating needed)</h2>
-      <div id="dueList"></div>
-
-      <h2 class="section-title">All Requests</h2>
-      <div id="reqs"></div>
-
-      <h2 class="section-title">All Workers</h2>
-      <div id="wl"></div>
     </div>
   </section>
 </main>
 
 <!-- Hire success modal -->
-<div id="done" class="hid">
+<div id="done" class="modal-overlay hid">
   <div class="modal-box">
-    <h3 id="doneTitle">Request received!</h3>
-    <p id="doneText">Our team will contact you shortly. You can also message the manager now.</p>
-    <button class="btn-primary" id="doneBtn" style="margin-bottom:10px">Message the manager</button>
+    <h3 id="doneTitle">Request Delivered!</h3>
+    <p id="doneText">Your request has been sent successfully. Our team will contact you shortly.</p>
+    <div class="phone-box">
+      <div style="font-size:12px;color:#166534;margin-bottom:4px">Call Admin now</div>
+      <a id="adminPhoneLink" href="tel:">09xxxxxxxx</a>
+    </div>
+    <button class="btn-primary" id="doneBtn" style="margin-bottom:8px">Message Admin on Telegram</button>
     <button class="btn-secondary" id="doneClose" style="width:100%">Close</button>
   </div>
 </div>
 
-<!-- Rating entry modal (for manager) -->
-<div id="ratingModal" class="hid">
+<!-- Rating modal -->
+<div id="ratingModal" class="modal-overlay hid">
   <div class="modal-box" style="text-align:left">
-    <h3 style="text-align:center;margin-bottom:12px">Save Rating</h3>
-    <p class="who" id="ratingWorkerName" style="text-align:center;margin-bottom:14px"></p>
-    
+    <h3 style="text-align:center">Save Rating</h3>
+    <p class="who" id="ratingWorkerName" style="text-align:center"></p>
     <label>Stars (1-5)</label>
     <select id="ratingStars">
       <option value="5">5 ★★★★★</option>
@@ -312,10 +319,8 @@ textarea { min-height: 70px; resize: vertical; }
       <option value="2">2 ★★</option>
       <option value="1">1 ★</option>
     </select>
-
-    <label>Recommendation / Comment</label>
-    <textarea id="ratingComment" placeholder="Employer's feedback..."></textarea>
-
+    <label>Comment / Recommendation</label>
+    <textarea id="ratingComment"></textarea>
     <button class="btn-primary" id="saveRatingBtn">Save Rating</button>
     <button class="btn-secondary" id="cancelRatingBtn" style="width:100%;margin-top:8px">Cancel</button>
   </div>
@@ -323,11 +328,13 @@ textarea { min-height: 70px; resize: vertical; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, orderBy, limit, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, orderBy, limit, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// ========== CONFIG ==========
 const MANAGER = "TamagnDelalaETBot";
+const ADMIN_PHONE = "09xxxxxxxx";
+const ADMIN_EMAIL = "henokj2000@gmail.com";
+
 const firebaseConfig = {
   apiKey: "AIzaSyDOzRzt9k35kokQOD1rEIpkIVPjNyd0Q3c",
   authDomain: "tamagn-delala.firebaseapp.com",
@@ -358,105 +365,141 @@ const SKILLS = [
 
 const i18n = {
   en: {
-    tagline: "Trusted Workers",
-    workers: "Workers", admin: "Admin",
-    allSkills: "All",
-    noWorkers: "No workers available right now",
-    noWorkersSub: "Please check again soon",
-    hire: "Hire this worker",
-    age: "Age", experience: "Experience", pay: "Pay",
-    negotiable: "Negotiable",
-    requestTitle: "Request received!",
-    requestText: "Our team will contact you shortly. You can also message the manager now.",
-    messageManager: "Message the manager", close: "Close",
-    confirmHire: "Request this worker?",
-    langBtn: "አማርኛ",
-    verifiedId: "ID Verified",
-    policeClearance: "Police Clearance",
-    monthly: "Monthly", hourly: "Hourly", daily: "Daily"
+    tagline: "Trusted Workers", findWorker: "Find Worker", registerWorker: "Register as Worker", admin: "Admin",
+    allSkills: "All", noWorkers: "No workers available", noWorkersSub: "Please check again soon",
+    hire: "Hire this worker", age: "Age", experience: "Experience", pay: "Pay", negotiable: "Negotiable",
+    requestTitle: "Request Delivered!", requestText: "Your request has been sent successfully. Our team will contact you shortly.",
+    messageAdmin: "Message Admin on Telegram", close: "Close", confirmHire: "Send hire request for this worker?",
+    langBtn: "አማርኛ", verifiedId: "ID Verified", policeClearance: "Police Clearance",
+    monthly: "Monthly", hourly: "Hourly", daily: "Daily",
+    empRegTitle: "Register to Hire", empRegNote: "Please register first before hiring a worker.",
+    workerRegTitle: "Register as Worker", workerRegNote: "Fill the form. Admin will review and approve you."
   },
   am: {
-    tagline: "ታማኝ ሰራተኞች",
-    workers: "ሰራተኞች", admin: "አስተዳዳሪ",
-    allSkills: "ሁሉም",
-    noWorkers: "በአሁኑ ጊዜ ሰራተኛ የለም",
-    noWorkersSub: "እባክዎ ቆይተው እንደገና ይመልከቱ",
-    hire: "ይህን ሰራተኛ ቅጠር",
-    age: "ዕድሜ", experience: "ልምድ", pay: "ክፍያ",
-    negotiable: "በድርድር",
-    requestTitle: "ጥያቄዎ ተቀብሏል!",
-    requestText: "ቡድናችን በቅርቡ ያገኝዎታል። አሁን ማኔጀሩን መልዕክት መላክ ይችላሉ።",
-    messageManager: "ማኔጀሩን መልዕክት ላክ", close: "ዝጋ",
-    confirmHire: "ይህን ሰራተኛ መጠየቅ ይፈልጋሉ?",
-    langBtn: "English",
-    verifiedId: "መታወቂያ አረጋግጧል",
-    policeClearance: "የፖሊስ ማረጋገጫ",
-    monthly: "ወርሃዊ", hourly: "በሰዓት", daily: "ዕለታዊ"
+    tagline: "ታማኝ ሰራተኞች", findWorker: "ሰራተኛ ፈልግ", registerWorker: "እንደ ሰራተኛ ይመዝገቡ", admin: "አስተዳዳሪ",
+    allSkills: "ሁሉም", noWorkers: "በአሁኑ ጊዜ ሰራተኛ የለም", noWorkersSub: "እባክዎ ቆይተው ይመልከቱ",
+    hire: "ይህን ሰራተኛ ቅጠር", age: "ዕድሜ", experience: "ልምድ", pay: "ክፍያ", negotiable: "በድርድር",
+    requestTitle: "ጥያቄዎ ተልኳል!", requestText: "ጥያቄዎ በተሳካ ሁኔታ ተልኳል። ቡድናችን በቅርቡ ያገኝዎታል።",
+    messageAdmin: "አድሚንን በቴሌግራም ያግኙ", close: "ዝጋ", confirmHire: "የቅጥር ጥያቄ መላክ ይፈልጋሉ?",
+    langBtn: "English", verifiedId: "መታወቂያ አረጋግጧል", policeClearance: "የፖሊስ ማረጋገጫ",
+    monthly: "ወርሃዊ", hourly: "በሰዓት", daily: "ዕለታዊ",
+    empRegTitle: "ለመቅጠር ይመዝገቡ", empRegNote: "ሰራተኛ ከመቅጠርዎ በፊት እባክዎ ይመዝገቡ።",
+    workerRegTitle: "እንደ ሰራተኛ ይመዝገቡ", workerRegNote: "ቅጹን ይሙሉ። አስተዳዳሪው ከገመገመ በኋላ ይፀድቃል።"
   }
 };
 
 let lang = localStorage.getItem("td_lang") || "en";
 let currentSkill = "";
-let ratingRequestId = null;
-let ratingWorkerId = null;
+let currentEmployer = null;
+let ratingRequestId = null, ratingWorkerId = null;
 
-const tg = window.Telegram && window.Telegram.WebApp;
+const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 const inTelegram = !!(tg && tg.initData);
+const tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
 
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 const auth = getAuth(fbApp);
 
 const $ = id => document.getElementById(id);
-const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({
-  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-}[c]));
-const ts = x => (x && x.seconds) ? x.seconds : 0;
-function t(key) { return i18n[lang][key] || key; }
-function skillLabel(skillEn) {
-  const found = SKILLS.find(s => s.en === skillEn);
-  return found ? (lang === "am" ? found.am : found.en) : skillEn;
-}
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ts = x => (x?.seconds) ? x.seconds : 0;
+const t = key => i18n[lang][key] || key;
+const skillLabel = en => { const s = SKILLS.find(x => x.en === en); return s ? (lang === "am" ? s.am : s.en) : en; };
 
 function applyLang() {
   $("tagline").textContent = t("tagline");
-  $("tabW").textContent = t("workers");
+  $("tabE").textContent = t("findWorker");
+  $("tabR").textContent = t("registerWorker");
   $("tabA").textContent = t("admin");
   $("langBtn").textContent = t("langBtn");
   $("doneTitle").textContent = t("requestTitle");
   $("doneText").textContent = t("requestText");
-  $("doneBtn").textContent = t("messageManager");
+  $("doneBtn").textContent = t("messageAdmin");
   $("doneClose").textContent = t("close");
+  $("empRegTitle").textContent = t("empRegTitle");
+  $("empRegNote").textContent = t("empRegNote");
+  $("workerRegTitle").textContent = t("workerRegTitle");
+  $("workerRegNote").textContent = t("workerRegNote");
+  $("adminPhoneLink").textContent = ADMIN_PHONE;
+  $("adminPhoneLink").href = "tel:" + ADMIN_PHONE;
+  const opts = SKILLS.map(s => `<option value="${esc(s.en)}">${lang==="am"?s.am:s.en}</option>`).join("");
+  $("wr_skill").innerHTML = opts;
+  $("f_skill").innerHTML = opts;
   renderSkillChips();
   renderWorkers();
-  const sel = $("f_skill");
-  const prev = sel.value;
-  sel.innerHTML = SKILLS.map(s => `<option value="${esc(s.en)}">${lang === "am" ? s.am : s.en}</option>`).join("");
-  if (prev) sel.value = prev;
 }
-$("langBtn").onclick = () => {
-  lang = lang === "en" ? "am" : "en";
-  localStorage.setItem("td_lang", lang);
-  applyLang();
-};
+$("langBtn").onclick = () => { lang = lang === "en" ? "am" : "en"; localStorage.setItem("td_lang", lang); applyLang(); };
 
 function show(view) {
-  $("vW").classList.toggle("hid", view !== "W");
-  $("vA").classList.toggle("hid", view !== "A");
-  $("tabW").classList.toggle("on", view === "W");
-  $("tabA").classList.toggle("on", view === "A");
+  ["E","R","A"].forEach(v => {
+    $("v"+v).classList.toggle("hid", v !== view);
+    $("tab"+v).classList.toggle("on", v === view);
+  });
 }
-$("tabW").onclick = () => show("W");
-$("tabA").onclick = () => show("A");
+document.querySelectorAll(".tab").forEach(btn => btn.onclick = () => show(btn.dataset.view));
+
+async function checkEmployer() {
+  if (!tgUser.id) {
+    currentEmployer = { name: "Guest", phone: "", location: "" };
+    $("empRegisterGate").classList.add("hid");
+    $("empMain").classList.remove("hid");
+    return;
+  }
+  try {
+    const snap = await getDoc(doc(db, "employers", String(tgUser.id)));
+    if (snap.exists()) {
+      currentEmployer = { id: snap.id, ...snap.data() };
+      $("empRegisterGate").classList.add("hid");
+      $("empMain").classList.remove("hid");
+    } else {
+      $("empRegisterGate").classList.remove("hid");
+      $("empMain").classList.add("hid");
+    }
+  } catch (e) {
+    console.error(e);
+    $("empRegisterGate").classList.remove("hid");
+  }
+}
+
+$("empSaveBtn").onclick = async () => {
+  const name = $("emp_name").value.trim();
+  const phone = $("emp_phone").value.trim();
+  const location = $("emp_location").value.trim();
+  if (!name || !phone || !location) return alert("Please fill all fields");
+  try {
+    const data = { name, phone, location, tgId: Number(tgUser.id)||0, username: tgUser.username||"", createdAt: serverTimestamp() };
+    await setDoc(doc(db, "employers", String(tgUser.id || Date.now())), data);
+    currentEmployer = data;
+    $("empRegisterGate").classList.add("hid");
+    $("empMain").classList.remove("hid");
+  } catch (e) { alert("Registration failed: " + e.message); }
+};
+
+let workers = [];
+async function loadWorkers() {
+  try {
+    const snap = await getDocs(query(collection(db, "workers"), where("status","==","approved"), where("available","==",true), limit(100)));
+    workers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    workers.sort((a,b) => ts(b.createdAt) - ts(a.createdAt));
+    renderWorkers();
+  } catch (e) {
+    console.error(e);
+    $("list").innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Could not load</h3></div>`;
+  }
+}
+
+function starsHtml(avg, count) {
+  if (!count) return "";
+  const full = Math.round(avg||0);
+  return `<div class="stars">${"★".repeat(full)}${"☆".repeat(5-full)} <span style="color:var(--hint);font-size:12px">(${count})</span></div>`;
+}
 
 function renderSkillChips() {
   $("skillChips").innerHTML = [
-    `<button class="chip ${currentSkill === "" ? "active" : ""}" data-skill="">${t("allSkills")}</button>`,
-    ...SKILLS.map(s => {
-      const label = lang === "am" ? s.am : s.en;
-      return `<button class="chip ${currentSkill === s.en ? "active" : ""}" data-skill="${esc(s.en)}">${esc(label)}</button>`;
-    })
+    `<button class="chip ${!currentSkill?"active":""}" data-skill="">${t("allSkills")}</button>`,
+    ...SKILLS.map(s => `<button class="chip ${currentSkill===s.en?"active":""}" data-skill="${esc(s.en)}">${esc(lang==="am"?s.am:s.en)}</button>`)
   ].join("");
 }
 $("skillChips").onclick = e => {
@@ -467,484 +510,302 @@ $("skillChips").onclick = e => {
   renderWorkers();
 };
 
-// ========== Workers ==========
-let workers = [];
-
-async function loadWorkers() {
-  try {
-    const snap = await getDocs(query(collection(db, "workers"), where("available", "==", true), limit(100)));
-    workers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    workers.sort((a, b) => ts(b.createdAt) - ts(a.createdAt));
-    renderWorkers();
-  } catch (e) {
-    console.error(e);
-    $("list").innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Could not load workers</h3></div>`;
-  }
-}
-
-function starsHtml(avg, count) {
-  if (!count || count === 0) return "";
-  const full = Math.round(avg || 0);
-  return `<div class="stars">${"★".repeat(full)}${"☆".repeat(5 - full)} <span style="color:var(--hint);font-size:12px">(${count})</span></div>`;
-}
-
 function renderWorkers() {
-  const filtered = currentSkill ? workers.filter(w => w.skill === currentSkill) : workers;
-  if (!filtered.length) {
+  const rows = currentSkill ? workers.filter(w => w.skill === currentSkill) : workers;
+  if (!rows.length) {
     $("list").innerHTML = `<div class="state"><div class="state-icon">👷</div><h3>${t("noWorkers")}</h3><p>${t("noWorkersSub")}</p></div>`;
     return;
   }
-
-  $("list").innerHTML = filtered.map(w => {
-    const img = (typeof w.photo === "string" && w.photo.startsWith("data:image/"))
+  $("list").innerHTML = rows.map(w => {
+    const img = (w.photo && w.photo.startsWith("data:image/"))
       ? `<img class="card-img" src="${w.photo}" alt="">`
-      : `<div class="card-img" style="display:grid;place-items:center;font-size:48px;color:#94a3b8">👤</div>`;
-
+      : `<div class="card-img" style="display:grid;place-items:center;font-size:42px;color:#94a3b8">👤</div>`;
     const badges = [];
     if (w.hasNationalId) badges.push(`<span class="badge badge-id">✓ ${t("verifiedId")}</span>`);
     if (w.hasPoliceClearance) badges.push(`<span class="badge badge-police">🛡 ${t("policeClearance")}</span>`);
-
-    return `
-      <div class="card">
-        ${img}
-        <div class="card-body">
-          <div class="card-name">${esc(w.name)}</div>
-          <div class="card-skill">${esc(skillLabel(w.skill))}</div>
-          <div class="badges">${badges.join("")}</div>
-          ${starsHtml(w.ratingAvg, w.ratingCount)}
-          <div class="meta">
-            <span>🎂 ${t("age")} ${esc(w.age)}</span>
-            <span>📍 ${esc(w.location)}</span>
-          </div>
-          <div class="meta">
-            <span>💼 ${t("experience")}: ${esc(w.experience)}</span>
-          </div>
-          <div class="pay">💰 ${esc(w.pay || t("negotiable"))} · ${t(w.paymentType || "monthly")}</div>
-          <button class="btn-hire" data-hire="${esc(w.id)}">${t("hire")}</button>
-        </div>
-      </div>`;
+    return `<div class="card">${img}<div class="card-body">
+      <div class="card-name">${esc(w.name)}</div>
+      <div class="card-skill">${esc(skillLabel(w.skill))}</div>
+      <div class="badges">${badges.join("")}</div>
+      ${starsHtml(w.ratingAvg, w.ratingCount)}
+      <div class="meta"><span>🎂 ${t("age")} ${esc(w.age)}</span><span>📍 ${esc(w.location)}</span></div>
+      <div class="meta"><span>💼 ${t("experience")}: ${esc(w.experience)}</span></div>
+      <div class="pay">💰 ${esc(w.pay || t("negotiable"))} · ${t(w.paymentType||"monthly")}</div>
+      <button class="btn-hire" data-hire="${esc(w.id)}">${t("hire")}</button>
+    </div></div>`;
   }).join("");
 }
-
-$("list").onclick = e => {
-  const id = e.target.dataset.hire;
-  if (id) hire(id);
-};
+$("list").onclick = e => { if (e.target.dataset.hire) hire(e.target.dataset.hire); };
 
 async function hire(id) {
+  if (!currentEmployer || !currentEmployer.name || currentEmployer.name === "Guest") {
+    alert(lang==="am" ? "እባክዎ መጀመሪያ ይመዝገቡ" : "Please register first");
+    $("empRegisterGate").classList.remove("hid");
+    $("empMain").classList.add("hid");
+    return;
+  }
   const w = workers.find(x => x.id === id);
   if (!w) return;
-
-  const ok = inTelegram
-    ? await new Promise(r => tg.showConfirm(t("confirmHire") + "\n" + w.name, r))
-    : confirm(t("confirmHire") + "\n" + w.name);
+  const ok = inTelegram ? await new Promise(r => tg.showConfirm(t("confirmHire")+"\n"+w.name, r)) : confirm(t("confirmHire")+"\n"+w.name);
   if (!ok) return;
-
-  const u = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
   try {
     const now = new Date();
-    let followUpAt;
-    if (w.paymentType === "hourly" || w.paymentType === "daily") {
-      followUpAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // +1 day
-    } else {
-      followUpAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // +30 days
-    }
-
+    const followUpAt = (w.paymentType==="hourly"||w.paymentType==="daily")
+      ? new Date(now.getTime()+86400000) : new Date(now.getTime()+30*86400000);
     await addDoc(collection(db, "requests"), {
-      workerId: id,
-      workerName: String(w.name).slice(0, 90),
-      paymentType: w.paymentType || "monthly",
-      employerTgId: Number(u.id) || 0,
-      employerName: ([u.first_name, u.last_name].filter(Boolean).join(" ") || "Unknown").slice(0, 90),
-      employerUsername: String(u.username || "").slice(0, 60),
-      createdAt: serverTimestamp(),
-      followUpAt: Timestamp.fromDate(followUpAt),
-      followUpSent: false,
-      status: "new",
-      rating: null,
-      ratingComment: null
+      workerId: id, workerName: w.name, paymentType: w.paymentType||"monthly",
+      employerTgId: Number(tgUser.id)||0, employerName: currentEmployer.name,
+      employerPhone: currentEmployer.phone||"", employerUsername: tgUser.username||currentEmployer.username||"",
+      employerLocation: currentEmployer.location||"",
+      createdAt: serverTimestamp(), followUpAt: Timestamp.fromDate(followUpAt),
+      followUpSent: false, status: "open", paymentReceived: false, rating: null, ratingComment: null
     });
     showDone(w);
-  } catch (e) {
-    console.error(e);
-    alert("Could not send the request. Please try again.");
-  }
+  } catch (e) { console.error(e); alert("Could not send request."); }
 }
 
 function showDone(w) {
-  const text = lang === "am"
-    ? `ሰላም፣ ከታማኝ ደላላ ${w.name} (ID ${w.id.slice(0,6)}) መቅጠር እፈልጋለሁ።`
-    : `Hello, I want to hire ${w.name} (ID ${w.id.slice(0,6)}) from Tamagn Delala.`;
-
+  const text = lang==="am"
+    ? `ሰላም፣ ከታማኝ ደላላ ${w.name} መቅጠር እፈልጋለሁ። ስሜ፦ ${currentEmployer.name}፣ ስልክ፦ ${currentEmployer.phone}`
+    : `Hello, I want to hire ${w.name} from Tamagn Delala. My name: ${currentEmployer.name}, Phone: ${currentEmployer.phone}`;
   $("doneBtn").onclick = () => {
-    const url = "https://t.me/" + MANAGER + "?text=" + encodeURIComponent(text);
-    if (inTelegram) tg.openTelegramLink(url);
-    else window.open(url, "_blank");
+    const url = `https://t.me/${MANAGER}?text=${encodeURIComponent(text)}`;
+    if (inTelegram) tg.openTelegramLink(url); else window.open(url,"_blank");
   };
   $("done").classList.remove("hid");
 }
 $("doneClose").onclick = () => $("done").classList.add("hid");
 
-// ========== ADMIN ==========
-let allW = [], reqs = [];
-
-if (inTelegram) {
-  $("loginNote").textContent = "Admin sign-in does not work inside Telegram. Open this page in your phone's browser.";
-  $("signIn").classList.add("hid");
-  $("openBrowser").classList.remove("hid");
-} else {
-  $("loginNote").textContent = "Sign in with the admin Google account.";
-}
-
-$("signIn").onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert("Sign-in failed: " + e.code));
-$("openBrowser").onclick = () => tg.openLink(location.href.split("#")[0]);
-$("signOut").onclick = () => signOut(auth);
-
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    $("login").classList.remove("hid");
-    $("panel").classList.add("hid");
-    return;
-  }
-  try {
-    await loadAdmin();
-    $("who").textContent = "Signed in: " + user.email;
-    $("login").classList.add("hid");
-    $("panel").classList.remove("hid");
-  } catch (e) {
-    console.error(e);
-    alert("This Google account is not the admin.");
-    signOut(auth);
-  }
-});
-
-async function loadAdmin() {
-  const rs = await getDocs(query(collection(db, "requests"), orderBy("createdAt", "desc"), limit(80)));
-  const ws = await getDocs(collection(db, "workers"));
-  reqs = rs.docs.map(d => ({ id: d.id, ...d.data() }));
-  allW = ws.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => ts(b.createdAt) - ts(a.createdAt));
-  renderAdmin();
-}
-
-function isDue(r) {
-  if (r.followUpSent || r.rating) return false;
-  if (!r.followUpAt) return false;
-  const followUpDate = r.followUpAt.toDate ? r.followUpAt.toDate() : new Date(ts(r.followUpAt) * 1000);
-  return followUpDate <= new Date();
-}
-
-function renderAdmin() {
-  // --- Follow-up due list (highlighted) ---
-  const due = reqs.filter(isDue);
-  if (due.length === 0) {
-    $("dueList").innerHTML = `<div class="state" style="padding:20px"><p>No follow-ups due right now.</p></div>`;
-  } else {
-    $("dueList").innerHTML = due.map(r => {
-      const when = r.createdAt ? new Date(ts(r.createdAt) * 1000).toLocaleDateString() : "";
-      const href = r.employerUsername
-        ? "https://t.me/" + esc(r.employerUsername)
-        : (r.employerTgId ? "tg://user?id=" + esc(r.employerTgId) : "#");
-      const un = r.employerUsername ? "@" + esc(r.employerUsername) : "No username";
-
-      return `
-        <div class="admin-card due">
-          <div class="due-label">⏰ RATING DUE</div>
-          <b>${esc(r.workerName)}</b>
-          <div class="who">Employer: <a href="${href}">${esc(r.employerName)}</a> (${un})</div>
-          <div class="who">Hired: ${esc(when)} · Type: ${esc(r.paymentType || "monthly")}</div>
-          <button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask for Rating via Telegram</button>
-          <button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Save Rating</button>
-          <button class="btn-secondary" data-marksent="${esc(r.id)}">Mark as Sent</button>
-        </div>`;
-    }).join("");
-  }
-
-  // --- All requests ---
-  $("reqs").innerHTML = reqs.length ? reqs.map(r => {
-    const when = r.createdAt ? new Date(ts(r.createdAt) * 1000).toLocaleString() : "";
-    const href = r.employerUsername
-      ? "https://t.me/" + esc(r.employerUsername)
-      : (r.employerTgId ? "tg://user?id=" + esc(r.employerTgId) : "#");
-    const un = r.employerUsername ? " (@" + esc(r.employerUsername) + ")" : "";
-    const dueBadge = isDue(r) ? `<span class="due-label">DUE</span>` : "";
-    const rated = r.rating ? `★ ${r.rating}/5` : (r.followUpSent ? "Follow-up sent" : "");
-
-    return `<div class="admin-card">
-      ${dueBadge}
-      <b>${esc(r.workerName)}</b>
-      <div class="who"><a href="${href}">${esc(r.employerName)}</a>${un} · ${esc(when)}</div>
-      <div class="who">Type: ${esc(r.paymentType || "monthly")} · ${rated}</div>
-      <button class="btn-secondary" data-na="${esc(r.workerId)}">Mark worker unavailable</button>
-      <button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">Delete</button>
-    </div>`;
-  }).join("") : `<div class="state"><p>No requests yet.</p></div>`;
-
-  // --- Workers ---
-  $("wl").innerHTML = allW.length ? allW.map(w => `
-    <div class="admin-card">
-      <b>${esc(w.name)}</b>
-      <span class="who"> · ${esc(w.skill)} · ${w.available ? "available" : "unavailable"}</span>
-      <div class="who">${esc(w.pay || "Negotiable")} · ${esc(w.paymentType || "monthly")}</div>
-      <div class="who">ID: ${w.hasNationalId ? "Yes" : "No"} · Police: ${w.hasPoliceClearance ? "Yes" : "No"}</div>
-      ${starsHtml(w.ratingAvg, w.ratingCount)}
-      <button class="btn-secondary" data-tg="${esc(w.id)}">${w.available ? "Mark unavailable" : "Mark available"}</button>
-      <button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button>
-      <button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>
-    </div>`).join("") : `<div class="state"><p>No workers yet.</p></div>`;
-}
-
-// Admin actions
-$("panel").onclick = async e => {
-  const d = e.target.dataset;
-  try {
-    // Ask for rating via Telegram
-    if (d.ask) {
-      const r = reqs.find(x => x.id === d.ask);
-      if (!r) return;
-
-      const msg = `ሰላም ${r.employerName} 👋
-
-ከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።
-
-እባክዎ ከ1 እስከ 5 ኮከብ ይስጡ እና አጭር ምክር / አስተያየት ይጻፉ፡
-
-⭐️⭐️⭐️⭐️⭐️
-
-ምሳሌ፦
-"4 ኮከብ - በጣም ጥሩ ሰራተኛ ነው፣ በሰዓቱ ይመጣል እና ሥራውን በደንብ ያከናውናል።"
-
-Thank you!`;
-
-      let url;
-      if (r.employerUsername) {
-        url = "https://t.me/" + r.employerUsername + "?text=" + encodeURIComponent(msg);
-      } else if (r.employerTgId) {
-        // Fallback – opens chat but text may not prefill on all clients
-        url = "tg://user?id=" + r.employerTgId;
-        // Copy message to clipboard as backup
-        try { await navigator.clipboard.writeText(msg); alert("Message copied! Paste it in the chat."); } catch(_){}
-      } else {
-        alert("No Telegram contact available for this employer.");
-        return;
-      }
-      window.open(url, "_blank");
-      return;
-    }
-
-    // Open rating modal
-    if (d.rate) {
-      const r = reqs.find(x => x.id === d.rate);
-      if (!r) return;
-      ratingRequestId = d.rate;
-      ratingWorkerId = d.wid;
-      $("ratingWorkerName").textContent = r.workerName + " ← " + r.employerName;
-      $("ratingStars").value = "5";
-      $("ratingComment").value = "";
-      $("ratingModal").classList.remove("hid");
-      return;
-    }
-
-    // Mark follow-up as sent
-    if (d.marksent) {
-      await updateDoc(doc(db, "requests", d.marksent), { followUpSent: true });
-      await loadAdmin();
-      return;
-    }
-
-    if (d.na) {
-      await updateDoc(doc(db, "workers", d.na), { available: false });
-    } else if (d.dr) {
-      if (!confirm("Delete this request?")) return;
-      await deleteDoc(doc(db, "requests", d.dr));
-    } else if (d.tg) {
-      const w = allW.find(x => x.id === d.tg);
-      await updateDoc(doc(db, "workers", d.tg), { available: !w.available });
-    } else if (d.dw) {
-      if (!confirm("Delete this worker permanently?")) return;
-      const b = writeBatch(db);
-      b.delete(doc(db, "workers", d.dw));
-      b.delete(doc(db, "workers_private", d.dw));
-      await b.commit();
-    } else if (d.ed) {
-      return startEdit(d.ed);
-    } else return;
-
-    await loadAdmin();
-    loadWorkers();
-  } catch (err) {
-    console.error(err);
-    alert("Failed: " + (err.code || err.message));
-  }
-};
-
-// Save rating
-$("saveRatingBtn").onclick = async () => {
-  if (!ratingRequestId || !ratingWorkerId) return;
-  const stars = Number($("ratingStars").value);
-  const comment = $("ratingComment").value.trim();
-
-  try {
-    // Update request
-    await updateDoc(doc(db, "requests", ratingRequestId), {
-      rating: stars,
-      ratingComment: comment,
-      followUpSent: true,
-      ratedAt: serverTimestamp()
-    });
-
-    // Update worker average
-    const wRef = doc(db, "workers", ratingWorkerId);
-    const wSnap = await getDoc(wRef);
-    if (wSnap.exists()) {
-      const w = wSnap.data();
-      const oldCount = w.ratingCount || 0;
-      const oldAvg = w.ratingAvg || 0;
-      const newCount = oldCount + 1;
-      const newAvg = ((oldAvg * oldCount) + stars) / newCount;
-      await updateDoc(wRef, {
-        ratingAvg: Math.round(newAvg * 10) / 10,
-        ratingCount: newCount
-      });
-    }
-
-    $("ratingModal").classList.add("hid");
-    ratingRequestId = null;
-    ratingWorkerId = null;
-    await loadAdmin();
-    loadWorkers();
-    alert("Rating saved successfully!");
-  } catch (err) {
-    console.error(err);
-    alert("Failed to save rating: " + err.message);
-  }
-};
-$("cancelRatingBtn").onclick = () => {
-  $("ratingModal").classList.add("hid");
-  ratingRequestId = null;
-  ratingWorkerId = null;
-};
-
-async function startEdit(id) {
-  const w = allW.find(x => x.id === id);
-  const p = await getDoc(doc(db, "workers_private", id));
-  const priv = p.exists() ? p.data() : {};
-
-  $("f_id").value = id;
-  $("f_name").value = w.name || "";
-  $("f_age").value = w.age || "";
-  $("f_skill").value = w.skill || "";
-  $("f_location").value = w.location || "";
-  $("f_experience").value = w.experience || "";
-  $("f_paymentType").value = w.paymentType || "monthly";
-  $("f_pay").value = w.pay || "";
-  $("f_nationalId").value = priv.nationalId || "";
-  $("f_police").value = w.hasPoliceClearance ? "yes" : "no";
-  $("f_guarantorName").value = priv.guarantorName || "";
-  $("f_guarantorId").value = priv.guarantorId || "";
-  $("f_guarantorPhone").value = priv.guarantorPhone || "";
-  $("f_phone").value = priv.phone || "";
-  $("f_photo").value = "";
-  $("f_idPhoto").value = "";
-  $("f_policePhoto").value = "";
-
-  $("formTitle").textContent = "Edit worker";
-  $("cancelEdit").classList.remove("hid");
-  $("wf").scrollIntoView({ behavior: "smooth" });
-}
-
-function resetForm() {
-  $("wf").reset();
-  $("f_id").value = "";
-  $("formTitle").textContent = "Add worker";
-  $("cancelEdit").classList.add("hid");
-}
-$("cancelEdit").onclick = resetForm;
-
-function shrink(file, maxSize = 400) {
-  return new Promise((res, rej) => {
+function shrink(file, max=400) {
+  return new Promise((res,rej) => {
     const img = new Image();
     img.onload = () => {
-      const s = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const s = Math.min(1, max/Math.max(img.width,img.height));
       const c = document.createElement("canvas");
-      c.width = Math.round(img.width * s);
-      c.height = Math.round(img.height * s);
-      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
       URL.revokeObjectURL(img.src);
-      res(c.toDataURL("image/jpeg", 0.65));
+      res(c.toDataURL("image/jpeg",0.65));
     };
     img.onerror = () => rej(new Error("Bad image"));
     img.src = URL.createObjectURL(file);
   });
 }
 
-$("wf").onsubmit = async e => {
-  e.preventDefault();
-  const btn = $("saveBtn");
-  btn.disabled = true;
-  btn.textContent = "Saving…";
-
+$("wrSubmitBtn").onclick = async () => {
+  const name = $("wr_name").value.trim();
+  const age = Number($("wr_age").value);
+  const skill = $("wr_skill").value;
+  const location = $("wr_location").value.trim();
+  const experience = $("wr_experience").value.trim();
+  const paymentType = $("wr_paymentType").value;
+  const pay = $("wr_pay").value.trim() || "Negotiable";
+  const nationalId = $("wr_nationalId").value.trim();
+  const phone = $("wr_phone").value.trim();
+  if (!name||!age||!skill||!location||!experience||!nationalId||!phone) return alert("Please fill all required fields");
+  const btn = $("wrSubmitBtn"); btn.disabled = true; btn.textContent = "Submitting...";
   try {
-    const id = $("f_id").value;
-    const ref = id ? doc(db, "workers", id) : doc(collection(db, "workers"));
-
-    const publicData = {
-      name: $("f_name").value.trim(),
-      age: Number($("f_age").value),
-      skill: $("f_skill").value,
-      location: $("f_location").value.trim(),
-      experience: $("f_experience").value.trim(),
-      paymentType: $("f_paymentType").value,
-      pay: $("f_pay").value.trim() || "Negotiable",
-      hasNationalId: !!$("f_nationalId").value.trim(),
-      hasPoliceClearance: $("f_police").value === "yes"
-    };
-
-    const profileFile = $("f_photo").files[0];
-    if (profileFile) publicData.photo = await shrink(profileFile);
-
-    const privateData = {
-      phone: $("f_phone").value.trim(),
-      nationalId: $("f_nationalId").value.trim(),
-      guarantorName: $("f_guarantorName").value.trim(),
-      guarantorId: $("f_guarantorId").value.trim(),
-      guarantorPhone: $("f_guarantorPhone").value.trim()
-    };
-
-    const idPhotoFile = $("f_idPhoto").files[0];
-    if (idPhotoFile) privateData.idPhoto = await shrink(idPhotoFile, 500);
-
-    const policeFile = $("f_policePhoto").files[0];
-    if (policeFile) privateData.policePhoto = await shrink(policeFile, 500);
-
-    const b = writeBatch(db);
-    if (id) {
-      b.update(ref, publicData);
-    } else {
-      b.set(ref, {
-        ...publicData,
-        photo: publicData.photo || "",
-        available: true,
-        ratingAvg: 0,
-        ratingCount: 0,
-        createdAt: serverTimestamp()
-      });
-    }
-    b.set(doc(db, "workers_private", ref.id), privateData, { merge: true });
-    await b.commit();
-
-    resetForm();
-    await loadAdmin();
-    loadWorkers();
-  } catch (err) {
-    console.error(err);
-    alert("Could not save: " + (err.code || err.message));
-  }
-  btn.disabled = false;
-  btn.textContent = "Save worker";
+    let photo = "";
+    if ($("wr_photo").files[0]) photo = await shrink($("wr_photo").files[0]);
+    const ref = doc(collection(db, "workers"));
+    const batch = writeBatch(db);
+    batch.set(ref, {
+      name, age, skill, location, experience, paymentType, pay, photo,
+      hasNationalId: true, hasPoliceClearance: $("wr_police").value==="yes",
+      status: "pending", available: false, ratingAvg:0, ratingCount:0,
+      createdAt: serverTimestamp(), source: "self"
+    });
+    batch.set(doc(db, "workers_private", ref.id), {
+      phone, nationalId,
+      guarantorName: $("wr_guarantorName").value.trim(),
+      guarantorPhone: $("wr_guarantorPhone").value.trim()
+    });
+    await batch.commit();
+    $("wrSuccess").classList.remove("hid");
+    $("wrFormCard").classList.add("hid");
+  } catch (e) { console.error(e); alert("Failed: "+e.message); }
+  btn.disabled = false; btn.textContent = "Submit Registration";
 };
 
-// Init
+let allW = [], reqs = [], pending = [];
+if (inTelegram) {
+  $("loginNote").textContent = "Admin login does not work inside Telegram. Open this page in Chrome/Safari.";
+  $("signIn").classList.add("hid");
+  $("openBrowser").classList.remove("hid");
+} else {
+  $("loginNote").textContent = "Sign in with the admin Google account.";
+}
+$("signIn").onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.code));
+$("openBrowser").onclick = () => tg.openLink(location.href.split("#")[0]);
+$("signOut").onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { $("login").classList.remove("hid"); $("panel").classList.add("hid"); return; }
+  if (user.email !== ADMIN_EMAIL) { alert("This account is not the admin."); signOut(auth); return; }
+  $("who").textContent = "Signed in: " + user.email;
+  $("login").classList.add("hid"); $("panel").classList.remove("hid");
+  await loadAdmin();
+});
+
+async function loadAdmin() {
+  const [rs, ws] = await Promise.all([
+    getDocs(query(collection(db,"requests"), orderBy("createdAt","desc"), limit(80))),
+    getDocs(collection(db,"workers"))
+  ]);
+  reqs = rs.docs.map(d => ({id:d.id, ...d.data()}));
+  allW = ws.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>ts(b.createdAt)-ts(a.createdAt));
+  pending = allW.filter(w => w.status === "pending");
+  renderAdmin();
+}
+
+function isDue(r) {
+  if (r.followUpSent || r.rating || r.status==="closed") return false;
+  if (!r.followUpAt) return false;
+  const d = r.followUpAt.toDate ? r.followUpAt.toDate() : new Date(ts(r.followUpAt)*1000);
+  return d <= new Date();
+}
+
+function renderAdmin() {
+  $("pendingList").innerHTML = pending.length ? pending.map(w => `
+    <div class="admin-card pending">
+      <div class="pending-label">PENDING APPROVAL</div>
+      <b>${esc(w.name)}</b> · ${esc(w.skill)} · ${esc(w.location)}
+      <div class="who">Age ${esc(w.age)} · ${esc(w.experience)} · ${esc(w.pay||"Negotiable")}</div>
+      <button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button>
+      <button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ Reject</button>
+    </div>`).join("") : `<div class="state" style="padding:16px"><p>No pending workers</p></div>`;
+
+  const due = reqs.filter(isDue);
+  $("dueList").innerHTML = due.length ? due.map(r => {
+    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : (r.employerTgId?`tg://user?id=${r.employerTgId}`:"#");
+    return `<div class="admin-card due">
+      <div class="due-label">RATING DUE</div>
+      <b>${esc(r.workerName)}</b>
+      <div class="who">Employer: <a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")}</div>
+      <button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask via Telegram</button>
+      <button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Save Rating</button>
+      <button class="btn-secondary" data-marksent="${esc(r.id)}">Mark Sent</button>
+    </div>`;
+  }).join("") : `<div class="state" style="padding:16px"><p>No follow-ups due</p></div>`;
+
+  $("reqs").innerHTML = reqs.length ? reqs.map(r => {
+    const when = r.createdAt ? new Date(ts(r.createdAt)*1000).toLocaleString() : "";
+    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : "#";
+    const stClass = r.status==="open"?"status-open":r.status==="on_process"?"status-process":"status-closed";
+    return `<div class="admin-card">
+      <b>${esc(r.workerName)}</b>
+      <div class="who"><a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")} · ${when}</div>
+      <div class="who">Status: <span class="${stClass}">${esc(r.status||"open")}</span> · Payment: ${r.paymentReceived?"✅":"❌"}</div>
+      <button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>
+      <button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button>
+      <button class="btn-secondary" data-pay="${esc(r.id)}">Mark Paid</button>
+      <button class="btn-secondary" data-showphone="${esc(r.workerId)}">Show Worker Phone</button>
+      <button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">Delete</button>
+    </div>`;
+  }).join("") : `<div class="state" style="padding:16px"><p>No requests yet</p></div>`;
+
+  $("wl").innerHTML = allW.length ? allW.map(w => `
+    <div class="admin-card">
+      <b>${esc(w.name)}</b>
+      <span class="who"> · ${esc(w.skill)} · ${w.status} · ${w.available?"available":"unavailable"}</span>
+      <div class="who">${esc(w.pay||"Negotiable")} · ${esc(w.paymentType||"monthly")}</div>
+      ${starsHtml(w.ratingAvg, w.ratingCount)}
+      <button class="btn-secondary" data-tg="${esc(w.id)}">${w.available?"Mark unavailable":"Mark available"}</button>
+      <button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button>
+      <button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>
+    </div>`).join("") : `<div class="state"><p>No workers</p></div>`;
+}
+
+$("panel").onclick = async e => {
+  const d = e.target.dataset;
+  try {
+    if (d.approve) await updateDoc(doc(db,"workers",d.approve),{status:"approved",available:true});
+    else if (d.reject) { if(!confirm("Reject?"))return; await updateDoc(doc(db,"workers",d.reject),{status:"rejected",available:false}); }
+    else if (d.ask) {
+      const r = reqs.find(x=>x.id===d.ask); if(!r)return;
+      const msg = `ሰላም ${r.employerName}\n\nከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።\n\nእባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ፡\n⭐️⭐️⭐️⭐️⭐️`;
+      const url = r.employerUsername ? `https://t.me/${r.employerUsername}?text=${encodeURIComponent(msg)}` : `tg://user?id=${r.employerTgId}`;
+      window.open(url,"_blank"); return;
+    }
+    else if (d.rate) {
+      ratingRequestId=d.rate; ratingWorkerId=d.wid;
+      const r=reqs.find(x=>x.id===d.rate);
+      $("ratingWorkerName").textContent=(r?.workerName||"")+" ← "+(r?.employerName||"");
+      $("ratingModal").classList.remove("hid"); return;
+    }
+    else if (d.marksent) await updateDoc(doc(db,"requests",d.marksent),{followUpSent:true});
+    else if (d.status) await updateDoc(doc(db,"requests",d.status),{status:d.val});
+    else if (d.pay) await updateDoc(doc(db,"requests",d.pay),{paymentReceived:true});
+    else if (d.showphone) {
+      const p = await getDoc(doc(db,"workers_private",d.showphone));
+      alert("Worker phone: "+(p.exists()?p.data().phone:"Not found")); return;
+    }
+    else if (d.dr) { if(!confirm("Delete?"))return; await deleteDoc(doc(db,"requests",d.dr)); }
+    else if (d.tg) { const w=allW.find(x=>x.id===d.tg); await updateDoc(doc(db,"workers",d.tg),{available:!w.available}); }
+    else if (d.dw) {
+      if(!confirm("Delete permanently?"))return;
+      const b=writeBatch(db); b.delete(doc(db,"workers",d.dw)); b.delete(doc(db,"workers_private",d.dw)); await b.commit();
+    }
+    else if (d.ed) return startEdit(d.ed);
+    else return;
+    await loadAdmin(); loadWorkers();
+  } catch(err) { console.error(err); alert("Error: "+(err.code||err.message)); }
+};
+
+$("saveRatingBtn").onclick = async () => {
+  if (!ratingRequestId||!ratingWorkerId) return;
+  const stars=Number($("ratingStars").value), comment=$("ratingComment").value.trim();
+  try {
+    await updateDoc(doc(db,"requests",ratingRequestId),{rating:stars,ratingComment:comment,followUpSent:true,ratedAt:serverTimestamp()});
+    const wRef=doc(db,"workers",ratingWorkerId); const wSnap=await getDoc(wRef);
+    if (wSnap.exists()) {
+      const w=wSnap.data(); const cnt=(w.ratingCount||0)+1;
+      const avg=(((w.ratingAvg||0)*(cnt-1))+stars)/cnt;
+      await updateDoc(wRef,{ratingAvg:Math.round(avg*10)/10,ratingCount:cnt});
+    }
+    $("ratingModal").classList.add("hid"); await loadAdmin(); loadWorkers(); alert("Rating saved!");
+  } catch(e){alert(e.message);}
+};
+$("cancelRatingBtn").onclick = () => $("ratingModal").classList.add("hid");
+
+async function startEdit(id) {
+  const w=allW.find(x=>x.id===id); const p=await getDoc(doc(db,"workers_private",id)); const priv=p.exists()?p.data():{};
+  $("f_id").value=id; $("f_name").value=w.name||""; $("f_age").value=w.age||"";
+  $("f_skill").value=w.skill||""; $("f_location").value=w.location||""; $("f_experience").value=w.experience||"";
+  $("f_paymentType").value=w.paymentType||"monthly"; $("f_pay").value=w.pay||"";
+  $("f_nationalId").value=priv.nationalId||""; $("f_phone").value=priv.phone||"";
+  $("f_police").value=w.hasPoliceClearance?"yes":"no";
+  $("f_guarantorName").value=priv.guarantorName||""; $("f_guarantorPhone").value=priv.guarantorPhone||"";
+  $("cancelEdit").classList.remove("hid"); $("wf").scrollIntoView({behavior:"smooth"});
+}
+$("cancelEdit").onclick = () => { $("wf").reset(); $("f_id").value=""; $("cancelEdit").classList.add("hid"); };
+
+$("wf").onsubmit = async e => {
+  e.preventDefault(); const btn=$("saveBtn"); btn.disabled=true; btn.textContent="Saving...";
+  try {
+    const id=$("f_id").value; const ref=id?doc(db,"workers",id):doc(collection(db,"workers"));
+    const publicData={
+      name:$("f_name").value.trim(), age:Number($("f_age").value), skill:$("f_skill").value,
+      location:$("f_location").value.trim(), experience:$("f_experience").value.trim(),
+      paymentType:$("f_paymentType").value, pay:$("f_pay").value.trim()||"Negotiable",
+      hasNationalId:true, hasPoliceClearance:$("f_police").value==="yes", status:"approved", available:true
+    };
+    if ($("f_photo").files[0]) publicData.photo=await shrink($("f_photo").files[0]);
+    const privateData={ phone:$("f_phone").value.trim(), nationalId:$("f_nationalId").value.trim(),
+      guarantorName:$("f_guarantorName").value.trim(), guarantorPhone:$("f_guarantorPhone").value.trim() };
+    const b=writeBatch(db);
+    if (id) b.update(ref,publicData);
+    else b.set(ref,{...publicData, photo:publicData.photo||"", ratingAvg:0, ratingCount:0, createdAt:serverTimestamp(), source:"admin"});
+    b.set(doc(db,"workers_private",ref.id), privateData, {merge:true});
+    await b.commit();
+    $("wf").reset(); $("f_id").value=""; $("cancelEdit").classList.add("hid");
+    await loadAdmin(); loadWorkers();
+  } catch(err){alert(err.message);}
+  btn.disabled=false; btn.textContent="Save Worker";
+};
+
 applyLang();
+checkEmployer();
 loadWorkers();
 </script>
 </body>
