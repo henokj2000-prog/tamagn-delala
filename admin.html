@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Tamagn Delala | Manager</title>
+<style>
+:root {
+  --bg: var(--tg-theme-bg-color, #f1f5f9);
+  --fg: var(--tg-theme-text-color, #0f172a);
+  --hint: var(--tg-theme-hint-color, #64748b);
+  --card: var(--tg-theme-secondary-bg-color, #ffffff);
+  --btn: var(--tg-theme-button-color, #0284c7);
+  --btnfg: var(--tg-theme-button-text-color, #ffffff);
+  --danger: #ef4444;
+  --success: #059669;
+  --warning: #d97706;
+  --border: #e2e8f0;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06);
+  --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 15px/1.5 system-ui, -apple-system, sans-serif;
+  padding-bottom: 50px; -webkit-font-smoothing: antialiased;
+}
+.header {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(135deg, #0ea5e9, #0369a1);
+  display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px;
+}
+.logo h1 { font-size: 16px; font-weight: 700; }
+.logo span { font-size: 12px; color: var(--hint); }
+.lang-btn {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+main { padding: 0 14px 24px; }
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--btn);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 8px 0 12px;
+  padding: 4px 0;
+}
+
+.skills-wrap { margin: 6px 0 12px; overflow-x: auto; scrollbar-width: none; }
+.skills-wrap::-webkit-scrollbar { display: none; }
+.skills { display: flex; gap: 8px; width: max-content; }
+.chip {
+  padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--card); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+}
+.chip.active { background: var(--btn); color: var(--btnfg); border-color: var(--btn); }
+.card {
+  background: var(--card); border-radius: var(--radius); margin-bottom: 12px;
+  overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.card-img { width: 100%; height: 160px; object-fit: cover; background: #e2e8f0; }
+.card-body { padding: 13px 14px 15px; }
+.card-name { font-size: 16px; font-weight: 700; }
+.card-skill {
+  display: inline-block; background: #e0f2fe; color: #0369a1;
+  font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 20px; margin-top: 3px;
+}
+.badges { display: flex; flex-wrap: wrap; gap: 5px; margin: 7px 0 3px; }
+.badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px; }
+.badge-id { background: #dcfce7; color: #166534; }
+.badge-police { background: #fef3c7; color: #92400e; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 6px 0; font-size: 13px; color: var(--hint); }
+.pay { font-weight: 600; color: var(--success); font-size: 14px; margin: 4px 0 10px; }
+.btn-hire, .btn-primary {
+  width: 100%; padding: 11px; border: none; border-radius: 11px;
+  background: var(--btn); color: var(--btnfg); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.state { text-align: center; padding: 40px 16px; color: var(--hint); }
+.state-icon { font-size: 40px; margin-bottom: 10px; opacity: 0.7; }
+.state h3 { font-size: 15px; color: var(--fg); margin-bottom: 4px; }
+.admin-card, .form-card {
+  background: var(--card); border-radius: var(--radius); padding: 15px;
+  margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.admin-card.due { border: 2px solid var(--warning); background: #fffbeb; }
+.admin-card.pending { border: 2px solid #93c5fd; background: #eff6ff; }
+label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 3px; font-weight: 500; }
+input, select, textarea {
+  width: 100%; padding: 10px 11px; margin-bottom: 11px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg); color: var(--fg); font-size: 15px;
+}
+textarea { min-height: 70px; resize: vertical; }
+.btn-secondary {
+  padding: 7px 11px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--fg); font-size: 13px; font-weight: 500;
+  cursor: pointer; margin: 3px 5px 0 0;
+}
+.btn-warning { background: #fef3c7; border-color: #fbbf24; color: #92400e; font-weight: 600; }
+.btn-success { background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 600; }
+.btn-danger { color: var(--danger); border-color: #fecaca; }
+.btn-info { background: #e0f2fe; border-color: #7dd3fc; color: #0369a1; font-weight: 600; }
+.hid { display: none !important; }
+.section-title { font-size: 15px; font-weight: 700; margin: 18px 0 9px; }
+.who { font-size: 13px; color: var(--hint); margin-bottom: 5px; }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+.due-label, .pending-label {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 2px 7px; border-radius: 6px; margin-bottom: 5px;
+}
+.due-label { background: #fef3c7; color: #92400e; }
+.pending-label { background: #dbeafe; color: #1e40af; }
+.status-open { color: #0369a1; font-weight: 600; }
+.status-process { color: #d97706; font-weight: 600; }
+.status-closed { color: #059669; font-weight: 600; }
+.stars { color: #eab308; letter-spacing: 1px; font-size: 13px; }
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px; z-index: 100;
+}
+.modal-overlay.hid { display: none !important; }
+.modal-box {
+  background: var(--card); border-radius: 18px; padding: 22px;
+  max-width: 340px; width: 100%; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+}
+.modal-box h3 { font-size: 17px; margin-bottom: 8px; text-align: center; }
+.modal-box p { color: var(--hint); font-size: 14px; margin-bottom: 14px; text-align: center; }
+.phone-box {
+  background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px;
+  padding: 12px; text-align: center; margin-bottom: 14px;
+}
+.phone-box a { font-size: 18px; font-weight: 700; color: #166534; text-decoration: none; }
+
+.topbar-right { display:flex; gap:8px; align-items:center; }
+.wrap { max-width: 760px; margin: 0 auto; }
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">TD</div>
+    <div><h1>Tamagn Delala</h1><span>Manager panel</span></div>
+  </div>
+</header>
+
+<main><div class="wrap">
+  <div id="login" class="form-card" style="margin-top:16px">
+    <p id="loginNote" class="who" style="margin-bottom:12px">Sign in with the manager Google account.</p>
+    <button class="btn-primary" id="signIn">Sign in with Google</button>
+    <p id="tgNote" class="who hid" style="margin-top:10px">This page does not work inside Telegram. Open it in Chrome or Safari.</p>
+  </div>
+
+  <div id="panel" class="hid">
+    <div class="who" id="who" style="margin-top:12px"></div>
+    <button class="btn-secondary" id="signOut">Sign out</button>
+
+    <h2 class="section-title">⏳ Pending Workers</h2>
+    <div id="pendingList"></div>
+
+    <h2 class="section-title">⭐ Rating Follow-up Due</h2>
+    <div id="dueList"></div>
+
+    <h2 class="section-title">📋 Hire Requests</h2>
+    <div id="reqs"></div>
+
+    <h2 class="section-title">👔 Registered Employers</h2>
+    <div id="empList"></div>
+
+    <h2 class="section-title">👷 All Workers</h2>
+    <div id="wl"></div>
+
+    <h2 class="section-title">➕ Add Worker Manually</h2>
+    <form id="wf" class="form-card">
+        <input type="hidden" id="f_id">
+        <label>Full name *</label>
+        <input id="f_name" required maxlength="80">
+        <label>Age *</label>
+        <input id="f_age" type="number" min="14" max="80" required>
+        <label>Skill *</label>
+        <select id="f_skill" required></select>
+        <label>Location *</label>
+        <input id="f_location" required maxlength="60">
+        <label>Experience *</label>
+        <input id="f_experience" required maxlength="120">
+        <label>Payment type *</label>
+        <select id="f_paymentType">
+          <option value="monthly">Monthly</option>
+          <option value="hourly">Hourly</option>
+          <option value="daily">Daily</option>
+        </select>
+        <label>Pay (optional)</label>
+        <input id="f_pay" maxlength="60">
+        <label>National ID *</label>
+        <input id="f_nationalId" required maxlength="30">
+        <label>Phone *</label>
+        <input id="f_phone" required maxlength="20">
+        <label>Police Clearance</label>
+        <select id="f_police"><option value="no">No</option><option value="yes">Yes</option></select>
+        <label>Guarantor Name</label>
+        <input id="f_guarantorName" maxlength="80">
+        <label>Guarantor Phone</label>
+        <input id="f_guarantorPhone" maxlength="20">
+        <label>Photo</label>
+        <input id="f_photo" type="file" accept="image/*">
+        <button class="btn-primary" id="saveBtn" type="submit">Save Worker</button>
+        <button class="btn-secondary hid" id="cancelEdit" type="button">Cancel</button>
+      </form>
+  </div>
+</div></main>
+
+<div id="ratingModal" class="modal-overlay hid">
+  <div class="modal-box" style="text-align:left">
+    <h3 style="text-align:center">Save Rating</h3>
+    <p class="who" id="ratingWorkerName" style="text-align:center"></p>
+    <label>Stars (1-5)</label>
+    <select id="ratingStars">
+      <option value="5">5 ★★★★★</option><option value="4">4 ★★★★</option><option value="3">3 ★★★</option>
+      <option value="2">2 ★★</option><option value="1">1 ★</option>
+    </select>
+    <label>Comment / Recommendation</label>
+    <textarea id="ratingComment"></textarea>
+    <button class="btn-primary" id="saveRatingBtn">Save Rating</button>
+    <button class="btn-secondary" id="cancelRatingBtn" style="width:100%;margin-top:8px">Cancel</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, getDocs, getDoc, updateDoc, deleteDoc, writeBatch, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const ADMIN_EMAIL = "henokj2000@gmail.com";
+const firebaseConfig = {
+  apiKey: "AIzaSyDOzRzt9k35kokQOD1rEIpkIVPjNyd0Q3c",
+  authDomain: "tamagn-delala.firebaseapp.com",
+  projectId: "tamagn-delala",
+  storageBucket: "tamagn-delala.firebasestorage.app",
+  messagingSenderId: "996483381337",
+  appId: "1:996483381337:web:f20127638e8da2aee7d948"
+};
+
+const SKILLS = [
+  { en: "House Maid", am: "የቤት ሰራተኛ" },
+  { en: "Babysitter", am: "ህጻናት አሳዳጊ" },
+  { en: "Cook / Chef", am: "ምግብ አብሳይ" },
+  { en: "Gardener", am: "አትክልተኛ" },
+  { en: "Security Guard", am: "ጠባቂ" },
+  { en: "Plumber", am: "የቧንቧ ሰራተኛ" },
+  { en: "Electrician", am: "ኤሌክትሪሺያን" },
+  { en: "Construction Worker", am: "የግንባታ ሰራተኛ" },
+  { en: "Daily Laborer", am: "ዕለታዊ ሰራተኛ" },
+  { en: "Driver", am: "ሹፌር" },
+  { en: "Cleaner", am: "ጽዳት ሰራተኛ" },
+  { en: "Laundry Worker", am: "የልብስ ማጠቢያ" },
+  { en: "Waiter / Waitress", am: "አስተናጋጅ" },
+  { en: "Office Assistant", am: "የቢሮ ረዳት" },
+  { en: "Nanny", am: "ሞግዚት" },
+  { en: "Other", am: "ሌላ" }
+];
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const auth = getAuth(fbApp);
+
+const tg = window.Telegram?.WebApp;
+const inTelegram = /Telegram/i.test(navigator.userAgent) || !!(tg && tg.initData);
+if (inTelegram) { $_tgNote(); }
+function $_tgNote() { document.getElementById("tgNote").classList.remove("hid"); document.getElementById("signIn").classList.add("hid"); }
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ts = x => (x?.seconds) ? x.seconds : 0;
+let ratingRequestId = null, ratingWorkerId = null;
+
+$("f_skill").innerHTML = SKILLS.map(s => `<option value="${esc(s.en)}">${s.en}</option>`).join("");
+$("f_police").innerHTML = '<option value="no">No</option><option value="yes">Yes</option>';
+
+function starsHtml(avg, count) {
+  if (!count) return "";
+  const full = Math.round(avg||0);
+  return `<div class="stars">${"★".repeat(full)}${"☆".repeat(5-full)} <span style="color:var(--hint);font-size:12px">(${count})</span></div>`;
+}
+
+function shrink(file, max=400) {
+  return new Promise((res,rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, max/Math.max(img.width,img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(img.src);
+      res(c.toDataURL("image/jpeg",0.65));
+    };
+    img.onerror = () => rej(new Error("Bad image"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// Admin
+let allW = [], reqs = [], pending = [], employers = [];
+$("signIn").onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert(e.code));
+$("signOut").onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { $("login").classList.remove("hid"); $("panel").classList.add("hid"); return; }
+  if (user.email !== ADMIN_EMAIL) { alert("Not admin"); signOut(auth); return; }
+  $("who").textContent = "Signed in: " + user.email;
+  $("login").classList.add("hid"); $("panel").classList.remove("hid");
+  await loadAdmin();
+});
+
+async function loadAdmin() {
+  const [rs, ws, es] = await Promise.all([
+    getDocs(query(collection(db,"requests"), orderBy("createdAt","desc"), limit(80))),
+    getDocs(collection(db,"workers")),
+    getDocs(collection(db,"employers"))
+  ]);
+  reqs = rs.docs.map(d => ({id:d.id, ...d.data()}));
+  allW = ws.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>ts(b.createdAt)-ts(a.createdAt));
+  pending = allW.filter(w => w.status === "pending");
+  employers = es.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>ts(b.createdAt)-ts(a.createdAt));
+  renderAdmin();
+}
+
+function isDue(r) {
+  if (r.followUpSent || r.rating || r.status==="closed") return false;
+  if (!r.followUpAt) return false;
+  const d = r.followUpAt.toDate ? r.followUpAt.toDate() : new Date(ts(r.followUpAt)*1000);
+  return d <= new Date();
+}
+
+function renderAdmin() {
+  $("pendingList").innerHTML = pending.length ? pending.map(w => `
+    <div class="admin-card pending">
+      <div class="pending-label">PENDING</div>
+      <b>${esc(w.name)}</b> · ${esc(w.skill)} · ${esc(w.location)}
+      <div class="who">Age ${esc(w.age)} · ${esc(w.experience)}</div>
+      <button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button>
+      <button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ Reject</button>
+    </div>`).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
+
+  const due = reqs.filter(isDue);
+  $("dueList").innerHTML = due.length ? due.map(r => {
+    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : "#";
+    return `<div class="admin-card due">
+      <div class="due-label">RATING DUE</div>
+      <b>${esc(r.workerName)}</b>
+      <div class="who"><a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")}</div>
+      <button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask</button>
+      <button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Rate</button>
+      <button class="btn-secondary" data-marksent="${esc(r.id)}">Mark Sent</button>
+    </div>`;
+  }).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
+
+  $("reqs").innerHTML = reqs.length ? reqs.map(r => {
+    const when = r.createdAt ? new Date(ts(r.createdAt)*1000).toLocaleString() : "";
+    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : "#";
+    const stClass = r.status==="open"?"status-open":r.status==="on_process"?"status-process":"status-closed";
+    return `<div class="admin-card">
+      <b>${esc(r.workerName)}</b>
+      <div class="who"><a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")} · ${when}</div>
+      <div class="who">Status: <span class="${stClass}">${esc(r.status||"open")}</span> · Pay: ${r.paymentReceived?"✅":"❌"}</div>
+      <button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>
+      <button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button>
+      <button class="btn-secondary" data-pay="${esc(r.id)}">Mark Paid</button>
+      <button class="btn-secondary" data-showphone="${esc(r.workerId)}">Show Phone</button>
+      <button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">Delete</button>
+    </div>`;
+  }).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
+
+  // Registered Employers (stay forever until deleted)
+  $("empList").innerHTML = employers.length ? employers.map(e => {
+    const when = e.createdAt ? new Date(ts(e.createdAt)*1000).toLocaleDateString() : "";
+    const un = e.username ? "@" + esc(e.username) : "";
+    return `<div class="admin-card">
+      <b>${esc(e.name)}</b>
+      <div class="who">📞 ${esc(e.phone||"—")} · 📍 ${esc(e.location||"—")}</div>
+      <div class="who">${un} · Registered: ${when}</div>
+      <button class="btn-secondary btn-danger" data-de="${esc(e.id)}">${"Delete"}</button>
+    </div>`;
+  }).join("") : `<div class="state" style="padding:16px"><p>${"No employers registered yet"}</p></div>`;
+
+  $("wl").innerHTML = allW.length ? allW.map(w => `
+    <div class="admin-card">
+      <b>${esc(w.name)}</b>
+      <span class="who"> · ${esc(w.skill)} · ${w.status}</span>
+      ${starsHtml(w.ratingAvg, w.ratingCount)}
+      <button class="btn-secondary" data-tg="${esc(w.id)}">${w.available?"Unavailable":"Available"}</button>
+      <button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button>
+      <button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>
+    </div>`).join("") : `<div class="state"><p>—</p></div>`;
+}
+
+$("panel").onclick = async e => {
+  const d = e.target.dataset;
+  try {
+    if (d.approve) await updateDoc(doc(db,"workers",d.approve),{status:"approved",available:true});
+    else if (d.reject) { if(!confirm("Reject?"))return; await updateDoc(doc(db,"workers",d.reject),{status:"rejected",available:false}); }
+    else if (d.ask) {
+      const r = reqs.find(x=>x.id===d.ask); if(!r)return;
+      const msg = `ሰላም ${r.employerName}\n\nከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።\n\nእባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ።`;
+      const url = r.employerUsername ? `https://t.me/${r.employerUsername}?text=${encodeURIComponent(msg)}` : `tg://user?id=${r.employerTgId}`;
+      window.open(url,"_blank"); return;
+    }
+    else if (d.rate) {
+      ratingRequestId=d.rate; ratingWorkerId=d.wid;
+      const r=reqs.find(x=>x.id===d.rate);
+      $("ratingWorkerName").textContent=(r?.workerName||"")+" ← "+(r?.employerName||"");
+      $("ratingModal").classList.remove("hid"); return;
+    }
+    else if (d.marksent) await updateDoc(doc(db,"requests",d.marksent),{followUpSent:true});
+    else if (d.status) await updateDoc(doc(db,"requests",d.status),{status:d.val});
+    else if (d.pay) await updateDoc(doc(db,"requests",d.pay),{paymentReceived:true});
+    else if (d.showphone) {
+      const p = await getDoc(doc(db,"workers_private",d.showphone));
+      alert("Phone: "+(p.exists()?p.data().phone:"N/A")); return;
+    }
+    else if (d.dr) { if(!confirm("Delete?"))return; await deleteDoc(doc(db,"requests",d.dr)); }
+    else if (d.de) { if(!confirm("Delete this employer permanently?"))return; await deleteDoc(doc(db,"employers",d.de)); }
+    else if (d.tg) { const w=allW.find(x=>x.id===d.tg); await updateDoc(doc(db,"workers",d.tg),{available:!w.available}); }
+    else if (d.dw) {
+      if(!confirm("Delete?"))return;
+      const b=writeBatch(db); b.delete(doc(db,"workers",d.dw)); b.delete(doc(db,"workers_private",d.dw)); await b.commit();
+    }
+    else if (d.ed) return startEdit(d.ed);
+    else return;
+    await loadAdmin();
+  } catch(err) { alert(err.message); }
+};
+
+$("saveRatingBtn").onclick = async () => {
+  if (!ratingRequestId||!ratingWorkerId) return;
+  const stars=Number($("ratingStars").value), comment=$("ratingComment").value.trim();
+  try {
+    await updateDoc(doc(db,"requests",ratingRequestId),{rating:stars,ratingComment:comment,followUpSent:true,ratedAt:serverTimestamp()});
+    const wRef=doc(db,"workers",ratingWorkerId); const wSnap=await getDoc(wRef);
+    if (wSnap.exists()) {
+      const w=wSnap.data(); const cnt=(w.ratingCount||0)+1;
+      const avg=(((w.ratingAvg||0)*(cnt-1))+stars)/cnt;
+      await updateDoc(wRef,{ratingAvg:Math.round(avg*10)/10,ratingCount:cnt});
+    }
+    $("ratingModal").classList.add("hid"); await loadAdmin();
+  } catch(e){alert(e.message);}
+};
+$("cancelRatingBtn").onclick = () => $("ratingModal").classList.add("hid");
+
+async function startEdit(id) {
+  const w=allW.find(x=>x.id===id); const p=await getDoc(doc(db,"workers_private",id)); const priv=p.exists()?p.data():{};
+  $("f_id").value=id; $("f_name").value=w.name||""; $("f_age").value=w.age||"";
+  $("f_skill").value=w.skill||""; $("f_location").value=w.location||""; $("f_experience").value=w.experience||"";
+  $("f_paymentType").value=w.paymentType||"monthly"; $("f_pay").value=w.pay||"";
+  $("f_nationalId").value=priv.nationalId||""; $("f_phone").value=priv.phone||"";
+  $("f_police").value=w.hasPoliceClearance?"yes":"no";
+  $("f_guarantorName").value=priv.guarantorName||""; $("f_guarantorPhone").value=priv.guarantorPhone||"";
+  $("cancelEdit").classList.remove("hid"); $("wf").scrollIntoView({behavior:"smooth"});
+}
+$("cancelEdit").onclick = () => { $("wf").reset(); $("f_id").value=""; $("cancelEdit").classList.add("hid"); };
+
+$("wf").onsubmit = async e => {
+  e.preventDefault(); const btn=$("saveBtn"); btn.disabled=true;
+  try {
+    const id=$("f_id").value; const ref=id?doc(db,"workers",id):doc(collection(db,"workers"));
+    const publicData={
+      name:$("f_name").value.trim(), age:Number($("f_age").value), skill:$("f_skill").value,
+      location:$("f_location").value.trim(), experience:$("f_experience").value.trim(),
+      paymentType:$("f_paymentType").value, pay:$("f_pay").value.trim()||"Negotiable",
+      hasNationalId:true, hasPoliceClearance:$("f_police").value==="yes", status:"approved", available:true
+    };
+    if ($("f_photo").files[0]) publicData.photo=await shrink($("f_photo").files[0]);
+    const privateData={ phone:$("f_phone").value.trim(), nationalId:$("f_nationalId").value.trim(),
+      guarantorName:$("f_guarantorName").value.trim(), guarantorPhone:$("f_guarantorPhone").value.trim() };
+    const b=writeBatch(db);
+    if (id) b.update(ref,publicData);
+    else b.set(ref,{...publicData, photo:publicData.photo||"", ratingAvg:0, ratingCount:0, createdAt:serverTimestamp(), source:"admin"});
+    b.set(doc(db,"workers_private",ref.id), privateData, {merge:true});
+    await b.commit();
+    $("wf").reset(); $("f_id").value=""; $("cancelEdit").classList.add("hid");
+    await loadAdmin();
+  } catch(err){alert(err.message);}
+  btn.disabled=false; btn.textContent="Save Worker";
+};
+
+
+</script>
+</body>
+</html>
