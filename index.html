@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tamagn Delala</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:var(--tg-theme-bg-color,#fff);--fg:var(--tg-theme-text-color,#111);--hint:var(--tg-theme-hint-color,#6b7280);--card:var(--tg-theme-secondary-bg-color,#f3f4f6);--btn:var(--tg-theme-button-color,#2481cc);--btnfg:var(--tg-theme-button-text-color,#fff);--danger:#d33}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,sans-serif;padding-bottom:40px}
+header{padding:14px 16px 8px}
+h1{font-size:18px;margin:0}
+h2{font-size:16px;margin:18px 0 4px}
+.tabs{display:flex;gap:8px;padding:0 16px 8px}
+.tab{flex:1;padding:9px;border:0;border-radius:10px;background:var(--card);color:var(--fg);font-size:14px}
+.tab.on{background:var(--btn);color:var(--btnfg)}
+main{padding:0 16px}
+.card{background:var(--card);border-radius:14px;margin:10px 0;overflow:hidden}
+.card img{width:100%;max-height:220px;object-fit:cover;display:block}
+.pad{padding:12px 14px}
+.row{color:var(--hint);font-size:13px}
+.msg{padding:14px;text-align:center;color:var(--hint)}
+button.p{width:100%;padding:11px;border:0;border-radius:10px;background:var(--btn);color:var(--btnfg);font-size:15px;margin-top:10px}
+button.s{padding:7px 10px;border:0;border-radius:8px;background:var(--bg);color:var(--fg);font-size:13px;margin:6px 6px 0 0}
+button.d{color:var(--danger)}
+input,select{width:100%;padding:10px;margin:4px 0 10px;border:1px solid var(--hint);border-radius:10px;background:var(--bg);color:var(--fg);font-size:15px}
+label{font-size:13px;color:var(--hint)}
+.hid{display:none}
+#done{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px}
+#done.hid{display:none}
+.box{background:var(--bg);border-radius:16px;padding:18px;max-width:340px;width:100%}
+</style>
+</head>
+<body>
+<header><h1>ታማኝ ደላላ | Tamagn Delala</h1></header>
+<div class="tabs"><button class="tab on" id="tabW">Workers</button><button class="tab" id="tabA">Admin</button></div>
+<main>
+<section id="vW">
+<select id="skillF"><option value="">All skills</option></select>
+<div id="list" class="msg">Loading…</div>
+</section>
+<section id="vA" class="hid">
+<div id="login" class="card pad">
+<p id="loginNote" class="row"></p>
+<button class="p" id="signIn">Sign in with Google</button>
+<button class="p hid" id="openBrowser">Open in browser to sign in</button>
+</div>
+<div id="panel" class="hid">
+<div class="row" id="who"></div>
+<button class="s" id="signOut" type="button">Sign out</button>
+<h2 id="formTitle">Add worker</h2>
+<form id="wf" class="card pad">
+<input type="hidden" id="f_id">
+<label>Full name</label><input id="f_name" required maxlength="80">
+<label>Age</label><input id="f_age" type="number" min="14" max="80" required>
+<label>Skill (e.g. housemaid, cook, driver)</label><input id="f_skill" required maxlength="40">
+<label>Location</label><input id="f_location" required maxlength="60">
+<label>Experience</label><input id="f_experience" required maxlength="120">
+<label>Pay (e.g. 5000 ETB / month, or Negotiable)</label><input id="f_pay" maxlength="60">
+<label>Phone (private, only you see it)</label><input id="f_phone" maxlength="30">
+<label>Photo</label><input id="f_photo" type="file" accept="image/*">
+<button class="p" id="saveBtn" type="submit">Save worker</button>
+<button class="s hid" id="cancelEdit" type="button">Cancel edit</button>
+</form>
+<h2>Requests</h2>
+<div id="reqs"></div>
+<h2>Workers</h2>
+<div id="wl"></div>
+</div>
+</section>
+</main>
+<div id="done" class="hid"><div class="box">
+<b>Request received</b>
+<p class="row">Our team will contact you shortly. To speed things up, message the manager now.</p>
+<button class="p" id="doneBtn">Message the manager</button>
+<button class="s" id="doneClose">Close</button>
+</div></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const MANAGER = "YOUR_TELEGRAM_USERNAME";
+const firebaseConfig = {
+  apiKey: "AIzaSyDOzRzt9k35kokQOD1rEIpkIVPjNyd0Q3c",
+  authDomain: "tamagn-delala.firebaseapp.com",
+  projectId: "tamagn-delala",
+  storageBucket: "tamagn-delala.firebasestorage.app",
+  messagingSenderId: "996483381337",
+  appId: "1:996483381337:web:f20127638e8da2aee7d948"
+};
+
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+const inTelegram = !!(tg && tg.initData);
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const auth = getAuth(fbApp);
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const imgTag = p => (typeof p === "string" && p.startsWith("data:image/")) ? `<img src="${p}" alt="">` : "";
+const ts = x => (x && x.seconds) ? x.seconds : 0;
+
+function show(t) {
+  $("vW").classList.toggle("hid", t !== "W");
+  $("vA").classList.toggle("hid", t !== "A");
+  $("tabW").classList.toggle("on", t === "W");
+  $("tabA").classList.toggle("on", t === "A");
+}
+$("tabW").onclick = () => show("W");
+$("tabA").onclick = () => show("A");
+
+// ---------- EMPLOYER SIDE ----------
+let workers = [];
+async function loadWorkers() {
+  try {
+    const snap = await getDocs(query(collection(db, "workers"), where("available", "==", true), limit(100)));
+    workers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    workers.sort((a, b) => ts(b.createdAt) - ts(a.createdAt));
+    const keep = $("skillF").value;
+    const skills = [...new Set(workers.map(w => w.skill))].sort();
+    $("skillF").innerHTML = '<option value="">All skills</option>' + skills.map(s => `<option>${esc(s)}</option>`).join("");
+    $("skillF").value = skills.includes(keep) ? keep : "";
+    renderWorkers();
+  } catch (e) {
+    console.error(e);
+    $("list").className = "msg";
+    $("list").textContent = "Could not load workers. Please try again.";
+  }
+}
+function renderWorkers() {
+  const f = $("skillF").value;
+  const rows = workers.filter(w => !f || w.skill === f);
+  if (!rows.length) {
+    $("list").className = "msg";
+    $("list").textContent = "No workers available right now. Please check again soon.";
+    return;
+  }
+  $("list").className = "";
+  $("list").innerHTML = rows.map(w => `
+    <div class="card">${imgTag(w.photo)}
+      <div class="pad">
+        <b>${esc(w.name)}</b> <span class="row">· ${esc(w.skill)}</span>
+        <div class="row">Age ${esc(w.age)} · ${esc(w.location)}</div>
+        <div class="row">Experience: ${esc(w.experience)}</div>
+        <div class="row">Pay: ${esc(w.pay || "Negotiable")}</div>
+        <button class="p" data-hire="${esc(w.id)}">Hire this worker</button>
+      </div>
+    </div>`).join("");
+}
+$("skillF").onchange = renderWorkers;
+$("list").onclick = e => { const id = e.target.dataset.hire; if (id) hire(id); };
+
+async function hire(id) {
+  const w = workers.find(x => x.id === id);
+  if (!w) return;
+  const ok = inTelegram ? await new Promise(r => tg.showConfirm("Request " + w.name + "?", r)) : confirm("Request " + w.name + "?");
+  if (!ok) return;
+  const u = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || {};
+  try {
+    await addDoc(collection(db, "requests"), {
+      workerId: id,
+      workerName: String(w.name).slice(0, 90),
+      employerTgId: Number(u.id) || 0,
+      employerName: ([u.first_name, u.last_name].filter(Boolean).join(" ") || "Unknown").slice(0, 90),
+      employerUsername: String(u.username || "").slice(0, 60),
+      createdAt: serverTimestamp(),
+      status: "new"
+    });
+    showDone(w);
+  } catch (e) {
+    console.error(e);
+    alert("Could not send the request. Please try again.");
+  }
+}
+function showDone(w) {
+  const text = "Hello, I want to hire " + w.name + " (ID " + w.id.slice(0, 6) + ") from Tamagn Delala.";
+  $("doneBtn").onclick = () => {
+    const url = "https://t.me/" + MANAGER + "?text=" + encodeURIComponent(text);
+    if (inTelegram) tg.openTelegramLink(url); else window.open(url, "_blank");
+  };
+  $("done").classList.remove("hid");
+}
+$("doneClose").onclick = () => $("done").classList.add("hid");
+
+// ---------- ADMIN SIDE ----------
+let allW = [], reqs = [];
+if (inTelegram) {
+  $("loginNote").textContent = "Admin sign-in does not work inside Telegram. Open this page in your phone's browser.";
+  $("signIn").classList.add("hid");
+  $("openBrowser").classList.remove("hid");
+} else {
+  $("loginNote").textContent = "Sign in with the admin Google account.";
+}
+$("signIn").onclick = () => signInWithPopup(auth, new GoogleAuthProvider()).catch(e => alert("Sign-in failed: " + e.code));
+$("openBrowser").onclick = () => tg.openLink(location.href.split("#")[0]);
+$("signOut").onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    $("login").classList.remove("hid");
+    $("panel").classList.add("hid");
+    return;
+  }
+  try {
+    await loadAdmin();
+    $("who").textContent = "Signed in: " + user.email;
+    $("login").classList.add("hid");
+    $("panel").classList.remove("hid");
+  } catch (e) {
+    console.error(e);
+    alert("This Google account is not the admin.");
+    signOut(auth);
+  }
+});
+
+async function loadAdmin() {
+  const rs = await getDocs(query(collection(db, "requests"), orderBy("createdAt", "desc"), limit(50)));
+  const ws = await getDocs(collection(db, "workers"));
+  reqs = rs.docs.map(d => ({ id: d.id, ...d.data() }));
+  allW = ws.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => ts(b.createdAt) - ts(a.createdAt));
+  renderAdmin();
+}
+function renderAdmin() {
+  $("reqs").innerHTML = reqs.length ? reqs.map(r => {
+    const when = r.createdAt ? new Date(ts(r.createdAt) * 1000).toLocaleString() : "";
+    const href = r.employerUsername ? "https://t.me/" + esc(r.employerUsername) : "tg://user?id=" + esc(r.employerTgId);
+    const un = r.employerUsername ? " (@" + esc(r.employerUsername) + ")" : "";
+    return `<div class="card pad"><b>${esc(r.workerName)}</b>
+      <div class="row"><a href="${href}">${esc(r.employerName)}</a>${un} · ${esc(when)}</div>
+      <button class="s" data-na="${esc(r.workerId)}">Mark worker unavailable</button>
+      <button class="s d" data-dr="${esc(r.id)}">Delete request</button></div>`;
+  }).join("") : '<div class="msg">No requests yet.</div>';
+  $("wl").innerHTML = allW.length ? allW.map(w => `
+    <div class="card pad"><b>${esc(w.name)}</b> <span class="row">· ${esc(w.skill)} · ${w.available ? "available" : "unavailable"}</span>
+      <div class="row">${esc(w.pay || "Negotiable")}</div>
+      <button class="s" data-tg="${esc(w.id)}">${w.available ? "Mark unavailable" : "Mark available"}</button>
+      <button class="s" data-ed="${esc(w.id)}">Edit</button>
+      <button class="s d" data-dw="${esc(w.id)}">Delete</button></div>`).join("") : '<div class="msg">No workers yet. Add one above.</div>';
+}
+
+$("panel").onclick = async e => {
+  const d = e.target.dataset;
+  try {
+    if (d.na) {
+      await updateDoc(doc(db, "workers", d.na), { available: false });
+    } else if (d.dr) {
+      if (!confirm("Delete this request?")) return;
+      await deleteDoc(doc(db, "requests", d.dr));
+    } else if (d.tg) {
+      const w = allW.find(x => x.id === d.tg);
+      await updateDoc(doc(db, "workers", d.tg), { available: !w.available });
+    } else if (d.dw) {
+      if (!confirm("Delete this worker? This cannot be undone.")) return;
+      const b = writeBatch(db);
+      b.delete(doc(db, "workers", d.dw));
+      b.delete(doc(db, "workers_private", d.dw));
+      await b.commit();
+    } else if (d.ed) {
+      return startEdit(d.ed);
+    } else {
+      return;
+    }
+    await loadAdmin();
+    loadWorkers();
+  } catch (err) {
+    console.error(err);
+    alert("Failed: " + (err.code || err.message));
+  }
+};
+
+async function startEdit(id) {
+  const w = allW.find(x => x.id === id);
+  const p = await getDoc(doc(db, "workers_private", id));
+  $("f_id").value = id;
+  for (const k of ["name", "age", "skill", "location", "experience", "pay"]) $("f_" + k).value = w[k] == null ? "" : w[k];
+  $("f_phone").value = p.exists() ? (p.data().phone || "") : "";
+  $("f_photo").value = "";
+  $("formTitle").textContent = "Edit worker";
+  $("cancelEdit").classList.remove("hid");
+  $("wf").scrollIntoView({ behavior: "smooth" });
+}
+function resetForm() {
+  $("wf").reset();
+  $("f_id").value = "";
+  $("formTitle").textContent = "Add worker";
+  $("cancelEdit").classList.add("hid");
+}
+$("cancelEdit").onclick = resetForm;
+
+function shrink(file) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, 360 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * s);
+      c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(img.src);
+      res(c.toDataURL("image/jpeg", 0.7));
+    };
+    img.onerror = () => rej(new Error("Bad image"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+$("wf").onsubmit = async e => {
+  e.preventDefault();
+  const btn = $("saveBtn");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+  try {
+    const id = $("f_id").value;
+    const ref = id ? doc(db, "workers", id) : doc(collection(db, "workers"));
+    const data = {
+      name: $("f_name").value.trim(),
+      age: Number($("f_age").value),
+      skill: $("f_skill").value.trim(),
+      location: $("f_location").value.trim(),
+      experience: $("f_experience").value.trim(),
+      pay: $("f_pay").value.trim() || "Negotiable"
+    };
+    const file = $("f_photo").files[0];
+    if (file) data.photo = await shrink(file);
+    const b = writeBatch(db);
+    if (id) b.update(ref, data);
+    else b.set(ref, { ...data, photo: data.photo || "", available: true, createdAt: serverTimestamp() });
+    b.set(doc(db, "workers_private", ref.id), { phone: $("f_phone").value.trim() });
+    await b.commit();
+    resetForm();
+    await loadAdmin();
+    loadWorkers();
+  } catch (err) {
+    console.error(err);
+    alert("Could not save: " + (err.code || err.message));
+  }
+  btn.disabled = false;
+  btn.textContent = "Save worker";
+};
+
+loadWorkers();
+</script>
+</body>
+</html>
