@@ -220,6 +220,22 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 }
 .toast.show { opacity: 1; }
 
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 150;
+}
+.modal-overlay.hid { display: none !important; }
+.modal-box {
+  background: var(--card); border-radius: 14px; padding: 24px;
+  max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.15);
+}
+.modal-box h3 { font-size: 17px; margin-bottom: 6px; text-align: center; }
+.modal-box > p { color: var(--hint); font-size: 13px; margin-bottom: 16px; text-align: center; }
+.modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+.modal-actions .btn { flex: 1; justify-content: center; }
+
 @media (max-width: 900px) {
   .sidebar {
     width: 100%; height: auto; position: fixed; left: 0; right: 0; bottom: 0; top: auto;
@@ -536,6 +552,42 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 
 <div class="toast" id="toast"></div>
 
+<!-- Handover / OTP Modal (Step 4) -->
+<div class="modal-overlay hid" id="handoverModal">
+  <div class="modal-box" style="max-width:440px">
+    <h3>Agreement & Handover</h3>
+    <p style="margin-bottom:12px">Complete OTP verification to place the worker</p>
+
+    <div style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--hint);margin-bottom:4px">Worker</div>
+      <div style="font-weight:700" id="hoWorker">—</div>
+      <div style="font-size:12px;color:var(--hint);margin:8px 0 4px">Job</div>
+      <div style="font-weight:600" id="hoJob">—</div>
+    </div>
+
+    <div id="hoAgreement" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:14px;max-height:140px;overflow-y:auto"></div>
+
+    <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:10px;padding:12px;margin-bottom:12px;text-align:center">
+      <div style="font-size:12px;color:#92400e;margin-bottom:4px">Demo OTP (normally sent via Telegram/SMS)</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:4px;color:#92400e" id="hoOtpDisplay">000000</div>
+    </div>
+
+    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Enter 6-digit OTP</label>
+    <input type="text" id="hoOtpInput" maxlength="6" inputmode="numeric" pattern="[0-9]*"
+      placeholder="e.g. 482913"
+      style="width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-size:18px;letter-spacing:4px;text-align:center;margin-bottom:8px">
+
+    <div style="font-size:12px;color:var(--hint);margin-bottom:14px">
+      Employer commission payment (Telebirr / Bank / Office) is recorded after OTP confirmation.
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="hoCancel">Cancel</button>
+      <button class="btn btn-primary" id="hoConfirm">Confirm Placement</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // STATE (in-memory – simulates Firebase)
@@ -615,7 +667,7 @@ function avHtml(name) {
 function statusBdg(status) {
   const map = {
     Verified: "ok", Approved: "ok", Available: "ok", Active: "ok", Current: "ok", Paid: "mute",
-    Pending: "warn", Placed: "info", Open: "info",
+    Pending: "warn", "Pending Review": "warn", Placed: "info", Open: "info",
     Suspended: "bad", Rejected: "bad", Overdue: "bad", Inactive: "mute", "Not Started": "mute"
   };
   return `<span class="bdg ${map[status] || "mute"}">${status}</span>`;
@@ -790,7 +842,7 @@ function renderWorkers() {
     <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Verification</div><div class="value">${pending}</div></div>
   `;
 
-  const filters = [["all","All"],["Available","Available"],["Placed","Placed"],["Pending","Pending Verification"],["Inactive","Inactive"]];
+  const filters = [["all","All"],["Available","Available"],["Pending Review","Pending Review"],["Placed","Placed"],["Pending","Pending Verification"],["Inactive","Inactive"]];
   $("wChips").innerHTML = filters.map(([v,l]) =>
     `<button class="chip ${wFilter === v ? "active" : ""}" data-action="w-filter" data-val="${v}">${l}</button>`
   ).join("");
@@ -799,7 +851,8 @@ function renderWorkers() {
   const skill = $("wSkillFilter")?.value || "all";
   let rows = workers.filter(w => {
     if (wFilter === "Pending" && w.verification_status !== "Pending") return false;
-    if (wFilter !== "all" && wFilter !== "Pending" && w.availability_status !== wFilter) return false;
+    if (wFilter === "Pending Review" && w.availability_status !== "Pending Review") return false;
+    if (wFilter !== "all" && wFilter !== "Pending" && wFilter !== "Pending Review" && w.availability_status !== wFilter) return false;
     if (skill !== "all" && w.primary_skill_role !== skill) return false;
     if (q && !`${w.full_name} ${w.id} ${w.primary_skill_role}`.toLowerCase().includes(q)) return false;
     return true;
@@ -826,6 +879,9 @@ function renderWorkers() {
           ` : ""}
           ${w.availability_status === "Available" && w.verification_status === "Verified" ? `
             <button class="btn btn-primary btn-sm" data-action="match-worker" data-id="${w.id}">Match</button>
+          ` : ""}
+          ${w.availability_status === "Pending Review" ? `
+            <button class="btn btn-warning btn-sm" data-action="resume-handover" data-id="${w.id}">Complete Handover</button>
           ` : ""}
           <button class="btn-ghost btn-sm" data-action="view-worker" data-id="${w.id}">View</button>
         </div>
@@ -1010,6 +1066,9 @@ function rejectEntity(type, id) {
   renderCurrent();
 }
 
+// Pending placement waiting for OTP + handover
+let pendingHandover = null; // { workerId, jobId, otp }
+
 function assignWorker(workerId, jobId) {
   const w = workers.find(x => x.id === workerId);
   const j = jobOrders.find(x => x.id === jobId);
@@ -1019,24 +1078,92 @@ function assignWorker(workerId, jobId) {
     toast("⚠️ ID verification required before matching (see Settings)");
     return;
   }
+  if (w.availability_status !== "Available") {
+    toast("Worker is not available");
+    return;
+  }
 
-  // Step 3 → 4 of process flow
-  w.availability_status = "Placed";
+  // Step 3 → Status becomes "Pending Review" (waiting for agreement + OTP)
+  w.availability_status = "Pending Review";
   w.assigned_employer = j.employer_name;
+  w._pendingJobId = j.id;
+
+  activityFeed.unshift({
+    icon: "📋",
+    text: `${w.full_name} assigned to ${j.job_title} @ ${j.employer_name} → Pending Review`,
+    time: "now", ago: "just now"
+  });
+
+  // Generate demo OTP and open handover modal
+  const otp = String(Math.floor(100000 + Math.random() * 900000));
+  pendingHandover = { workerId: w.id, jobId: j.id, otp, workerName: w.full_name, jobTitle: j.job_title, employerName: j.employer_name };
+  openHandoverModal(pendingHandover);
+  toast(`✅ ${w.full_name} → Pending Review. Complete OTP & Handover.`);
+  renderCurrent();
+}
+
+function openHandoverModal(data) {
+  $("hoWorker").textContent = data.workerName;
+  $("hoJob").textContent = `${data.jobTitle} @ ${data.employerName}`;
+  $("hoOtpDisplay").textContent = data.otp; // demo only – real system sends via Telegram/SMS
+  $("hoOtpInput").value = "";
+  $("hoAgreement").innerHTML = `
+    <p style="font-size:13px;line-height:1.6;color:var(--fg)">
+      <strong>የሥራ ስምምነት / Employment Agreement</strong><br><br>
+      Worker: <b>${data.workerName}</b><br>
+      Employer: <b>${data.employerName}</b><br>
+      Position: <b>${data.jobTitle}</b><br>
+      Agency Commission: <b>${settings.commission}%</b><br><br>
+      This agreement is generated by Tamagn Delala. Both parties confirm by entering the 6-digit OTP sent via Telegram/SMS.
+    </p>`;
+  $("handoverModal").classList.remove("hid");
+}
+
+function confirmHandover() {
+  if (!pendingHandover) return;
+  const entered = ($("hoOtpInput").value || "").trim();
+  if (entered !== pendingHandover.otp) {
+    toast("❌ Invalid OTP. Check the code sent to Telegram/SMS.");
+    return;
+  }
+
+  const w = workers.find(x => x.id === pendingHandover.workerId);
+  const j = jobOrders.find(x => x.id === pendingHandover.jobId);
+  if (!w || !j) return;
+
+  // Step 4 complete → Worker becomes Placed
+  w.availability_status = "Placed";
+  delete w._pendingJobId;
   j.workers_needed_count = Math.max(0, j.workers_needed_count - 1);
   if (j.workers_needed_count === 0) j.status = "Filled";
 
-  // Bump employer placed count
   const emp = employers.find(e => e.company_name === j.employer_name);
   if (emp) emp.placed_workers_count += 1;
 
   activityFeed.unshift({
     icon: "🤝",
-    text: `${w.full_name} assigned to ${j.job_title} @ ${j.employer_name}`,
+    text: `Handover complete: ${w.full_name} is now Placed at ${j.employer_name}`,
     time: "now", ago: "just now"
   });
 
-  toast(`✅ ${w.full_name} assigned → Status: Placed. OTP & agreement would be sent next.`);
+  $("handoverModal").classList.add("hid");
+  pendingHandover = null;
+  toast(`✅ Handover complete → ${w.full_name} is Placed. Active Placements +1`);
+  renderCurrent();
+}
+
+function cancelHandover() {
+  if (pendingHandover) {
+    const w = workers.find(x => x.id === pendingHandover.workerId);
+    if (w && w.availability_status === "Pending Review") {
+      w.availability_status = "Available";
+      w.assigned_employer = null;
+      delete w._pendingJobId;
+    }
+  }
+  $("handoverModal").classList.add("hid");
+  pendingHandover = null;
+  toast("Handover cancelled – worker returned to Available");
   renderCurrent();
 }
 
@@ -1136,10 +1263,22 @@ document.addEventListener("click", e => {
       else renderMatches();
       break;
     case "match-worker":
-      // Jump to matches with this worker highlighted conceptually
       showView("matches");
-      toast(`Select a job then Assign ${btn.dataset.id}`);
+      toast(`Select a job then click Assign Worker`);
       break;
+    case "resume-handover": {
+      const w = workers.find(x => x.id === btn.dataset.id);
+      if (!w || w.availability_status !== "Pending Review") break;
+      const j = jobOrders.find(x => x.id === w._pendingJobId) || jobOrders[0];
+      const otp = String(Math.floor(100000 + Math.random() * 900000));
+      pendingHandover = {
+        workerId: w.id, jobId: j?.id, otp,
+        workerName: w.full_name, jobTitle: j?.job_title || "Job",
+        employerName: w.assigned_employer || j?.employer_name || ""
+      };
+      openHandoverModal(pendingHandover);
+      break;
+    }
     case "w-filter":
       wFilter = btn.dataset.val;
       renderWorkers();
@@ -1198,6 +1337,13 @@ $("topActionBtn").addEventListener("click", () => {
         toast("Settings saved ✓");
       } else toast("Action: " + action);
     })();
+});
+
+// Handover modal buttons
+$("hoConfirm")?.addEventListener("click", confirmHandover);
+$("hoCancel")?.addEventListener("click", cancelHandover);
+$("hoOtpInput")?.addEventListener("keydown", e => {
+  if (e.key === "Enter") confirmHandover();
 });
 
 // Init
