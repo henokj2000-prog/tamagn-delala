@@ -1336,15 +1336,49 @@ async function updateRequest(id, patch) {
 let viewingWorkerId = null;
 let viewingEmployerId = null;
 
-function openWorkerView(id) {
+function dlLink(dataUrl, filename, label) {
+  if (!dataUrl) return `<span style="color:var(--hint)">—</span>`;
+  return `<a class="btn btn-secondary btn-sm" href="${dataUrl}" download="${filename}" target="_blank" rel="noopener">${label}</a>`;
+}
+
+async function openWorkerView(id) {
   const w = workers.find(x => x.id === id);
   if (!w) return;
   viewingWorkerId = id;
-  const photoBlock = w.photo
-    ? `<img src="${w.photo}" alt="" style="width:105px;aspect-ratio:7/9;object-fit:cover;border-radius:8px;margin-bottom:12px">`
-    : "";
+  $("wvBody").innerHTML = `<div class="empty">Loading private data…</div>`;
+  $("workerViewModal").classList.remove("hid");
+
+  let priv = {};
+  try {
+    const snap = await getDoc(doc(db, "workers_private", id));
+    if (snap.exists()) priv = snap.data();
+  } catch (e) {
+    console.warn("private load", e);
+  }
+
+  const photo = w.photo || null;
+  const idPhoto = priv.idPhoto || null;
+  const phone = priv.phone || w.phone || "—";
+  const nationalId = priv.nationalId || w.id_number || "—";
+  const safeName = (w.full_name || "worker").replace(/\s+/g, "_");
+
   $("wvBody").innerHTML = `
-    <div style="text-align:center">${photoBlock}</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:14px">
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--hint);margin-bottom:4px">Profile photo</div>
+        ${photo
+          ? `<img src="${photo}" alt="Photo" style="width:105px;aspect-ratio:7/9;object-fit:cover;border-radius:8px;border:1px solid var(--border)">`
+          : `<div style="width:105px;aspect-ratio:7/9;border-radius:8px;background:#e2e8f0;display:grid;place-items:center">👤</div>`}
+        <div style="margin-top:6px">${dlLink(photo, `${safeName}_photo.jpg`, "⬇ Download photo")}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--hint);margin-bottom:4px">National ID photo</div>
+        ${idPhoto
+          ? `<img src="${idPhoto}" alt="ID" style="width:105px;aspect-ratio:7/9;object-fit:cover;border-radius:8px;border:1px solid var(--border)">`
+          : `<div style="width:105px;aspect-ratio:7/9;border-radius:8px;background:#e2e8f0;display:grid;place-items:center;font-size:12px;color:#64748b;padding:8px">No ID image</div>`}
+        <div style="margin-top:6px">${dlLink(idPhoto, `${safeName}_ID.jpg`, "⬇ Download ID")}</div>
+      </div>
+    </div>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
       ${avHtml(w.full_name, w.photo)}
       <div><b style="font-size:16px">${esc(w.full_name)}</b><div style="color:var(--hint);font-size:13px">#${esc(w.id)}</div></div>
@@ -1354,15 +1388,13 @@ function openWorkerView(id) {
       <div><span style="color:var(--hint)">Experience</span><br><b>${esc(w.experience || w.experience_years)}</b></div>
       <div><span style="color:var(--hint)">Age</span><br><b>${esc(w.age || "—")}</b></div>
       <div><span style="color:var(--hint)">Location</span><br><b>${esc(w.location || "—")}</b></div>
+      <div><span style="color:var(--hint)">Phone</span><br><b>${esc(phone)}</b></div>
+      <div><span style="color:var(--hint)">National ID #</span><br><b>${esc(nationalId)}</b></div>
       <div><span style="color:var(--hint)">Pay</span><br><b>${esc(w.pay)} · ${esc(w.paymentType)}</b></div>
       <div><span style="color:var(--hint)">Status</span><br>${statusBdg(w.verification_status)} ${statusBdg(w.availability_status)}</div>
-      <div><span style="color:var(--hint)">ID / Police</span><br>
-        ${w.hasNationalId ? statusBdg("Verified") : "—"}
-        ${w.hasPoliceClearance ? ' <span class="bdg warn">Police</span>' : ""}
-      </div>
-      <div><span style="color:var(--hint)">Source</span><br><b>${esc(w.source || "—")}</b></div>
+      <div><span style="color:var(--hint)">Guarantor</span><br><b>${esc(priv.guarantorName || "—")}</b><div style="color:var(--hint)">${esc(priv.guarantorPhone || "")}</div></div>
+      <div><span style="color:var(--hint)">Police</span><br>${w.hasPoliceClearance ? statusBdg("Verified") : "—"}</div>
     </div>`;
-  $("workerViewModal").classList.remove("hid");
 }
 
 function openEmployerView(id) {
