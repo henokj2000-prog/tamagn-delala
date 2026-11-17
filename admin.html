@@ -740,9 +740,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 
 <!-- View Worker Modal -->
 <div class="modal-overlay hid" id="workerViewModal">
-  <div class="modal-box" style="max-width:440px">
+  <div class="modal-box" style="max-width:520px">
     <h3>Worker Details</h3>
-    <div id="wvBody" style="text-align:left;font-size:14px"></div>
+    <div id="wvBody" style="text-align:left;font-size:14px;max-height:70vh;overflow-y:auto"></div>
     <div class="modal-actions" style="margin-top:16px">
       <button class="btn btn-secondary" id="wvClose">Close</button>
       <button class="btn btn-primary" id="wvEdit">Edit</button>
@@ -793,9 +793,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 
 <!-- View Employer Modal -->
 <div class="modal-overlay hid" id="employerViewModal">
-  <div class="modal-box" style="max-width:440px">
+  <div class="modal-box" style="max-width:520px">
     <h3>Employer Details</h3>
-    <div id="evBody" style="text-align:left;font-size:14px"></div>
+    <div id="evBody" style="text-align:left;font-size:14px;max-height:70vh;overflow-y:auto"></div>
     <div class="modal-actions" style="margin-top:16px">
       <button class="btn btn-secondary" id="evClose">Close</button>
       <button class="btn btn-primary" id="evEdit">Edit</button>
@@ -1612,8 +1612,22 @@ async function openAgreementForRequest(requestId) {
   }
   if ($("agSignedFile")) $("agSignedFile").value = "";
 
+  if ($("agEditPanel")) $("agEditPanel").style.display = "";
   refreshAgreementPreview();
   $("agreementModal").classList.remove("hid");
+}
+
+function findEmployerIdForRequest(r, agreementData) {
+  const phone = (agreementData?.empPhone || r?.employerPhone || "").replace(/\s+/g, "");
+  const name = (agreementData?.empName || r?.employerName || "").toLowerCase();
+  const tg = r?.employerTgId != null ? String(r.employerTgId) : "";
+  const match = employers.find(e => {
+    if (tg && (String(e.tgId) === tg || e.id === tg)) return true;
+    if (phone && (e.phone || "").replace(/\s+/g, "") === phone) return true;
+    if (name && (e.company_name || e.name || "").toLowerCase() === name) return true;
+    return false;
+  });
+  return match ? match.id : null;
 }
 
 async function finalizeAgreement() {
@@ -1630,6 +1644,10 @@ async function finalizeAgreement() {
   if (!feeOk) {
     toast("የአገልግሎት ክፍያ መሰብሰቡን ያረጋግጡ");
     return;
+  }
+  if (!signedAgreementDataUrl) {
+    const cont = confirm("የተፈረመ ስምምነት አልተሰቀለም። ቢቀጥሉ? (Print → sign → upload is recommended)");
+    if (!cont) return;
   }
 
   const agreementData = {
@@ -1650,41 +1668,274 @@ async function finalizeAgreement() {
     partiesPresent: true
   };
 
+  const r = requests.find(x => x.id === currentAgreementRequestId) || {};
+  const employerId = findEmployerIdForRequest(r, agreementData);
+  const workerId = currentAgreementWorkerId || r.workerId || null;
+
+  let signedUrl = null;
+  let signedNote = null;
+  if (signedAgreementDataUrl) {
+    if (signedAgreementDataUrl.length < 900000) {
+      signedUrl = signedAgreementDataUrl;
+    } else {
+      signedUrl = "uploaded_large_file";
+      signedNote = "File too large for Firestore; keep local print copy";
+    }
+  }
+
   try {
     const patch = {
       status: "on_work",
       agreementPrepared: true,
+      agreementSigned: true,
       agreementSignedAt: serverTimestamp(),
       agreementData,
       serviceFee: feeAmt,
       serviceFeeCollected: true,
       partiesPresent: true,
-      paymentReceived: feeAmt > 0 ? true : undefined
+      paymentReceived: feeAmt > 0 ? true : undefined,
+      workerId: workerId || r.workerId || null,
+      employerId: employerId || null
     };
-    if (signedAgreementDataUrl) {
-      // Store only a short flag + truncated preview if huge; full base64 can exceed Firestore limits
-      if (signedAgreementDataUrl.length < 900000) {
-        patch.signedAgreementUrl = signedAgreementDataUrl;
-      } else {
-        patch.signedAgreementUrl = "uploaded_large_file";
-        patch.signedAgreementNote = "File too large for Firestore; keep local print copy";
-      }
-    }
+    if (signedUrl) patch.signedAgreementUrl = signedUrl;
+    if (signedNote) patch.signedAgreementNote = signedNote;
 
     await updateDoc(doc(db, "requests", currentAgreementRequestId), patch);
 
-    if (currentAgreementWorkerId) {
-      await updateDoc(doc(db, "workers", currentAgreementWorkerId), {
+    // Dedicated agreements collection — visible on both worker & employer profiles
+    const agRef = doc(collection(db, "agreements"));
+    await setDoc(agRef, {
+      requestId: currentAgreementRequestId,
+      workerId: workerId || null,
+      employerId: employerId || null,
+      workerName: agreementData.workerName,
+      employerName: agreementData.empName,
+      employerPhone: agreementData.empPhone,
+      skill: agreementData.skill,
+      pay: agreementData.pay,
+      payType: agreementData.payType,
+      serviceFee: feeAmt,
+      serviceFeeCollected: true,
+      agreementData,
+      signedAgreementUrl: signedUrl || null,
+      signedAgreementNote: signedNote || null,
+      status: "signed",
+      agreementSignedAt: serverTimestamp(),
+      createdAt: serverTimestamp()
+    });
+
+    // Link latest agreement id on worker + employer
+    if (workerId) {
+      await updateDoc(doc(db, "workers", workerId), {
         available: false,
         work_status: "on_work",
         availability_status: "On Work",
-        assigned_employer: agreementData.empName || null
+        assigned_employer: agreementData.empName || null,
+        latestAgreementId: agRef.id
       }).catch(() => {});
     }
+    if (employerId) {
+      await updateDoc(doc(db, "employers", employerId), {
+        latestAgreementId: agRef.id
+      }).catch(async () => {
+        await setDoc(doc(db, "employers", employerId), { latestAgreementId: agRef.id }, { merge: true });
+      });
+    }
 
-    toast("✅ ስምምነት ተፈርሟል · ክፍያ ተሰብስቧል · ሰራተኛ በሥራ ላይ");
+    toast("✅ ተፈርሟል · ተሰቅሏል · ክፍያ · ሰራተኛ በሥራ ላይ");
     $("agreementModal").classList.add("hid");
     await loadAll();
+  } catch (e) {
+    toast("Error: " + e.message);
+  }
+}
+
+async function loadAgreementsForWorker(workerId) {
+  if (!workerId) return [];
+  try {
+    const snap = await getDocs(query(collection(db, "agreements"), where("workerId", "==", workerId), limit(30)));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    // Fallback: from requests if index missing
+    return requests
+      .filter(r => r.workerId === workerId && (r.agreementSigned || r.agreementPrepared || r.agreementData))
+      .map(r => ({
+        id: "req_" + r.id,
+        requestId: r.id,
+        workerId,
+        employerName: r.agreementData?.empName || r.employerName,
+        skill: r.agreementData?.skill || r.workerSkill,
+        pay: r.agreementData?.pay,
+        payType: r.agreementData?.payType,
+        serviceFee: r.serviceFee,
+        status: r.agreementSigned ? "signed" : "draft",
+        signedAgreementUrl: r.signedAgreementUrl,
+        agreementData: r.agreementData,
+        agreementSignedAt: r.agreementSignedAt,
+        _fromRequest: true
+      }));
+  }
+}
+
+async function loadAgreementsForEmployer(employer) {
+  if (!employer) return [];
+  try {
+    let list = [];
+    if (employer.id) {
+      const snap = await getDocs(query(collection(db, "agreements"), where("employerId", "==", employer.id), limit(30)));
+      list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    // Also match by phone/name on agreements without employerId
+    const phone = (employer.phone || "").replace(/\s+/g, "");
+    const name = (employer.company_name || employer.name || "").toLowerCase();
+    const extra = requests.filter(r => {
+      if (!(r.agreementSigned || r.agreementPrepared || r.agreementData)) return false;
+      if (r.employerId === employer.id) return true;
+      const rp = (r.agreementData?.empPhone || r.employerPhone || "").replace(/\s+/g, "");
+      const rn = (r.agreementData?.empName || r.employerName || "").toLowerCase();
+      return (phone && rp === phone) || (name && rn === name);
+    }).map(r => ({
+      id: "req_" + r.id,
+      requestId: r.id,
+      workerName: r.agreementData?.workerName || r.workerName,
+      employerName: r.agreementData?.empName || r.employerName,
+      skill: r.agreementData?.skill,
+      pay: r.agreementData?.pay,
+      serviceFee: r.serviceFee,
+      status: r.agreementSigned ? "signed" : "draft",
+      signedAgreementUrl: r.signedAgreementUrl,
+      agreementData: r.agreementData,
+      agreementSignedAt: r.agreementSignedAt,
+      _fromRequest: true
+    }));
+    const ids = new Set(list.map(a => a.requestId || a.id));
+    extra.forEach(a => {
+      if (!ids.has(a.requestId || a.id)) list.push(a);
+    });
+    return list;
+  } catch (e) {
+    return [];
+  }
+}
+
+function formatAgDate(v) {
+  if (!v) return "—";
+  try {
+    if (v.seconds) return new Date(v.seconds * 1000).toLocaleDateString("en-GB");
+    if (v.toDate) return v.toDate().toLocaleDateString("en-GB");
+  } catch (_) {}
+  return "—";
+}
+
+function renderAgreementsList(list, emptyMsg) {
+  if (!list.length) return `<div class="empty" style="padding:12px">${emptyMsg || "No agreements yet"}</div>`;
+  return list.map(a => {
+    const title = a.workerName && a.employerName
+      ? `${esc(a.workerName)} ↔ ${esc(a.employerName)}`
+      : esc(a.workerName || a.employerName || a.skill || "Agreement");
+    const fee = a.serviceFee != null ? money(a.serviceFee) : "—";
+    const hasFile = a.signedAgreementUrl && a.signedAgreementUrl !== "uploaded_large_file";
+    return `
+      <div class="match-card" style="align-items:flex-start" data-ag-id="${esc(a.id)}">
+        <div style="flex:1;min-width:0">
+          <b style="font-size:13px">${title}</b>
+          <div style="font-size:12px;color:var(--hint);margin-top:2px">
+            ${esc(a.skill || "")} · ${fee} · ${formatAgDate(a.agreementSignedAt || a.createdAt)}
+            ${statusBdg(a.status === "signed" ? "Verified" : a.status || "Pending")}
+          </div>
+        </div>
+        <div class="acts" style="flex-direction:column;align-items:flex-end">
+          <button class="btn-ghost btn-sm" data-action="view-agreement" data-id="${esc(a.id)}" data-req="${esc(a.requestId || "")}">View</button>
+          ${hasFile ? `<a class="btn-ghost btn-sm" href="${a.signedAgreementUrl}" target="_blank" rel="noopener">Signed file</a>` : ""}
+          <button class="btn btn-danger btn-sm" data-action="delete-agreement" data-id="${esc(a.id)}" data-req="${esc(a.requestId || "")}" data-from-req="${a._fromRequest ? "1" : "0"}">Delete</button>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+async function openAgreementById(agId, requestId) {
+  // Prefer agreements collection, else rebuild from request
+  let a = null;
+  if (agId && !String(agId).startsWith("req_")) {
+    try {
+      const snap = await getDoc(doc(db, "agreements", agId));
+      if (snap.exists()) a = { id: snap.id, ...snap.data() };
+    } catch (_) {}
+  }
+  if (!a && requestId) {
+    const r = requests.find(x => x.id === requestId) ||
+      (await getDoc(doc(db, "requests", requestId)).then(s => s.exists() ? { id: s.id, ...s.data() } : null));
+    if (r) {
+      a = {
+        id: "req_" + r.id,
+        requestId: r.id,
+        agreementData: r.agreementData,
+        signedAgreementUrl: r.signedAgreementUrl,
+        serviceFee: r.serviceFee,
+        status: r.agreementSigned ? "signed" : "draft"
+      };
+    }
+  }
+  if (!a) { toast("Agreement not found"); return; }
+
+  const d = a.agreementData || {};
+  const today = formatAgDate(a.agreementSignedAt || a.createdAt);
+  const html = buildAmharicAgreementHtml({
+    ref: a.requestId || a.id,
+    today,
+    workerName: d.workerName || a.workerName || "—",
+    skill: d.skill || a.skill || "—",
+    workerPhone: d.workerPhone || "—",
+    nationalId: d.nationalId || "—",
+    empName: d.empName || a.employerName || "—",
+    empPhone: d.empPhone || a.employerPhone || "—",
+    empLoc: d.empLoc || "—",
+    gName: d.gName || "—",
+    gPhone: d.gPhone || "—",
+    pay: d.pay || a.pay || "—",
+    payType: d.payType || a.payType || "—",
+    serviceFee: d.serviceFee ?? a.serviceFee ?? "",
+    commission: settings.commission || 18,
+    extraTerms: d.extraTerms || ""
+  });
+
+  // Reuse agreement modal in read-only mode
+  currentAgreementRequestId = a.requestId || null;
+  if ($("agEditPanel")) $("agEditPanel").style.display = "none";
+  if ($("agreementBody")) $("agreementBody").innerHTML = html + (
+    a.signedAgreementUrl && a.signedAgreementUrl.startsWith("data:")
+      ? `<p style="margin-top:12px"><a class="btn btn-secondary btn-sm" href="${a.signedAgreementUrl}" target="_blank">Open signed upload</a></p>`
+      : ""
+  );
+  $("agreementModal")?.classList.remove("hid");
+  // Restore edit panel when closed
+  const onClose = () => {
+    if ($("agEditPanel")) $("agEditPanel").style.display = "";
+    $("agClose")?.removeEventListener("click", onClose);
+  };
+  $("agClose")?.addEventListener("click", onClose, { once: true });
+}
+
+async function deleteAgreement(agId, requestId, fromReq) {
+  if (!confirm("ይህን ስምምነት መሰረዝ ይፈልጋሉ? Delete this agreement?")) return;
+  try {
+    if (!fromReq && agId && !String(agId).startsWith("req_")) {
+      await deleteDoc(doc(db, "agreements", agId));
+    }
+    if (requestId) {
+      await updateDoc(doc(db, "requests", requestId), {
+        agreementSigned: false,
+        agreementPrepared: false,
+        signedAgreementUrl: null,
+        agreementData: null,
+        agreementSignedAt: null
+      }).catch(() => {});
+    }
+    toast("Agreement deleted");
+    // Refresh open profile if any
+    if (viewingWorkerId) await openWorkerView(viewingWorkerId);
+    else if (viewingEmployerId) await openEmployerView(viewingEmployerId);
+    else await loadAll();
   } catch (e) {
     toast("Error: " + e.message);
   }
@@ -1705,7 +1956,8 @@ async function openWorkerView(id) {
   const w = workers.find(x => x.id === id);
   if (!w) return;
   viewingWorkerId = id;
-  $("wvBody").innerHTML = `<div class="empty">Loading private data…</div>`;
+  viewingEmployerId = null;
+  $("wvBody").innerHTML = `<div class="empty">Loading…</div>`;
   $("workerViewModal").classList.remove("hid");
 
   let priv = {};
@@ -1715,6 +1967,14 @@ async function openWorkerView(id) {
   } catch (e) {
     console.warn("private load", e);
   }
+
+  const agreements = await loadAgreementsForWorker(id);
+  // Sort newest first
+  agreements.sort((a, b) => {
+    const ta = a.agreementSignedAt?.seconds || a.createdAt?.seconds || 0;
+    const tb = b.agreementSignedAt?.seconds || b.createdAt?.seconds || 0;
+    return tb - ta;
+  });
 
   const photo = w.photo || null;
   const idPhoto = priv.idPhoto || null;
@@ -1754,13 +2014,28 @@ async function openWorkerView(id) {
       <div><span style="color:var(--hint)">Status</span><br>${statusBdg(w.verification_status)} ${statusBdg(w.availability_status)}</div>
       <div><span style="color:var(--hint)">Guarantor</span><br><b>${esc(priv.guarantorName || "—")}</b><div style="color:var(--hint)">${esc(priv.guarantorPhone || "")}</div></div>
       <div><span style="color:var(--hint)">Police</span><br>${w.hasPoliceClearance ? statusBdg("Verified") : "—"}</div>
+    </div>
+    <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">የሥራ ስምምነቶች · Agreements (${agreements.length})</div>
+      ${renderAgreementsList(agreements, "No agreements for this worker yet")}
     </div>`;
 }
 
-function openEmployerView(id) {
+async function openEmployerView(id) {
   const e = employers.find(x => x.id === id);
   if (!e) return;
   viewingEmployerId = id;
+  viewingWorkerId = null;
+  $("evBody").innerHTML = `<div class="empty">Loading…</div>`;
+  $("employerViewModal").classList.remove("hid");
+
+  const agreements = await loadAgreementsForEmployer(e);
+  agreements.sort((a, b) => {
+    const ta = a.agreementSignedAt?.seconds || a.createdAt?.seconds || 0;
+    const tb = b.agreementSignedAt?.seconds || b.createdAt?.seconds || 0;
+    return tb - ta;
+  });
+
   $("evBody").innerHTML = `
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
       <div class="av">${e.logo}</div>
@@ -1771,8 +2046,11 @@ function openEmployerView(id) {
       <div><span style="color:var(--hint)">Verification</span><br>${statusBdg(e.verification_status)}</div>
       <div><span style="color:var(--hint)">Telegram</span><br><b>${e.username ? "@"+esc(e.username) : "—"}</b></div>
       <div><span style="color:var(--hint)">TG ID</span><br><b>${esc(e.tgId || e.id)}</b></div>
+    </div>
+    <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">የሥራ ስምምነቶች · Agreements (${agreements.length})</div>
+      ${renderAgreementsList(agreements, "No agreements for this employer yet")}
     </div>`;
-  $("employerViewModal").classList.remove("hid");
 }
 
 async function saveWorkerFromForm(f) {
@@ -1931,6 +2209,12 @@ document.addEventListener("click", async e => {
     case "add-employer": openEmployerForm(); break;
     case "view-worker": openWorkerView(btn.dataset.id); break;
     case "view-employer": openEmployerView(btn.dataset.id); break;
+    case "view-agreement":
+      await openAgreementById(btn.dataset.id, btn.dataset.req || null);
+      break;
+    case "delete-agreement":
+      await deleteAgreement(btn.dataset.id, btn.dataset.req || null, btn.dataset.fromReq === "1");
+      break;
     case "w-filter": wFilter = btn.dataset.val; renderWorkers(); break;
     case "p-filter": pFilter = btn.dataset.val; renderPayroll(); break;
     case "goto-kpi": {
