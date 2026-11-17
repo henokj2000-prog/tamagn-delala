@@ -572,37 +572,27 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 <div class="toast" id="toast"></div>
 
 <!-- Handover / OTP Modal (Step 4) -->
+<!-- Employment Agreement modal (after On Process) -->
+<div class="modal-overlay hid" id="agreementModal">
+  <div class="modal-box" style="max-width:560px">
+    <h3>የሥራ ስምምነት / Employment Agreement</h3>
+    <p style="margin-bottom:10px">Prepared for signature by Worker, Employer, Guarantor & Agency</p>
+    <div id="agreementBody" style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;max-height:55vh;overflow-y:auto;font-size:13px;line-height:1.55;color:var(--fg);text-align:left"></div>
+    <div class="modal-actions" style="margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-secondary" id="agClose">Close</button>
+      <button class="btn btn-secondary" id="agPrint">🖨 Print</button>
+      <button class="btn btn-primary" id="agMarkSigned">Mark as Signed</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay hid" id="handoverModal">
   <div class="modal-box" style="max-width:440px">
     <h3>Agreement & Handover</h3>
-    <p style="margin-bottom:12px">Complete OTP verification to place the worker</p>
-
-    <div style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
-      <div style="font-size:12px;color:var(--hint);margin-bottom:4px">Worker</div>
-      <div style="font-weight:700" id="hoWorker">—</div>
-      <div style="font-size:12px;color:var(--hint);margin:8px 0 4px">Job</div>
-      <div style="font-weight:600" id="hoJob">—</div>
-    </div>
-
-    <div id="hoAgreement" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:14px;max-height:140px;overflow-y:auto"></div>
-
-    <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:10px;padding:12px;margin-bottom:12px;text-align:center">
-      <div style="font-size:12px;color:#92400e;margin-bottom:4px">Demo OTP (normally sent via Telegram/SMS)</div>
-      <div style="font-size:22px;font-weight:800;letter-spacing:4px;color:#92400e" id="hoOtpDisplay">000000</div>
-    </div>
-
-    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Enter 6-digit OTP</label>
-    <input type="text" id="hoOtpInput" maxlength="6" inputmode="numeric" pattern="[0-9]*"
-      placeholder="e.g. 482913"
-      style="width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-size:18px;letter-spacing:4px;text-align:center;margin-bottom:8px">
-
-    <div style="font-size:12px;color:var(--hint);margin-bottom:14px">
-      Employer commission payment (Telebirr / Bank / Office) is recorded after OTP confirmation.
-    </div>
-
+    <p style="margin-bottom:12px">Legacy OTP step (optional)</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="hoCancel">Cancel</button>
-      <button class="btn btn-primary" id="hoConfirm">Confirm Placement</button>
+      <button class="btn btn-primary" id="hoConfirm">Close</button>
     </div>
   </div>
 </div>
@@ -1049,6 +1039,8 @@ function renderDashboard() {
     </div>
   `).join("") : `<div class="empty">No open hire requests</div>`;
 
+  // (Agreement opens automatically after On Process)
+
   $("dashFeed").innerHTML = activityFeed.length ? activityFeed.map(f => `
     <div class="feed-item">
       <div class="feed-dot">${f.icon}</div>
@@ -1186,6 +1178,7 @@ function renderMatches() {
       </div>
       <div style="margin-top:8px" class="acts">
         <button class="btn btn-primary btn-sm" data-action="req-process" data-id="${esc(r.id)}">On Process</button>
+        <button class="btn btn-secondary btn-sm" data-action="req-agreement" data-id="${esc(r.id)}">Agreement</button>
         <button class="btn btn-success btn-sm" data-action="req-close" data-id="${esc(r.id)}">Close</button>
         ${r.employerUsername ? `<a class="btn btn-secondary btn-sm" href="https://t.me/${esc(r.employerUsername)}" target="_blank">Telegram</a>` : ""}
       </div>
@@ -1246,6 +1239,7 @@ function renderPayroll() {
       <td class="c-act" data-l="Actions">
         <div class="acts">
           ${r.status === "open" ? `<button class="btn btn-primary btn-sm" data-action="req-process" data-id="${esc(r.id)}">On Process</button>` : ""}
+          ${r.status === "on_process" || r.agreementPrepared ? `<button class="btn btn-secondary btn-sm" data-action="req-agreement" data-id="${esc(r.id)}">Agreement</button>` : ""}
           ${r.status !== "closed" ? `<button class="btn btn-success btn-sm" data-action="req-close" data-id="${esc(r.id)}">Close</button>` : ""}
           ${!r.paymentReceived && r.status !== "open" ? `<button class="btn btn-secondary btn-sm" data-action="req-paid" data-id="${esc(r.id)}">Mark Paid</button>` : ""}
         </div>
@@ -1314,20 +1308,121 @@ async function updateRequest(id, patch) {
     await updateDoc(doc(db, "requests", id), patch);
 
     // When hire is accepted (on process / closed), hide worker from Telegram employer list
-    // index.html only shows status=="approved" && available==true
     if (r && r.workerId && (patch.status === "on_process" || patch.status === "closed")) {
       await updateDoc(doc(db, "workers", r.workerId), {
         available: false,
         assigned_employer: r.employerName || null
       }).catch(() => {});
-      toast(patch.status === "on_process"
-        ? "On process — worker hidden from employer search"
-        : "Closed — worker remains unavailable until you Set Available");
-    } else {
-      toast("Request updated");
     }
+
+    if (patch.status === "on_process" && r) {
+      toast("On process — preparing agreement…");
+      await loadAll();
+      await openAgreementForRequest(id);
+      return;
+    }
+
+    toast(patch.status === "closed"
+      ? "Closed — worker stays unavailable until Set Available"
+      : "Request updated");
     await loadAll();
   } catch (e) { toast("Error: " + e.message); }
+}
+
+let currentAgreementRequestId = null;
+
+async function openAgreementForRequest(requestId) {
+  const r = requests.find(x => x.id === requestId) ||
+    (await getDoc(doc(db, "requests", requestId)).then(s => s.exists() ? { id: s.id, ...s.data() } : null));
+  if (!r) { toast("Request not found"); return; }
+  currentAgreementRequestId = r.id;
+
+  const w = workers.find(x => x.id === r.workerId) || {};
+  let priv = {};
+  try {
+    if (r.workerId) {
+      const snap = await getDoc(doc(db, "workers_private", r.workerId));
+      if (snap.exists()) priv = snap.data();
+    }
+  } catch (_) {}
+
+  const today = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
+  const commission = settings.commission || 18;
+  const workerName = r.workerName || w.full_name || w.name || "—";
+  const skill = w.skill || w.primary_skill_role || "—";
+  const empName = r.employerName || "—";
+  const empPhone = r.employerPhone || "—";
+  const empLoc = r.employerLocation || "—";
+  const payType = r.paymentType || w.paymentType || "monthly";
+  const pay = w.pay || "As agreed";
+  const gName = priv.guarantorName || "________________";
+  const gPhone = priv.guarantorPhone || "________________";
+  const nationalId = priv.nationalId || "________________";
+  const workerPhone = priv.phone || "________________";
+
+  $("agreementBody").innerHTML = `
+    <div style="text-align:center;margin-bottom:12px">
+      <b style="font-size:15px">ታማኝ ደላላ / Tamagn Delala</b><br>
+      <span style="color:var(--hint)">Employment Placement Agreement · የሥራ አቀማመጥ ስምምነት</span><br>
+      <span style="font-size:12px;color:var(--hint)">Date / ቀን: ${today} · Ref: ${esc(r.id)}</span>
+    </div>
+    <p>This agreement is prepared when a hire request moves to <b>On Process</b>. Parties sign below.</p>
+    <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
+    <p><b>1. Worker / ሰራተኛ</b><br>
+      Name: <b>${esc(workerName)}</b><br>
+      Skill: <b>${esc(skill)}</b><br>
+      Phone: <b>${esc(workerPhone)}</b><br>
+      National ID: <b>${esc(nationalId)}</b><br>
+      Expected pay: <b>${esc(pay)}</b> (${esc(payType)})
+    </p>
+    <p><b>2. Employer / አሰሪ</b><br>
+      Name: <b>${esc(empName)}</b><br>
+      Phone: <b>${esc(empPhone)}</b><br>
+      Location: <b>${esc(empLoc)}</b>
+    </p>
+    <p><b>3. Guarantor / ዋስ</b><br>
+      Name: <b>${esc(gName)}</b><br>
+      Phone: <b>${esc(gPhone)}</b>
+    </p>
+    <p><b>4. Agency / ደላላ</b><br>
+      Tamagn Delala · Commission: <b>${commission}%</b> of agreed arrangement (or as office policy).
+    </p>
+    <p><b>5. Terms (summary)</b><br>
+      • Worker will perform duties related to <b>${esc(skill)}</b> at the employer’s location.<br>
+      • Worker is placed through Tamagn Delala; status is On Process until closed.<br>
+      • Employer pays agreed worker compensation and agency commission.<br>
+      • Guarantor confirms identity/reliability of the worker as provided at registration.<br>
+      • All parties may keep a signed copy (print this page).
+    </p>
+    <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:12px">
+      <div>
+        <b>Worker signature</b><br><br>
+        _______________________<br>
+        Name: ${esc(workerName)}<br>
+        Date: ____________
+      </div>
+      <div>
+        <b>Employer signature</b><br><br>
+        _______________________<br>
+        Name: ${esc(empName)}<br>
+        Date: ____________
+      </div>
+      <div>
+        <b>Guarantor signature</b><br><br>
+        _______________________<br>
+        Name: ${esc(gName)}<br>
+        Date: ____________
+      </div>
+      <div>
+        <b>Agency (Tamagn Delala)</b><br><br>
+        _______________________<br>
+        Officer: ____________<br>
+        Date: ____________
+      </div>
+    </div>
+  `;
+  $("agreementModal").classList.remove("hid");
 }
 
 // ============================================================
@@ -1560,6 +1655,7 @@ document.addEventListener("click", async e => {
     case "req-process": await updateRequest(btn.dataset.id, { status: "on_process" }); break;
     case "req-close": await updateRequest(btn.dataset.id, { status: "closed" }); break;
     case "req-paid": await updateRequest(btn.dataset.id, { paymentReceived: true }); break;
+    case "req-agreement": await openAgreementForRequest(btn.dataset.id); break;
     case "add-worker": openWorkerForm(); break;
     case "add-employer": openEmployerForm(); break;
     case "view-worker": openWorkerView(btn.dataset.id); break;
@@ -1622,6 +1718,33 @@ $("employerForm")?.addEventListener("submit", e => { e.preventDefault(); saveEmp
 
 $("hoCancel")?.addEventListener("click", () => $("handoverModal")?.classList.add("hid"));
 $("hoConfirm")?.addEventListener("click", () => $("handoverModal")?.classList.add("hid"));
+
+$("agClose")?.addEventListener("click", () => $("agreementModal")?.classList.add("hid"));
+$("agPrint")?.addEventListener("click", () => {
+  const body = $("agreementBody")?.innerHTML || "";
+  const w = window.open("", "_blank");
+  if (!w) { toast("Allow pop-ups to print"); return; }
+  w.document.write(`<!DOCTYPE html><html><head><title>Agreement</title>
+    <style>body{font-family:system-ui,sans-serif;padding:24px;max-width:720px;margin:0 auto;line-height:1.5;font-size:14px}
+    @media print{button{display:none}}</style></head><body>
+    ${body}
+    <p style="margin-top:24px"><button onclick="print()">Print</button></p>
+    </body></html>`);
+  w.document.close();
+});
+$("agMarkSigned")?.addEventListener("click", async () => {
+  if (!currentAgreementRequestId) return;
+  try {
+    await updateDoc(doc(db, "requests", currentAgreementRequestId), {
+      agreementPrepared: true,
+      agreementSignedAt: serverTimestamp(),
+      status: "on_process"
+    });
+    toast("Agreement marked as signed");
+    $("agreementModal").classList.add("hid");
+    await loadAll();
+  } catch (e) { toast("Error: " + e.message); }
+});
 
 // Auth
 $("signInBtn")?.addEventListener("click", async () => {
