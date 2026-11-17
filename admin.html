@@ -378,8 +378,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
           <div class="chips" id="wChips"></div>
           <select id="wSkillFilter" class="filter-select">
             <option value="all">Filter by Skill</option>
-            <option>Electrician</option><option>Hospitality Staff</option><option>Warehouse Associate</option>
-            <option>Registered Nurse</option><option>Delivery Driver</option><option>Office Admin</option>
+            <option>House Maid</option><option>Babysitter</option><option>Cook / Chef</option>
+            <option>Gardener</option><option>Security Guard</option><option>Plumber</option>
+            <option>Electrician</option><option>Construction Worker</option><option>Daily Laborer</option>
+            <option>Driver</option><option>Cleaner</option><option>Laundry Worker</option>
+            <option>Waiter / Waitress</option><option>Office Assistant</option>
           </select>
         </div>
         <div class="kpis" id="workerKpis"></div>
@@ -603,9 +606,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
           <label style="font-size:12px;font-weight:600;color:var(--hint)">Primary Skill *</label>
           <select required name="primary_skill_role" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
             <option value="">Select skill</option>
-            <option>Electrician</option><option>Hospitality Staff</option><option>Warehouse Associate</option>
-            <option>Registered Nurse</option><option>Delivery Driver</option><option>Office Admin</option>
-            <option>Domestic Worker</option><option>Construction Worker</option><option>General Labor</option>
+            <option>House Maid</option><option>Babysitter</option><option>Cook / Chef</option>
+            <option>Gardener</option><option>Security Guard</option><option>Plumber</option>
+            <option>Electrician</option><option>Construction Worker</option><option>Daily Laborer</option>
+            <option>Driver</option><option>Cleaner</option><option>Laundry Worker</option>
+            <option>Waiter / Waitress</option><option>Office Assistant</option>
           </select>
         </div>
         <div>
@@ -703,108 +708,221 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
   </div>
 </div>
 
-<script>
+<script type="module">
 // ============================================================
-// STATE (in-memory – simulates Firebase)
+// Firebase – same project & collections as index.html (Telegram Mini App)
+// workers: name, skill, photo, status (pending|approved|rejected), available
+// employers: name, phone, location, tgId, username
+// requests: hire requests from employers
 // ============================================================
-let employers = [
-  { id: "e1", company_name: "Delta Corp", email: "delta.corp@contact.com", industry: "Logistics", active_jobs_count: 8, placed_workers_count: 45, verification_status: "Verified", billing_status: "Current", logo: "Δ" },
-  { id: "e2", company_name: "Logistics Inc", email: "ops@logistics.inc", industry: "Manufacturing", active_jobs_count: 12, placed_workers_count: 61, verification_status: "Pending", billing_status: "Pending", logo: "L" },
-  { id: "e3", company_name: "Horizon Construction", email: "hr@horizon.build", industry: "Construction", active_jobs_count: 5, placed_workers_count: 30, verification_status: "Verified", billing_status: "Current", logo: "H" },
-  { id: "e4", company_name: "Apex Hospitality", email: "service@apexhospitality.com", industry: "Hospitality", active_jobs_count: 15, placed_workers_count: 88, verification_status: "Verified", billing_status: "Overdue", logo: "A" },
-  { id: "e5", company_name: "Metro Healthcare", email: "admin@metrohealth.co", industry: "Healthcare", active_jobs_count: 2, placed_workers_count: 14, verification_status: "Suspended", billing_status: "Suspended", logo: "M" },
-  { id: "e6", company_name: "Quantum Solutions", email: "recruiting@quantum.solutions", industry: "Technology", active_jobs_count: 0, placed_workers_count: 5, verification_status: "Pending", billing_status: "Not Started", logo: "Q" },
-];
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
+  writeBatch, query, where, orderBy, limit, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let workers = [
-  { id: "W-1042", full_name: "Dawit Bekele", primary_skill_role: "Electrician", experience_years: 5, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Horizon Construction", skill_tags: ["Electrician","Safety"] },
-  { id: "W-1043", full_name: "Selamawit Tadesse", primary_skill_role: "Hospitality Staff", experience_years: 3, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Hospitality"] },
-  { id: "W-1044", full_name: "Bereket Alemu", primary_skill_role: "Warehouse Associate", experience_years: 2, availability_status: "Pending", verification_status: "Pending", assigned_employer: null, skill_tags: ["Warehouse"] },
-  { id: "W-1045", full_name: "Tigist Haile", primary_skill_role: "Registered Nurse", experience_years: 6, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Metro Healthcare", skill_tags: ["Nurse"] },
-  { id: "W-1046", full_name: "Yonas Kebede", primary_skill_role: "Delivery Driver", experience_years: 4, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Driver"] },
-  { id: "W-1047", full_name: "Meron Girma", primary_skill_role: "Office Admin", experience_years: 3, availability_status: "Inactive", verification_status: "Verified", assigned_employer: null, skill_tags: ["Admin"] },
-  { id: "W-1040", full_name: "Anch Chileman", primary_skill_role: "Warehouse Associate", experience_years: 3, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Warehouse"] },
-  { id: "W-1041", full_name: "Sarah Jolley", primary_skill_role: "General Labor", experience_years: 2, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Delta Corp", skill_tags: ["Labor"] },
-];
+const firebaseConfig = {
+  apiKey: "AIzaSyDOzRzt9k35kokQOD1rEIpkIVPjNyd0Q3c",
+  authDomain: "tamagn-delala.firebaseapp.com",
+  projectId: "tamagn-delala",
+  storageBucket: "tamagn-delala.firebasestorage.app",
+  messagingSenderId: "996483381337",
+  appId: "1:996483381337:web:f20127638e8da2aee7d948"
+};
 
-let jobOrders = [
-  { id: "j1", job_title: "Electrician", employer_name: "Horizon Construction", required_skill: "Electrician", workers_needed_count: 2, location_city: "Addis Ababa", pay_rate: "ETB 800/day", urgency_level: "Urgent", status: "Open", start_date: "2026-11-20" },
-  { id: "j2", job_title: "Warehouse Associate", employer_name: "Logistics Inc", required_skill: "Warehouse Associate", workers_needed_count: 10, location_city: "Addis Ababa", pay_rate: "Negotiable", urgency_level: "Urgent", status: "Open", start_date: "2026-11-22" },
-  { id: "j3", job_title: "RN", employer_name: "Metro Healthcare", required_skill: "Registered Nurse", workers_needed_count: 4, location_city: "Addis Ababa", pay_rate: "Monthly", urgency_level: "Normal", status: "Open", start_date: "2026-12-01" },
-  { id: "j4", job_title: "Senior Welder", employer_name: "Delta Corp", required_skill: "Welder", workers_needed_count: 1, location_city: "Addis Ababa", pay_rate: "Daily", urgency_level: "Urgent", status: "Open", start_date: "2026-11-18" },
-];
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-let timesheets = [
-  { id: "t1", worker_id: "W-1042", worker_name: "Dawit Bekele", employer_name: "Horizon Construction", hours: 40.0, worker_pay: 1400, employer_bill: 1850, approval_status: "Approved" },
-  { id: "t2", worker_id: "W-1043", worker_name: "Selamawit Tadesse", employer_name: "Logistics Inc", hours: 38.5, worker_pay: 962.50, employer_bill: 1280, approval_status: "Pending" },
-  { id: "t3", worker_id: "W-1044", worker_name: "Bereket Alemu", employer_name: "Horizon Construction", hours: 40.0, worker_pay: 1200, employer_bill: 1550, approval_status: "Approved" },
-  { id: "t4", worker_id: "W-1045", worker_name: "Tigist Haile", employer_name: "Metro Healthcare", hours: 36.0, worker_pay: 1980, employer_bill: 2500, approval_status: "Pending" },
-  { id: "t5", worker_id: "W-1041", worker_name: "Sarah Jolley", employer_name: "Delta Corp", hours: 40.0, worker_pay: 1600, employer_bill: 2100, approval_status: "Approved" },
-  { id: "t6", worker_id: "W-1040", worker_name: "Anch Chileman", employer_name: "Logistics Inc", hours: 37.0, worker_pay: 925, employer_bill: 1210, approval_status: "Paid" },
-];
-
-let staff = [
-  { id: "s1", full_name: "Henok Fikru", role: "Super Admin", permissions_scope: "Full System, Payroll & Settings", status: "Active", is_owner: true },
-  { id: "s2", full_name: "Selamawit Bekele", role: "Placement Coordinator", permissions_scope: "Workers, Employers, Job Matches", status: "Active" },
-  { id: "s3", full_name: "Dawit Tadesse", role: "Payroll Officer", permissions_scope: "Timesheets, Invoices & Payouts", status: "Active" },
-  { id: "s4", full_name: "Meron Alemu", role: "Verification Specialist", permissions_scope: "Approve/Reject Workers & Employers", status: "Active" },
-];
-
-let activityFeed = [
-  { icon: "👤", text: "Sarah J. checked in – General Labor (Site A)", time: "9:40 PM", ago: "just now" },
-  { icon: "✓", text: "Mark R. completed shift – Delivery Driver (Site B)", time: "9:45 PM", ago: "5 min ago" },
-];
-
+// Normalized state for UI
+let workers = [];
+let employers = [];
+let requests = [];
+let activityFeed = [];
 let settings = { commission: 18, requireId: true, reminders: true, paymentTerms: "Net 15 Days" };
-let selectedJobId = "j1";
+let selectedJobId = null;
 let wFilter = "all";
 let pFilter = "all";
+let loading = false;
 
-// ============================================================
-// HELPERS
-// ============================================================
+// Job orders derived from open requests (for Job Matches screen)
+let jobOrders = [];
+
 const $ = id => document.getElementById(id);
 const $$ = sel => document.querySelectorAll(sel);
 
 function toast(msg) {
   const t = $("toast");
+  if (!t) return;
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2800);
 }
 
 function initials(name) {
-  return (name || "?").split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase();
+  return (name || "?").split(/\s+/).map(p => p[0]).slice(0, 2).join("").toUpperCase();
 }
-function avHtml(name) {
+function avHtml(name, photo) {
+  if (photo && (photo.startsWith("data:image/") || photo.startsWith("http"))) {
+    return `<div class="av"><img src="${photo}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent='${initials(name)}'"></div>`;
+  }
   return `<div class="av">${initials(name)}</div>`;
 }
 function statusBdg(status) {
   const map = {
     Verified: "ok", Approved: "ok", Available: "ok", Active: "ok", Current: "ok", Paid: "mute",
-    Pending: "warn", "Pending Review": "warn", Placed: "info", Open: "info",
-    Suspended: "bad", Rejected: "bad", Overdue: "bad", Inactive: "mute", "Not Started": "mute"
+    approved: "ok", pending: "warn", Pending: "warn", "Pending Review": "warn", Placed: "info", Open: "info",
+    open: "info", on_process: "warn", closed: "ok",
+    Suspended: "bad", Rejected: "bad", rejected: "bad", Overdue: "bad", Inactive: "mute", "Not Started": "mute"
   };
-  return `<span class="bdg ${map[status] || "mute"}">${status}</span>`;
+  const label = status === "approved" ? "Verified" : status === "pending" ? "Pending" : status === "rejected" ? "Rejected"
+    : status === "open" ? "Open" : status === "on_process" ? "On Process" : status === "closed" ? "Closed" : status;
+  return `<span class="bdg ${map[status] || map[label] || "mute"}">${label}</span>`;
 }
 function roleBdg(role) {
   const map = { "Super Admin": "purple", "Placement Coordinator": "info", "Payroll Officer": "teal", "Verification Specialist": "orange" };
   return `<span class="bdg ${map[role] || "mute"}">${role}</span>`;
 }
 function money(n) {
-  return "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  return "ETB " + Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
+}
+function esc(s) {
+  return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function ts(v) {
+  if (!v) return 0;
+  if (typeof v === "number") return v;
+  if (v.seconds) return v.seconds;
+  if (v.toMillis) return v.toMillis() / 1000;
+  return 0;
+}
+
+// Normalize worker from Firestore (index.html schema) → UI fields
+function normWorker(id, d) {
+  const status = d.status || "pending"; // pending | approved | rejected
+  let availability = "Inactive";
+  if (status === "pending") availability = "Pending";
+  else if (status === "rejected") availability = "Inactive";
+  else if (status === "approved" && d.available) availability = "Available";
+  else if (status === "approved" && !d.available) availability = "Placed";
+  if (d.availability_status === "Pending Review") availability = "Pending Review";
+
+  return {
+    id,
+    full_name: d.name || d.full_name || "—",
+    name: d.name || d.full_name || "—",
+    primary_skill_role: d.skill || d.primary_skill_role || "—",
+    skill: d.skill || d.primary_skill_role || "—",
+    experience_years: d.experience_years ?? d.experience ?? "—",
+    experience: d.experience || String(d.experience_years || ""),
+    age: d.age,
+    location: d.location || "",
+    pay: d.pay || "Negotiable",
+    paymentType: d.paymentType || "monthly",
+    photo: d.photo || d.photo_url || null,
+    verification_status: status === "approved" ? "Verified" : status === "rejected" ? "Rejected" : "Pending",
+    status, // raw
+    available: !!d.available,
+    availability_status: availability,
+    assigned_employer: d.assigned_employer || null,
+    hasNationalId: d.hasNationalId !== false,
+    hasPoliceClearance: !!d.hasPoliceClearance,
+    ratingAvg: d.ratingAvg || 0,
+    ratingCount: d.ratingCount || 0,
+    source: d.source || "",
+    phone: d.phone || "",
+    id_number: d.id_number || d.nationalId || "",
+    createdAt: d.createdAt,
+    _raw: d
+  };
+}
+
+function normEmployer(id, d) {
+  return {
+    id,
+    company_name: d.name || d.company_name || "—",
+    name: d.name || d.company_name || "—",
+    email: d.email || "",
+    phone: d.phone || "",
+    location: d.location || "",
+    industry: d.industry || d.location || "—",
+    verification_status: d.verification_status || (d.status === "approved" ? "Verified" : "Pending"),
+    billing_status: d.billing_status || "Current",
+    active_jobs_count: d.active_jobs_count || 0,
+    placed_workers_count: d.placed_workers_count || 0,
+    username: d.username || "",
+    tgId: d.tgId || id,
+    logo: initials(d.name || d.company_name),
+    createdAt: d.createdAt,
+    _raw: d
+  };
 }
 
 // ============================================================
-// NAVIGATION
+// LOAD FROM FIRESTORE
+// ============================================================
+async function loadAll() {
+  if (loading) return;
+  loading = true;
+  try {
+    const [wSnap, eSnap, rSnap] = await Promise.all([
+      getDocs(query(collection(db, "workers"), limit(200))),
+      getDocs(collection(db, "employers")),
+      getDocs(query(collection(db, "requests"), orderBy("createdAt", "desc"), limit(80)))
+    ]);
+
+    workers = wSnap.docs.map(d => normWorker(d.id, d.data()));
+    employers = eSnap.docs.map(d => normEmployer(d.id, d.data()));
+    requests = rSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Derive simple job board from open requests (grouped by skill if useful)
+    const openReqs = requests.filter(r => (r.status || "open") === "open");
+    jobOrders = openReqs.slice(0, 20).map(r => ({
+      id: r.id,
+      job_title: r.workerName ? `Hire: ${r.workerName}` : "Open request",
+      employer_name: r.employerName || "Employer",
+      required_skill: r.workerSkill || "",
+      workers_needed_count: 1,
+      location_city: r.employerLocation || "Addis Ababa",
+      pay_rate: r.paymentType || "monthly",
+      urgency_level: "Normal",
+      status: "Open",
+      start_date: "",
+      _request: r
+    }));
+
+    activityFeed = [
+      ...requests.slice(0, 5).map(r => ({
+        icon: "📋",
+        text: `${r.employerName || "Employer"} requested ${r.workerName || "a worker"}`,
+        time: "",
+        ago: "request"
+      })),
+      ...workers.filter(w => w.status === "pending").slice(0, 5).map(w => ({
+        icon: "👷",
+        text: `${w.full_name} applied · ${w.skill}`,
+        time: "",
+        ago: "pending"
+      }))
+    ];
+
+    renderCurrent();
+  } catch (err) {
+    console.error(err);
+    toast("Load error: " + err.message);
+  }
+  loading = false;
+}
+
+// ============================================================
+// NAV
 // ============================================================
 const titles = {
   dashboard: "Dashboard", employers: "Employers Directory", workers: "Workers Directory",
   matches: "Job Matches & Placements", payroll: "Timesheets & Payroll Management", settings: "Settings & Roles"
 };
 const topActions = {
-  dashboard: "+ New", employers: "+ Add Employer", workers: "+ Add Worker",
-  matches: "+ Create Match", payroll: "+ Approve All", settings: "Save Changes"
+  dashboard: "↻ Refresh", employers: "+ Add Employer", workers: "+ Add Worker",
+  matches: "↻ Refresh", payroll: "↻ Refresh", settings: "Save Changes"
 };
 
 function showView(name) {
@@ -816,11 +934,10 @@ function showView(name) {
   if (nav) nav.classList.add("active");
   $("pageTitle").textContent = titles[name] || name;
   $("topActionBtn").textContent = topActions[name] || "+ New";
-  $("topActionBtn").dataset.action = name === "payroll" ? "approve-all" :
-    name === "settings" ? "save-settings" :
-    name === "employers" ? "add-employer" :
+  $("topActionBtn").dataset.action =
     name === "workers" ? "add-worker" :
-    name === "matches" ? "create-match" : "new";
+    name === "employers" ? "add-employer" :
+    name === "settings" ? "save-settings" : "refresh";
   renderCurrent();
 }
 
@@ -835,129 +952,134 @@ function renderCurrent() {
 }
 
 // ============================================================
-// RENDERERS
+// RENDER
 // ============================================================
 function renderDashboard() {
-  const pendingW = workers.filter(w => w.verification_status === "Pending").length;
+  const pendingW = workers.filter(w => w.status === "pending").length;
   const pendingE = employers.filter(e => e.verification_status === "Pending").length;
-  const openJobs = jobOrders.filter(j => j.status === "Open").length;
+  const openJobs = requests.filter(r => (r.status || "open") === "open").length;
   const placed = workers.filter(w => w.availability_status === "Placed").length;
+  const available = workers.filter(w => w.availability_status === "Available").length;
 
   $("dashKpis").innerHTML = `
-    <div class="kpi"><div class="label">Pending Approvals <span class="trend">↑ ${pendingW + pendingE}</span></div><div class="value">${pendingW + pendingE + 14}</div></div>
-    <div class="kpi"><div class="label">Open Job Orders <span class="trend">↑ ${openJobs}</span></div><div class="value">${openJobs + 38}</div></div>
-    <div class="kpi"><div class="label">Active Placements <span class="trend">↑ ${placed}</span></div><div class="value">${placed + 310}</div></div>
-    <div class="kpi"><div class="label">Today's Revenue <span class="trend">↑ 8%</span></div><div class="value">$4,850</div></div>
+    <div class="kpi ${pendingW + pendingE ? "alert" : ""}"><div class="label">Pending Approvals</div><div class="value">${pendingW + pendingE}</div></div>
+    <div class="kpi"><div class="label">Open Hire Requests</div><div class="value">${openJobs}</div></div>
+    <div class="kpi"><div class="label">Available Workers</div><div class="value">${available}</div></div>
+    <div class="kpi"><div class="label">Placed / Busy</div><div class="value">${placed}</div></div>
   `;
 
-  // Queue: pending workers + pending employers
   const queueItems = [
-    ...workers.filter(w => w.verification_status === "Pending").map(w => ({
-      id: w.id, name: w.full_name, type: "worker", date: "Today", tags: w.primary_skill_role
+    ...workers.filter(w => w.status === "pending").map(w => ({
+      id: w.id, name: w.full_name, type: "worker", date: "Pending", tags: w.skill, photo: w.photo
     })),
     ...employers.filter(e => e.verification_status === "Pending").map(e => ({
-      id: e.id, name: e.company_name, type: "employer", date: "Today", tags: e.industry
+      id: e.id, name: e.company_name, type: "employer", date: "Pending", tags: e.location || e.industry, photo: null
     }))
   ];
 
   $("dashQueue").innerHTML = queueItems.length ? `
     <table class="tbl" style="font-size:12px">
-      <thead><tr><th>Name</th><th>Type</th><th>Application</th><th>Tags</th><th></th></tr></thead>
+      <thead><tr><th></th><th>Name</th><th>Type</th><th>Info</th><th></th></tr></thead>
       <tbody>
         ${queueItems.map(q => `
           <tr>
-            <td>${q.name}</td>
+            <td>${avHtml(q.name, q.photo)}</td>
+            <td>${esc(q.name)}</td>
             <td>${q.type}</td>
-            <td>${q.date}</td>
-            <td><span class="bdg mute">${q.tags}</span></td>
+            <td><span class="bdg mute">${esc(q.tags)}</span></td>
             <td class="acts">
-              <button class="btn btn-success btn-sm" data-action="approve" data-type="${q.type}" data-id="${q.id}">Approve</button>
-              <button class="btn btn-danger btn-sm" data-action="reject" data-type="${q.type}" data-id="${q.id}">Reject</button>
+              <button class="btn btn-success btn-sm" data-action="approve" data-type="${q.type}" data-id="${esc(q.id)}">Approve</button>
+              <button class="btn btn-danger btn-sm" data-action="reject" data-type="${q.type}" data-id="${esc(q.id)}">Reject</button>
             </td>
           </tr>`).join("")}
       </tbody>
     </table>` : `<div class="empty">All caught up ✅</div>`;
 
-  $("dashUrgent").innerHTML = jobOrders.filter(j => j.urgency_level === "Urgent" && j.status === "Open").map(j => `
-    <div class="job-card" data-action="select-job" data-id="${j.id}">
-      <h4>${j.job_title} – ${j.employer_name} <span style="font-weight:400;color:var(--hint)">(Start: ${j.start_date.slice(5)})</span></h4>
-      <div style="margin-top:8px"><button class="btn btn-primary btn-sm" data-action="find-match" data-id="${j.id}">Find Match</button></div>
+  const openReqs = requests.filter(r => (r.status || "open") === "open").slice(0, 6);
+  $("dashUrgent").innerHTML = openReqs.length ? openReqs.map(r => `
+    <div class="job-card">
+      <h4>${esc(r.workerName || "Worker")} ← ${esc(r.employerName || "Employer")}</h4>
+      <div class="meta"><span>${esc(r.employerPhone || "")}</span><span>${esc(r.employerLocation || "")}</span></div>
+      <div style="margin-top:8px" class="acts">
+        <button class="btn btn-primary btn-sm" data-action="req-process" data-id="${esc(r.id)}">On Process</button>
+        <button class="btn btn-success btn-sm" data-action="req-close" data-id="${esc(r.id)}">Close</button>
+      </div>
     </div>
-  `).join("") || `<div class="empty">No urgent jobs</div>`;
+  `).join("") : `<div class="empty">No open hire requests</div>`;
 
-  $("dashFeed").innerHTML = activityFeed.map(f => `
+  $("dashFeed").innerHTML = activityFeed.length ? activityFeed.map(f => `
     <div class="feed-item">
       <div class="feed-dot">${f.icon}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px">${f.text}</div>
-        <div style="font-size:11px;color:var(--hint)">${f.ago}</div>
-      </div>
-      <span class="feed-time">${f.time}</span>
+      <div style="flex:1;min-width:0"><div style="font-size:13px">${esc(f.text)}</div></div>
+      <span class="feed-time">${esc(f.ago)}</span>
     </div>
-  `).join("") || `<div class="empty">No activity yet</div>`;
+  `).join("") : `<div class="empty">No activity yet</div>`;
 }
 
 function renderEmployers() {
   const verified = employers.filter(e => e.verification_status === "Verified").length;
   const pending = employers.filter(e => e.verification_status === "Pending").length;
-  const activeJobs = employers.reduce((s, e) => s + e.active_jobs_count, 0);
 
   $("empKpis").innerHTML = `
     <div class="kpi"><div class="label">Total Employers</div><div class="value">${employers.length}</div></div>
-    <div class="kpi"><div class="label">Verified Partners</div><div class="value">${verified}</div></div>
-    <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Verification</div><div class="value">${pending}</div></div>
-    <div class="kpi"><div class="label">Active Job Orders</div><div class="value">${activeJobs}</div></div>
+    <div class="kpi"><div class="label">Verified</div><div class="value">${verified}</div></div>
+    <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending</div><div class="value">${pending}</div></div>
+    <div class="kpi"><div class="label">Open Requests</div><div class="value">${requests.filter(r => (r.status||"open")==="open").length}</div></div>
   `;
 
   const q = ($("eSearch")?.value || "").toLowerCase();
   const st = $("eStatusFilter")?.value || "all";
-  const ind = $("eIndustryFilter")?.value || "all";
   let rows = employers.filter(e => {
-    if (st !== "all" && e.verification_status !== st) return false;
-    if (ind !== "all" && e.industry !== ind) return false;
-    if (q && !`${e.company_name} ${e.email} ${e.industry}`.toLowerCase().includes(q)) return false;
+    if (st === "Verified" && e.verification_status !== "Verified") return false;
+    if (st === "Pending" && e.verification_status !== "Pending") return false;
+    if (st === "Suspended" && e.verification_status !== "Suspended") return false;
+    if (q && !`${e.company_name} ${e.phone} ${e.location}`.toLowerCase().includes(q)) return false;
     return true;
   });
+
+  const reqCount = e => requests.filter(r =>
+    (e.phone && r.employerPhone === e.phone) || (e.name && r.employerName === e.name) || (e.tgId && String(r.employerTgId) === String(e.tgId))
+  ).length;
 
   $("tbEmployers").innerHTML = rows.map(e => `
     <tr>
       <td class="c-user" data-l="Company">
         <div class="cell-user">
-          <div class="av">${e.logo || initials(e.company_name)}</div>
-          <div class="info"><b>${e.company_name}</b><span>${e.email}</span></div>
+          <div class="av">${e.logo}</div>
+          <div class="info"><b>${esc(e.company_name)}</b><span>${esc(e.phone || e.email || "")}</span></div>
         </div>
       </td>
-      <td data-l="Industry">${e.industry}</td>
-      <td data-l="Active Jobs">${e.active_jobs_count}</td>
-      <td data-l="Placed Workers">${e.placed_workers_count}</td>
+      <td data-l="Location">${esc(e.location || e.industry)}</td>
+      <td data-l="Requests">${reqCount(e)}</td>
+      <td data-l="—">—</td>
       <td data-l="Verification">${statusBdg(e.verification_status)}</td>
-      <td data-l="Billing">${e.billing_status}</td>
+      <td data-l="Billing">${esc(e.billing_status)}</td>
       <td class="c-act" data-l="Actions">
         <div class="acts">
-          <button class="btn-ghost btn-sm" data-action="view-employer" data-id="${e.id}">View</button>
+          <button class="btn-ghost btn-sm" data-action="view-employer" data-id="${esc(e.id)}">View</button>
           ${e.verification_status === "Pending" ? `
-            <button class="btn btn-success btn-sm" data-action="approve" data-type="employer" data-id="${e.id}">Approve</button>
-            <button class="btn btn-danger btn-sm" data-action="reject" data-type="employer" data-id="${e.id}">Reject</button>
+            <button class="btn btn-success btn-sm" data-action="approve" data-type="employer" data-id="${esc(e.id)}">Approve</button>
           ` : ""}
+          ${e.username ? `<a class="btn-ghost btn-sm" href="https://t.me/${esc(e.username)}" target="_blank">Telegram</a>` : ""}
         </div>
       </td>
     </tr>
-  `).join("") || `<tr><td colspan="7" class="empty">No employers match</td></tr>`;
+  `).join("") || `<tr><td colspan="7" class="empty">No employers yet — they register via Telegram Mini App</td></tr>`;
 }
 
 function renderWorkers() {
   const available = workers.filter(w => w.availability_status === "Available").length;
   const placed = workers.filter(w => w.availability_status === "Placed").length;
-  const pending = workers.filter(w => w.verification_status === "Pending").length;
+  const pending = workers.filter(w => w.status === "pending").length;
 
   $("workerKpis").innerHTML = `
     <div class="kpi"><div class="label">Total Workers</div><div class="value">${workers.length}</div></div>
     <div class="kpi"><div class="label">Available Now <span class="bdg ok" style="margin-left:6px">Ready</span></div><div class="value">${available}</div></div>
-    <div class="kpi"><div class="label">Currently Placed <span class="bdg info" style="margin-left:6px">Active</span></div><div class="value">${placed}</div></div>
+    <div class="kpi"><div class="label">Placed / Busy</div><div class="value">${placed}</div></div>
     <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Verification</div><div class="value">${pending}</div></div>
   `;
 
-  const filters = [["all","All"],["Available","Available"],["Pending Review","Pending Review"],["Placed","Placed"],["Pending","Pending Verification"],["Inactive","Inactive"]];
+  const filters = [["all","All"],["Available","Available"],["Placed","Placed"],["Pending","Pending Verification"],["Inactive","Inactive"]];
   $("wChips").innerHTML = filters.map(([v,l]) =>
     `<button class="chip ${wFilter === v ? "active" : ""}" data-action="w-filter" data-val="${v}">${l}</button>`
   ).join("");
@@ -965,11 +1087,12 @@ function renderWorkers() {
   const q = ($("wSearch")?.value || "").toLowerCase();
   const skill = $("wSkillFilter")?.value || "all";
   let rows = workers.filter(w => {
-    if (wFilter === "Pending" && w.verification_status !== "Pending") return false;
-    if (wFilter === "Pending Review" && w.availability_status !== "Pending Review") return false;
-    if (wFilter !== "all" && wFilter !== "Pending" && wFilter !== "Pending Review" && w.availability_status !== wFilter) return false;
-    if (skill !== "all" && w.primary_skill_role !== skill) return false;
-    if (q && !`${w.full_name} ${w.id} ${w.primary_skill_role}`.toLowerCase().includes(q)) return false;
+    if (wFilter === "Pending" && w.status !== "pending") return false;
+    if (wFilter === "Available" && w.availability_status !== "Available") return false;
+    if (wFilter === "Placed" && w.availability_status !== "Placed") return false;
+    if (wFilter === "Inactive" && w.availability_status !== "Inactive") return false;
+    if (skill !== "all" && w.skill !== skill) return false;
+    if (q && !`${w.full_name} ${w.id} ${w.skill} ${w.location}`.toLowerCase().includes(q)) return false;
     return true;
   });
 
@@ -977,359 +1100,351 @@ function renderWorkers() {
     <tr>
       <td class="c-user" data-l="Worker">
         <div class="cell-user">
-          ${avHtml(w.full_name)}
-          <div class="info"><b>${w.full_name}</b><span>#${w.id}</span></div>
+          ${avHtml(w.full_name, w.photo)}
+          <div class="info"><b>${esc(w.full_name)}</b><span>#${esc(w.id)}${w.age ? " · Age "+w.age : ""}</span></div>
         </div>
       </td>
-      <td data-l="Skill">${w.primary_skill_role}</td>
-      <td data-l="Experience">${w.experience_years} yrs</td>
+      <td data-l="Skill">${esc(w.skill)}</td>
+      <td data-l="Experience">${esc(w.experience || w.experience_years)}</td>
       <td data-l="Availability">${statusBdg(w.availability_status)}</td>
       <td data-l="Verification">${statusBdg(w.verification_status)}</td>
-      <td data-l="Employer">${w.assigned_employer || "Unassigned"}</td>
+      <td data-l="Location">${esc(w.location || "—")}</td>
       <td class="c-act" data-l="Actions">
         <div class="acts">
-          ${w.verification_status === "Pending" ? `
-            <button class="btn btn-success btn-sm" data-action="approve" data-type="worker" data-id="${w.id}">Approve</button>
-            <button class="btn btn-danger btn-sm" data-action="reject" data-type="worker" data-id="${w.id}">Reject</button>
+          ${w.status === "pending" ? `
+            <button class="btn btn-success btn-sm" data-action="approve" data-type="worker" data-id="${esc(w.id)}">Approve</button>
+            <button class="btn btn-danger btn-sm" data-action="reject" data-type="worker" data-id="${esc(w.id)}">Reject</button>
           ` : ""}
-          ${w.availability_status === "Available" && w.verification_status === "Verified" ? `
-            <button class="btn btn-primary btn-sm" data-action="match-worker" data-id="${w.id}">Match</button>
+          ${w.status === "approved" ? `
+            <button class="btn btn-secondary btn-sm" data-action="toggle-available" data-id="${esc(w.id)}">${w.available ? "Set Busy" : "Set Available"}</button>
           ` : ""}
-          ${w.availability_status === "Pending Review" ? `
-            <button class="btn btn-warning btn-sm" data-action="resume-handover" data-id="${w.id}">Complete Handover</button>
-          ` : ""}
-          <button class="btn-ghost btn-sm" data-action="view-worker" data-id="${w.id}">View</button>
+          <button class="btn-ghost btn-sm" data-action="view-worker" data-id="${esc(w.id)}">View</button>
         </div>
       </td>
     </tr>
-  `).join("") || `<tr><td colspan="7" class="empty">No workers match</td></tr>`;
+  `).join("") || `<tr><td colspan="7" class="empty">No workers yet — they register via Telegram Mini App (with photo)</td></tr>`;
 }
 
 function renderMatches() {
-  const open = jobOrders.filter(j => j.status === "Open").length;
+  const open = requests.filter(r => (r.status || "open") === "open");
   $("matchKpis").innerHTML = `
-    <div class="kpi"><div class="label">Open Job Orders</div><div class="value">${open}</div></div>
-    <div class="kpi"><div class="label">Suggested Matches <span class="bdg ok" style="margin-left:6px">98% Avg</span></div><div class="value">18</div></div>
-    <div class="kpi alert"><div class="label">Pending Employer Review</div><div class="value">11</div></div>
-    <div class="kpi"><div class="label">Active Placements</div><div class="value">${workers.filter(w=>w.availability_status==="Placed").length + 310}</div></div>
+    <div class="kpi"><div class="label">Open Hire Requests</div><div class="value">${open.length}</div></div>
+    <div class="kpi"><div class="label">Available Workers</div><div class="value">${workers.filter(w=>w.availability_status==="Available").length}</div></div>
+    <div class="kpi"><div class="label">On Process</div><div class="value">${requests.filter(r=>r.status==="on_process").length}</div></div>
+    <div class="kpi"><div class="label">Closed</div><div class="value">${requests.filter(r=>r.status==="closed").length}</div></div>
   `;
 
-  $("openJobs").innerHTML = jobOrders.filter(j => j.status === "Open").map(j => `
-    <div class="job-card ${selectedJobId === j.id ? "active" : ""}" data-action="select-job" data-id="${j.id}">
-      <h4>${j.job_title} – ${j.employer_name}</h4>
+  $("openJobs").innerHTML = open.length ? open.map(r => `
+    <div class="job-card">
+      <h4>Request: ${esc(r.workerName || "Worker")}</h4>
       <div class="meta">
-        <span>${j.employer_name}</span>
-        <span>${j.pay_rate}</span>
-        <span>${j.location_city}</span>
+        <span>👔 ${esc(r.employerName || "")}</span>
+        <span>📞 ${esc(r.employerPhone || "")}</span>
+        <span>📍 ${esc(r.employerLocation || "")}</span>
       </div>
-      <div style="margin-top:6px;font-size:12px;font-weight:600;color:var(--btn)">${j.workers_needed_count} Workers Needed · ${j.urgency_level}</div>
+      <div style="margin-top:8px" class="acts">
+        <button class="btn btn-primary btn-sm" data-action="req-process" data-id="${esc(r.id)}">On Process</button>
+        <button class="btn btn-success btn-sm" data-action="req-close" data-id="${esc(r.id)}">Close</button>
+        ${r.employerUsername ? `<a class="btn btn-secondary btn-sm" href="https://t.me/${esc(r.employerUsername)}" target="_blank">Telegram</a>` : ""}
+      </div>
     </div>
-  `).join("") || `<div class="empty">No open jobs</div>`;
+  `).join("") : `<div class="empty">No open requests from Mini App</div>`;
 
-  // Recommended matches: verified + available workers whose skill matches selected job
-  const job = jobOrders.find(j => j.id === selectedJobId) || jobOrders[0];
-  const candidates = workers
-    .filter(w => w.verification_status === "Verified" && w.availability_status === "Available")
-    .map(w => {
-      let score = 70;
-      if (job && w.primary_skill_role === job.required_skill) score = 98;
-      else if (job && w.skill_tags?.some(t => t.toLowerCase().includes(job.required_skill.toLowerCase().split(" ")[0]))) score = 88;
-      return { worker: w, score };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5);
-
-  $("recMatches").innerHTML = candidates.length ? candidates.map(m => `
+  const avail = workers.filter(w => w.status === "approved" && w.available).slice(0, 10);
+  $("recMatches").innerHTML = avail.length ? avail.map(w => `
     <div class="match-card">
-      ${avHtml(m.worker.full_name)}
+      ${avHtml(w.full_name, w.photo)}
       <div style="flex:1;min-width:0">
-        <b>${m.worker.full_name} (#${m.worker.id})</b>
-        <div style="font-size:12px;color:var(--hint)">${m.worker.primary_skill_role}</div>
-        <div style="font-size:12px;margin-top:2px">
-          ${m.worker.experience_years} yrs exp
-          ${statusBdg("Verified")} ${statusBdg("Available")}
-        </div>
+        <b>${esc(w.full_name)}</b>
+        <div style="font-size:12px;color:var(--hint)">${esc(w.skill)} · ${esc(w.location)}</div>
+        <div style="font-size:12px;margin-top:2px">${statusBdg("Verified")} ${statusBdg("Available")}</div>
       </div>
       <div style="text-align:right">
-        <div class="match-score">${m.score}% Match</div>
-        <button class="btn btn-primary btn-sm" style="margin-top:6px"
-          data-action="assign-worker" data-worker="${m.worker.id}" data-job="${job?.id || ""}">
-          Assign Worker
-        </button>
+        <button class="btn btn-secondary btn-sm" data-action="view-worker" data-id="${esc(w.id)}">View</button>
       </div>
     </div>
-  `).join("") : `<div class="empty">No available verified workers for this skill</div>`;
+  `).join("") : `<div class="empty">No available verified workers</div>`;
 }
 
 function renderPayroll() {
-  const totalHours = timesheets.reduce((s, t) => s + t.hours, 0);
-  const pending = timesheets.filter(t => t.approval_status === "Pending").length;
-  const payouts = timesheets.filter(t => t.approval_status !== "Paid").reduce((s, t) => s + t.worker_pay, 0);
-  const invoices = timesheets.reduce((s, t) => s + t.employer_bill, 0);
-
+  // Use closed/on_process requests as timesheet-like rows
+  const rows = requests.filter(r => r.status === "on_process" || r.status === "closed" || r.paymentReceived);
   $("payKpis").innerHTML = `
-    <div class="kpi"><div class="label">Total Hours Logged</div><div class="value">${totalHours.toFixed(0)} hrs</div></div>
-    <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Approval</div><div class="value">${pending} timesheets</div></div>
-    <div class="kpi"><div class="label">Worker Payouts Due</div><div class="value">${money(payouts)}</div></div>
-    <div class="kpi"><div class="label">Employer Invoices</div><div class="value">${money(invoices)}</div></div>
+    <div class="kpi"><div class="label">Active / Closed Requests</div><div class="value">${rows.length}</div></div>
+    <div class="kpi"><div class="label">Awaiting Payment</div><div class="value">${requests.filter(r => r.status !== "open" && !r.paymentReceived).length}</div></div>
+    <div class="kpi"><div class="label">Payment Received</div><div class="value">${requests.filter(r => r.paymentReceived).length}</div></div>
+    <div class="kpi"><div class="label">Commission Setting</div><div class="value">${settings.commission}%</div></div>
   `;
 
-  const filters = [["all","All"],["Pending","Pending Approval"],["Approved","Approved"],["Paid","Paid"],["Disputed","Disputed"]];
-  $("pChips").innerHTML = filters.map(([v,l]) =>
-    `<button class="chip ${pFilter === v ? "active" : ""}" data-action="p-filter" data-val="${v}">${l}</button>`
-  ).join("");
+  $("pChips").innerHTML = [
+    ["all","All"],["on_process","On Process"],["closed","Closed"],["unpaid","Unpaid"]
+  ].map(([v,l]) => `<button class="chip ${pFilter===v?"active":""}" data-action="p-filter" data-val="${v}">${l}</button>`).join("");
 
-  const q = ($("pSearch")?.value || "").toLowerCase();
-  let rows = timesheets.filter(t => {
-    if (pFilter !== "all" && t.approval_status !== pFilter) return false;
-    if (q && !`${t.worker_name} ${t.employer_name} ${t.worker_id}`.toLowerCase().includes(q)) return false;
+  let list = requests.filter(r => {
+    if (pFilter === "on_process" && r.status !== "on_process") return false;
+    if (pFilter === "closed" && r.status !== "closed") return false;
+    if (pFilter === "unpaid" && r.paymentReceived) return false;
+    if (pFilter === "unpaid" && r.status === "open") return false;
     return true;
   });
 
-  $("tbPayroll").innerHTML = rows.map(t => `
+  $("tbPayroll").innerHTML = list.map(r => `
     <tr>
       <td class="c-user" data-l="Worker">
         <div class="cell-user">
-          ${avHtml(t.worker_name)}
-          <div class="info"><b>${t.worker_name}</b><span>#${t.worker_id}</span></div>
+          <div class="av">${initials(r.workerName)}</div>
+          <div class="info"><b>${esc(r.workerName || "—")}</b></div>
         </div>
       </td>
-      <td data-l="Employer">${t.employer_name}</td>
-      <td data-l="Hours">${t.hours.toFixed(1)} hrs</td>
-      <td data-l="Worker Pay">${money(t.worker_pay)}</td>
-      <td data-l="Employer Bill">${money(t.employer_bill)}</td>
-      <td data-l="Status">${statusBdg(t.approval_status)}</td>
+      <td data-l="Employer">${esc(r.employerName || "—")}<div class="who" style="margin:0">${esc(r.employerPhone || "")}</div></td>
+      <td data-l="Type">${esc(r.paymentType || "—")}</td>
+      <td data-l="Pay">—</td>
+      <td data-l="Bill">—</td>
+      <td data-l="Status">${statusBdg(r.status || "open")} ${r.paymentReceived ? statusBdg("Paid") : ""}</td>
       <td class="c-act" data-l="Actions">
         <div class="acts">
-          ${t.approval_status === "Pending" ? `
-            <button class="btn btn-success btn-sm" data-action="approve-timesheet" data-id="${t.id}">Approve</button>
-          ` : ""}
-          ${t.approval_status === "Approved" ? `
-            <button class="btn btn-primary btn-sm" data-action="mark-paid" data-id="${t.id}">Mark Paid</button>
-          ` : ""}
-          <button class="btn-ghost btn-sm" data-action="view-timesheet" data-id="${t.id}">View</button>
+          ${r.status === "open" ? `<button class="btn btn-primary btn-sm" data-action="req-process" data-id="${esc(r.id)}">On Process</button>` : ""}
+          ${r.status !== "closed" ? `<button class="btn btn-success btn-sm" data-action="req-close" data-id="${esc(r.id)}">Close</button>` : ""}
+          ${!r.paymentReceived && r.status !== "open" ? `<button class="btn btn-secondary btn-sm" data-action="req-paid" data-id="${esc(r.id)}">Mark Paid</button>` : ""}
         </div>
       </td>
     </tr>
-  `).join("") || `<tr><td colspan="7" class="empty">No timesheets match</td></tr>`;
+  `).join("") || `<tr><td colspan="7" class="empty">No hire requests yet</td></tr>`;
 }
 
 function renderSettings() {
   $("staffKpis").innerHTML = `
-    <div class="setting-card"><div class="sc-label">Active Admin Staff</div><div class="sc-value">${staff.filter(s=>s.status==="Active").length}</div></div>
-    <div class="setting-card"><div class="sc-label">Default Agency Commission</div><div class="sc-value">${settings.commission}%</div></div>
-    <div class="setting-card"><div class="sc-label">Auto-Approval Threshold</div><div class="sc-value" style="font-size:18px">Verified IDs</div></div>
+    <div class="setting-card"><div class="sc-label">Workers in DB</div><div class="sc-value">${workers.length}</div></div>
+    <div class="setting-card"><div class="sc-label">Default Commission</div><div class="sc-value">${settings.commission}%</div></div>
+    <div class="setting-card"><div class="sc-label">Require ID before match</div><div class="sc-value" style="font-size:18px">${settings.requireId ? "On" : "Off"}</div></div>
   `;
-
-  $("tbStaff").innerHTML = staff.map(s => `
-    <tr>
-      <td class="c-user">
-        <div class="cell-user">
-          ${avHtml(s.full_name)}
-          <div class="info"><b>${s.full_name}${s.is_owner ? " (Owner)" : ""}</b></div>
-        </div>
-      </td>
-      <td>${roleBdg(s.role)}</td>
-      <td>${s.permissions_scope}</td>
-      <td>${statusBdg(s.status)}</td>
-      <td><div class="acts"><button class="btn btn-secondary btn-sm" data-action="edit-staff" data-id="${s.id}">Edit</button></div></td>
-    </tr>
-  `).join("");
-
-  // Sync toggles
-  $("setCommission").value = settings.commission;
-  $("setRequireId").classList.toggle("on", settings.requireId);
-  $("setReminders").classList.toggle("on", settings.reminders);
+  if ($("tbStaff")) $("tbStaff").innerHTML = `<tr><td colspan="5" class="empty">Staff roles stored locally for now</td></tr>`;
+  if ($("setCommission")) $("setCommission").value = settings.commission;
+  if ($("setRequireId")) $("setRequireId").classList.toggle("on", settings.requireId);
+  if ($("setReminders")) $("setReminders").classList.toggle("on", settings.reminders);
 }
 
 // ============================================================
-// ACTIONS (full process flow)
+// ACTIONS → Firestore (same fields as index.html)
 // ============================================================
-function approveEntity(type, id) {
-  if (type === "worker") {
-    const w = workers.find(x => x.id === id);
-    if (!w) return;
-    w.verification_status = "Verified";
-    if (w.availability_status === "Pending") w.availability_status = "Available";
-    toast(`✅ Worker ${w.full_name} approved → Verified & Available`);
-    activityFeed.unshift({ icon: "✅", text: `${w.full_name} verified and approved`, time: "now", ago: "just now" });
-  } else if (type === "employer") {
-    const e = employers.find(x => x.id === id);
-    if (!e) return;
-    e.verification_status = "Verified";
-    e.billing_status = "Current";
-    toast(`✅ Employer ${e.company_name} approved → Verified`);
-    activityFeed.unshift({ icon: "✅", text: `${e.company_name} verified as partner`, time: "now", ago: "just now" });
-  }
-  renderCurrent();
-}
-
-function rejectEntity(type, id) {
-  if (type === "worker") {
-    const w = workers.find(x => x.id === id);
-    if (!w) return;
-    w.verification_status = "Rejected";
-    w.availability_status = "Inactive";
-    toast(`Worker ${w.full_name} rejected`);
-  } else if (type === "employer") {
-    const e = employers.find(x => x.id === id);
-    if (!e) return;
-    e.verification_status = "Suspended";
-    e.billing_status = "Suspended";
-    toast(`Employer ${e.company_name} suspended`);
-  }
-  renderCurrent();
-}
-
-// Pending placement waiting for OTP + handover
-let pendingHandover = null; // { workerId, jobId, otp }
-
-function assignWorker(workerId, jobId) {
-  const w = workers.find(x => x.id === workerId);
-  const j = jobOrders.find(x => x.id === jobId);
-  if (!w || !j) { toast("Missing worker or job"); return; }
-
-  if (settings.requireId && w.verification_status !== "Verified") {
-    toast("⚠️ ID verification required before matching (see Settings)");
-    return;
-  }
-  if (w.availability_status !== "Available") {
-    toast("Worker is not available");
-    return;
-  }
-
-  // Step 3 → Status becomes "Pending Review" (waiting for agreement + OTP)
-  w.availability_status = "Pending Review";
-  w.assigned_employer = j.employer_name;
-  w._pendingJobId = j.id;
-
-  activityFeed.unshift({
-    icon: "📋",
-    text: `${w.full_name} assigned to ${j.job_title} @ ${j.employer_name} → Pending Review`,
-    time: "now", ago: "just now"
-  });
-
-  // Generate demo OTP and open handover modal
-  const otp = String(Math.floor(100000 + Math.random() * 900000));
-  pendingHandover = { workerId: w.id, jobId: j.id, otp, workerName: w.full_name, jobTitle: j.job_title, employerName: j.employer_name };
-  openHandoverModal(pendingHandover);
-  toast(`✅ ${w.full_name} → Pending Review. Complete OTP & Handover.`);
-  renderCurrent();
-}
-
-function openHandoverModal(data) {
-  $("hoWorker").textContent = data.workerName;
-  $("hoJob").textContent = `${data.jobTitle} @ ${data.employerName}`;
-  $("hoOtpDisplay").textContent = data.otp; // demo only – real system sends via Telegram/SMS
-  $("hoOtpInput").value = "";
-  $("hoAgreement").innerHTML = `
-    <p style="font-size:13px;line-height:1.6;color:var(--fg)">
-      <strong>የሥራ ስምምነት / Employment Agreement</strong><br><br>
-      Worker: <b>${data.workerName}</b><br>
-      Employer: <b>${data.employerName}</b><br>
-      Position: <b>${data.jobTitle}</b><br>
-      Agency Commission: <b>${settings.commission}%</b><br><br>
-      This agreement is generated by Tamagn Delala. Both parties confirm by entering the 6-digit OTP sent via Telegram/SMS.
-    </p>`;
-  $("handoverModal").classList.remove("hid");
-}
-
-function confirmHandover() {
-  if (!pendingHandover) return;
-  const entered = ($("hoOtpInput").value || "").trim();
-  if (entered !== pendingHandover.otp) {
-    toast("❌ Invalid OTP. Check the code sent to Telegram/SMS.");
-    return;
-  }
-
-  const w = workers.find(x => x.id === pendingHandover.workerId);
-  const j = jobOrders.find(x => x.id === pendingHandover.jobId);
-  if (!w || !j) return;
-
-  // Step 4 complete → Worker becomes Placed
-  w.availability_status = "Placed";
-  delete w._pendingJobId;
-  j.workers_needed_count = Math.max(0, j.workers_needed_count - 1);
-  if (j.workers_needed_count === 0) j.status = "Filled";
-
-  const emp = employers.find(e => e.company_name === j.employer_name);
-  if (emp) emp.placed_workers_count += 1;
-
-  activityFeed.unshift({
-    icon: "🤝",
-    text: `Handover complete: ${w.full_name} is now Placed at ${j.employer_name}`,
-    time: "now", ago: "just now"
-  });
-
-  $("handoverModal").classList.add("hid");
-  pendingHandover = null;
-  toast(`✅ Handover complete → ${w.full_name} is Placed. Active Placements +1`);
-  renderCurrent();
-}
-
-function cancelHandover() {
-  if (pendingHandover) {
-    const w = workers.find(x => x.id === pendingHandover.workerId);
-    if (w && w.availability_status === "Pending Review") {
-      w.availability_status = "Available";
-      w.assigned_employer = null;
-      delete w._pendingJobId;
+async function approveEntity(type, id) {
+  try {
+    if (type === "worker") {
+      await updateDoc(doc(db, "workers", id), { status: "approved", available: true });
+      toast("✅ Worker approved — now visible in Mini App");
+    } else if (type === "employer") {
+      // employers in index use doc id = tg id; mark as verified if field exists
+      await updateDoc(doc(db, "employers", id), { verification_status: "Verified", status: "approved" }).catch(async () => {
+        await setDoc(doc(db, "employers", id), { verification_status: "Verified" }, { merge: true });
+      });
+      toast("✅ Employer approved");
     }
+    await loadAll();
+  } catch (e) { toast("Error: " + e.message); }
+}
+
+async function rejectEntity(type, id) {
+  try {
+    if (type === "worker") {
+      await updateDoc(doc(db, "workers", id), { status: "rejected", available: false });
+      toast("Worker rejected");
+    } else if (type === "employer") {
+      await updateDoc(doc(db, "employers", id), { verification_status: "Suspended" }).catch(() => {});
+      toast("Employer suspended");
+    }
+    await loadAll();
+  } catch (e) { toast("Error: " + e.message); }
+}
+
+async function toggleAvailable(id) {
+  const w = workers.find(x => x.id === id);
+  if (!w) return;
+  try {
+    await updateDoc(doc(db, "workers", id), { available: !w.available });
+    toast(w.available ? "Set to Busy (hidden from Mini App list)" : "Set Available (shown in Mini App)");
+    await loadAll();
+  } catch (e) { toast("Error: " + e.message); }
+}
+
+async function updateRequest(id, patch) {
+  try {
+    await updateDoc(doc(db, "requests", id), patch);
+    toast("Request updated");
+    await loadAll();
+  } catch (e) { toast("Error: " + e.message); }
+}
+
+// ============================================================
+// VIEW / ADD MODALS
+// ============================================================
+let viewingWorkerId = null;
+let viewingEmployerId = null;
+
+function openWorkerView(id) {
+  const w = workers.find(x => x.id === id);
+  if (!w) return;
+  viewingWorkerId = id;
+  const photoBlock = w.photo
+    ? `<img src="${w.photo}" alt="" style="width:105px;aspect-ratio:7/9;object-fit:cover;border-radius:8px;margin-bottom:12px">`
+    : "";
+  $("wvBody").innerHTML = `
+    <div style="text-align:center">${photoBlock}</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      ${avHtml(w.full_name, w.photo)}
+      <div><b style="font-size:16px">${esc(w.full_name)}</b><div style="color:var(--hint);font-size:13px">#${esc(w.id)}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
+      <div><span style="color:var(--hint)">Skill</span><br><b>${esc(w.skill)}</b></div>
+      <div><span style="color:var(--hint)">Experience</span><br><b>${esc(w.experience || w.experience_years)}</b></div>
+      <div><span style="color:var(--hint)">Age</span><br><b>${esc(w.age || "—")}</b></div>
+      <div><span style="color:var(--hint)">Location</span><br><b>${esc(w.location || "—")}</b></div>
+      <div><span style="color:var(--hint)">Pay</span><br><b>${esc(w.pay)} · ${esc(w.paymentType)}</b></div>
+      <div><span style="color:var(--hint)">Status</span><br>${statusBdg(w.verification_status)} ${statusBdg(w.availability_status)}</div>
+      <div><span style="color:var(--hint)">ID / Police</span><br>
+        ${w.hasNationalId ? statusBdg("Verified") : "—"}
+        ${w.hasPoliceClearance ? ' <span class="bdg warn">Police</span>' : ""}
+      </div>
+      <div><span style="color:var(--hint)">Source</span><br><b>${esc(w.source || "—")}</b></div>
+    </div>`;
+  $("workerViewModal").classList.remove("hid");
+}
+
+function openEmployerView(id) {
+  const e = employers.find(x => x.id === id);
+  if (!e) return;
+  viewingEmployerId = id;
+  $("evBody").innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div class="av">${e.logo}</div>
+      <div><b style="font-size:16px">${esc(e.company_name)}</b><div style="color:var(--hint);font-size:13px">${esc(e.phone)}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
+      <div><span style="color:var(--hint)">Location</span><br><b>${esc(e.location || "—")}</b></div>
+      <div><span style="color:var(--hint)">Verification</span><br>${statusBdg(e.verification_status)}</div>
+      <div><span style="color:var(--hint)">Telegram</span><br><b>${e.username ? "@"+esc(e.username) : "—"}</b></div>
+      <div><span style="color:var(--hint)">TG ID</span><br><b>${esc(e.tgId || e.id)}</b></div>
+    </div>`;
+  $("employerViewModal").classList.remove("hid");
+}
+
+async function saveWorkerFromForm(f) {
+  const name = f.full_name.value.trim();
+  const skill = f.primary_skill_role.value;
+  const experience = String(f.experience_years.value || "");
+  const phone = f.phone.value.trim();
+  const nationalId = f.id_number.value.trim();
+  if (!name || !skill) { toast("Name and skill required"); return; }
+
+  const editId = f.edit_id.value;
+  try {
+    if (editId) {
+      await updateDoc(doc(db, "workers", editId), {
+        name, skill, experience, experience_years: Number(f.experience_years.value) || 0
+      });
+      if (phone || nationalId) {
+        await setDoc(doc(db, "workers_private", editId), {
+          phone, nationalId,
+          guarantorName: f.guarantor_name.value.trim(),
+          guarantorPhone: f.guarantor_phone.value.trim()
+        }, { merge: true });
+      }
+      toast("Worker updated");
+    } else {
+      const ref = doc(collection(db, "workers"));
+      const batch = writeBatch(db);
+      batch.set(ref, {
+        name, age: 25, skill, location: "Addis Ababa", experience,
+        paymentType: "monthly", pay: "Negotiable", photo: "",
+        hasNationalId: !!nationalId, hasPoliceClearance: false,
+        status: "approved", available: true, ratingAvg: 0, ratingCount: 0,
+        createdAt: serverTimestamp(), source: "admin"
+      });
+      batch.set(doc(db, "workers_private", ref.id), {
+        phone, nationalId,
+        guarantorName: f.guarantor_name.value.trim(),
+        guarantorPhone: f.guarantor_phone.value.trim()
+      });
+      await batch.commit();
+      toast("Worker added (approved & available)");
+    }
+    $("workerFormModal").classList.add("hid");
+    await loadAll();
+  } catch (e) { toast("Error: " + e.message); }
+}
+
+async function saveEmployerFromForm(f) {
+  const name = f.company_name.value.trim();
+  const phone = f.phone.value.trim();
+  const location = f.industry.value || f.phone.value || "Addis Ababa";
+  if (!name) { toast("Company name required"); return; }
+  try {
+    const editId = f.edit_id.value;
+    if (editId) {
+      await updateDoc(doc(db, "employers", editId), { name, phone, location, email: f.email.value.trim() }).catch(async () => {
+        await setDoc(doc(db, "employers", editId), { name, phone, location, email: f.email.value.trim() }, { merge: true });
+      });
+      toast("Employer updated");
+    } else {
+      const id = String(Date.now());
+      await setDoc(doc(db, "employers", id), {
+        name, phone, location, email: f.email.value.trim(),
+        tgId: 0, username: "", createdAt: serverTimestamp(),
+        verification_status: "Verified", status: "approved"
+      });
+      toast("Employer added");
+    }
+    $("employerFormModal").classList.add("hid");
+    await loadAll();
+  } catch (e) { toast("Error: " + e.message); }
+}
+
+function openWorkerForm(editId) {
+  const form = $("workerForm");
+  form.reset();
+  form.edit_id.value = editId || "";
+  if (editId) {
+    const w = workers.find(x => x.id === editId);
+    if (w) {
+      form.full_name.value = w.full_name || "";
+      form.primary_skill_role.value = w.skill || "";
+      form.experience_years.value = parseInt(w.experience_years, 10) || 1;
+    }
+    $("wfTitle").textContent = "Edit Worker";
+  } else {
+    $("wfTitle").textContent = "Add Worker";
   }
-  $("handoverModal").classList.add("hid");
-  pendingHandover = null;
-  toast("Handover cancelled – worker returned to Available");
-  renderCurrent();
+  $("workerFormModal").classList.remove("hid");
 }
 
-function approveTimesheet(id) {
-  const t = timesheets.find(x => x.id === id);
-  if (!t) return;
-  t.approval_status = "Approved";
-  toast(`Timesheet approved for ${t.worker_name}`);
-  renderCurrent();
-}
-
-function markPaid(id) {
-  const t = timesheets.find(x => x.id === id);
-  if (!t) return;
-  t.approval_status = "Paid";
-  toast(`Marked Paid – ${t.worker_name} · ${money(t.worker_pay)}`);
-  activityFeed.unshift({
-    icon: "💰",
-    text: `Payout completed for ${t.worker_name}`,
-    time: "now", ago: "just now"
-  });
-  renderCurrent();
-}
-
-function approveAllPending() {
-  let n = 0;
-  timesheets.forEach(t => {
-    if (t.approval_status === "Pending") { t.approval_status = "Approved"; n++; }
-  });
-  toast(n ? `Approved ${n} timesheet(s)` : "No pending timesheets");
-  renderCurrent();
+function openEmployerForm(editId) {
+  const form = $("employerForm");
+  form.reset();
+  form.edit_id.value = editId || "";
+  if (editId) {
+    const e = employers.find(x => x.id === editId);
+    if (e) {
+      form.company_name.value = e.company_name || "";
+      form.phone.value = e.phone || "";
+      form.email.value = e.email || "";
+    }
+    $("efTitle").textContent = "Edit Employer";
+  } else $("efTitle").textContent = "Add Employer";
+  $("employerFormModal").classList.remove("hid");
 }
 
 // ============================================================
-// EVENT DELEGATION
+// EVENTS
 // ============================================================
-document.addEventListener("click", e => {
-  const btn = e.target.closest("[data-action], [data-view], [data-goto], [data-tab], .toggle, .nav-item");
+$$(".nav-item").forEach(btn => {
+  btn.addEventListener("click", () => showView(btn.dataset.view));
+});
+
+document.addEventListener("click", async e => {
+  const btn = e.target.closest("[data-action], [data-goto], [data-tab], .toggle");
   if (!btn) return;
 
-  // Navigation
-  if (btn.classList.contains("nav-item") && btn.dataset.view) {
-    showView(btn.dataset.view);
-    return;
-  }
-  if (btn.dataset.goto) {
-    showView(btn.dataset.goto);
-    return;
-  }
+  if (btn.dataset.goto) { showView(btn.dataset.goto); return; }
 
-  // Settings tabs
   if (btn.dataset.tab) {
     $$(".tab").forEach(t => t.classList.remove("active"));
     btn.classList.add("active");
@@ -1340,12 +1455,10 @@ document.addEventListener("click", e => {
     return;
   }
 
-  // Toggles
   if (btn.classList.contains("toggle")) {
     btn.classList.toggle("on");
-    const key = btn.dataset.toggle;
-    if (key === "requireId") settings.requireId = btn.classList.contains("on");
-    if (key === "reminders") settings.reminders = btn.classList.contains("on");
+    if (btn.dataset.toggle === "requireId") settings.requireId = btn.classList.contains("on");
+    if (btn.dataset.toggle === "reminders") settings.reminders = btn.classList.contains("on");
     return;
   }
 
@@ -1353,170 +1466,47 @@ document.addEventListener("click", e => {
   if (!action) return;
 
   switch (action) {
-    case "approve":
-      approveEntity(btn.dataset.type, btn.dataset.id);
-      break;
-    case "reject":
-      rejectEntity(btn.dataset.type, btn.dataset.id);
-      break;
-    case "assign-worker":
-      assignWorker(btn.dataset.worker, btn.dataset.job);
-      break;
-    case "approve-timesheet":
-      approveTimesheet(btn.dataset.id);
-      break;
-    case "mark-paid":
-      markPaid(btn.dataset.id);
-      break;
-    case "approve-all":
-      approveAllPending();
-      break;
-    case "select-job":
-    case "find-match":
-      selectedJobId = btn.dataset.id;
-      if (action === "find-match") showView("matches");
-      else renderMatches();
-      break;
-    case "match-worker":
-      showView("matches");
-      toast(`Select a job then click Assign Worker`);
-      break;
-    case "resume-handover": {
-      const w = workers.find(x => x.id === btn.dataset.id);
-      if (!w || w.availability_status !== "Pending Review") break;
-      const j = jobOrders.find(x => x.id === w._pendingJobId) || jobOrders[0];
-      const otp = String(Math.floor(100000 + Math.random() * 900000));
-      pendingHandover = {
-        workerId: w.id, jobId: j?.id, otp,
-        workerName: w.full_name, jobTitle: j?.job_title || "Job",
-        employerName: w.assigned_employer || j?.employer_name || ""
-      };
-      openHandoverModal(pendingHandover);
-      break;
-    }
-    case "w-filter":
-      wFilter = btn.dataset.val;
-      renderWorkers();
-      break;
-    case "p-filter":
-      pFilter = btn.dataset.val;
-      renderPayroll();
-      break;
+    case "approve": await approveEntity(btn.dataset.type, btn.dataset.id); break;
+    case "reject": await rejectEntity(btn.dataset.type, btn.dataset.id); break;
+    case "toggle-available": await toggleAvailable(btn.dataset.id); break;
+    case "req-process": await updateRequest(btn.dataset.id, { status: "on_process" }); break;
+    case "req-close": await updateRequest(btn.dataset.id, { status: "closed" }); break;
+    case "req-paid": await updateRequest(btn.dataset.id, { paymentReceived: true }); break;
+    case "add-worker": openWorkerForm(); break;
+    case "add-employer": openEmployerForm(); break;
+    case "view-worker": openWorkerView(btn.dataset.id); break;
+    case "view-employer": openEmployerView(btn.dataset.id); break;
+    case "w-filter": wFilter = btn.dataset.val; renderWorkers(); break;
+    case "p-filter": pFilter = btn.dataset.val; renderPayroll(); break;
+    case "refresh": await loadAll(); toast("Refreshed"); break;
     case "save-settings":
-      settings.commission = Number($("setCommission").value) || 18;
-      settings.paymentTerms = $("setPaymentTerms").value;
-      toast("Settings saved ✓");
+      settings.commission = Number($("setCommission")?.value) || 18;
+      toast("Settings saved (local)");
       renderSettings();
-      break;
-    case "add-worker":
-      openWorkerForm();
-      break;
-    case "add-employer":
-      openEmployerForm();
-      break;
-    case "view-worker":
-      openWorkerView(btn.dataset.id);
-      break;
-    case "view-employer":
-      openEmployerView(btn.dataset.id);
-      break;
-    case "create-match":
-    case "invite-staff":
-    case "view-timesheet":
-    case "edit-staff":
-      toast("Coming soon in next iteration");
-      break;
-    case "new":
-      toast("Choose a section first");
       break;
   }
 });
 
-// Live search
 ["eSearch","eStatusFilter","eIndustryFilter"].forEach(id => {
   const el = $(id);
-  if (el) {
-    el.addEventListener("input", renderEmployers);
-    el.addEventListener("change", renderEmployers);
-  }
+  if (el) { el.addEventListener("input", renderEmployers); el.addEventListener("change", renderEmployers); }
 });
 ["wSearch","wSkillFilter"].forEach(id => {
   const el = $(id);
-  if (el) {
-    el.addEventListener("input", renderWorkers);
-    el.addEventListener("change", renderWorkers);
-  }
+  if (el) { el.addEventListener("input", renderWorkers); el.addEventListener("change", renderWorkers); }
 });
 $("pSearch")?.addEventListener("input", renderPayroll);
 
-// Top action button
-$("topActionBtn").addEventListener("click", () => {
-  const action = $("topActionBtn").dataset.action || "new";
-  document.querySelector(`[data-action="${action}"]`)?.click() ||
-    (() => {
-      if (action === "approve-all") approveAllPending();
-      else if (action === "save-settings") {
-        settings.commission = Number($("setCommission").value) || 18;
-        toast("Settings saved ✓");
-      } else toast("Action: " + action);
-    })();
-});
-
-// Handover modal buttons
-$("hoConfirm")?.addEventListener("click", confirmHandover);
-$("hoCancel")?.addEventListener("click", cancelHandover);
-$("hoOtpInput")?.addEventListener("keydown", e => {
-  if (e.key === "Enter") confirmHandover();
-});
-
-// ---- Worker form / view ----
-let viewingWorkerId = null;
-
-function openWorkerForm(editId) {
-  const form = $("workerForm");
-  form.reset();
-  form.edit_id.value = editId || "";
-  if (editId) {
-    const w = workers.find(x => x.id === editId);
-    if (w) {
-      form.full_name.value = w.full_name || "";
-      form.primary_skill_role.value = w.primary_skill_role || "";
-      form.experience_years.value = w.experience_years || 1;
-      form.phone.value = w.phone || "";
-      form.id_number.value = w.id_number || "";
-      form.guarantor_name.value = w.guarantor_name || "";
-      form.guarantor_phone.value = w.guarantor_phone || "";
-    }
-    $("wfTitle").textContent = "Edit Worker";
-    $("wfSub").textContent = "Update worker details.";
-  } else {
-    $("wfTitle").textContent = "Add Worker";
-    $("wfSub").textContent = "Status starts as Pending until verified.";
+$("topActionBtn")?.addEventListener("click", () => {
+  const a = $("topActionBtn").dataset.action;
+  if (a === "add-worker") openWorkerForm();
+  else if (a === "add-employer") openEmployerForm();
+  else if (a === "refresh") loadAll().then(() => toast("Refreshed"));
+  else if (a === "save-settings") {
+    settings.commission = Number($("setCommission")?.value) || 18;
+    toast("Settings saved");
   }
-  $("workerFormModal").classList.remove("hid");
-}
-
-function openWorkerView(id) {
-  const w = workers.find(x => x.id === id);
-  if (!w) return;
-  viewingWorkerId = id;
-  $("wvBody").innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-      ${avHtml(w.full_name)}
-      <div><b style="font-size:16px">${w.full_name}</b><div style="color:var(--hint);font-size:13px">#${w.id}</div></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
-      <div><span style="color:var(--hint)">Skill</span><br><b>${w.primary_skill_role}</b></div>
-      <div><span style="color:var(--hint)">Experience</span><br><b>${w.experience_years} yrs</b></div>
-      <div><span style="color:var(--hint)">Availability</span><br>${statusBdg(w.availability_status)}</div>
-      <div><span style="color:var(--hint)">Verification</span><br>${statusBdg(w.verification_status)}</div>
-      <div><span style="color:var(--hint)">Assigned Employer</span><br><b>${w.assigned_employer || "—"}</b></div>
-      <div><span style="color:var(--hint)">Phone</span><br><b>${w.phone || "—"}</b></div>
-      <div><span style="color:var(--hint)">ID Number</span><br><b>${w.id_number || "—"}</b></div>
-      <div><span style="color:var(--hint)">Guarantor</span><br><b>${w.guarantor_name || "—"}</b> ${w.guarantor_phone ? "("+w.guarantor_phone+")" : ""}</div>
-    </div>`;
-  $("workerViewModal").classList.remove("hid");
-}
+});
 
 $("wfCancel")?.addEventListener("click", () => $("workerFormModal").classList.add("hid"));
 $("wvClose")?.addEventListener("click", () => $("workerViewModal").classList.add("hid"));
@@ -1524,84 +1514,7 @@ $("wvEdit")?.addEventListener("click", () => {
   $("workerViewModal").classList.add("hid");
   if (viewingWorkerId) openWorkerForm(viewingWorkerId);
 });
-
-$("workerForm")?.addEventListener("submit", e => {
-  e.preventDefault();
-  const f = e.target;
-  const editId = f.edit_id.value;
-  const data = {
-    full_name: f.full_name.value.trim(),
-    primary_skill_role: f.primary_skill_role.value,
-    experience_years: Number(f.experience_years.value) || 0,
-    phone: f.phone.value.trim(),
-    id_number: f.id_number.value.trim(),
-    guarantor_name: f.guarantor_name.value.trim(),
-    guarantor_phone: f.guarantor_phone.value.trim(),
-    skill_tags: [f.primary_skill_role.value]
-  };
-  if (editId) {
-    const w = workers.find(x => x.id === editId);
-    if (w) Object.assign(w, data);
-    toast(`Worker ${data.full_name} updated`);
-  } else {
-    const id = "W-" + (1048 + workers.length);
-    workers.unshift({
-      id,
-      ...data,
-      availability_status: "Pending",
-      verification_status: "Pending",
-      assigned_employer: null
-    });
-    activityFeed.unshift({ icon: "👷", text: `${data.full_name} registered → Pending verification`, time: "now", ago: "just now" });
-    toast(`Worker ${data.full_name} added → Pending`);
-  }
-  $("workerFormModal").classList.add("hid");
-  renderCurrent();
-});
-
-// ---- Employer form / view ----
-let viewingEmployerId = null;
-
-function openEmployerForm(editId) {
-  const form = $("employerForm");
-  form.reset();
-  form.edit_id.value = editId || "";
-  if (editId) {
-    const e = employers.find(x => x.id === editId);
-    if (e) {
-      form.company_name.value = e.company_name || "";
-      form.industry.value = e.industry || "";
-      form.email.value = e.email || "";
-      form.phone.value = e.phone || "";
-      form.tin.value = e.tin || "";
-    }
-    $("efTitle").textContent = "Edit Employer";
-  } else {
-    $("efTitle").textContent = "Add Employer";
-  }
-  $("employerFormModal").classList.remove("hid");
-}
-
-function openEmployerView(id) {
-  const e = employers.find(x => x.id === id);
-  if (!e) return;
-  viewingEmployerId = id;
-  $("evBody").innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-      <div class="av">${e.logo || initials(e.company_name)}</div>
-      <div><b style="font-size:16px">${e.company_name}</b><div style="color:var(--hint);font-size:13px">${e.email || ""}</div></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
-      <div><span style="color:var(--hint)">Industry</span><br><b>${e.industry}</b></div>
-      <div><span style="color:var(--hint)">Verification</span><br>${statusBdg(e.verification_status)}</div>
-      <div><span style="color:var(--hint)">Billing</span><br><b>${e.billing_status}</b></div>
-      <div><span style="color:var(--hint)">Active Jobs</span><br><b>${e.active_jobs_count}</b></div>
-      <div><span style="color:var(--hint)">Placed Workers</span><br><b>${e.placed_workers_count}</b></div>
-      <div><span style="color:var(--hint)">Phone</span><br><b>${e.phone || "—"}</b></div>
-      <div><span style="color:var(--hint)">TIN</span><br><b>${e.tin || "—"}</b></div>
-    </div>`;
-  $("employerViewModal").classList.remove("hid");
-}
+$("workerForm")?.addEventListener("submit", e => { e.preventDefault(); saveWorkerFromForm(e.target); });
 
 $("efCancel")?.addEventListener("click", () => $("employerFormModal").classList.add("hid"));
 $("evClose")?.addEventListener("click", () => $("employerViewModal").classList.add("hid"));
@@ -1609,44 +1522,15 @@ $("evEdit")?.addEventListener("click", () => {
   $("employerViewModal").classList.add("hid");
   if (viewingEmployerId) openEmployerForm(viewingEmployerId);
 });
+$("employerForm")?.addEventListener("submit", e => { e.preventDefault(); saveEmployerFromForm(e.target); });
 
-$("employerForm")?.addEventListener("submit", e => {
-  e.preventDefault();
-  const f = e.target;
-  const editId = f.edit_id.value;
-  const data = {
-    company_name: f.company_name.value.trim(),
-    industry: f.industry.value,
-    email: f.email.value.trim(),
-    phone: f.phone.value.trim(),
-    tin: f.tin.value.trim()
-  };
-  if (editId) {
-    const emp = employers.find(x => x.id === editId);
-    if (emp) Object.assign(emp, data);
-    toast(`Employer ${data.company_name} updated`);
-  } else {
-    const id = "e" + (employers.length + 10);
-    employers.unshift({
-      id,
-      ...data,
-      active_jobs_count: 0,
-      placed_workers_count: 0,
-      verification_status: "Pending",
-      billing_status: "Not Started",
-      logo: initials(data.company_name)
-    });
-    activityFeed.unshift({ icon: "🏢", text: `${data.company_name} registered → Pending verification`, time: "now", ago: "just now" });
-    toast(`Employer ${data.company_name} added → Pending`);
-  }
-  $("employerFormModal").classList.add("hid");
-  renderCurrent();
-});
+$("hoCancel")?.addEventListener("click", () => $("handoverModal")?.classList.add("hid"));
+$("hoConfirm")?.addEventListener("click", () => $("handoverModal")?.classList.add("hid"));
 
 // Init
 showView("dashboard");
+loadAll();
 
-// PWA
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./admin-sw.js", { scope: "./" }).catch(() => {});
 }
