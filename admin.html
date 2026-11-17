@@ -984,10 +984,18 @@ function renderDashboard() {
   const available = workers.filter(w => w.availability_status === "Available").length;
 
   $("dashKpis").innerHTML = `
-    <div class="kpi ${pendingW + pendingE ? "alert" : ""}"><div class="label">Pending Approvals</div><div class="value">${pendingW + pendingE}</div></div>
-    <div class="kpi"><div class="label">Open Hire Requests</div><div class="value">${openJobs}</div></div>
-    <div class="kpi"><div class="label">Available Workers</div><div class="value">${available}</div></div>
-    <div class="kpi"><div class="label">Placed / Busy</div><div class="value">${placed}</div></div>
+    <div class="kpi ${pendingW + pendingE ? "alert" : ""}" data-action="goto-kpi" data-kpi="pending" style="cursor:pointer" title="View pending workers">
+      <div class="label">Pending Approvals</div><div class="value">${pendingW + pendingE}</div>
+    </div>
+    <div class="kpi" data-action="goto-kpi" data-kpi="requests" style="cursor:pointer" title="View open hire requests">
+      <div class="label">Open Hire Requests</div><div class="value">${openJobs}</div>
+    </div>
+    <div class="kpi" data-action="goto-kpi" data-kpi="available" style="cursor:pointer" title="View available workers">
+      <div class="label">Available Workers</div><div class="value">${available}</div>
+    </div>
+    <div class="kpi" data-action="goto-kpi" data-kpi="placed" style="cursor:pointer" title="View placed / busy workers">
+      <div class="label">Placed / Busy</div><div class="value">${placed}</div>
+    </div>
   `;
 
   const queueItems = [
@@ -1290,8 +1298,22 @@ async function toggleAvailable(id) {
 
 async function updateRequest(id, patch) {
   try {
+    const r = requests.find(x => x.id === id);
     await updateDoc(doc(db, "requests", id), patch);
-    toast("Request updated");
+
+    // When hire is accepted (on process / closed), hide worker from Telegram employer list
+    // index.html only shows status=="approved" && available==true
+    if (r && r.workerId && (patch.status === "on_process" || patch.status === "closed")) {
+      await updateDoc(doc(db, "workers", r.workerId), {
+        available: false,
+        assigned_employer: r.employerName || null
+      }).catch(() => {});
+      toast(patch.status === "on_process"
+        ? "On process — worker hidden from employer search"
+        : "Closed — worker remains unavailable until you Set Available");
+    } else {
+      toast("Request updated");
+    }
     await loadAll();
   } catch (e) { toast("Error: " + e.message); }
 }
@@ -1500,6 +1522,14 @@ document.addEventListener("click", async e => {
     case "view-employer": openEmployerView(btn.dataset.id); break;
     case "w-filter": wFilter = btn.dataset.val; renderWorkers(); break;
     case "p-filter": pFilter = btn.dataset.val; renderPayroll(); break;
+    case "goto-kpi": {
+      const k = btn.dataset.kpi;
+      if (k === "pending") { wFilter = "Pending"; showView("workers"); }
+      else if (k === "available") { wFilter = "Available"; showView("workers"); }
+      else if (k === "placed") { wFilter = "Placed"; showView("workers"); }
+      else if (k === "requests") { showView("matches"); }
+      break;
+    }
     case "refresh": await loadAll(); toast("Refreshed"); break;
     case "save-settings":
       settings.commission = Number($("setCommission")?.value) || 18;
