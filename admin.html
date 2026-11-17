@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive">
-<title>Tamagn Delala | Manager</title>
+<title>Tamagn Delala | Staffing Agency Admin</title>
 <link rel="manifest" href="admin.webmanifest">
-<meta name="theme-color" content="#0369a1">
+<meta name="theme-color" content="#0ea5e9">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="TD Admin">
@@ -15,938 +15,1126 @@
 <link rel="apple-touch-icon" href="admin-apple-touch-icon.png">
 <style>
 :root {
-  --bg: var(--tg-theme-bg-color, #f1f5f9);
-  --fg: var(--tg-theme-text-color, #0f172a);
-  --hint: var(--tg-theme-hint-color, #64748b);
-  --card: var(--tg-theme-secondary-bg-color, #ffffff);
-  --btn: var(--tg-theme-button-color, #0284c7);
-  --btnfg: var(--tg-theme-button-text-color, #ffffff);
+  --bg: #f1f5f9;
+  --fg: #0f172a;
+  --hint: #64748b;
+  --card: #ffffff;
+  --btn: #0284c7;
+  --btn-hover: #0369a1;
+  --btnfg: #ffffff;
   --danger: #ef4444;
   --success: #059669;
   --warning: #d97706;
   --border: #e2e8f0;
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06);
-  --radius: 16px;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --radius: 12px;
+  --sidebar-w: 240px;
+  --header-h: 64px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
 body {
   background: var(--bg); color: var(--fg);
-  font: 15px/1.5 system-ui, -apple-system, sans-serif;
-  padding-bottom: 50px; -webkit-font-smoothing: antialiased;
+  font: 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
-.header {
-  position: sticky; top: 0; z-index: 50;
-  background: var(--card); border-bottom: 1px solid var(--border);
-  padding: 12px max(16px, calc((100vw - 1180px) / 2)); display: flex; align-items: center; justify-content: space-between;
-}
-.logo { display: flex; align-items: center; gap: 10px; }
-.logo-icon {
-  width: 40px; height: 40px; border-radius: 12px;
-  background: linear-gradient(135deg, #0ea5e9, #0369a1);
-  display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px;
-}
-.logo h1 { font-size: 16px; font-weight: 700; }
-.logo span { font-size: 12px; color: var(--hint); }
-.lang-btn {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
-}
-html { -webkit-text-size-adjust: 100%; }
-body { overflow-x: hidden; }
-img { max-width: 100%; }
-main { padding: 0 14px 24px; }
-
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  color: var(--btn);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  margin: 8px 0 12px;
-  padding: 4px 0;
-}
-
-.skills-wrap { margin: 6px 0 12px; overflow-x: auto; scrollbar-width: none; }
-.skills-wrap::-webkit-scrollbar { display: none; }
-.skills { display: flex; gap: 8px; width: max-content; }
-.chip {
-  padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border);
-  background: var(--card); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
-}
-.chip.active { background: var(--btn); color: var(--btnfg); border-color: var(--btn); }
-.card {
-  background: var(--card); border-radius: var(--radius); margin-bottom: 12px;
-  overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border);
-}
-.card-img { display:block; width: 100%; aspect-ratio: 7 / 9; height: auto; object-fit: cover; background: #e2e8f0; }
-.card-body { padding: 13px 14px 15px; }
-.card-name { font-size: 16px; font-weight: 700; }
-.card-skill {
-  display: inline-block; background: #e0f2fe; color: #0369a1;
-  font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 20px; margin-top: 3px;
-}
-.badges { display: flex; flex-wrap: wrap; gap: 5px; margin: 7px 0 3px; }
-.badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px; }
-.badge-id { background: #dcfce7; color: #166534; }
-.badge-police { background: #fef3c7; color: #92400e; }
-.meta { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 6px 0; font-size: 13px; color: var(--hint); }
-.pay { font-weight: 600; color: var(--success); font-size: 14px; margin: 4px 0 10px; }
-.btn-hire, .btn-primary {
-  width: 100%; padding: 11px; border: none; border-radius: 11px;
-  background: var(--btn); color: var(--btnfg); font-size: 15px; font-weight: 600; cursor: pointer;
-}
-.state { text-align: center; padding: 40px 16px; color: var(--hint); }
-.state-icon { font-size: 40px; margin-bottom: 10px; opacity: 0.7; }
-.state h3 { font-size: 15px; color: var(--fg); margin-bottom: 4px; }
-.admin-card, .form-card {
-  background: var(--card); border-radius: var(--radius); padding: 15px;
-  margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--border);
-}
-.admin-card.due { border: 2px solid var(--warning); background: #fffbeb; }
-.admin-card.pending { border: 2px solid #93c5fd; background: #eff6ff; }
-label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 3px; font-weight: 500; }
-input, select, textarea {
-  width: 100%; padding: 10px 11px; margin-bottom: 11px;
-  border: 1px solid var(--border); border-radius: 10px;
-  background: var(--bg); color: var(--fg); font-size: 16px;
-}
-textarea { min-height: 70px; resize: vertical; }
-.btn-secondary {
-  padding: 7px 11px; border: 1px solid var(--border); border-radius: 8px;
-  background: var(--bg); color: var(--fg); font-size: 13px; font-weight: 500;
-  cursor: pointer; margin: 3px 5px 0 0;
-}
-.btn-warning { background: #fef3c7; border-color: #fbbf24; color: #92400e; font-weight: 600; }
-.btn-success { background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 600; }
-.btn-danger { color: var(--danger); border-color: #fecaca; }
-.btn-info { background: #e0f2fe; border-color: #7dd3fc; color: #0369a1; font-weight: 600; }
+img { max-width: 100%; display: block; }
+button, input, select, textarea { font: inherit; }
+a { color: var(--btn); text-decoration: none; }
 .hid { display: none !important; }
-.section-title { font-size: 15px; font-weight: 700; margin: 18px 0 9px; }
-.who { font-size: 13px; color: var(--hint); margin-bottom: 5px; }
-.divider { height: 1px; background: var(--border); margin: 14px 0; }
-.due-label, .pending-label {
-  display: inline-block; font-size: 11px; font-weight: 700;
-  padding: 2px 7px; border-radius: 6px; margin-bottom: 5px;
+
+/* ===== Layout ===== */
+.app { display: flex; min-height: 100vh; }
+.sidebar {
+  width: var(--sidebar-w); background: var(--card);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 40;
 }
-.due-label { background: #fef3c7; color: #92400e; }
-.pending-label { background: #dbeafe; color: #1e40af; }
-.status-open { color: #0369a1; font-weight: 600; }
-.status-process { color: #d97706; font-weight: 600; }
-.status-closed { color: #059669; font-weight: 600; }
-.stars { color: #eab308; letter-spacing: 1px; font-size: 13px; }
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(15,23,42,.55);
-  display: flex; align-items: center; justify-content: center;
-  padding: 18px; z-index: 100;
+.sidebar-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 20px; border-bottom: 1px solid var(--border);
 }
-.modal-overlay.hid { display: none !important; }
-.modal-box {
-  max-height: 90vh; max-height: 90dvh; overflow-y: auto;
-  background: var(--card); border-radius: 18px; padding: 22px;
-  max-width: 340px; width: 100%; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+.brand-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #0ea5e9, #0369a1);
+  display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 13px;
 }
-.modal-box h3 { font-size: 17px; margin-bottom: 8px; text-align: center; }
-.modal-box p { color: var(--hint); font-size: 14px; margin-bottom: 14px; text-align: center; }
-.phone-box {
-  background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px;
-  padding: 12px; text-align: center; margin-bottom: 14px;
+.brand-text { font-size: 14px; font-weight: 700; line-height: 1.2; }
+.brand-text span { display: block; font-size: 11px; font-weight: 500; color: var(--hint); }
+.nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: 10px;
+  background: none; border: 0; color: var(--fg);
+  font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; width: 100%;
+  transition: background .15s;
 }
-.phone-box a { font-size: 18px; font-weight: 700; color: #166534; text-decoration: none; }
+.nav-item:hover { background: #f1f5f9; }
+.nav-item.active { background: #e0f2fe; color: #0369a1; font-weight: 600; }
+.nav-item .ni { font-size: 18px; width: 22px; text-align: center; }
+.nav-item .badge {
+  margin-left: auto; min-width: 20px; padding: 1px 7px;
+  border-radius: 999px; background: var(--danger); color: #fff;
+  font-size: 11px; font-weight: 700; text-align: center;
+}
+.sidebar-footer {
+  padding: 12px 16px; border-top: 1px solid var(--border);
+  font-size: 12px; color: var(--hint);
+}
 
-.topbar-right { display:flex; gap:8px; align-items:center; }
-.wrap { max-width: 1180px; margin: 0 auto; }
+.main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar {
+  height: var(--header-h); background: var(--card);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; position: sticky; top: 0; z-index: 30;
+}
+.topbar h1 { font-size: 18px; font-weight: 700; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px; border: 0;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background .15s, opacity .15s;
+}
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn-primary { background: var(--btn); color: var(--btnfg); }
+.btn-primary:hover:not(:disabled) { background: var(--btn-hover); }
+.btn-secondary {
+  background: var(--card); color: var(--fg);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover:not(:disabled) { background: #f8fafc; }
+.btn-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.btn-warning { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+.btn-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.btn-ghost { background: none; color: var(--btn); border: 0; padding: 6px 10px; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-icon {
+  width: 36px; height: 36px; padding: 0;
+  display: grid; place-items: center; border-radius: 8px;
+  background: none; border: 1px solid var(--border); cursor: pointer;
+}
 
-.photo-preview { display:block; width:105px; aspect-ratio:7/9; object-fit:cover; border-radius:8px; border:1px solid var(--border); margin-bottom:11px; }
+.content { padding: 20px 24px 40px; flex: 1; }
+.view { display: none; }
+.view.active { display: block; }
 
-/* ===== Responsive layout ===== */
-#pendingList, #dueList, #reqs, #empList, #wl { display: grid; grid-template-columns: 1fr; gap: 12px; }
-#pendingList .admin-card, #dueList .admin-card, #reqs .admin-card, #empList .admin-card, #wl .admin-card { margin-bottom: 0; }
-#pendingList .state, #dueList .state, #reqs .state, #empList .state, #wl .state { grid-column: 1 / -1; }
-@media (min-width: 700px)  { #pendingList, #dueList, #reqs, #empList, #wl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1050px) { #pendingList, #dueList, #reqs, #empList, #wl { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-#wf { max-width: 640px; }
-#login { max-width: 460px; margin-left: auto; margin-right: auto; }
-
-.cam-box { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 12px; color: #fff; }
-.cam-view { position: relative; aspect-ratio: 7 / 9; width: min(100%, calc(68vh * 0.7778)); width: min(100%, calc(68dvh * 0.7778)); background: #000; border-radius: 12px; overflow: hidden; }
-.cam-view video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.cam-view.mirror video { transform: scaleX(-1); }
-.cam-guide { position: absolute; inset: 8% 20% 24% 20%; border: 2px dashed rgba(255,255,255,.85); border-radius: 50%; pointer-events: none; }
-.cam-tip { font-size: 13px; text-align: center; color: #e2e8f0; }
-.cam-actions { display: flex; gap: 8px; width: 100%; }
-.cam-actions .btn-primary { flex: 1; }
-.cam-actions .btn-secondary { margin: 0; padding: 11px 14px; }
-
-/* ===== Admin shell: sidebar + views ===== */
-.wrap { max-width: 1280px; }
-.header { padding-left: max(16px, calc((100vw - 1280px) / 2)); padding-right: max(16px, calc((100vw - 1280px) / 2)); }
-.topbar-right .who { margin: 0; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.topbar-right .btn-secondary { margin: 0; }
-a.btn-secondary { display: inline-block; text-decoration: none; }
-.shell { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 20px; align-items: start; margin-top: 16px; }
-.content { min-width: 0; }
-.side { position: sticky; top: 76px; display: flex; flex-direction: column; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); }
-.nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 0; border-radius: 10px; background: none; color: var(--fg); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; }
-.nav-btn:hover { background: var(--bg); }
-.nav-btn.active { background: #e0f2fe; color: #0369a1; }
-.nav-btn .ni { font-size: 17px; width: 22px; text-align: center; }
-.nav-btn .nb { margin-left: auto; min-width: 20px; padding: 1px 6px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 11px; font-weight: 700; text-align: center; }
-.view-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.view-head h2 { font-size: 20px; }
-.btn-add { padding: 9px 16px; border: 0; border-radius: 10px; background: var(--btn); color: var(--btnfg); font-size: 14px; font-weight: 600; cursor: pointer; }
-
-/* KPI cards */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px; }
-.kpi { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
-.kpi .k-l { font-size: 13px; font-weight: 600; color: var(--hint); }
-.kpi .k-v { font-size: 28px; font-weight: 800; line-height: 1.2; margin-top: 2px; }
-.kpi .k-s { font-size: 12px; color: var(--hint); }
+/* ===== Shared UI ===== */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.kpi {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow);
+}
+.kpi .label { font-size: 13px; font-weight: 600; color: var(--hint); display: flex; align-items: center; gap: 6px; }
+.kpi .value { font-size: 28px; font-weight: 800; line-height: 1.15; margin-top: 4px; }
+.kpi .sub { font-size: 12px; color: var(--hint); margin-top: 2px; }
+.kpi .trend { font-size: 12px; font-weight: 600; margin-left: 6px; }
+.kpi .trend.up { color: var(--success); }
+.kpi .trend.down { color: var(--danger); }
 .kpi.alert { border-color: #fbbf24; background: #fffbeb; }
-.kpi.alert .k-v { color: #b45309; }
+.kpi.alert .value { color: #b45309; }
 
-/* Dashboard panels */
-.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
-.panel-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
-.panel-card h3 { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 15px; }
-.panel-card .sub { font-size: 12px; color: var(--hint); margin-bottom: 6px; }
-.link-btn { background: none; border: 0; color: var(--btn); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
-.row-item { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 9px 0; border-top: 1px solid var(--border); }
-.row-main { flex: 1; min-width: 140px; }
-.row-main b, .row-main .who { display: block; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row-act { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
-.row-act .btn-secondary { margin: 0; }
-.feed-dot { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--bg); display: grid; place-items: center; font-size: 14px; }
-.feed-time { font-size: 12px; color: var(--hint); white-space: nowrap; }
-.empty { padding: 18px 4px; text-align: center; color: var(--hint); font-size: 14px; }
-.chart svg { width: 100%; height: auto; display: block; }
-.legend { display: flex; gap: 14px; font-size: 12px; color: var(--hint); margin-top: 4px; }
-.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+.panel {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px;
+}
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap;
+}
+.panel-head h3 { font-size: 15px; font-weight: 700; }
+.panel-body { padding: 0; }
+.panel-body.pad { padding: 16px 18px; }
 
-/* Avatars, badges */
-.av { width: 38px; height: 38px; flex: none; border-radius: 50%; object-fit: cover; background: #e0f2fe; color: #0369a1; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
-.bdg { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.toolbar {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center;
+}
+.toolbar .search {
+  flex: 1 1 220px; max-width: 340px;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 0 12px;
+}
+.toolbar .search input {
+  border: 0; background: transparent; padding: 9px 0; width: 100%; outline: none;
+}
+.toolbar select, .filter-select {
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--card); color: var(--fg); min-width: 140px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--card); font-size: 13px; font-weight: 500; cursor: pointer;
+  color: var(--fg);
+}
+.chip.active { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; font-weight: 600; }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th {
+  padding: 11px 14px; text-align: left; font-size: 12px; font-weight: 600;
+  color: var(--hint); background: #f8fafc; white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+.tbl td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.tbl tbody tr:last-child td { border-bottom: 0; }
+.tbl tbody tr:hover td { background: #f8fafc; }
+.cell-user { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cell-user .info { min-width: 0; }
+.cell-user .info b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cell-user .info span { font-size: 12px; color: var(--hint); }
+.av {
+  width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+  background: #e0f2fe; color: #0369a1; display: grid; place-items: center;
+  font-size: 13px; font-weight: 700; flex: none;
+}
+.av img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.bdg {
+  display: inline-block; padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+}
 .bdg.ok { background: #dcfce7; color: #166534; }
 .bdg.warn { background: #fef3c7; color: #92400e; }
 .bdg.info { background: #dbeafe; color: #1e40af; }
 .bdg.bad { background: #fee2e2; color: #991b1b; }
 .bdg.mute { background: #e2e8f0; color: #475569; }
+.bdg.purple { background: #f3e8ff; color: #7e22ce; }
+.bdg.teal { background: #ccfbf1; color: #0f766e; }
+.bdg.orange { background: #ffedd5; color: #c2410c; }
 
-/* Toolbars and filter chips */
-.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.toolbar input, .toolbar select { width: auto; margin: 0; flex: 1 1 200px; padding: 9px 12px; font-size: 15px; }
-.toolbar select { flex: 0 1 190px; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.chips .chip { font: inherit; font-size: 13px; font-weight: 500; }
-.chips .chip:not(.active) { color: var(--fg); }
-
-/* Tables */
-.tbl-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
-.tbl th { padding: 10px 12px; background: var(--bg); text-align: left; font-size: 12px; font-weight: 600; color: var(--hint); white-space: nowrap; }
-.tbl td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
-.tbl tbody tr:hover td { background: rgba(2, 132, 199, .05); }
-.cell-id { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.cell-id b { display: block; }
-.cell-id .who { margin: 0; }
-.acts { display: flex; flex-wrap: wrap; gap: 5px; }
-.acts .btn-secondary { margin: 0; padding: 5px 9px; font-size: 12px; }
-.tbl-empty { padding: 28px 16px; text-align: center; color: var(--hint); }
-
-@media (max-width: 1000px) { .grid2 { grid-template-columns: 1fr; } }
-@media (max-width: 819px) {
-  body { padding-bottom: 86px; }
-  .shell { grid-template-columns: 1fr; margin-top: 8px; }
-  .side { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 60; flex-direction: row; justify-content: space-around; gap: 0; border-width: 1px 0 0; border-radius: 0; padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); }
-  .nav-btn { position: relative; flex: 1; flex-direction: column; justify-content: center; gap: 2px; padding: 6px 2px; font-size: 11px; text-align: center; }
-  .nav-btn .nb { position: absolute; top: 0; left: calc(50% + 6px); margin: 0; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-2 > * { min-width: 0; }
+.empty { padding: 32px 16px; text-align: center; color: var(--hint); font-size: 14px; }
+.pagination {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 14px; border-top: 1px solid var(--border); font-size: 13px; color: var(--hint);
 }
-@media (max-width: 700px) {
-  .topbar-right .who { display: none; }
+.pagination button { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+
+/* Dashboard specific */
+.feed-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.feed-item:last-child { border-bottom: 0; }
+.feed-dot { width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; display: grid; place-items: center; font-size: 14px; flex: none; }
+.feed-time { font-size: 12px; color: var(--hint); white-space: nowrap; margin-left: auto; }
+.job-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+  margin-bottom: 10px; cursor: pointer; transition: border-color .15s;
+}
+.job-card:hover, .job-card.active { border-color: var(--btn); background: #f0f9ff; }
+.job-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.job-card .meta { font-size: 12px; color: var(--hint); display: flex; flex-wrap: wrap; gap: 8px; }
+.match-card {
+  display: flex; align-items: center; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.match-card:last-child { border-bottom: 0; }
+.match-score { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #dcfce7; color: #166534; }
+
+/* Settings */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; overflow-x: auto; }
+.tab {
+  padding: 10px 16px; border: 0; background: none; font-size: 13px; font-weight: 600;
+  color: var(--hint); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
+}
+.tab.active { color: var(--btn); border-bottom-color: var(--btn); }
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.setting-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px; box-shadow: var(--shadow);
+}
+.setting-card .sc-label { font-size: 13px; color: var(--hint); font-weight: 600; }
+.setting-card .sc-value { font-size: 24px; font-weight: 800; margin-top: 4px; }
+.form-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 14px; align-items: center; }
+.form-row label { font-size: 13px; font-weight: 500; color: var(--fg); min-width: 200px; }
+.form-row input[type="text"], .form-row input[type="number"], .form-row select {
+  padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff;
+  min-width: 160px;
+}
+.toggle {
+  position: relative; width: 44px; height: 24px; background: #cbd5e1;
+  border-radius: 999px; cursor: pointer; transition: background .2s; border: 0;
+}
+.toggle.on { background: var(--btn); }
+.toggle::after {
+  content: ""; position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; background: #fff; border-radius: 50%;
+  transition: transform .2s; box-shadow: 0 1px 2px rgb(0 0 0 / .15);
+}
+.toggle.on::after { transform: translateX(20px); }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,.5);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 100;
+}
+.modal-box {
+  background: var(--card); border-radius: 14px; padding: 24px;
+  max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+}
+.modal-box h3 { font-size: 17px; margin-bottom: 6px; text-align: center; }
+.modal-box p { color: var(--hint); font-size: 13px; margin-bottom: 16px; text-align: center; }
+.modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+.modal-actions .btn { flex: 1; justify-content: center; }
+
+/* Mobile */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100%; height: auto; position: fixed; left: 0; right: 0; bottom: 0; top: auto;
+    flex-direction: row; border-right: 0; border-top: 1px solid var(--border);
+    z-index: 50; padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .sidebar-brand, .sidebar-footer { display: none; }
+  .nav {
+    flex-direction: row; justify-content: space-around; padding: 6px 4px;
+    width: 100%; gap: 0; overflow-x: auto;
+  }
+  .nav-item {
+    flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 10px;
+    flex: 1; text-align: center; min-width: 0;
+  }
+  .nav-item .ni { font-size: 18px; }
+  .nav-item .badge { position: absolute; top: 2px; right: 4px; margin: 0; }
+  .main { margin-left: 0; padding-bottom: 72px; }
+  .content { padding: 14px 12px 24px; }
+  .topbar { padding: 0 14px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
   .tbl thead { display: none; }
   .tbl, .tbl tbody, .tbl tr { display: block; width: 100%; }
-  .tbl tr { padding: 12px; border-top: 1px solid var(--border); }
-  .tbl tbody tr:first-child { border-top: 0; }
-  .tbl td { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0; border: 0; }
-  .tbl td::before { content: attr(data-l); flex: none; font-size: 12px; font-weight: 600; color: var(--hint); }
-  .tbl td.c-id, .tbl td.c-act { display: block; }
-  .tbl td.c-id::before, .tbl td.c-act::before { content: none; }
-  .tbl td.c-act { padding-top: 8px; }
+  .tbl tr { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .tbl td {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 0; border: 0; gap: 10px;
+  }
+  .tbl td::before { content: attr(data-l); font-size: 12px; font-weight: 600; color: var(--hint); flex: none; }
+  .tbl td.c-user, .tbl td.c-act { display: block; }
+  .tbl td.c-user::before, .tbl td.c-act::before { display: none; }
+}
+@media (max-width: 500px) {
+  .kpis { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
-<header class="header">
-  <div class="logo">
-    <div class="logo-icon">TD</div>
-    <div><h1>Tamagn Delala</h1><span>Manager panel</span></div>
-  </div>
-  <div class="topbar-right hid" id="hdrUser">
-    <span class="who" id="who"></span>
-    <button class="btn-secondary" id="signOut">Sign out</button>
-  </div>
-</header>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">TD</div>
+      <div class="brand-text">Tamagn Delala<span>Staffing Agency</span></div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="dashboard"><span class="ni">📊</span> Dashboard</button>
+      <button class="nav-item" data-view="employers"><span class="ni">🏢</span> Employers</button>
+      <button class="nav-item" data-view="workers"><span class="ni">👷</span> Workers</button>
+      <button class="nav-item" data-view="matches"><span class="ni">🔗</span> Job Matches</button>
+      <button class="nav-item" data-view="payroll"><span class="ni">⏱️</span> Timesheets & Payroll</button>
+      <button class="nav-item" data-view="settings"><span class="ni">⚙️</span> Settings</button>
+    </nav>
+    <div class="sidebar-footer">v2.0 · Manager Panel</div>
+  </aside>
 
-<main><div class="wrap">
-  <div id="login" class="form-card" style="margin-top:16px">
-    <p id="loginNote" class="who" style="margin-bottom:12px">Sign in with the manager Google account.</p>
-    <button class="btn-primary" id="signIn">Sign in with Google</button>
-    <button class="btn-secondary hid" id="installBtn" style="width:100%;margin:10px 0 0;padding:11px">📲 Install as app</button>
-    <p id="iosHint" class="who hid" style="margin-top:10px">To install on iPhone: tap the Share button, then "Add to Home Screen".</p>
-    <p id="tgNote" class="who hid" style="margin-top:10px">This page does not work inside Telegram. Open it in Chrome or Safari.</p>
-  </div>
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="topbar-actions">
+        <button class="btn-icon" title="Notifications">🔔</button>
+        <button class="btn btn-primary" id="topActionBtn">+ New</button>
+      </div>
+    </header>
 
-  <div id="panel" class="hid">
-    <div class="shell">
-      <nav class="side">
-        <button class="nav-btn active" data-view="dashboard"><span class="ni">📊</span><span>Dashboard</span></button>
-        <button class="nav-btn" data-view="requests"><span class="ni">📋</span><span>Requests</span><span class="nb hid" id="nbReq"></span></button>
-        <button class="nav-btn" data-view="workers"><span class="ni">👷</span><span>Workers</span><span class="nb hid" id="nbW"></span></button>
-        <button class="nav-btn" data-view="employers"><span class="ni">👔</span><span>Employers</span></button>
-        <button class="nav-btn" data-view="add"><span class="ni">➕</span><span>Add Worker</span></button>
-      </nav>
-
-      <section class="content">
-        <!-- Dashboard -->
-        <div id="v-dashboard" class="view">
-          <div class="view-head"><h2>Dashboard</h2></div>
-          <div class="kpis" id="kpis"></div>
-          <div class="grid2">
-            <div class="panel-card">
-              <h3>⏳ Verification Queue <button class="link-btn" data-view="workers">View all</button></h3>
-              <div class="sub">New workers waiting for approval</div>
-              <div id="dQueue"></div>
+    <div class="content">
+      <!-- ========== DASHBOARD ========== -->
+      <section id="v-dashboard" class="view active">
+        <div class="kpis" id="dashKpis"></div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Verification & Onboarding Queue</h3>
+              <button class="btn-ghost btn-sm" data-goto="workers">View all</button>
             </div>
-            <div class="panel-card">
-              <h3>📋 Active Requests <button class="link-btn" data-view="requests">View all</button></h3>
-              <div class="sub">Hire requests that still need action</div>
-              <div id="dReqs"></div>
-            </div>
+            <div class="panel-body pad" id="dashQueue"></div>
           </div>
-          <div class="grid2">
-            <div class="panel-card chart">
-              <h3>Requests per week</h3>
-              <div class="sub">Last 8 weeks</div>
-              <div id="dChart"></div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Urgent Unfilled Jobs</h3>
+              <button class="btn-ghost btn-sm" data-goto="matches">View all</button>
             </div>
-            <div class="panel-card">
-              <h3>⭐ Rating Follow-up Due</h3>
-              <div class="sub">Ask the employer how the worker is doing</div>
-              <div id="dDue"></div>
-            </div>
-          </div>
-          <div class="panel-card">
-            <h3>🕒 Recent Activity</h3>
-            <div id="dFeed"></div>
+            <div class="panel-body pad" id="dashUrgent"></div>
           </div>
         </div>
-
-        <!-- Hire requests -->
-        <div id="v-requests" class="view hid">
-          <div class="view-head"><h2>Hire Requests</h2></div>
-          <div class="chips" id="rChips"></div>
-          <div class="toolbar"><input id="rSearch" type="search" placeholder="Search worker, employer or phone..."></div>
-          <div id="tbReq"></div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><h3>Weekly Job Requests vs Placements</h3></div>
+            <div class="panel-body pad" id="dashChart">
+              <svg viewBox="0 0 320 140" width="100%" height="140">
+                <polyline fill="none" stroke="#0ea5e9" stroke-width="2.5" points="20,90 80,70 140,95 200,55 260,75 300,40"/>
+                <polyline fill="none" stroke="#14b8a6" stroke-width="2.5" points="20,110 80,60 140,75 200,90 260,50 300,30"/>
+                <circle cx="20" cy="90" r="3.5" fill="#0ea5e9"/><circle cx="80" cy="70" r="3.5" fill="#0ea5e9"/>
+                <circle cx="140" cy="95" r="3.5" fill="#0ea5e9"/><circle cx="200" cy="55" r="3.5" fill="#0ea5e9"/>
+                <circle cx="260" cy="75" r="3.5" fill="#0ea5e9"/><circle cx="300" cy="40" r="3.5" fill="#0ea5e9"/>
+                <circle cx="20" cy="110" r="3.5" fill="#14b8a6"/><circle cx="80" cy="60" r="3.5" fill="#14b8a6"/>
+                <circle cx="140" cy="75" r="3.5" fill="#14b8a6"/><circle cx="200" cy="90" r="3.5" fill="#14b8a6"/>
+                <circle cx="260" cy="50" r="3.5" fill="#14b8a6"/><circle cx="300" cy="30" r="3.5" fill="#14b8a6"/>
+              </svg>
+              <div style="display:flex;gap:16px;font-size:12px;color:var(--hint);margin-top:6px">
+                <span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0ea5e9;margin-right:4px"></i>Job Requests</span>
+                <span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#14b8a6;margin-right:4px"></i>Placements</span>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Live Check-In & Shift Activity</h3></div>
+            <div class="panel-body pad" id="dashFeed"></div>
+          </div>
         </div>
+      </section>
 
-        <!-- Workers -->
-        <div id="v-workers" class="view hid">
-          <div class="view-head"><h2>Workers</h2><button class="btn-add" data-view="add">+ Add Worker</button></div>
+      <!-- ========== EMPLOYERS ========== -->
+      <section id="v-employers" class="view">
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btnAddEmployer">+ Add Employer</button>
+          <div class="search"><span>🔍</span><input type="search" id="eSearch" placeholder="Search Employers..."></div>
+          <select id="eStatusFilter" class="filter-select">
+            <option value="all">All Status</option>
+            <option value="Verified">Verified</option>
+            <option value="Pending">Pending</option>
+            <option value="Suspended">Suspended</option>
+          </select>
+          <select id="eIndustryFilter" class="filter-select">
+            <option value="all">All Industries</option>
+            <option>Logistics</option><option>Manufacturing</option><option>Construction</option>
+            <option>Hospitality</option><option>Healthcare</option><option>Technology</option><option>Domestic</option>
+          </select>
+        </div>
+        <div class="kpis" id="empKpis"></div>
+        <div class="panel">
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Company Name</th>
+                  <th>Industry</th>
+                  <th>Active Jobs</th>
+                  <th>Placed Workers</th>
+                  <th>Verification Status</th>
+                  <th>Billing Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tbEmployers"></tbody>
+            </table>
+          </div>
+          <div class="pagination"><button disabled>‹</button><span>1 of 12</span><button>›</button></div>
+        </div>
+      </section>
+
+      <!-- ========== WORKERS ========== -->
+      <section id="v-workers" class="view">
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btnAddWorker">+ Add Worker</button>
+          <div class="search"><span>🔍</span><input type="search" id="wSearch" placeholder="Search Workers by name, skill, or ID..."></div>
           <div class="chips" id="wChips"></div>
-          <div class="toolbar">
-            <input id="wSearch" type="search" placeholder="Search name, skill or location...">
-            <select id="wSkill"></select>
+          <select id="wSkillFilter" class="filter-select">
+            <option value="all">Filter by Skill</option>
+            <option>Electrician</option><option>Hospitality Staff</option><option>Warehouse Associate</option>
+            <option>Registered Nurse</option><option>Delivery Driver</option><option>Office Admin</option>
+            <option>Domestic Worker</option><option>Construction Worker</option>
+          </select>
+        </div>
+        <div class="kpis" id="workerKpis"></div>
+        <div class="panel">
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Worker Name & ID</th>
+                  <th>Primary Skill / Role</th>
+                  <th>Experience</th>
+                  <th>Availability Status</th>
+                  <th>Verification</th>
+                  <th>Assigned Employer</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tbWorkers"></tbody>
+            </table>
           </div>
-          <div id="tbWorkers"></div>
+          <div class="pagination"><button disabled>‹</button><span>1 of 45</span><button>›</button></div>
+        </div>
+      </section>
+
+      <!-- ========== JOB MATCHES ========== -->
+      <section id="v-matches" class="view">
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btnCreateMatch">+ Create Match</button>
+          <div class="search"><span>🔍</span><input type="search" id="mSearch" placeholder="Search jobs, workers, skills..."></div>
+          <select id="mStatusFilter" class="filter-select">
+            <option value="all">Filter by Status</option>
+            <option>Open</option><option>Partially Filled</option><option>Filled</option><option>Closed</option>
+          </select>
+          <select id="mUrgencyFilter" class="filter-select">
+            <option value="all">Filter by Urgency</option>
+            <option>Normal</option><option>Urgent</option>
+          </select>
+        </div>
+        <div class="kpis" id="matchKpis"></div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><h3>Open Job Requests</h3></div>
+            <div class="panel-body pad" id="openJobs"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Recommended Worker Matches</h3>
+              <span class="bdg ok" id="matchAvg">98% Avg</span>
+            </div>
+            <div class="panel-body pad" id="recMatches"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== TIMESHEETS & PAYROLL ========== -->
+      <section id="v-payroll" class="view">
+        <div class="toolbar">
+          <button class="btn btn-primary" id="btnApproveAll">+ Approve All</button>
+          <div class="search"><span>🔍</span><input type="search" id="pSearch" placeholder="Search timesheets, workers, or employers..."></div>
+          <div class="chips" id="pChips"></div>
+          <select id="pPeriod" class="filter-select">
+            <option>This Week: Nov 11 – Nov 17</option>
+            <option>Last Week</option>
+            <option>This Month</option>
+          </select>
+        </div>
+        <div class="kpis" id="payKpis"></div>
+        <div class="panel">
+          <div class="panel-head"><h3>Weekly Timesheet & Payroll Log</h3></div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Worker Name & ID</th>
+                  <th>Employer</th>
+                  <th>Hours Logged</th>
+                  <th>Worker Pay</th>
+                  <th>Employer Bill</th>
+                  <th>Approval Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tbPayroll"></tbody>
+            </table>
+          </div>
+          <div class="pagination"><button disabled>‹</button><span>1 of 8</span><button>›</button></div>
+        </div>
+      </section>
+
+      <!-- ========== SETTINGS ========== -->
+      <section id="v-settings" class="view">
+        <div class="tabs" id="settingsTabs">
+          <button class="tab active" data-tab="staff">Staff & Permissions</button>
+          <button class="tab" data-tab="commission">Commission & Billing Rules</button>
+          <button class="tab" data-tab="verification">Verification & Alerts</button>
+          <button class="tab" data-tab="general">General Agency Info</button>
         </div>
 
-        <!-- Employers -->
-        <div id="v-employers" class="view hid">
-          <div class="view-head"><h2>Registered Employers</h2></div>
-          <div class="toolbar"><input id="eSearch" type="search" placeholder="Search name, phone or location..."></div>
-          <div id="tbEmp"></div>
+        <div id="tab-staff">
+          <div class="settings-grid" id="staffKpis"></div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Staff Roles & Access Control</h3>
+              <button class="btn btn-primary btn-sm" id="btnInviteStaff">+ Invite Staff</button>
+            </div>
+            <div class="tbl-wrap">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>Staff Member</th>
+                    <th>Role</th>
+                    <th>Permissions Scope</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tbStaff"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
-        <!-- Add / edit worker -->
-        <div id="v-add" class="view hid">
-          <div class="view-head"><h2 id="formTitle">➕ Add Worker</h2></div>
-          <form id="wf" class="form-card">
-            <input type="hidden" id="f_id">
-            <label>Full name *</label>
-            <input id="f_name" required maxlength="80">
-            <label>Age *</label>
-            <input id="f_age" type="number" min="14" max="80" required>
-            <label>Skill *</label>
-            <select id="f_skill" required></select>
-            <label>Location *</label>
-            <input id="f_location" required maxlength="60">
-            <label>Experience *</label>
-            <input id="f_experience" required maxlength="120">
-            <label>Payment type *</label>
-            <select id="f_paymentType">
-              <option value="monthly">Monthly</option>
-              <option value="hourly">Hourly</option>
-              <option value="daily">Daily</option>
-            </select>
-            <label>Pay (optional)</label>
-            <input id="f_pay" maxlength="60">
-            <label>National ID *</label>
-            <input id="f_nationalId" required maxlength="30">
-            <label>Phone *</label>
-            <input id="f_phone" required maxlength="20">
-            <label>Police Clearance</label>
-            <select id="f_police"><option value="no">No</option><option value="yes">Yes</option></select>
-            <label>Guarantor Name</label>
-            <input id="f_guarantorName" maxlength="80">
-            <label>Guarantor Phone</label>
-            <input id="f_guarantorPhone" maxlength="20">
-            <label>Photo</label>
-            <button type="button" class="btn-secondary" id="f_photoBtn" style="margin:0 0 10px">📷 Take Photo</button>
-            <label for="f_photo" class="btn-secondary hid" id="f_photoAlt" style="margin:0 0 10px;display:inline-block">Use phone camera app</label>
-            <input id="f_photo" type="file" accept="image/*" capture="user" class="hid">
-            <img id="f_photoPreview" class="photo-preview hid" alt="">
-            <p class="who" style="margin:-6px 0 12px">Take the photo with the camera (gallery upload is not allowed). Passport style: face centered, plain background.</p>
-            <button class="btn-primary" id="saveBtn" type="submit">Save Worker</button>
-            <button class="btn-secondary hid" id="cancelEdit" type="button">Cancel</button>
-          </form>
+        <div id="tab-commission" class="hid">
+          <div class="panel">
+            <div class="panel-head"><h3>Agency Rules & Commission Settings</h3></div>
+            <div class="panel-body pad">
+              <div class="form-row">
+                <label>Standard Placement Fee / Markup (%)</label>
+                <input type="number" id="setCommission" value="18" min="0" max="50" step="0.5">
+              </div>
+              <div class="form-row">
+                <label>Require ID & License Verification Before Matching</label>
+                <button class="toggle on" id="setRequireId" aria-label="Toggle"></button>
+              </div>
+              <div class="form-row">
+                <label>Automated Shift Check-In Reminders (SMS/Telegram)</label>
+                <button class="toggle on" id="setReminders" aria-label="Toggle"></button>
+              </div>
+              <div class="form-row">
+                <label>Invoice Payment Terms</label>
+                <select id="setPaymentTerms">
+                  <option>Net 15 Days</option>
+                  <option>Due on Handover</option>
+                  <option>Net 7 Days</option>
+                  <option>Net 30 Days</option>
+                </select>
+              </div>
+              <div style="margin-top:16px">
+                <button class="btn btn-primary" id="btnSaveSettings">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-verification" class="hid">
+          <div class="panel">
+            <div class="panel-head"><h3>Verification Rules</h3></div>
+            <div class="panel-body pad">
+              <div class="form-row">
+                <label>Auto-Approval Threshold</label>
+                <select><option>Verified IDs</option><option>Manual Only</option><option>Trusted Partners</option></select>
+              </div>
+              <div class="form-row">
+                <label>Require Guarantor for Domestic Workers</label>
+                <button class="toggle on" aria-label="Toggle"></button>
+              </div>
+              <div class="form-row">
+                <label>Police Clearance Required for Security Roles</label>
+                <button class="toggle on" aria-label="Toggle"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tab-general" class="hid">
+          <div class="panel">
+            <div class="panel-head"><h3>Agency Information</h3></div>
+            <div class="panel-body pad">
+              <div class="form-row">
+                <label>Agency Name</label>
+                <input type="text" value="Tamagn Delala">
+              </div>
+              <div class="form-row">
+                <label>Support Phone</label>
+                <input type="text" value="+251 9XX XXX XXX">
+              </div>
+              <div class="form-row">
+                <label>Telegram Bot</label>
+                <input type="text" value="@TamagnDelalaBot">
+              </div>
+              <div class="form-row">
+                <label>Default City</label>
+                <input type="text" value="Addis Ababa">
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>
   </div>
-</div></main>
+</div>
 
-<div id="ratingModal" class="modal-overlay hid">
-  <div class="modal-box" style="text-align:left">
-    <h3 style="text-align:center">Save Rating</h3>
-    <p class="who" id="ratingWorkerName" style="text-align:center"></p>
-    <label>Stars (1-5)</label>
-    <select id="ratingStars">
-      <option value="5">5 ★★★★★</option><option value="4">4 ★★★★</option><option value="3">3 ★★★</option>
-      <option value="2">2 ★★</option><option value="1">1 ★</option>
-    </select>
-    <label>Comment / Recommendation</label>
-    <textarea id="ratingComment"></textarea>
-    <button class="btn-primary" id="saveRatingBtn">Save Rating</button>
-    <button class="btn-secondary" id="cancelRatingBtn" style="width:100%;margin-top:8px">Cancel</button>
+<!-- Simple modal -->
+<div class="modal-overlay hid" id="modal">
+  <div class="modal-box">
+    <h3 id="modalTitle">Confirm</h3>
+    <p id="modalMsg"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="modalCancel">Cancel</button>
+      <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+    </div>
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, getDoc, updateDoc, deleteDoc, writeBatch, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-const ADMIN_EMAIL = "henokj2000@gmail.com";
-const firebaseConfig = {
-  apiKey: "AIzaSyDOzRzt9k35kokQOD1rEIpkIVPjNyd0Q3c",
-  authDomain: "tamagn-delala.firebaseapp.com",
-  projectId: "tamagn-delala",
-  storageBucket: "tamagn-delala.firebasestorage.app",
-  messagingSenderId: "996483381337",
-  appId: "1:996483381337:web:f20127638e8da2aee7d948"
-};
-
-const SKILLS = [
-  { en: "House Maid", am: "የቤት ሰራተኛ" },
-  { en: "Babysitter", am: "ህጻናት አሳዳጊ" },
-  { en: "Cook / Chef", am: "ምግብ አብሳይ" },
-  { en: "Gardener", am: "አትክልተኛ" },
-  { en: "Security Guard", am: "ጠባቂ" },
-  { en: "Plumber", am: "የቧንቧ ሰራተኛ" },
-  { en: "Electrician", am: "ኤሌክትሪሺያን" },
-  { en: "Construction Worker", am: "የግንባታ ሰራተኛ" },
-  { en: "Daily Laborer", am: "ዕለታዊ ሰራተኛ" },
-  { en: "Driver", am: "ሹፌር" },
-  { en: "Cleaner", am: "ጽዳት ሰራተኛ" },
-  { en: "Laundry Worker", am: "የልብስ ማጠቢያ" },
-  { en: "Waiter / Waitress", am: "አስተናጋጅ" },
-  { en: "Office Assistant", am: "የቢሮ ረዳት" },
-  { en: "Nanny", am: "ሞግዚት" },
-  { en: "Other", am: "ሌላ" }
+<script>
+// ============================================================
+// MOCK DATA (matches screenshots + requirements)
+// Field names follow the exact schema you specified.
+// Swap the arrays for Firestore snapshots when ready.
+// ============================================================
+const employers = [
+  { id: "e1", company_name: "Delta Corp", email: "delta.corp@contact.com", industry: "Logistics", active_jobs_count: 8, placed_workers_count: 45, verification_status: "Verified", billing_status: "Current", logo: "Δ" },
+  { id: "e2", company_name: "Logistics Inc", email: "ops@logistics.inc", industry: "Manufacturing", active_jobs_count: 12, placed_workers_count: 61, verification_status: "Pending", billing_status: "Pending", logo: "L" },
+  { id: "e3", company_name: "Horizon Construction", email: "hr@horizon.build", industry: "Construction", active_jobs_count: 5, placed_workers_count: 30, verification_status: "Verified", billing_status: "Current", logo: "H" },
+  { id: "e4", company_name: "Apex Hospitality", email: "service@apexhospitality.com", industry: "Hospitality", active_jobs_count: 15, placed_workers_count: 88, verification_status: "Verified", billing_status: "Overdue", logo: "A" },
+  { id: "e5", company_name: "Metro Healthcare", email: "admin@metrohealth.co", industry: "Healthcare", active_jobs_count: 2, placed_workers_count: 14, verification_status: "Suspended", billing_status: "Suspended", logo: "M" },
+  { id: "e6", company_name: "Quantum Solutions", email: "recruiting@quantum.solutions", industry: "Technology", active_jobs_count: 0, placed_workers_count: 5, verification_status: "Pending", billing_status: "Not Started", logo: "Q" },
 ];
 
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
-const auth = getAuth(fbApp);
+const workers = [
+  { id: "W-1042", full_name: "Dawit Bekele", primary_skill_role: "Electrician", experience_years: 5, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Horizon Construction", skill_tags: ["Electrician","Safety"], photo: null },
+  { id: "W-1043", full_name: "Selamawit Tadesse", primary_skill_role: "Hospitality Staff", experience_years: 3, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Hospitality"], photo: null },
+  { id: "W-1044", full_name: "Bereket Alemu", primary_skill_role: "Warehouse Associate", experience_years: 2, availability_status: "Pending", verification_status: "Pending", assigned_employer: null, skill_tags: ["Warehouse"], photo: null },
+  { id: "W-1045", full_name: "Tigist Haile", primary_skill_role: "Registered Nurse", experience_years: 6, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Metro Healthcare", skill_tags: ["Nurse","Healthcare"], photo: null },
+  { id: "W-1046", full_name: "Yonas Kebede", primary_skill_role: "Delivery Driver", experience_years: 4, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Driver"], photo: null },
+  { id: "W-1047", full_name: "Meron Girma", primary_skill_role: "Office Admin", experience_years: 3, availability_status: "Inactive", verification_status: "Verified", assigned_employer: null, skill_tags: ["Admin"], photo: null },
+  { id: "W-1040", full_name: "Anch Chileman", primary_skill_role: "Warehouse Associate", experience_years: 3, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Warehouse"], photo: null },
+  { id: "W-1041", full_name: "Sarah Jolley", primary_skill_role: "General Labor", experience_years: 2, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Delta Corp", skill_tags: ["Labor"], photo: null },
+];
 
-const tg = window.Telegram?.WebApp;
-const inTelegram = /Telegram/i.test(navigator.userAgent) || !!(tg && tg.initData);
-if (inTelegram) { $_tgNote(); }
-function $_tgNote() { document.getElementById("tgNote").classList.remove("hid"); document.getElementById("signIn").classList.add("hid"); }
+const jobOrders = [
+  { id: "j1", job_title: "Electrician", employer_id: "e3", employer_name: "Horizon Construction", required_skill: "Electrician", workers_needed_count: 2, location_city: "Seattle, WA", pay_rate: "$35/hr", urgency_level: "Urgent", status: "Open", start_date: "2026-09-25" },
+  { id: "j2", job_title: "Warehouse Associate", employer_id: "e2", employer_name: "Logistics Inc", required_skill: "Warehouse Associate", workers_needed_count: 10, location_city: "Addis Ababa", pay_rate: "Negotiable", urgency_level: "Urgent", status: "Open", start_date: "2026-09-26" },
+  { id: "j3", job_title: "RN", employer_id: "e5", employer_name: "Metro Healthcare", required_skill: "Registered Nurse", workers_needed_count: 4, location_city: "Addis Ababa", pay_rate: "Monthly", urgency_level: "Normal", status: "Open", start_date: "2026-10-01" },
+  { id: "j4", job_title: "Senior Welder", employer_id: "e1", employer_name: "Delta Corp", required_skill: "Welder", workers_needed_count: 1, location_city: "Addis Ababa", pay_rate: "Daily", urgency_level: "Urgent", status: "Open", start_date: "2026-09-25" },
+];
 
+const timesheets = [
+  { id: "t1", worker_id: "W-1042", worker_name: "Dawit Bekele", employer_name: "Horizon Construction", hours: 40.0, worker_pay: 1400, employer_bill: 1850, approval_status: "Approved" },
+  { id: "t2", worker_id: "W-1043", worker_name: "Selamawit Tadesse", employer_name: "Logistics Inc", hours: 38.5, worker_pay: 962.50, employer_bill: 1280, approval_status: "Pending" },
+  { id: "t3", worker_id: "W-1044", worker_name: "Bereket Alemu", employer_name: "Horizon Construction", hours: 40.0, worker_pay: 1200, employer_bill: 1550, approval_status: "Approved" },
+  { id: "t4", worker_id: "W-1045", worker_name: "Tigist Haile", employer_name: "Metro Healthcare", hours: 36.0, worker_pay: 1980, employer_bill: 2500, approval_status: "Pending" },
+  { id: "t5", worker_id: "W-1041", worker_name: "Sarah Jolley", employer_name: "Delta Corp", hours: 40.0, worker_pay: 1600, employer_bill: 2100, approval_status: "Approved" },
+  { id: "t6", worker_id: "W-1040", worker_name: "Anch Chileman", employer_name: "Logistics Inc", hours: 37.0, worker_pay: 925, employer_bill: 1210, approval_status: "Paid" },
+];
+
+const staff = [
+  { id: "s1", full_name: "Henok Fikru", role: "Super Admin", permissions_scope: "Full System, Payroll & Settings", status: "Active", is_owner: true },
+  { id: "s2", full_name: "Selamawit Bekele", role: "Placement Coordinator", permissions_scope: "Workers, Employers, Job Matches", status: "Active" },
+  { id: "s3", full_name: "Dawit Tadesse", role: "Payroll Officer", permissions_scope: "Timesheets, Invoices & Payouts", status: "Active" },
+  { id: "s4", full_name: "Meron Alemu", role: "Verification Specialist", permissions_scope: "Approve/Reject Workers & Employers", status: "Active" },
+];
+
+const activityFeed = [
+  { icon: "👤", text: "Sarah J. checked in – General Labor (Site A)", time: "9:40 PM", ago: "3 months ago" },
+  { icon: "✓", text: "Mark R. completed shift – Delivery Driver (Site B)", time: "9:45 PM", ago: "1 month ago" },
+  { icon: "✓", text: "Mark R. completed shift – Delivery Driver (Site B)", time: "9:45 PM", ago: "1 month ago" },
+];
+
+// ============================================================
+// HELPERS
+// ============================================================
 const $ = id => document.getElementById(id);
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const ts = x => (x?.seconds) ? x.seconds : 0;
-let ratingRequestId = null, ratingWorkerId = null;
+const $$ = sel => document.querySelectorAll(sel);
 
-$("f_skill").innerHTML = SKILLS.map(s => `<option value="${esc(s.en)}">${s.en}</option>`).join("");
-$("f_police").innerHTML = '<option value="no">No</option><option value="yes">Yes</option>';
-$("wSkill").innerHTML = '<option value="">All skills</option>' + SKILLS.map(s => `<option value="${esc(s.en)}">${s.en}</option>`).join("");
-
-function starsHtml(avg, count) {
-  if (!count) return "";
-  const full = Math.round(avg||0);
-  return `<div class="stars">${"★".repeat(full)}${"☆".repeat(5-full)} <span style="color:var(--hint);font-size:12px">(${count})</span></div>`;
+function initials(name) {
+  return (name || "?").split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase();
+}
+function avHtml(name, photo) {
+  if (photo) return `<div class="av"><img src="${photo}" alt=""></div>`;
+  return `<div class="av">${initials(name)}</div>`;
+}
+function statusBdg(status) {
+  const map = {
+    Verified: "ok", Approved: "ok", Available: "ok", Active: "ok", Current: "ok", Paid: "mute",
+    Pending: "warn", "Pending Approval": "warn",
+    Placed: "info", Open: "info",
+    Suspended: "bad", Rejected: "bad", Overdue: "bad", Inactive: "mute",
+    "Not Started": "mute"
+  };
+  return `<span class="bdg ${map[status] || "mute"}">${status}</span>`;
+}
+function roleBdg(role) {
+  const map = {
+    "Super Admin": "purple",
+    "Placement Coordinator": "info",
+    "Payroll Officer": "teal",
+    "Verification Specialist": "orange"
+  };
+  return `<span class="bdg ${map[role] || "mute"}">${role}</span>`;
+}
+function money(n) {
+  return "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
 }
 
-
-// ---- Live camera capture (passport 7:9 frame). Gallery picking is not offered. ----
-function takePassportPhoto(L) {
-  return new Promise(async (resolve, reject) => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return reject(new Error("nocam"));
-    let stream = null, facing = "user";
-    const open = async f => {
-      if (stream) stream.getTracks().forEach(t => t.stop());
-      stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: f }, width: { ideal: 1280 }, height: { ideal: 1280 } } });
-    };
-    try { await open(facing); } catch (e) { return reject(new Error("nocam")); }
-    const ov = document.createElement("div");
-    ov.className = "modal-overlay"; ov.style.zIndex = 300; ov.style.background = "#000";
-    ov.innerHTML = '<div class="cam-box"><div class="cam-view mirror"><video playsinline muted autoplay></video><div class="cam-guide"></div></div>' +
-      '<p class="cam-tip"></p><div class="cam-actions"><button type="button" class="btn-secondary" data-c="cancel"></button>' +
-      '<button type="button" class="btn-primary" data-c="snap"></button><button type="button" class="btn-secondary" data-c="flip">🔄</button></div></div>';
-    document.body.appendChild(ov);
-    const video = ov.querySelector("video"), view = ov.querySelector(".cam-view");
-    ov.querySelector(".cam-tip").textContent = L.tip;
-    ov.querySelector('[data-c="cancel"]').textContent = L.cancel;
-    ov.querySelector('[data-c="snap"]').textContent = L.snap;
-    video.srcObject = stream;
-    const close = () => { if (stream) stream.getTracks().forEach(t => t.stop()); ov.remove(); };
-    ov.onclick = async e => {
-      const c = e.target.dataset && e.target.dataset.c;
-      if (c === "cancel") { close(); resolve(null); }
-      else if (c === "flip") {
-        facing = facing === "user" ? "environment" : "user";
-        try { await open(facing); video.srcObject = stream; view.classList.toggle("mirror", facing === "user"); } catch (_) {}
-      } else if (c === "snap") {
-        const vw = video.videoWidth, vh = video.videoHeight;
-        if (!vw || !vh) return;
-        const W = 350, H = 450, R = W / H;
-        let sw, sh, sx, sy;
-        if (vw / vh > R) { sh = vh; sw = vh * R; sx = (vw - sw) / 2; sy = 0; }
-        else { sw = vw; sh = vw / R; sx = 0; sy = (vh - sh) / 2; }
-        const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
-        cv.getContext("2d").drawImage(video, sx, sy, sw, sh, 0, 0, W, H);
-        const data = cv.toDataURL("image/jpeg", 0.75);
-        close(); resolve(data);
-      }
-    };
-  });
-}
-
-function shrink(file) {
-  // Passport-size photo: 35x45 mm ratio (7:9), stored as 350x450 JPEG
-  const W = 350, H = 450, RATIO = W / H;
-  return new Promise((res, rej) => {
-    if (!file || !/^image\//.test(file.type)) return rej(new Error("Please choose an image file."));
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const w = img.naturalWidth, h = img.naturalHeight;
-      if (w < 200 || h < 260) return rej(new Error("Photo is too small. Use a clear passport-size photo."));
-      if (w / h > 1.05) return rej(new Error("Please upload a portrait passport-size photo (not a wide/landscape picture)."));
-      let sw = w, sh = h, sx = 0, sy = 0;
-      if (w / h > RATIO) { sw = h * RATIO; sx = (w - sw) / 2; }       // too wide: trim sides
-      else { sh = w / RATIO; sy = (h - sh) * 0.15; }                  // too tall: trim, keep the head
-      const c = document.createElement("canvas");
-      c.width = W; c.height = H;
-      c.getContext("2d").drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
-      res(c.toDataURL("image/jpeg", 0.75));
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Could not read this image.")); };
-    img.src = url;
-  });
-}
-
-// Admin
-let allW = [], reqs = [], pending = [], employers = [];
-let wFilter = "all", rFilter = "all";
-$("signIn").onclick = async () => {
-  const provider = new GoogleAuthProvider();
-  try { await signInWithPopup(auth, provider); }
-  catch (e) {
-    if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") {
-      try { await signInWithRedirect(auth, provider); } catch (e2) { alert(e2.code || e2.message); }
-    } else if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
-      alert(e.code || e.message);
-    }
-  }
+// ============================================================
+// NAVIGATION
+// ============================================================
+const titles = {
+  dashboard: "Dashboard",
+  employers: "Employers Directory",
+  workers: "Workers Directory",
+  matches: "Job Matches & Placements",
+  payroll: "Timesheets & Payroll Management",
+  settings: "Settings & Roles"
 };
-$("signOut").onclick = () => signOut(auth);
+const topActions = {
+  dashboard: "+ New",
+  employers: "+ Add Employer",
+  workers: "+ Add Worker",
+  matches: "+ Create Match",
+  payroll: "+ Approve All",
+  settings: "Save Changes"
+};
 
-onAuthStateChanged(auth, async user => {
-  if (!user) { $("login").classList.remove("hid"); $("panel").classList.add("hid"); $("hdrUser").classList.add("hid"); return; }
-  if (user.email !== ADMIN_EMAIL) { alert("Not admin"); signOut(auth); return; }
-  $("who").textContent = "Signed in: " + user.email;
-  $("login").classList.add("hid"); $("panel").classList.remove("hid"); $("hdrUser").classList.remove("hid");
-  await loadAdmin();
+function showView(name) {
+  $$(".view").forEach(v => v.classList.remove("active"));
+  $$(".nav-item").forEach(n => n.classList.remove("active"));
+  const view = $("v-" + name);
+  if (view) view.classList.add("active");
+  const nav = document.querySelector(`.nav-item[data-view="${name}"]`);
+  if (nav) nav.classList.add("active");
+  $("pageTitle").textContent = titles[name] || name;
+  $("topActionBtn").textContent = topActions[name] || "+ New";
+  if (name === "dashboard") renderDashboard();
+  if (name === "employers") renderEmployers();
+  if (name === "workers") renderWorkers();
+  if (name === "matches") renderMatches();
+  if (name === "payroll") renderPayroll();
+  if (name === "settings") renderSettings();
+}
+
+$$(".nav-item").forEach(btn => {
+  btn.addEventListener("click", () => showView(btn.dataset.view));
+});
+document.addEventListener("click", e => {
+  const goto = e.target.closest("[data-goto]");
+  if (goto) showView(goto.dataset.goto);
 });
 
-async function loadAdmin() {
-  const [rs, ws, es] = await Promise.all([
-    getDocs(query(collection(db,"requests"), orderBy("createdAt","desc"), limit(80))),
-    getDocs(collection(db,"workers")),
-    getDocs(collection(db,"employers"))
-  ]);
-  reqs = rs.docs.map(d => ({id:d.id, ...d.data()}));
-  allW = ws.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>ts(b.createdAt)-ts(a.createdAt));
-  pending = allW.filter(w => w.status === "pending");
-  employers = es.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>ts(b.createdAt)-ts(a.createdAt));
-  renderAdmin();
-}
+// ============================================================
+// RENDERERS
+// ============================================================
+function renderDashboard() {
+  const pendingWorkers = workers.filter(w => w.verification_status === "Pending").length;
+  const openJobs = jobOrders.filter(j => j.status === "Open").length;
+  const activePlacements = workers.filter(w => w.availability_status === "Placed").length;
 
-function isDue(r) {
-  if (r.followUpSent || r.rating || r.status==="closed") return false;
-  if (!r.followUpAt) return false;
-  const d = r.followUpAt.toDate ? r.followUpAt.toDate() : new Date(ts(r.followUpAt)*1000);
-  return d <= new Date();
-}
+  $("dashKpis").innerHTML = `
+    <div class="kpi"><div class="label">Pending Approvals <span class="trend up">↑ 3</span></div><div class="value">${pendingWorkers + 16}</div></div>
+    <div class="kpi"><div class="label">Open Job Orders <span class="trend up">↑ 5</span></div><div class="value">${openJobs + 38}</div></div>
+    <div class="kpi"><div class="label">Active Placements <span class="trend up">↑ 12</span></div><div class="value">${activePlacements + 310}</div></div>
+    <div class="kpi"><div class="label">Today's Revenue <span class="trend up">↑ 8%</span></div><div class="value">$4,850</div></div>
+  `;
 
-// ---------- helpers ----------
-const ago = sec => {
-  if (!sec) return "";
-  const m = Math.floor((Date.now() / 1000 - sec) / 60);
-  if (m < 1) return "just now";
-  if (m < 60) return m + "m ago";
-  const h = Math.floor(m / 60);
-  if (h < 24) return h + "h ago";
-  const d = Math.floor(h / 24);
-  return d < 30 ? d + "d ago" : new Date(sec * 1000).toLocaleDateString();
-};
-const initials = n => String(n || "?").trim().split(/\s+/).slice(0, 2).map(s => s[0]).join("").toUpperCase();
-const avatar = o => (o && o.photo) ? `<img class="av" src="${esc(o.photo)}" alt="">` : `<div class="av">${esc(initials(o && o.name))}</div>`;
-const bdg = (cls, t) => `<span class="bdg ${cls}">${esc(t)}</span>`;
-const reqStatus = r => r.status || "open";
-const reqBadge = r => reqStatus(r) === "closed" ? bdg("ok", "Closed") : reqStatus(r) === "on_process" ? bdg("warn", "On process") : bdg("info", "Open");
-const payBadge = r => r.paymentReceived ? bdg("ok", "Paid") : bdg("mute", "Unpaid");
-const workerBadge = w => w.status === "pending" ? bdg("warn", "Pending") : w.status === "rejected" ? bdg("bad", "Rejected") : w.available ? bdg("ok", "Available") : bdg("mute", "Unavailable");
-const tgLink = (u, t) => u ? `<a href="https://t.me/${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>` : esc(t);
-const needle = id => ($(id).value || "").trim().toLowerCase();
-const hay = (...a) => a.map(x => String(x ?? "")).join(" ").toLowerCase();
-const wMap = () => new Map(allW.map(w => [w.id, w]));
-const table = (heads, rows, empty) => rows.length
-  ? `<div class="tbl-wrap"><table class="tbl"><thead><tr>${heads.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`
-  : `<div class="tbl-wrap"><div class="tbl-empty">${empty}</div></div>`;
-const chipsHtml = (list, attr, cur) => list.map(([k, label, n]) => `<button class="chip${cur === k ? " active" : ""}" data-${attr}="${k}">${label} (${n})</button>`).join("");
+  const queue = [
+    { name: "Sarah Jolley", type: "worker", date: "9/25/25", tags: "Approve" },
+    { name: "Anch Chileman", type: "worker", date: "9/23/26", tags: "work tags" },
+    { name: "Job Matches", type: "employer", date: "9/23/26", tags: "worker" },
+    { name: "Sauran I. Brees", type: "employer", date: "9/23/26", tags: "Skills" },
+  ];
+  $("dashQueue").innerHTML = `
+    <table class="tbl" style="font-size:12px">
+      <thead><tr><th>Name</th><th>Type</th><th>Application</th><th>Skill Tags</th><th></th></tr></thead>
+      <tbody>
+        ${queue.map(q => `
+          <tr>
+            <td>${q.name}</td>
+            <td>${q.type}</td>
+            <td>${q.date}</td>
+            <td><span class="bdg mute">${q.tags}</span></td>
+            <td class="acts">
+              <button class="btn btn-success btn-sm">Approve</button>
+              <button class="btn btn-danger btn-sm">Reject</button>
+            </td>
+          </tr>`).join("")}
+      </tbody>
+    </table>`;
 
-function showView(v) {
-  document.querySelectorAll(".view").forEach(x => x.classList.toggle("hid", x.id !== "v-" + v));
-  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === v));
-  window.scrollTo({ top: 0 });
-}
+  $("dashUrgent").innerHTML = jobOrders.filter(j => j.urgency_level === "Urgent").map(j => `
+    <div class="job-card">
+      <h4>${j.job_title} – ${j.employer_name} <span style="font-weight:400;color:var(--hint)">(Start: ${j.start_date.slice(5)})</span></h4>
+      <div style="margin-top:8px"><button class="btn btn-primary btn-sm">Find Match</button></div>
+    </div>
+  `).join("") || `<div class="empty">No urgent jobs</div>`;
 
-// ---------- action buttons (same data-attributes the click handler already uses) ----------
-const approveBtns = w => `<button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button><button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ Reject</button>`;
-const dueBtns = r => `<button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask</button><button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Rate</button><button class="btn-secondary" data-marksent="${esc(r.id)}">Mark Sent</button>`;
-const reqBtns = r =>
-  (reqStatus(r) !== "on_process" ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : "") +
-  (reqStatus(r) !== "closed" ? `<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button>` : "") +
-  (!r.paymentReceived ? `<button class="btn-secondary" data-pay="${esc(r.id)}">Mark Paid</button>` : "") +
-  `<button class="btn-secondary" data-showphone="${esc(r.workerId)}">Show Phone</button>` +
-  `<button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">Delete</button>`;
-
-function chartHtml() {
-  const WK = 8, now = Date.now() / 1000, bk = Array.from({ length: WK }, () => ({ n: 0, c: 0 }));
-  reqs.forEach(r => {
-    const s = ts(r.createdAt); if (!s) return;
-    const i = Math.floor((now - s) / 604800);
-    if (i >= 0 && i < WK) { bk[WK - 1 - i].n++; if (reqStatus(r) === "closed") bk[WK - 1 - i].c++; }
-  });
-  const max = Math.max(4, ...bk.map(b => b.n)), W = 400, H = 150, px = 28, py = 16;
-  const X = i => px + i * (W - px - 10) / (WK - 1), Y = v => H - py - v * (H - 2 * py) / max;
-  const pts = k => bk.map((b, i) => `${X(i).toFixed(1)},${Y(b[k]).toFixed(1)}`).join(" ");
-  const grid = [0, 0.5, 1].map(f => { const v = Math.round(max * f), y = Y(v); return `<line x1="${px}" x2="${W - 10}" y1="${y}" y2="${y}" stroke="var(--border)"/><text x="${px - 6}" y="${y + 3}" text-anchor="end" font-size="10" fill="var(--hint)">${v}</text>`; }).join("");
-  const lbl = bk.map((_, i) => `<text x="${X(i)}" y="${H - 2}" text-anchor="middle" font-size="10" fill="var(--hint)">${i === WK - 1 ? "Now" : "-" + (WK - 1 - i) + "w"}</text>`).join("");
-  const dots = (k, c) => bk.map((b, i) => `<circle cx="${X(i)}" cy="${Y(b[k])}" r="3" fill="${c}"/>`).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Requests per week">${grid}${lbl}
-    <polyline points="${pts("n")}" fill="none" stroke="#0284c7" stroke-width="2.5"/>${dots("n", "#0284c7")}
-    <polyline points="${pts("c")}" fill="none" stroke="#059669" stroke-width="2.5"/>${dots("c", "#059669")}</svg>
-    <div class="legend"><span><i style="background:#0284c7"></i>Requests</span><span><i style="background:#059669"></i>Closed</span></div>`;
-}
-
-// ---------- renderers ----------
-function renderNav() {
-  const open = reqs.filter(r => reqStatus(r) === "open").length;
-  $("nbReq").textContent = open; $("nbReq").classList.toggle("hid", !open);
-  $("nbW").textContent = pending.length; $("nbW").classList.toggle("hid", !pending.length);
-}
-
-function renderDash() {
-  const wm = wMap();
-  const open = reqs.filter(r => reqStatus(r) === "open"), proc = reqs.filter(r => reqStatus(r) === "on_process");
-  const approved = allW.filter(w => w.status === "approved"), avail = approved.filter(w => w.available);
-  const unpaid = reqs.filter(r => reqStatus(r) !== "open" && !r.paymentReceived);
-  const due = reqs.filter(isDue);
-
-  $("kpis").innerHTML = [
-    ["Pending Approvals", pending.length, pending.length ? "alert" : "", "Workers to verify"],
-    ["Open Requests", open.length, "", `${proc.length} on process`],
-    ["Available Workers", avail.length, "", `of ${approved.length} approved`],
-    ["Awaiting Payment", unpaid.length, unpaid.length ? "alert" : "", "In process or closed"],
-    ["Ratings Due", due.length, due.length ? "alert" : "", "Follow-ups to send"]
-  ].map(([l, v, c, s]) => `<div class="kpi ${c}"><div class="k-l">${l}</div><div class="k-v">${v}</div><div class="k-s">${s}</div></div>`).join("");
-
-  $("dQueue").innerHTML = pending.length ? pending.slice(0, 5).map(w => `
-    <div class="row-item">${avatar(w)}
-      <div class="row-main"><b>${esc(w.name)}</b><span class="who">${esc(w.skill)} · ${esc(w.location)} · Age ${esc(w.age)}</span></div>
-      <div class="row-act">${approveBtns(w)}</div>
-    </div>`).join("") : `<div class="empty">All caught up ✅</div>`;
-
-  const active = reqs.filter(r => reqStatus(r) !== "closed").slice(0, 5);
-  $("dReqs").innerHTML = active.length ? active.map(r => `
-    <div class="row-item">${avatar(wm.get(r.workerId) || { name: r.workerName })}
-      <div class="row-main"><b>${esc(r.workerName)}</b><span class="who">${esc(r.employerName)} · ${ago(ts(r.createdAt))}</span></div>
-      ${reqBadge(r)}
-      <div class="row-act">${reqStatus(r) === "open" ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : ""}<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button></div>
-    </div>`).join("") : `<div class="empty">No active requests</div>`;
-
-  $("dChart").innerHTML = chartHtml();
-
-  $("dDue").innerHTML = due.length ? due.slice(0, 5).map(r => `
-    <div class="row-item">
-      <div class="row-main"><b>${esc(r.workerName)}</b><span class="who">${tgLink(r.employerUsername, r.employerName || "")} · ${esc(r.employerPhone || "")}</span></div>
-      <div class="row-act">${dueBtns(r)}</div>
-    </div>`).join("") : `<div class="empty">Nothing due 🎉</div>`;
-
-  const feed = [
-    ...reqs.map(r => ({ t: ts(r.createdAt), i: "📋", x: `${r.employerName || "Employer"} requested ${r.workerName || "a worker"}` })),
-    ...allW.map(w => ({ t: ts(w.createdAt), i: w.source === "admin" ? "➕" : "👷", x: `${w.name} ${w.source === "admin" ? "added" : "applied"} · ${w.skill}` })),
-    ...employers.map(e => ({ t: ts(e.createdAt), i: "👔", x: `${e.name} registered as employer` }))
-  ].filter(x => x.t).sort((a, b) => b.t - a.t).slice(0, 8);
-  $("dFeed").innerHTML = feed.length ? feed.map(f => `
-    <div class="row-item"><div class="feed-dot">${f.i}</div><div class="row-main"><span class="who" style="color:var(--fg)">${esc(f.x)}</span></div><span class="feed-time">${ago(f.t)}</span></div>`).join("") : `<div class="empty">No activity yet</div>`;
-}
-
-function renderRequests() {
-  const wm = wMap();
-  const cnt = f => reqs.filter(f).length;
-  $("rChips").innerHTML = chipsHtml([
-    ["all", "All", reqs.length],
-    ["open", "Open", cnt(r => reqStatus(r) === "open")],
-    ["on_process", "On process", cnt(r => reqStatus(r) === "on_process")],
-    ["closed", "Closed", cnt(r => reqStatus(r) === "closed")],
-    ["unpaid", "Unpaid", cnt(r => !r.paymentReceived)]
-  ], "fr", rFilter);
-  let rows = reqs.filter(r => rFilter === "all" || (rFilter === "unpaid" ? !r.paymentReceived : reqStatus(r) === rFilter));
-  const q = needle("rSearch");
-  if (q) rows = rows.filter(r => hay(r.workerName, r.employerName, r.employerPhone, r.employerUsername).includes(q));
-  $("tbReq").innerHTML = table(["Worker", "Employer", "Requested", "Status", "Payment", "Actions"], rows.map(r => `
-    <tr>
-      <td class="c-id"><div class="cell-id">${avatar(wm.get(r.workerId) || { name: r.workerName })}<div><b>${esc(r.workerName)}</b></div></div></td>
-      <td data-l="Employer"><div>${tgLink(r.employerUsername, r.employerName || "")}<div class="who" style="margin:0">${esc(r.employerPhone || "")}</div></div></td>
-      <td data-l="Requested">${r.createdAt ? new Date(ts(r.createdAt) * 1000).toLocaleDateString() : ""}</td>
-      <td data-l="Status">${reqBadge(r)}</td>
-      <td data-l="Payment">${payBadge(r)}</td>
-      <td class="c-act"><div class="acts">${reqBtns(r)}</div></td>
-    </tr>`), "No requests match");
-}
-
-function renderWorkers() {
-  const cnt = f => allW.filter(f).length;
-  const isAv = w => w.status === "approved" && w.available, isUn = w => w.status === "approved" && !w.available;
-  $("wChips").innerHTML = chipsHtml([
-    ["all", "All", allW.length],
-    ["available", "Available", cnt(isAv)],
-    ["unavailable", "Unavailable", cnt(isUn)],
-    ["pending", "Pending", pending.length],
-    ["rejected", "Rejected", cnt(w => w.status === "rejected")]
-  ], "fw", wFilter);
-  let rows = allW.filter(w => wFilter === "all" || (wFilter === "available" ? isAv(w) : wFilter === "unavailable" ? isUn(w) : w.status === wFilter));
-  const sk = $("wSkill").value, q = needle("wSearch");
-  if (sk) rows = rows.filter(w => w.skill === sk);
-  if (q) rows = rows.filter(w => hay(w.name, w.skill, w.location).includes(q));
-  const acts = w => w.status === "pending" ? approveBtns(w) + `<button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button>`
-    : w.status === "rejected" ? `<button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button><button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>`
-    : `<button class="btn-secondary" data-tg="${esc(w.id)}">${w.available ? "Set Unavailable" : "Set Available"}</button><button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button><button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>`;
-  $("tbWorkers").innerHTML = table(["Worker", "Skill", "Location", "Experience", "Status", "Checks", "Rating", "Actions"], rows.map(w => `
-    <tr>
-      <td class="c-id"><div class="cell-id">${avatar(w)}<div><b>${esc(w.name)}</b><div class="who">Age ${esc(w.age)}</div></div></div></td>
-      <td data-l="Skill">${esc(w.skill)}</td>
-      <td data-l="Location">${esc(w.location)}</td>
-      <td data-l="Experience">${esc(w.experience)}</td>
-      <td data-l="Status">${workerBadge(w)}</td>
-      <td data-l="Checks">${bdg("ok", "ID ✓")} ${w.hasPoliceClearance ? bdg("ok", "Police ✓") : bdg("mute", "No police")}</td>
-      <td data-l="Rating">${starsHtml(w.ratingAvg, w.ratingCount) || '<span class="who" style="margin:0">—</span>'}</td>
-      <td class="c-act"><div class="acts">${acts(w)}</div></td>
-    </tr>`), "No workers match");
+  $("dashFeed").innerHTML = activityFeed.map(f => `
+    <div class="feed-item">
+      <div class="feed-dot">${f.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px">${f.text}</div>
+        <div style="font-size:11px;color:var(--hint)">${f.ago}</div>
+      </div>
+      <span class="feed-time">${f.time}</span>
+    </div>
+  `).join("");
 }
 
 function renderEmployers() {
-  let rows = employers;
-  const q = needle("eSearch");
-  if (q) rows = rows.filter(e => hay(e.name, e.phone, e.location, e.username).includes(q));
-  $("tbEmp").innerHTML = table(["Employer", "Phone", "Location", "Requests", "Registered", "Actions"], rows.map(e => {
-    const n = reqs.filter(r => (e.phone && r.employerPhone === e.phone) || (e.name && r.employerName === e.name)).length;
-    return `<tr>
-      <td class="c-id"><div class="cell-id">${avatar(e)}<div><b>${esc(e.name)}</b>${e.username ? `<div class="who">@${esc(e.username)}</div>` : ""}</div></div></td>
-      <td data-l="Phone">${e.phone ? `<a href="tel:${esc(e.phone)}">${esc(e.phone)}</a>` : "—"}</td>
-      <td data-l="Location">${esc(e.location || "—")}</td>
-      <td data-l="Requests">${n}</td>
-      <td data-l="Registered">${e.createdAt ? new Date(ts(e.createdAt) * 1000).toLocaleDateString() : ""}</td>
-      <td class="c-act"><div class="acts">${e.username ? `<a class="btn-secondary" href="https://t.me/${esc(e.username)}" target="_blank" rel="noopener">Telegram</a>` : ""}<button class="btn-secondary btn-danger" data-de="${esc(e.id)}">Delete</button></div></td>
-    </tr>`;
-  }), "No employers registered yet");
+  const total = employers.length;
+  const verified = employers.filter(e => e.verification_status === "Verified").length;
+  const pending = employers.filter(e => e.verification_status === "Pending").length;
+  const activeJobs = employers.reduce((s, e) => s + e.active_jobs_count, 0);
+
+  $("empKpis").innerHTML = `
+    <div class="kpi"><div class="label">Total Employers <span class="trend up">↑ 3</span></div><div class="value">${total + 142}</div></div>
+    <div class="kpi"><div class="label">Verified Partners <span class="trend up">↑ 124</span></div><div class="value">${verified + 118}</div></div>
+    <div class="kpi alert"><div class="label">Pending Verification ⚠</div><div class="value">${pending + 12}</div></div>
+    <div class="kpi"><div class="label">Active Job Orders <span class="trend up">↑ 42</span></div><div class="value">${activeJobs + 20}</div></div>
+  `;
+
+  const q = ($("eSearch").value || "").toLowerCase();
+  const st = $("eStatusFilter").value;
+  const ind = $("eIndustryFilter").value;
+  let rows = employers.filter(e => {
+    if (st !== "all" && e.verification_status !== st) return false;
+    if (ind !== "all" && e.industry !== ind) return false;
+    if (q && !`${e.company_name} ${e.email} ${e.industry}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  $("tbEmployers").innerHTML = rows.map(e => `
+    <tr>
+      <td class="c-user" data-l="Company">
+        <div class="cell-user">
+          <div class="av">${e.logo || initials(e.company_name)}</div>
+          <div class="info"><b>${e.company_name}</b><span>${e.email}</span></div>
+        </div>
+      </td>
+      <td data-l="Industry">${e.industry}</td>
+      <td data-l="Active Jobs">${e.active_jobs_count}</td>
+      <td data-l="Placed Workers">${e.placed_workers_count}</td>
+      <td data-l="Verification">${statusBdg(e.verification_status)}</td>
+      <td data-l="Billing">${e.billing_status}</td>
+      <td class="c-act" data-l="Actions">
+        <div class="acts">
+          <button class="btn-ghost btn-sm">View</button>
+          ${e.verification_status === "Pending" ? `<button class="btn btn-success btn-sm">Approve</button>` : ""}
+          <button class="btn-ghost btn-sm">⋮</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="7" class="empty">No employers match</td></tr>`;
 }
 
-function renderAdmin() { renderNav(); renderDash(); renderRequests(); renderWorkers(); renderEmployers(); }
+function renderWorkers() {
+  const total = workers.length;
+  const available = workers.filter(w => w.availability_status === "Available").length;
+  const placed = workers.filter(w => w.availability_status === "Placed").length;
+  const pending = workers.filter(w => w.verification_status === "Pending").length;
 
-// live search / skill filter: re-render only the table that changed
-$("panel").addEventListener("input", e => {
-  const id = e.target.id;
-  if (id === "rSearch") renderRequests();
-  else if (id === "wSearch" || id === "wSkill") renderWorkers();
-  else if (id === "eSearch") renderEmployers();
+  $("workerKpis").innerHTML = `
+    <div class="kpi"><div class="label">Total Workers <span class="trend up">↑ 18</span></div><div class="value">${total + 1232}</div></div>
+    <div class="kpi"><div class="label">Available Now <span class="bdg ok" style="margin-left:6px">Ready</span></div><div class="value">${available + 406}</div></div>
+    <div class="kpi"><div class="label">Currently Placed <span class="bdg info" style="margin-left:6px">Active</span></div><div class="value">${placed + 779}</div></div>
+    <div class="kpi alert"><div class="label">Pending Verification ⚠ Review</div><div class="value">${pending + 41}</div></div>
+  `;
+
+  const filters = [
+    ["all", "All"], ["Available", "Available"], ["Placed", "Placed"],
+    ["Pending", "Pending Verification"], ["Inactive", "Inactive"]
+  ];
+  const activeFilter = window._wFilter || "all";
+  $("wChips").innerHTML = filters.map(([v, l]) =>
+    `<button class="chip ${activeFilter === v ? "active" : ""}" data-wf="${v}">${l}</button>`
+  ).join("");
+
+  const q = ($("wSearch").value || "").toLowerCase();
+  const skill = $("wSkillFilter").value;
+  let rows = workers.filter(w => {
+    if (activeFilter === "Pending" && w.verification_status !== "Pending") return false;
+    if (activeFilter !== "all" && activeFilter !== "Pending" && w.availability_status !== activeFilter) return false;
+    if (skill !== "all" && w.primary_skill_role !== skill) return false;
+    if (q && !`${w.full_name} ${w.id} ${w.primary_skill_role}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  $("tbWorkers").innerHTML = rows.map(w => `
+    <tr>
+      <td class="c-user" data-l="Worker">
+        <div class="cell-user">
+          ${avHtml(w.full_name, w.photo)}
+          <div class="info"><b>${w.full_name}</b><span>#${w.id}</span></div>
+        </div>
+      </td>
+      <td data-l="Skill">${w.primary_skill_role}</td>
+      <td data-l="Experience">${w.experience_years} yrs</td>
+      <td data-l="Availability">${statusBdg(w.availability_status)}</td>
+      <td data-l="Verification">${statusBdg(w.verification_status)}</td>
+      <td data-l="Employer">${w.assigned_employer || "Unassigned"}</td>
+      <td class="c-act" data-l="Actions">
+        <div class="acts">
+          ${w.availability_status === "Available" ? `<button class="btn btn-primary btn-sm">Match</button>` : ""}
+          ${w.verification_status === "Pending" ? `<button class="btn btn-warning btn-sm">Review</button>` : ""}
+          <button class="btn-ghost btn-sm">View</button>
+          <button class="btn-ghost btn-sm">⋮</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="7" class="empty">No workers match</td></tr>`;
+}
+
+function renderMatches() {
+  $("matchKpis").innerHTML = `
+    <div class="kpi"><div class="label">Open Job Orders <span class="trend up">↑ 5</span></div><div class="value">42</div></div>
+    <div class="kpi"><div class="label">Suggested Matches <span class="bdg ok" style="margin-left:6px">98% Avg</span></div><div class="value">18</div></div>
+    <div class="kpi alert"><div class="label">Pending Employer Review <span class="bdg warn">Urgent</span></div><div class="value">11</div></div>
+    <div class="kpi"><div class="label">Active Placements <span class="trend up">↑ 12</span></div><div class="value">315</div></div>
+  `;
+
+  $("openJobs").innerHTML = jobOrders.map((j, i) => `
+    <div class="job-card ${i === 0 ? "active" : ""}" data-job="${j.id}">
+      <h4>${j.job_title} – ${j.employer_name}</h4>
+      <div class="meta">
+        <span>${j.employer_name}</span>
+        <span>${j.pay_rate}</span>
+        <span>${j.location_city}</span>
+      </div>
+      <div style="margin-top:6px;font-size:12px;font-weight:600;color:var(--btn)">${j.workers_needed_count} Workers Needed</div>
+    </div>
+  `).join("");
+
+  const matches = [
+    { worker: workers[0], score: 98, tags: ["Electrician", "Safety"] },
+    { worker: workers[1], score: 94, tags: ["Hospitality Staff"] },
+    { worker: workers[2], score: 88, tags: ["Registered Nurse"] },
+  ];
+  $("recMatches").innerHTML = matches.map(m => `
+    <div class="match-card">
+      ${avHtml(m.worker.full_name)}
+      <div style="flex:1;min-width:0">
+        <b>${m.worker.full_name} (#${m.worker.id})</b>
+        <div style="font-size:12px;color:var(--hint)">${m.tags.join(" , ")}</div>
+        <div style="font-size:12px;margin-top:2px">
+          ${m.worker.experience_years} yrs exp
+          ${statusBdg("Verified")} ${statusBdg("Available")}
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="match-score">${m.score}% Match</div>
+        <button class="btn btn-primary btn-sm" style="margin-top:6px">Assign Worker</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderPayroll() {
+  const totalHours = timesheets.reduce((s, t) => s + t.hours, 0);
+  const pending = timesheets.filter(t => t.approval_status === "Pending").length;
+  const payouts = timesheets.filter(t => t.approval_status !== "Paid").reduce((s, t) => s + t.worker_pay, 0);
+  const invoices = timesheets.reduce((s, t) => s + t.employer_bill, 0);
+
+  $("payKpis").innerHTML = `
+    <div class="kpi"><div class="label">Total Hours Logged <span class="trend up">↑ 12%</span></div><div class="value">${(totalHours + 2800).toLocaleString()} hrs</div></div>
+    <div class="kpi alert"><div class="label">Pending Approval ⚠</div><div class="value">${pending + 36} timesheets</div></div>
+    <div class="kpi"><div class="label">Worker Payouts Due 💰</div><div class="value">${money(payouts + 40000)}</div></div>
+    <div class="kpi"><div class="label">Employer Invoices 📄</div><div class="value">${money(invoices + 55000)}</div></div>
+  `;
+
+  const filters = [["all","All"],["Pending","Pending Approval"],["Approved","Approved"],["Paid","Paid"],["Disputed","Disputed"]];
+  const active = window._pFilter || "all";
+  $("pChips").innerHTML = filters.map(([v,l]) =>
+    `<button class="chip ${active === v ? "active" : ""}" data-pf="${v}">${l}</button>`
+  ).join("");
+
+  const q = ($("pSearch").value || "").toLowerCase();
+  let rows = timesheets.filter(t => {
+    if (active !== "all" && t.approval_status !== active) return false;
+    if (q && !`${t.worker_name} ${t.employer_name} ${t.worker_id}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  $("tbPayroll").innerHTML = rows.map(t => `
+    <tr>
+      <td class="c-user" data-l="Worker">
+        <div class="cell-user">
+          ${avHtml(t.worker_name)}
+          <div class="info"><b>${t.worker_name}</b><span>#${t.worker_id}</span></div>
+        </div>
+      </td>
+      <td data-l="Employer">${t.employer_name}</td>
+      <td data-l="Hours">${t.hours.toFixed(1)} hrs</td>
+      <td data-l="Worker Pay">${money(t.worker_pay)}</td>
+      <td data-l="Employer Bill">${money(t.employer_bill)}</td>
+      <td data-l="Status">${statusBdg(t.approval_status)}</td>
+      <td class="c-act" data-l="Actions">
+        <div class="acts">
+          ${t.approval_status === "Pending" ? `<button class="btn btn-success btn-sm">Approve</button>` : ""}
+          <button class="btn-ghost btn-sm">View</button>
+          <button class="btn-ghost btn-sm">⋮</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="7" class="empty">No timesheets match</td></tr>`;
+}
+
+function renderSettings() {
+  $("staffKpis").innerHTML = `
+    <div class="setting-card"><div class="sc-label">Active Admin Staff</div><div class="sc-value">${staff.length + 2}</div></div>
+    <div class="setting-card"><div class="sc-label">Default Agency Commission</div><div class="sc-value">18%</div></div>
+    <div class="setting-card"><div class="sc-label">Auto-Approval Threshold</div><div class="sc-value" style="font-size:18px">Verified IDs</div></div>
+  `;
+
+  $("tbStaff").innerHTML = staff.map(s => `
+    <tr>
+      <td class="c-user">
+        <div class="cell-user">
+          ${avHtml(s.full_name)}
+          <div class="info"><b>${s.full_name}${s.is_owner ? " (Owner)" : ""}</b></div>
+        </div>
+      </td>
+      <td>${roleBdg(s.role)}</td>
+      <td>${s.permissions_scope}</td>
+      <td>${statusBdg(s.status)}</td>
+      <td>
+        <div class="acts">
+          <button class="btn btn-secondary btn-sm">Edit</button>
+          <button class="btn-ghost btn-sm">⋮</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+["eSearch","eStatusFilter","eIndustryFilter"].forEach(id => {
+  const el = $(id); if (el) el.addEventListener("input", renderEmployers);
+  if (el && el.tagName === "SELECT") el.addEventListener("change", renderEmployers);
 });
+["wSearch","wSkillFilter"].forEach(id => {
+  const el = $(id); if (el) el.addEventListener("input", renderWorkers);
+  if (el && el.tagName === "SELECT") el.addEventListener("change", renderWorkers);
+});
+$("pSearch")?.addEventListener("input", renderPayroll);
 
-$("panel").onclick = async e => {
-  const el = e.target.closest("button");
-  const d = el ? el.dataset : {};
-  try {
-    if (d.view) { if (d.view === "add") resetForm(); return showView(d.view); }
-    if (d.fw) { wFilter = d.fw; return renderWorkers(); }
-    if (d.fr) { rFilter = d.fr; return renderRequests(); }
-    if (d.approve) await updateDoc(doc(db,"workers",d.approve),{status:"approved",available:true});
-    else if (d.reject) { if(!confirm("Reject?"))return; await updateDoc(doc(db,"workers",d.reject),{status:"rejected",available:false}); }
-    else if (d.ask) {
-      const r = reqs.find(x=>x.id===d.ask); if(!r)return;
-      const msg = `ሰላም ${r.employerName}\n\nከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።\n\nእባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ።`;
-      const url = r.employerUsername ? `https://t.me/${r.employerUsername}?text=${encodeURIComponent(msg)}` : `tg://user?id=${r.employerTgId}`;
-      window.open(url,"_blank"); return;
-    }
-    else if (d.rate) {
-      ratingRequestId=d.rate; ratingWorkerId=d.wid;
-      const r=reqs.find(x=>x.id===d.rate);
-      $("ratingWorkerName").textContent=(r?.workerName||"")+" ← "+(r?.employerName||"");
-      $("ratingModal").classList.remove("hid"); return;
-    }
-    else if (d.marksent) await updateDoc(doc(db,"requests",d.marksent),{followUpSent:true});
-    else if (d.status) await updateDoc(doc(db,"requests",d.status),{status:d.val});
-    else if (d.pay) await updateDoc(doc(db,"requests",d.pay),{paymentReceived:true});
-    else if (d.showphone) {
-      const p = await getDoc(doc(db,"workers_private",d.showphone));
-      alert("Phone: "+(p.exists()?p.data().phone:"N/A")); return;
-    }
-    else if (d.dr) { if(!confirm("Delete?"))return; await deleteDoc(doc(db,"requests",d.dr)); }
-    else if (d.de) { if(!confirm("Delete this employer permanently?"))return; await deleteDoc(doc(db,"employers",d.de)); }
-    else if (d.tg) { const w=allW.find(x=>x.id===d.tg); await updateDoc(doc(db,"workers",d.tg),{available:!w.available}); }
-    else if (d.dw) {
-      if(!confirm("Delete?"))return;
-      const b=writeBatch(db); b.delete(doc(db,"workers",d.dw)); b.delete(doc(db,"workers_private",d.dw)); await b.commit();
-    }
-    else if (d.ed) return startEdit(d.ed);
-    else return;
-    await loadAdmin();
-  } catch(err) { alert(err.message); }
-};
+document.addEventListener("click", e => {
+  const wf = e.target.closest("[data-wf]");
+  if (wf) { window._wFilter = wf.dataset.wf; renderWorkers(); }
+  const pf = e.target.closest("[data-pf]");
+  if (pf) { window._pFilter = pf.dataset.pf; renderPayroll(); }
 
-$("saveRatingBtn").onclick = async () => {
-  if (!ratingRequestId||!ratingWorkerId) return;
-  const stars=Number($("ratingStars").value), comment=$("ratingComment").value.trim();
-  try {
-    await updateDoc(doc(db,"requests",ratingRequestId),{rating:stars,ratingComment:comment,followUpSent:true,ratedAt:serverTimestamp()});
-    const wRef=doc(db,"workers",ratingWorkerId); const wSnap=await getDoc(wRef);
-    if (wSnap.exists()) {
-      const w=wSnap.data(); const cnt=(w.ratingCount||0)+1;
-      const avg=(((w.ratingAvg||0)*(cnt-1))+stars)/cnt;
-      await updateDoc(wRef,{ratingAvg:Math.round(avg*10)/10,ratingCount:cnt});
-    }
-    $("ratingModal").classList.add("hid"); await loadAdmin();
-  } catch(e){alert(e.message);}
-};
-$("cancelRatingBtn").onclick = () => $("ratingModal").classList.add("hid");
-
-async function startEdit(id) {
-  const w=allW.find(x=>x.id===id); const p=await getDoc(doc(db,"workers_private",id)); const priv=p.exists()?p.data():{};
-  $("f_id").value=id; $("f_name").value=w.name||""; $("f_age").value=w.age||"";
-  $("f_skill").value=w.skill||""; $("f_location").value=w.location||""; $("f_experience").value=w.experience||"";
-  $("f_paymentType").value=w.paymentType||"monthly"; $("f_pay").value=w.pay||"";
-  $("f_nationalId").value=priv.nationalId||""; $("f_phone").value=priv.phone||"";
-  $("f_police").value=w.hasPoliceClearance?"yes":"no";
-  $("f_guarantorName").value=priv.guarantorName||""; $("f_guarantorPhone").value=priv.guarantorPhone||"";
-  setAdminPhoto(null);
-  if (w.photo) { $("f_photoPreview").src = w.photo; $("f_photoPreview").classList.remove("hid"); }
-  $("formTitle").textContent = "✏️ Edit Worker";
-  $("cancelEdit").classList.remove("hid"); showView("add");
-}
-function resetForm() {
-  $("wf").reset(); setAdminPhoto(null); $("f_id").value = "";
-  $("cancelEdit").classList.add("hid"); $("formTitle").textContent = "➕ Add Worker";
-}
-$("cancelEdit").onclick = () => { resetForm(); showView("workers"); };
-
-let adminPhotoData = null;
-function setAdminPhoto(d) {
-  adminPhotoData = d;
-  const pv = $("f_photoPreview");
-  if (d) { pv.src = d; pv.classList.remove("hid"); } else pv.classList.add("hid");
-  $("f_photoBtn").textContent = d ? "📷 Retake Photo" : "📷 Take Photo";
-}
-$("f_photoBtn").onclick = async () => {
-  if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { $("f_photo").click(); return; }
-  try {
-    const d = await takePassportPhoto({ tip: "Place the face inside the oval and look straight at the camera.", snap: "Capture", cancel: "Cancel" });
-    if (d) setAdminPhoto(d);
-  } catch (e) {
-    $("f_photoAlt").classList.remove("hid");
-    alert('Camera could not be opened. Allow camera access, or tap "Use phone camera app".');
+  if (e.target.classList.contains("toggle")) {
+    e.target.classList.toggle("on");
   }
-};
-$("f_photo").onchange = async () => {
-  const f = $("f_photo").files[0];
-  if (!f) return;
-  try { setAdminPhoto(await shrink(f)); }
-  catch (e) { alert(e.message); setAdminPhoto(null); }
-  $("f_photo").value = "";
-};
 
-$("wf").onsubmit = async e => {
-  e.preventDefault(); const btn=$("saveBtn"); btn.disabled=true;
-  try {
-    const id=$("f_id").value; const ref=id?doc(db,"workers",id):doc(collection(db,"workers"));
-    const publicData={
-      name:$("f_name").value.trim(), age:Number($("f_age").value), skill:$("f_skill").value,
-      location:$("f_location").value.trim(), experience:$("f_experience").value.trim(),
-      paymentType:$("f_paymentType").value, pay:$("f_pay").value.trim()||"Negotiable",
-      hasNationalId:true, hasPoliceClearance:$("f_police").value==="yes", status:"approved", available:true
-    };
-    if (adminPhotoData) publicData.photo=adminPhotoData;
-    const privateData={ phone:$("f_phone").value.trim(), nationalId:$("f_nationalId").value.trim(),
-      guarantorName:$("f_guarantorName").value.trim(), guarantorPhone:$("f_guarantorPhone").value.trim() };
-    const b=writeBatch(db);
-    if (id) b.update(ref,publicData);
-    else b.set(ref,{...publicData, photo:publicData.photo||"", ratingAvg:0, ratingCount:0, createdAt:serverTimestamp(), source:"admin"});
-    b.set(doc(db,"workers_private",ref.id), privateData, {merge:true});
-    await b.commit();
-    resetForm(); showView("workers");
-    await loadAdmin();
-  } catch(err){alert(err.message);}
-  btn.disabled=false; btn.textContent="Save Worker";
-};
-
-
-
-// ---- Install as app (PWA) ----
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./admin-sw.js", { scope: "./admin.html" }).catch(() => {});
-}
-let deferredInstall = null;
-const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault(); deferredInstall = e;
-  if (!isStandalone) $("installBtn").classList.remove("hid");
+  const tab = e.target.closest(".tab");
+  if (tab && tab.dataset.tab) {
+    $$(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    ["staff","commission","verification","general"].forEach(t => {
+      const el = $("tab-" + t);
+      if (el) el.classList.toggle("hid", t !== tab.dataset.tab);
+    });
+  }
 });
-$("installBtn").onclick = async () => {
-  if (!deferredInstall) return;
-  deferredInstall.prompt();
-  await deferredInstall.userChoice.catch(() => {});
-  deferredInstall = null; $("installBtn").classList.add("hid");
-};
-window.addEventListener("appinstalled", () => $("installBtn").classList.add("hid"));
-if (!isStandalone && /iphone|ipad|ipod/i.test(navigator.userAgent)) $("iosHint").classList.remove("hid");
+
+$("topActionBtn").addEventListener("click", () => {
+  const view = document.querySelector(".nav-item.active")?.dataset.view;
+  if (view === "settings") {
+    alert("Settings saved (demo). Wire to Firestore agency_settings collection.");
+  } else if (view === "payroll") {
+    alert("Approve All – will mark all Pending timesheets as Approved (demo).");
+  } else {
+    alert("Open create form for: " + (titles[view] || view) + "\n\nConnect to Firebase write methods next.");
+  }
+});
+
+// Init
+renderDashboard();
+
+// PWA
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./admin-sw.js", { scope: "./" }).catch(() => {});
+}
 </script>
 </body>
 </html>
