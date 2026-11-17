@@ -1,867 +1,1655 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <meta name="theme-color" content="#0369a1" />
-  <title>Tamagn Delala | Manager</title>
-  <link rel="manifest" href="./admin.webmanifest" />
-  <link rel="apple-touch-icon" href="./admin-apple-touch-icon.png" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --sky-700: #0369a1;
-      --sky-800: #075985;
-      --sky-900: #0c4a6e;
-      --sky-50: #f0f9ff;
-      --sky-100: #e0f2fe;
-      --slate-50: #f8fafc;
-      --slate-100: #f1f5f9;
-      --slate-200: #e2e8f0;
-      --slate-300: #cbd5e1;
-      --slate-400: #94a3b8;
-      --slate-500: #64748b;
-      --slate-600: #475569;
-      --slate-700: #334155;
-      --slate-800: #1e293b;
-      --slate-900: #0f172a;
-      --amber-50: #fffbeb;
-      --amber-100: #fef3c7;
-      --amber-300: #fcd34d;
-      --amber-500: #f59e0b;
-      --amber-600: #d97706;
-      --amber-800: #92400e;
-      --amber-900: #78350f;
-      --emerald-600: #059669;
-      --emerald-700: #047857;
-      --rose-600: #e11d48;
-      --rose-700: #be123c;
-      --purple-50: #faf5ff;
-      --purple-100: #f3e8ff;
-      --purple-600: #9333ea;
-      --purple-800: #6b21a8;
-    }
-    body {
-      background-color: var(--slate-100);
-      color: var(--slate-800);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      min-height: 100vh;
-      line-height: 1.5;
-    }
-    .hidden { display: none !important; }
-    .container { max-width: 1152px; margin: 0 auto; padding: 0 16px; }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Tamagn Delala | Staffing Agency Admin</title>
+<link rel="manifest" href="admin.webmanifest">
+<meta name="theme-color" content="#0ea5e9">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TD Admin">
+<link rel="icon" type="image/png" href="admin-icon-192.png">
+<link rel="apple-touch-icon" href="admin-apple-touch-icon.png">
+<style>
+:root {
+  --bg: #f1f5f9; --fg: #0f172a; --hint: #64748b; --card: #ffffff;
+  --btn: #0284c7; --btn-hover: #0369a1; --btnfg: #ffffff;
+  --danger: #ef4444; --success: #059669; --warning: #d97706;
+  --border: #e2e8f0; --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+  --radius: 12px; --sidebar-w: 240px; --header-h: 64px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+img { max-width: 100%; display: block; }
+button, input, select, textarea { font: inherit; }
+a { color: var(--btn); text-decoration: none; }
+.hid { display: none !important; }
 
-    /* Header */
-    header {
-      background-color: var(--sky-700);
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-      position: sticky;
-      top: 0;
-      z-index: 40;
-    }
-    .header-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      max-width: 1152px;
-      margin: 0 auto;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand-logo {
-      width: 40px; height: 40px; border-radius: 12px;
-      background: #fff; color: var(--sky-700);
-      font-weight: 800; font-size: 18px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    }
-    .brand h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
-    .brand p { font-size: 12px; color: var(--sky-100); }
-    .header-actions { display: flex; align-items: center; gap: 8px; }
+.app { display: flex; min-height: 100vh; }
+.sidebar {
+  width: var(--sidebar-w); background: var(--card); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 40;
+}
+.sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+.brand-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #0ea5e9, #0369a1);
+  display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 13px;
+}
+.brand-text { font-size: 14px; font-weight: 700; line-height: 1.2; }
+.brand-text span { display: block; font-size: 11px; font-weight: 500; color: var(--hint); }
+.nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px;
+  background: none; border: 0; color: var(--fg); font-size: 14px; font-weight: 500;
+  cursor: pointer; text-align: left; width: 100%; transition: background .15s;
+}
+.nav-item:hover { background: #f1f5f9; }
+.nav-item.active { background: #e0f2fe; color: #0369a1; font-weight: 600; }
+.nav-item .ni { font-size: 18px; width: 22px; text-align: center; }
+.sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--hint); }
 
-    /* Buttons */
-    button { cursor: pointer; font-family: inherit; border: none; transition: background-color 0.15s ease; }
-    .btn { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-    .btn-primary { background: var(--sky-700); color: #fff; }
-    .btn-primary:hover { background: var(--sky-800); }
-    .btn-emerald { background: var(--emerald-600); color: #fff; }
-    .btn-emerald:hover { background: var(--emerald-700); }
-    .btn-rose { background: var(--rose-600); color: #fff; }
-    .btn-rose:hover { background: var(--rose-700); }
-    .btn-purple { background: var(--purple-600); color: #fff; }
-    .btn-amber { background: var(--amber-500); color: #fff; }
-    .btn-amber:hover { background: var(--amber-600); }
-    .btn-dark-sky { background: var(--sky-800); color: #fff; border: 1px solid #0284c7; }
-    .btn-dark-sky:hover { background: var(--sky-900); }
-    .btn-outline { background: #fff; color: var(--slate-700); border: 1px solid var(--slate-300); }
-    .btn-outline:hover { background: var(--slate-50); }
-    .btn-sm { padding: 6px 10px; font-size: 12px; }
+.main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar {
+  height: var(--header-h); background: var(--card); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+  position: sticky; top: 0; z-index: 30;
+}
+.topbar h1 { font-size: 18px; font-weight: 700; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
 
-    /* Alerts & Login */
-    .alert-box {
-      max-width: 440px; margin: 32px auto; padding: 24px;
-      background: var(--amber-50); border: 1px solid var(--amber-300);
-      border-radius: 16px; text-align: center;
-    }
-    .login-wrap { max-width: 440px; margin: 48px auto; padding: 0 16px; }
-    .login-card {
-      background: #fff; padding: 32px; border-radius: 16px;
-      border: 1px solid var(--slate-200); box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      text-align: center;
-    }
-    .login-logo {
-      width: 64px; height: 64px; border-radius: 16px;
-      background: var(--sky-700); color: #fff;
-      font-weight: 800; font-size: 24px;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 16px;
-    }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px;
+  border: 0; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s, opacity .15s;
+}
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn-primary { background: var(--btn); color: var(--btnfg); }
+.btn-primary:hover:not(:disabled) { background: var(--btn-hover); }
+.btn-secondary { background: var(--card); color: var(--fg); border: 1px solid var(--border); }
+.btn-secondary:hover:not(:disabled) { background: #f8fafc; }
+.btn-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.btn-warning { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+.btn-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.btn-ghost { background: none; color: var(--btn); border: 0; padding: 6px 10px; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-icon {
+  width: 36px; height: 36px; padding: 0; display: grid; place-items: center;
+  border-radius: 8px; background: none; border: 1px solid var(--border); cursor: pointer;
+}
 
-    /* Main Dashboard */
-    main { padding: 24px 16px; display: flex; flex-direction: column; gap: 20px; }
-    .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    @media (min-width: 768px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
-    .kpi-card {
-      background: #fff; padding: 16px; border-radius: 12px;
-      border: 1px solid var(--slate-200); box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-    }
-    .kpi-label { font-size: 12px; color: var(--slate-500); font-weight: 500; }
-    .kpi-val { font-size: 26px; font-weight: 800; margin-top: 4px; }
-    .text-amber { color: var(--amber-600); }
-    .text-sky { color: var(--sky-700); }
-    .text-emerald { color: var(--emerald-600); }
-    .text-purple { color: var(--purple-600); }
+.content { padding: 20px 24px 40px; flex: 1; }
+.view { display: none; }
+.view.active { display: block; }
 
-    /* Toolbar */
-    .toolbar {
-      background: #fff; padding: 14px 16px; border-radius: 12px;
-      border: 1px solid var(--slate-200);
-      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
-    }
-    .search-input {
-      width: 100%; max-width: 340px; padding: 8px 12px;
-      border: 1px solid var(--slate-300); border-radius: 8px; font-size: 13px;
-    }
-    .search-input:focus { outline: none; border-color: var(--sky-700); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.kpi {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 18px; box-shadow: var(--shadow);
+}
+.kpi .label { font-size: 13px; font-weight: 600; color: var(--hint); display: flex; align-items: center; gap: 6px; }
+.kpi .value { font-size: 28px; font-weight: 800; line-height: 1.15; margin-top: 4px; }
+.kpi .trend { font-size: 12px; font-weight: 600; margin-left: 6px; color: var(--success); }
+.kpi.alert { border-color: #fbbf24; background: #fffbeb; }
+.kpi.alert .value { color: #b45309; }
 
-    /* Cards / Sections */
-    .panel {
-      background: #fff; border-radius: 12px;
-      border: 1px solid var(--slate-200); overflow: hidden;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-    }
-    .panel-header {
-      padding: 12px 18px; border-bottom: 1px solid var(--slate-200);
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
-    }
-    .panel-header h2 { font-size: 15px; font-weight: 700; color: var(--slate-900); }
-    .panel-header span { font-size: 12px; font-weight: 500; }
-    .bg-amber-soft { background: var(--amber-50); border-bottom-color: var(--amber-100); }
-    .bg-amber-soft span { color: var(--amber-800); }
-    .bg-sky-soft { background: var(--sky-50); border-bottom-color: var(--sky-100); }
-    .bg-sky-soft span { color: var(--sky-800); }
-    .bg-purple-soft { background: var(--purple-50); border-bottom-color: var(--purple-100); }
-    .bg-purple-soft span { color: var(--purple-800); }
-    .bg-slate-soft { background: var(--slate-50); }
-    .panel-body { padding: 8px 18px; font-size: 13px; color: var(--slate-600); }
+.panel {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); margin-bottom: 16px;
+}
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap;
+}
+.panel-head h3 { font-size: 15px; font-weight: 700; }
+.panel-body.pad { padding: 16px 18px; }
 
-    /* List Items */
-    .list-row {
-      padding: 12px 0; border-bottom: 1px solid var(--slate-100);
-      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;
-    }
-    .list-row:last-child { border-bottom: none; }
-    .item-title { font-weight: 700; color: var(--slate-900); font-size: 14px; }
-    .item-meta { font-size: 12px; color: var(--slate-500); margin-top: 2px; }
-    .item-meta a { color: var(--sky-700); text-decoration: underline; }
-    .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center; }
+.toolbar .search {
+  flex: 1 1 220px; max-width: 340px; display: flex; align-items: center; gap: 8px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0 12px;
+}
+.toolbar .search input { border: 0; background: transparent; padding: 9px 0; width: 100%; outline: none; }
+.toolbar select, .filter-select {
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--card); color: var(--fg); min-width: 140px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--card); font-size: 13px; font-weight: 500; cursor: pointer; color: var(--fg);
+}
+.chip.active { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; font-weight: 600; }
 
-    /* Modals */
-    .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55);
-      z-index: 50; display: flex; align-items: center; justify-content: center;
-      padding: 16px; overflow-y: auto;
-    }
-    .modal-box {
-      background: #fff; border-radius: 16px; max-width: 540px; width: 100%;
-      padding: 22px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
-      max-height: 90vh; overflow-y: auto;
-    }
-    .modal-box-lg { max-width: 680px; }
-    .modal-header {
-      display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid var(--slate-200); padding-bottom: 12px; margin-bottom: 16px;
-    }
-    .modal-header h3 { font-size: 17px; font-weight: 700; color: var(--slate-900); }
-    .close-btn { background: none; font-size: 22px; color: var(--slate-400); line-height: 1; }
-    .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 520px) { .form-grid-2 { grid-template-columns: 1fr 1fr; } }
-    .field label { display: block; font-size: 12px; font-weight: 600; color: var(--slate-700); margin-bottom: 4px; }
-    .field input, .field select, .field textarea {
-      width: 100%; padding: 8px 10px; border: 1px solid var(--slate-300);
-      border-radius: 8px; font-size: 13px; font-family: inherit;
-    }
-    .camera-box {
-      background: var(--slate-50); border: 1px dashed var(--slate-300);
-      padding: 12px; border-radius: 10px;
-    }
-    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.tbl-wrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th {
+  padding: 11px 14px; text-align: left; font-size: 12px; font-weight: 600;
+  color: var(--hint); background: #f8fafc; white-space: nowrap; border-bottom: 1px solid var(--border);
+}
+.tbl td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.tbl tbody tr:last-child td { border-bottom: 0; }
+.tbl tbody tr:hover td { background: #f8fafc; }
+.cell-user { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cell-user .info b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cell-user .info span { font-size: 12px; color: var(--hint); }
+.av {
+  width: 36px; height: 36px; border-radius: 50%; background: #e0f2fe; color: #0369a1;
+  display: grid; place-items: center; font-size: 13px; font-weight: 700; flex: none;
+}
+.acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.bdg {
+  display: inline-block; padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+.bdg.ok { background: #dcfce7; color: #166534; }
+.bdg.warn { background: #fef3c7; color: #92400e; }
+.bdg.info { background: #dbeafe; color: #1e40af; }
+.bdg.bad { background: #fee2e2; color: #991b1b; }
+.bdg.mute { background: #e2e8f0; color: #475569; }
+.bdg.purple { background: #f3e8ff; color: #7e22ce; }
+.bdg.teal { background: #ccfbf1; color: #0f766e; }
+.bdg.orange { background: #ffedd5; color: #c2410c; }
 
-    /* Print Contract */
-    .contract-paper {
-      border: 1px solid var(--slate-300); padding: 22px; border-radius: 10px;
-      font-size: 13px; line-height: 1.7; color: var(--slate-900); background: #fff;
-    }
-    .contract-header { text-align: center; border-bottom: 1px solid var(--slate-300); padding-bottom: 10px; margin-bottom: 14px; }
-    .sig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; font-size: 12px; }
-    .sig-line { margin-top: 28px; border-top: 1px solid var(--slate-500); padding-top: 4px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-2 > * { min-width: 0; }
+.empty { padding: 32px 16px; text-align: center; color: var(--hint); font-size: 14px; }
+.pagination {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 14px; border-top: 1px solid var(--border); font-size: 13px; color: var(--hint);
+}
+.pagination button { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 
-    @media print {
-      body * { visibility: hidden; }
-      #printArea, #printArea * { visibility: visible; }
-      #printArea { position: absolute; left: 0; top: 0; width: 100%; border: none; padding: 10px; }
-      .no-print { display: none !important; }
-    }
-  </style>
+.feed-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.feed-item:last-child { border-bottom: 0; }
+.feed-dot { width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; display: grid; place-items: center; font-size: 14px; flex: none; }
+.feed-time { font-size: 12px; color: var(--hint); white-space: nowrap; margin-left: auto; }
+.job-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+  margin-bottom: 10px; cursor: pointer; transition: border-color .15s;
+}
+.job-card:hover, .job-card.active { border-color: var(--btn); background: #f0f9ff; }
+.job-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.job-card .meta { font-size: 12px; color: var(--hint); display: flex; flex-wrap: wrap; gap: 8px; }
+.match-card {
+  display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.match-card:last-child { border-bottom: 0; }
+.match-score { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #dcfce7; color: #166534; }
+
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; overflow-x: auto; }
+.tab {
+  padding: 10px 16px; border: 0; background: none; font-size: 13px; font-weight: 600;
+  color: var(--hint); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
+}
+.tab.active { color: var(--btn); border-bottom-color: var(--btn); }
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.setting-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px; box-shadow: var(--shadow);
+}
+.setting-card .sc-label { font-size: 13px; color: var(--hint); font-weight: 600; }
+.setting-card .sc-value { font-size: 24px; font-weight: 800; margin-top: 4px; }
+.form-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 14px; align-items: center; }
+.form-row label { font-size: 13px; font-weight: 500; color: var(--fg); min-width: 200px; }
+.form-row input[type="text"], .form-row input[type="number"], .form-row select {
+  padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; min-width: 160px;
+}
+.toggle {
+  position: relative; width: 44px; height: 24px; background: #cbd5e1;
+  border-radius: 999px; cursor: pointer; transition: background .2s; border: 0;
+}
+.toggle.on { background: var(--btn); }
+.toggle::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+  background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 2px rgb(0 0 0 / .15);
+}
+.toggle.on::after { transform: translateX(20px); }
+
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #0f172a; color: #fff; padding: 12px 20px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; z-index: 200; box-shadow: 0 10px 25px rgb(0 0 0 / .2);
+  opacity: 0; transition: opacity .25s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 150;
+}
+.modal-overlay.hid { display: none !important; }
+.modal-box {
+  background: var(--card); border-radius: 14px; padding: 24px;
+  max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.15);
+}
+.modal-box h3 { font-size: 17px; margin-bottom: 6px; text-align: center; }
+.modal-box > p { color: var(--hint); font-size: 13px; margin-bottom: 16px; text-align: center; }
+.modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+.modal-actions .btn { flex: 1; justify-content: center; }
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100%; height: auto; position: fixed; left: 0; right: 0; bottom: 0; top: auto;
+    flex-direction: row; border-right: 0; border-top: 1px solid var(--border);
+    z-index: 50; padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .sidebar-brand, .sidebar-footer { display: none; }
+  .nav { flex-direction: row; justify-content: space-around; padding: 6px 4px; width: 100%; gap: 0; }
+  .nav-item { flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 10px; flex: 1; text-align: center; }
+  .nav-item .ni { font-size: 18px; }
+  .main { margin-left: 0; padding-bottom: 72px; }
+  .content { padding: 14px 12px 24px; }
+  .topbar { padding: 0 14px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .tbl thead { display: none; }
+  .tbl, .tbl tbody, .tbl tr { display: block; width: 100%; }
+  .tbl tr { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .tbl td { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border: 0; gap: 10px; }
+  .tbl td::before { content: attr(data-l); font-size: 12px; font-weight: 600; color: var(--hint); flex: none; }
+  .tbl td.c-user, .tbl td.c-act { display: block; }
+  .tbl td.c-user::before, .tbl td.c-act::before { display: none; }
+}
+@media (max-width: 500px) { .kpis { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
-
-  <!-- TOP HEADER -->
-  <header>
-    <div class="header-inner">
-      <div class="brand">
-        <div class="brand-logo">TD</div>
-        <div>
-          <h1>Tamagn Delala</h1>
-          <p>Manager panel • ታማኝ ደላላ</p>
-        </div>
-      </div>
-      <div class="header-actions">
-        <button id="installAppBtn" class="btn btn-amber btn-sm hidden">📲 Install as app</button>
-        <button id="signOutBtn" class="btn btn-dark-sky btn-sm hidden">Sign out</button>
-      </div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">TD</div>
+      <div class="brand-text">Tamagn Delala<span>Staffing Agency</span></div>
     </div>
-  </header>
+    <nav class="nav">
+      <button class="nav-item active" data-view="dashboard"><span class="ni">📊</span> Dashboard</button>
+      <button class="nav-item" data-view="employers"><span class="ni">🏢</span> Employers</button>
+      <button class="nav-item" data-view="workers"><span class="ni">👷</span> Workers</button>
+      <button class="nav-item" data-view="matches"><span class="ni">🔗</span> Job Matches</button>
+      <button class="nav-item" data-view="payroll"><span class="ni">⏱️</span> Timesheets & Payroll</button>
+      <button class="nav-item" data-view="settings"><span class="ni">⚙️</span> Settings</button>
+    </nav>
+    <div class="sidebar-footer">v2.0 · Interactive Demo</div>
+  </aside>
 
-  <!-- TELEGRAM IN-APP BROWSER WARNING -->
-  <div id="telegramWarning" class="alert-box hidden">
-    <p style="font-size: 28px; margin-bottom: 8px;">⚠️</p>
-    <h2 style="font-size: 16px; font-weight: 700; color: var(--amber-900); margin-bottom: 4px;">Open in Chrome or Safari</h2>
-    <p style="font-size: 13px; color: var(--amber-800);">
-      This page does not work inside Telegram. Tap the menu (•••) and choose <strong>"Open in Chrome"</strong> or <strong>"Open in Safari"</strong>.
-    </p>
-  </div>
-
-  <!-- LOGIN SCREEN -->
-  <section id="loginScreen" class="login-wrap">
-    <div class="login-card">
-      <div class="login-logo">TD</div>
-      <h2 style="font-size: 20px; font-weight: 700; color: var(--slate-900);">Tamagn Delala</h2>
-      <p style="font-size: 13px; color: var(--slate-500); margin: 4px 0 22px;">Sign in with the manager Google account.</p>
-
-      <button id="googleSignInBtn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">
-        Sign in with Google
-      </button>
-
-      <p id="authError" class="hidden" style="font-size: 12px; color: var(--rose-600); margin-top: 12px; font-weight: 600;"></p>
-
-      <div style="margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--slate-100); font-size: 12px; color: var(--slate-500);">
-        To install on iPhone: tap the <strong>Share</strong> button, then <strong>"Add to Home Screen"</strong>.
+  <div class="main">
+    <header class="topbar">
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="topbar-actions">
+        <button class="btn-icon" title="Notifications" id="notifBtn">🔔</button>
+        <button class="btn btn-primary" id="topActionBtn">+ New</button>
       </div>
-    </div>
-  </section>
+    </header>
 
-  <!-- MAIN MANAGER DASHBOARD -->
-  <main id="dashboardScreen" class="container hidden">
-
-    <!-- KPI SUMMARY BAR -->
-    <div class="kpi-grid">
-      <div class="kpi-card">
-        <div class="kpi-label">⏳ Pending Workers</div>
-        <div id="kpiPending" class="kpi-val text-amber">0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">📋 Open Hire Requests</div>
-        <div id="kpiRequests" class="kpi-val text-sky">0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">👷 Approved Workers</div>
-        <div id="kpiWorkers" class="kpi-val text-emerald">0</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">⭐ Rating Follow-up Due</div>
-        <div id="kpiRatings" class="kpi-val text-purple">0</div>
-      </div>
-    </div>
-
-    <!-- TOOLBAR -->
-    <div class="toolbar">
-      <input id="globalSearch" type="text" class="search-input" placeholder="Search name, phone, skill, or National ID..." oninput="filterDashboard()" />
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button onclick="openModal('addWorkerModal')" class="btn btn-primary">➕ Add Worker Manually</button>
-        <button onclick="openAgreementModal()" class="btn btn-emerald">📄 Amharic Agreement / Handover</button>
-      </div>
-    </div>
-
-    <!-- 1. PENDING WORKERS -->
-    <section class="panel">
-      <div class="panel-header bg-amber-soft">
-        <h2>⏳ Pending Workers</h2>
-        <span>Review ID &amp; approve to publish</span>
-      </div>
-      <div id="pendingWorkersList" class="panel-body">Loading pending workers...</div>
-    </section>
-
-    <!-- 2. HIRE REQUESTS -->
-    <section class="panel">
-      <div class="panel-header bg-sky-soft">
-        <h2>📋 Hire Requests</h2>
-        <span>Match workers &amp; generate handover contract</span>
-      </div>
-      <div id="hireRequestsList" class="panel-body">Loading hire requests...</div>
-    </section>
-
-    <!-- 3. RATING FOLLOW-UP DUE -->
-    <section class="panel">
-      <div class="panel-header bg-purple-soft">
-        <h2>⭐ Rating Follow-up Due</h2>
-        <span>Check employer satisfaction after placement</span>
-      </div>
-      <div id="ratingDueList" class="panel-body">No rating follow-ups due right now.</div>
-    </section>
-
-    <!-- 4. REGISTERED EMPLOYERS -->
-    <section class="panel">
-      <div class="panel-header bg-slate-soft">
-        <h2>👔 Registered Employers</h2>
-      </div>
-      <div id="employersList" class="panel-body">Loading employers...</div>
-    </section>
-
-    <!-- 5. ALL WORKERS -->
-    <section class="panel">
-      <div class="panel-header bg-slate-soft">
-        <h2>👷 All Workers</h2>
-      </div>
-      <div id="allWorkersList" class="panel-body">Loading workers...</div>
-    </section>
-  </main>
-
-  <!-- MODAL 1: ADD WORKER MANUALLY -->
-  <div id="addWorkerModal" class="modal-backdrop hidden">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3>➕ Add Worker Manually</h3>
-        <button onclick="closeModal('addWorkerModal')" class="close-btn">&times;</button>
-      </div>
-
-      <form id="manualWorkerForm" class="form-grid">
-        <div class="form-grid form-grid-2">
-          <div class="field">
-            <label>Full name *</label>
-            <input type="text" id="wFullName" required />
+    <div class="content">
+      <!-- DASHBOARD -->
+      <section id="v-dashboard" class="view active">
+        <div class="kpis" id="dashKpis"></div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Verification & Onboarding Queue</h3>
+              <button class="btn-ghost btn-sm" data-goto="workers">View all</button>
+            </div>
+            <div class="panel-body pad" id="dashQueue"></div>
           </div>
-          <div class="field">
-            <label>Age *</label>
-            <input type="number" id="wAge" required min="18" max="70" />
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Urgent Unfilled Jobs</h3>
+              <button class="btn-ghost btn-sm" data-goto="matches">View all</button>
+            </div>
+            <div class="panel-body pad" id="dashUrgent"></div>
           </div>
         </div>
-
-        <div class="form-grid form-grid-2">
-          <div class="field">
-            <label>Skill *</label>
-            <input type="text" id="wSkill" placeholder="House Maid, Driver, Cook..." required />
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><h3>Weekly Job Requests vs Placements</h3></div>
+            <div class="panel-body pad">
+              <svg viewBox="0 0 320 140" width="100%" height="140">
+                <polyline fill="none" stroke="#0ea5e9" stroke-width="2.5" points="20,90 80,70 140,95 200,55 260,75 300,40"/>
+                <polyline fill="none" stroke="#14b8a6" stroke-width="2.5" points="20,110 80,60 140,75 200,90 260,50 300,30"/>
+                <circle cx="20" cy="90" r="3.5" fill="#0ea5e9"/><circle cx="80" cy="70" r="3.5" fill="#0ea5e9"/>
+                <circle cx="140" cy="95" r="3.5" fill="#0ea5e9"/><circle cx="200" cy="55" r="3.5" fill="#0ea5e9"/>
+                <circle cx="260" cy="75" r="3.5" fill="#0ea5e9"/><circle cx="300" cy="40" r="3.5" fill="#0ea5e9"/>
+                <circle cx="20" cy="110" r="3.5" fill="#14b8a6"/><circle cx="80" cy="60" r="3.5" fill="#14b8a6"/>
+                <circle cx="140" cy="75" r="3.5" fill="#14b8a6"/><circle cx="200" cy="90" r="3.5" fill="#14b8a6"/>
+                <circle cx="260" cy="50" r="3.5" fill="#14b8a6"/><circle cx="300" cy="30" r="3.5" fill="#14b8a6"/>
+              </svg>
+              <div style="display:flex;gap:16px;font-size:12px;color:var(--hint);margin-top:6px">
+                <span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0ea5e9;margin-right:4px"></i>Job Requests</span>
+                <span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#14b8a6;margin-right:4px"></i>Placements</span>
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <label>Location *</label>
-            <input type="text" id="wLocation" placeholder="Legetafo, Bole..." required />
-          </div>
-        </div>
-
-        <div class="form-grid form-grid-2">
-          <div class="field">
-            <label>Experience *</label>
-            <input type="text" id="wExperience" placeholder="e.g. 3 years" required />
-          </div>
-          <div class="field">
-            <label>Payment type *</label>
-            <select id="wPaymentType">
-              <option value="Monthly">Monthly</option>
-              <option value="Hourly">Hourly</option>
-              <option value="Daily">Daily</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-grid form-grid-2">
-          <div class="field">
-            <label>Pay (optional)</label>
-            <input type="text" id="wPay" placeholder="e.g. 6,000 ETB" />
-          </div>
-          <div class="field">
-            <label>National ID (Fayda) *</label>
-            <input type="text" id="wNationalId" required />
+          <div class="panel">
+            <div class="panel-head"><h3>Live Check-In & Shift Activity</h3></div>
+            <div class="panel-body pad" id="dashFeed"></div>
           </div>
         </div>
+      </section>
 
-        <div class="form-grid form-grid-2">
-          <div class="field">
-            <label>Phone *</label>
-            <input type="tel" id="wPhone" placeholder="09..." required />
-          </div>
-          <div class="field">
-            <label>Police Clearance</label>
-            <select id="wClearance">
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-grid form-grid-2">
-          <div class="field">
-            <label>Guarantor Name (የዋስ ስም)</label>
-            <input type="text" id="wGuarantorName" />
-          </div>
-          <div class="field">
-            <label>Guarantor Phone</label>
-            <input type="tel" id="wGuarantorPhone" />
-          </div>
-        </div>
-
-        <div class="camera-box">
-          <label style="display:block; font-size:12px; font-weight:700; margin-bottom:4px;">Photo 📷 Take Photo</label>
-          <p style="font-size:11px; color:var(--slate-500); margin-bottom:8px;">
-            Take the photo with the camera (gallery upload is not allowed). Passport style: face centered, plain background.
-          </p>
-          <input type="file" id="wPhotoInput" accept="image/*" capture="user" style="font-size:12px;" />
-          <img id="wPhotoPreview" class="hidden" style="margin-top:8px; width:76px; height:76px; object-fit:cover; border-radius:8px; border:1px solid var(--slate-300);" />
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" onclick="closeModal('addWorkerModal')" class="btn btn-outline">Cancel</button>
-          <button type="submit" id="saveWorkerBtn" class="btn btn-primary">Save Worker</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 2: SAVE RATING -->
-  <div id="ratingModal" class="modal-backdrop hidden">
-    <div class="modal-box" style="max-width: 420px;">
-      <div class="modal-header">
-        <h3>Save Rating</h3>
-        <button onclick="closeModal('ratingModal')" class="close-btn">&times;</button>
-      </div>
-      <input type="hidden" id="ratingWorkerId" />
-      <div class="form-grid">
-        <div class="field">
-          <label>Stars (1-5)</label>
-          <select id="ratingStars">
-            <option value="5">5 ★★★★★</option>
-            <option value="4">4 ★★★★</option>
-            <option value="3">3 ★★★</option>
-            <option value="2">2 ★★</option>
-            <option value="1">1 ★</option>
+      <!-- EMPLOYERS -->
+      <section id="v-employers" class="view">
+        <div class="toolbar">
+          <button class="btn btn-primary" data-action="add-employer">+ Add Employer</button>
+          <div class="search"><span>🔍</span><input type="search" id="eSearch" placeholder="Search Employers..."></div>
+          <select id="eStatusFilter" class="filter-select">
+            <option value="all">All Status</option>
+            <option value="Verified">Verified</option>
+            <option value="Pending">Pending</option>
+            <option value="Suspended">Suspended</option>
+          </select>
+          <select id="eIndustryFilter" class="filter-select">
+            <option value="all">All Industries</option>
+            <option>Logistics</option><option>Manufacturing</option><option>Construction</option>
+            <option>Hospitality</option><option>Healthcare</option><option>Technology</option><option>Domestic</option>
           </select>
         </div>
-        <div class="field">
-          <label>Comment / Recommendation</label>
-          <textarea id="ratingComment" rows="3"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button onclick="closeModal('ratingModal')" class="btn btn-outline">Cancel</button>
-        <button onclick="submitRating()" class="btn btn-primary">Save Rating</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 3: PRINTABLE AMHARIC CONTRACT & HANDOVER RECEIPT -->
-  <div id="agreementModal" class="modal-backdrop hidden">
-    <div class="modal-box modal-box-lg">
-      <div class="modal-header no-print">
-        <h3>📄 የአገልግሎት ውል እና የሠራተኛ መረካከቢያ</h3>
-        <button onclick="closeModal('agreementModal')" class="close-btn">&times;</button>
-      </div>
-
-      <div class="form-grid form-grid-2 no-print" style="background: var(--slate-50); padding: 12px; border-radius: 10px; border: 1px solid var(--slate-200); margin-bottom: 14px;">
-        <div class="field">
-          <input type="text" id="agEmployer" placeholder="የአሠሪ ስም (Employer Name)" oninput="updateAgreementText()" />
-        </div>
-        <div class="field">
-          <input type="text" id="agEmployerPhone" placeholder="የአሠሪ ስልክ (Employer Phone)" oninput="updateAgreementText()" />
-        </div>
-        <div class="field">
-          <input type="text" id="agWorker" placeholder="የሠራተኛ ስም (Worker Name)" oninput="updateAgreementText()" />
-        </div>
-        <div class="field">
-          <input type="text" id="agWorkerId" placeholder="የሠራተኛ መታወቂያ (Fayda/Kebele ID)" oninput="updateAgreementText()" />
-        </div>
-        <div class="field">
-          <input type="text" id="agSalary" placeholder="ወርሃዊ ደመወዝ (Salary in ETB)" oninput="updateAgreementText()" />
-        </div>
-        <div class="field">
-          <input type="text" id="agFee" placeholder="የኤጀንሲ አገልግሎት ክፍያ (Commission ETB)" oninput="updateAgreementText()" />
-        </div>
-      </div>
-
-      <div id="printArea" class="contract-paper">
-        <div class="contract-header">
-          <h2 style="font-size: 17px; font-weight: 700;">ታማኝ ደላላ (Tamagn Delala) የሥራ አገናኝ ኤጀንሲ</h2>
-          <p style="font-size: 12px; color: var(--slate-600);">ለገጣፎ፣ ኢትዮጵያ • የሠራተኛ እና አሠሪ ውል እና መረካከቢያ ሰነድ</p>
-        </div>
-
-        <p style="margin-bottom: 8px;"><strong>ቀን፦</strong> <span id="outDate"></span></p>
-        <p style="margin-bottom: 10px;">
-          ይህ ውል በኢትዮጵያ የፍትሐብሔር ሕግ እና በአሠሪና ሠራተኛ ጉዳይ አዋጅ ቁጥር 1156/2011 መሠረት በ<strong>ታማኝ ደላላ የሥራ አገናኝ ኤጀንሲ</strong> (ውል ሰጪ) እና በአሠሪ <strong id="outEmployer">________________</strong> (ስልክ፦ <strong id="outEmployerPhone">__________</strong>) መካከል ተፈርሟል።
-        </p>
-        <p style="margin-bottom: 10px;">
-          <strong>1. የሠራተኛ መረካከቢያ፦</strong> አሠሪው ኤጀንሲው ያቀረባቸውን ሠራተኛ <strong id="outWorker">________________</strong> (መታወቂያ ቁጥር፦ <strong id="outWorkerId">__________</strong>) በወር ብር <strong id="outSalary">________</strong> ደመወዝ እንዲሠሩ በትክክል ተረክበዋል።
-        </p>
-        <p>
-          <strong>2. የአገልግሎት ክፍያ እና ዋስትና፦</strong> አሠሪው ለኤጀንሲው የአገልግሎት ክፍያ ብር <strong id="outFee">________</strong> ከፍለዋል። ሠራተኛው ሥራ በጀመሩ በ15 ቀናት ውስጥ በራሳቸው ፈቃድ ቢለቁ ኤጀንሲው ያለ ተጨማሪ ክፍያ ተተኪ ሠራተኛ ያቀርባል።
-        </p>
-
-        <div class="sig-grid">
-          <div>
-            <strong>የኤጀንሲው ተወካይ</strong>
-            <div class="sig-line">ፊርማና ማኅተም</div>
+        <div class="kpis" id="empKpis"></div>
+        <div class="panel">
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Company Name</th><th>Industry</th><th>Active Jobs</th><th>Placed Workers</th>
+                  <th>Verification Status</th><th>Billing Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tbEmployers"></tbody>
+            </table>
           </div>
-          <div>
-            <strong>አሠሪ (ተረካቢ)</strong>
-            <div class="sig-line">ፊርማ</div>
+          <div class="pagination"><button disabled>‹</button><span>1 of 1</span><button disabled>›</button></div>
+        </div>
+      </section>
+
+      <!-- WORKERS -->
+      <section id="v-workers" class="view">
+        <div class="toolbar">
+          <button class="btn btn-primary" data-action="add-worker">+ Add Worker</button>
+          <div class="search"><span>🔍</span><input type="search" id="wSearch" placeholder="Search Workers by name, skill, or ID..."></div>
+          <div class="chips" id="wChips"></div>
+          <select id="wSkillFilter" class="filter-select">
+            <option value="all">Filter by Skill</option>
+            <option>Electrician</option><option>Hospitality Staff</option><option>Warehouse Associate</option>
+            <option>Registered Nurse</option><option>Delivery Driver</option><option>Office Admin</option>
+          </select>
+        </div>
+        <div class="kpis" id="workerKpis"></div>
+        <div class="panel">
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Worker Name & ID</th><th>Primary Skill / Role</th><th>Experience</th>
+                  <th>Availability Status</th><th>Verification</th><th>Assigned Employer</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tbWorkers"></tbody>
+            </table>
           </div>
-          <div>
-            <strong>ሠራተኛ</strong>
-            <div class="sig-line">ፊርማ</div>
+          <div class="pagination"><button disabled>‹</button><span>1 of 1</span><button disabled>›</button></div>
+        </div>
+      </section>
+
+      <!-- JOB MATCHES -->
+      <section id="v-matches" class="view">
+        <div class="toolbar">
+          <button class="btn btn-primary" data-action="create-match">+ Create Match</button>
+          <div class="search"><span>🔍</span><input type="search" id="mSearch" placeholder="Search jobs, workers, skills..."></div>
+          <select id="mStatusFilter" class="filter-select">
+            <option value="all">Filter by Status</option>
+            <option>Open</option><option>Partially Filled</option><option>Filled</option><option>Closed</option>
+          </select>
+          <select id="mUrgencyFilter" class="filter-select">
+            <option value="all">Filter by Urgency</option>
+            <option>Normal</option><option>Urgent</option>
+          </select>
+        </div>
+        <div class="kpis" id="matchKpis"></div>
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><h3>Open Job Requests</h3></div>
+            <div class="panel-body pad" id="openJobs"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Recommended Worker Matches</h3>
+              <span class="bdg ok">98% Avg</span>
+            </div>
+            <div class="panel-body pad" id="recMatches"></div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="modal-footer no-print">
-        <button onclick="closeModal('agreementModal')" class="btn btn-outline">Close</button>
-        <button onclick="window.print()" class="btn btn-emerald">🖨️ Print / Save PDF</button>
-      </div>
-    </div>
-  </div>
+      <!-- PAYROLL -->
+      <section id="v-payroll" class="view">
+        <div class="toolbar">
+          <button class="btn btn-primary" data-action="approve-all">+ Approve All</button>
+          <div class="search"><span>🔍</span><input type="search" id="pSearch" placeholder="Search timesheets, workers, or employers..."></div>
+          <div class="chips" id="pChips"></div>
+          <select id="pPeriod" class="filter-select">
+            <option>This Week: Nov 11 – Nov 17</option>
+            <option>Last Week</option>
+            <option>This Month</option>
+          </select>
+        </div>
+        <div class="kpis" id="payKpis"></div>
+        <div class="panel">
+          <div class="panel-head"><h3>Weekly Timesheet & Payroll Log</h3></div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Worker Name & ID</th><th>Employer</th><th>Hours Logged</th>
+                  <th>Worker Pay</th><th>Employer Bill</th><th>Approval Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tbPayroll"></tbody>
+            </table>
+          </div>
+          <div class="pagination"><button disabled>‹</button><span>1 of 1</span><button disabled>›</button></div>
+        </div>
+      </section>
 
-  <!-- FIREBASE & APP LOGIC -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-    // LIVE FIREBASE CONFIGURATION FOR TAMAGN DELALA (green-farm-284f6)
-    // Note: Paste your Web API Key from Firebase Console -> Project Settings -> General
-    const firebaseConfig = {
-      apiKey: "REPLACE_WITH_YOUR_FIREBASE_WEB_API_KEY",
-      authDomain: "green-farm-284f6.firebaseapp.com",
-      projectId: "green-farm-284f6",
-      storageBucket: "green-farm-284f6.firebasestorage.app",
-      messagingSenderId: "307750549229",
-      appId: "1:307750549229:web:ecfc95362e28dae7eb3ee4",
-      measurementId: "G-R8WLYNY766"
-    };
-
-    // Allowed manager Google accounts (add any additional staff emails here)
-    const ALLOWED_MANAGERS = [
-      "henokfikru@gmail.com",
-      "fikruhailu@gmail.com"
-    ];
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-    const provider = new GoogleAuthProvider();
-
-    // 1. Detect Telegram In-App Browser
-    if (navigator.userAgent.includes("Telegram") || window.TelegramWebviewProxy) {
-      document.getElementById("telegramWarning").classList.remove("hidden");
-      document.getElementById("loginScreen").classList.add("hidden");
-    }
-
-    // 2. PWA Install Prompt
-    let deferredPrompt;
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById("installAppBtn").classList.remove("hidden");
-    });
-
-    document.getElementById("installAppBtn").addEventListener("click", async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      document.getElementById("installAppBtn").classList.add("hidden");
-    });
-
-    // 3. Google Sign-In & Auth State
-    document.getElementById("googleSignInBtn").addEventListener("click", async () => {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (err) {
-        const errEl = document.getElementById("authError");
-        errEl.textContent = err.message;
-        errEl.classList.remove("hidden");
-      }
-    });
-
-    document.getElementById("signOutBtn").addEventListener("click", () => signOut(auth));
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const userEmail = (user.email || "").toLowerCase();
-        const isAllowed = ALLOWED_MANAGERS.some(e => e.toLowerCase() === userEmail);
-        if (!isAllowed) {
-          const errEl = document.getElementById("authError");
-          errEl.textContent = `Access denied for ${user.email}. Please sign in with an authorized manager email.`;
-          errEl.classList.remove("hidden");
-          signOut(auth);
-          return;
-        }
-        document.getElementById("loginScreen").classList.add("hidden");
-        document.getElementById("dashboardScreen").classList.remove("hidden");
-        document.getElementById("signOutBtn").classList.remove("hidden");
-        initFirestoreListeners();
-      } else {
-        document.getElementById("loginScreen").classList.remove("hidden");
-        document.getElementById("dashboardScreen").classList.add("hidden");
-        document.getElementById("signOutBtn").classList.add("hidden");
-      }
-    });
-
-    // 4. Real-Time Firestore Listeners
-    let state = { workers: [], requests: [], employers: [] };
-
-    function initFirestoreListeners() {
-      onSnapshot(collection(db, "workers"), (snapshot) => {
-        state.workers = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderAll();
-      });
-
-      onSnapshot(collection(db, "hireRequests"), (snapshot) => {
-        state.requests = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderAll();
-      });
-
-      onSnapshot(collection(db, "employers"), (snapshot) => {
-        state.employers = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderAll();
-      });
-    }
-
-    window.filterDashboard = () => renderAll();
-
-    function renderAll() {
-      const q = (document.getElementById("globalSearch").value || "").toLowerCase();
-      const matchQuery = (obj) => !q || JSON.stringify(obj).toLowerCase().includes(q);
-
-      const pending = state.workers.filter(w => (w.status === "pending" || !w.approved) && matchQuery(w));
-      const approved = state.workers.filter(w => (w.status === "approved" || w.approved === true) && matchQuery(w));
-      const ratingDue = approved.filter(w => w.ratingDue === true);
-      const requests = state.requests.filter(matchQuery);
-      const employers = state.employers.filter(matchQuery);
-
-      document.getElementById("kpiPending").textContent = pending.length;
-      document.getElementById("kpiWorkers").textContent = approved.length;
-      document.getElementById("kpiRatings").textContent = ratingDue.length;
-      document.getElementById("kpiRequests").textContent = requests.length;
-
-      // Render Pending Workers
-      const pEl = document.getElementById("pendingWorkersList");
-      pEl.innerHTML = pending.length ? pending.map(w => `
-        <div class="list-row">
-          <div style="display:flex; gap:10px; align-items:center;">
-            ${w.photoUrl ? `<img src="${w.photoUrl}" style="width:44px; height:44px; border-radius:8px; object-fit:cover; border:1px solid var(--slate-200);" />` : ""}
-            <div>
-              <div class="item-title">${w.fullName || "Unnamed"} (${w.age || "-"}) • <span class="text-sky">${w.skill || ""}</span></div>
-              <div class="item-meta">📍 ${w.location || ""} | 📞 <a href="tel:${w.phone}">${w.phone || ""}</a> | ID: ${w.nationalId || "N/A"} | Clearance: ${w.policeClearance || "No"}</div>
-              <div class="item-meta">Guarantor: ${w.guarantorName || "None"} (${w.guarantorPhone || "-"})</div>
+      <!-- SETTINGS -->
+      <section id="v-settings" class="view">
+        <div class="tabs">
+          <button class="tab active" data-tab="staff">Staff & Permissions</button>
+          <button class="tab" data-tab="commission">Commission & Billing Rules</button>
+          <button class="tab" data-tab="verification">Verification & Alerts</button>
+          <button class="tab" data-tab="general">General Agency Info</button>
+        </div>
+        <div id="tab-staff">
+          <div class="settings-grid" id="staffKpis"></div>
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Staff Roles & Access Control</h3>
+              <button class="btn btn-primary btn-sm" data-action="invite-staff">+ Invite Staff</button>
+            </div>
+            <div class="tbl-wrap">
+              <table class="tbl">
+                <thead>
+                  <tr><th>Staff Member</th><th>Role</th><th>Permissions Scope</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="tbStaff"></tbody>
+              </table>
             </div>
           </div>
-          <div class="row-actions">
-            <button onclick="approveWorker('${w.id}')" class="btn btn-emerald btn-sm">Approve &amp; Publish</button>
-            <button onclick="rejectWorker('${w.id}')" class="btn btn-rose btn-sm">Reject</button>
-          </div>
         </div>
-      `).join("") : "<p style='padding: 8px 0;'>No pending workers awaiting approval.</p>";
-
-      // Render Hire Requests
-      const rEl = document.getElementById("hireRequestsList");
-      rEl.innerHTML = requests.length ? requests.map(r => `
-        <div class="list-row">
-          <div>
-            <div class="item-title">${r.employerName || "Employer"} — Needs: <span class="text-sky">${r.skill || r.service || "Worker"}</span></div>
-            <div class="item-meta">📍 ${r.location || ""} | 📞 <a href="tel:${r.phone}">${r.phone || ""}</a></div>
-          </div>
-          <div class="row-actions">
-            <button onclick="prepareAgreement('${(r.employerName || "").replace(/'/g, "\'")}', '${(r.phone || "").replace(/'/g, "\'")}')" class="btn btn-primary btn-sm">
-              📄 Match &amp; Handover Contract
-            </button>
-          </div>
-        </div>
-      `).join("") : "<p style='padding: 8px 0;'>No active hire requests.</p>";
-
-      // Render Rating Due
-      const rateEl = document.getElementById("ratingDueList");
-      rateEl.innerHTML = ratingDue.length ? ratingDue.map(w => `
-        <div class="list-row">
-          <div>
-            <div class="item-title">${w.fullName} (${w.skill})</div>
-            <div class="item-meta">📞 ${w.phone}</div>
-          </div>
-          <button onclick="openRatingModal('${w.id}')" class="btn btn-purple btn-sm">⭐ Save Rating</button>
-        </div>
-      `).join("") : "<p style='padding: 8px 0;'>No rating follow-ups due right now.</p>";
-
-      // Render Employers
-      const empEl = document.getElementById("employersList");
-      empEl.innerHTML = employers.length ? employers.map(emp => `
-        <div class="list-row">
-          <div>
-            <div class="item-title">${emp.fullName || emp.name || "Employer"}</div>
-            <div class="item-meta">📍 ${emp.location || ""} • 📞 <a href="tel:${emp.phone}">${emp.phone || ""}</a></div>
-          </div>
-          <a href="https://t.me/${(emp.phone || "").replace(/[^0-9+]/g, "")}" target="_blank" style="font-size:12px; color:var(--sky-700); font-weight:700;">Telegram</a>
-        </div>
-      `).join("") : "<p style='padding: 8px 0;'>No registered employers yet.</p>";
-
-      // Render All Workers
-      const allEl = document.getElementById("allWorkersList");
-      allEl.innerHTML = approved.length ? approved.map(w => `
-        <div class="list-row">
-          <div style="display:flex; gap:10px; align-items:center;">
-            ${w.photoUrl ? `<img src="${w.photoUrl}" style="width:40px; height:40px; border-radius:8px; object-fit:cover; border:1px solid var(--slate-200);" />` : ""}
-            <div>
-              <div class="item-title">${w.fullName} • <span class="text-sky">${w.skill}</span></div>
-              <div class="item-meta">📍 ${w.location} | ${w.paymentType || "Monthly"} (${w.pay || "Negotiable"}) | ID: ${w.nationalId || "-"}</div>
+        <div id="tab-commission" class="hid">
+          <div class="panel">
+            <div class="panel-head"><h3>Agency Rules & Commission Settings</h3></div>
+            <div class="panel-body pad">
+              <div class="form-row">
+                <label>Standard Placement Fee / Markup (%)</label>
+                <input type="number" id="setCommission" value="18" min="0" max="50" step="0.5">
+              </div>
+              <div class="form-row">
+                <label>Require ID & License Verification Before Matching</label>
+                <button class="toggle on" id="setRequireId" data-toggle="requireId"></button>
+              </div>
+              <div class="form-row">
+                <label>Automated Shift Check-In Reminders (SMS/Telegram)</label>
+                <button class="toggle on" id="setReminders" data-toggle="reminders"></button>
+              </div>
+              <div class="form-row">
+                <label>Invoice Payment Terms</label>
+                <select id="setPaymentTerms">
+                  <option>Net 15 Days</option>
+                  <option>Due on Handover</option>
+                  <option>Net 7 Days</option>
+                  <option>Net 30 Days</option>
+                </select>
+              </div>
+              <div style="margin-top:16px">
+                <button class="btn btn-primary" data-action="save-settings">Save Changes</button>
+              </div>
             </div>
           </div>
-          <div class="row-actions">
-            <button onclick="prepareAgreementWithWorker('${(w.fullName || "").replace(/'/g, "\'")}', '${(w.nationalId || "").replace(/'/g, "\'")}', '${(w.pay || "").replace(/'/g, "\'")}')" class="btn btn-outline btn-sm">📄 Contract</button>
-            <button onclick="openRatingModal('${w.id}')" class="btn btn-outline btn-sm">⭐ Rate</button>
+        </div>
+        <div id="tab-verification" class="hid">
+          <div class="panel">
+            <div class="panel-head"><h3>Verification Rules</h3></div>
+            <div class="panel-body pad">
+              <div class="form-row">
+                <label>Auto-Approval Threshold</label>
+                <select><option>Verified IDs</option><option>Manual Only</option><option>Trusted Partners</option></select>
+              </div>
+              <div class="form-row">
+                <label>Require Guarantor for Domestic Workers</label>
+                <button class="toggle on" data-toggle="guarantor"></button>
+              </div>
+              <div class="form-row">
+                <label>Police Clearance Required for Security Roles</label>
+                <button class="toggle on" data-toggle="police"></button>
+              </div>
+            </div>
           </div>
         </div>
-      `).join("") : "<p style='padding: 8px 0;'>No approved workers yet.</p>";
+        <div id="tab-general" class="hid">
+          <div class="panel">
+            <div class="panel-head"><h3>Agency Information</h3></div>
+            <div class="panel-body pad">
+              <div class="form-row"><label>Agency Name</label><input type="text" value="Tamagn Delala"></div>
+              <div class="form-row"><label>Support Phone</label><input type="text" value="+251 9XX XXX XXX"></div>
+              <div class="form-row"><label>Telegram Bot</label><input type="text" value="@TamagnDelalaBot"></div>
+              <div class="form-row"><label>Default City</label><input type="text" value="Addis Ababa"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Handover / OTP Modal (Step 4) -->
+<div class="modal-overlay hid" id="handoverModal">
+  <div class="modal-box" style="max-width:440px">
+    <h3>Agreement & Handover</h3>
+    <p style="margin-bottom:12px">Complete OTP verification to place the worker</p>
+
+    <div style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--hint);margin-bottom:4px">Worker</div>
+      <div style="font-weight:700" id="hoWorker">—</div>
+      <div style="font-size:12px;color:var(--hint);margin:8px 0 4px">Job</div>
+      <div style="font-weight:600" id="hoJob">—</div>
+    </div>
+
+    <div id="hoAgreement" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:14px;max-height:140px;overflow-y:auto"></div>
+
+    <div style="background:#fef3c7;border:1px solid #fbbf24;border-radius:10px;padding:12px;margin-bottom:12px;text-align:center">
+      <div style="font-size:12px;color:#92400e;margin-bottom:4px">Demo OTP (normally sent via Telegram/SMS)</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:4px;color:#92400e" id="hoOtpDisplay">000000</div>
+    </div>
+
+    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Enter 6-digit OTP</label>
+    <input type="text" id="hoOtpInput" maxlength="6" inputmode="numeric" pattern="[0-9]*"
+      placeholder="e.g. 482913"
+      style="width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-size:18px;letter-spacing:4px;text-align:center;margin-bottom:8px">
+
+    <div style="font-size:12px;color:var(--hint);margin-bottom:14px">
+      Employer commission payment (Telebirr / Bank / Office) is recorded after OTP confirmation.
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="hoCancel">Cancel</button>
+      <button class="btn btn-primary" id="hoConfirm">Confirm Placement</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Worker Modal -->
+<div class="modal-overlay hid" id="workerFormModal">
+  <div class="modal-box" style="max-width:480px">
+    <h3 id="wfTitle">Add Worker</h3>
+    <p id="wfSub">Status starts as Pending until verified.</p>
+    <form id="workerForm">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="grid-column:1/-1">
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">Full Name *</label>
+          <input required name="full_name" placeholder="e.g. Abebe Kebede" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">Primary Skill *</label>
+          <select required name="primary_skill_role" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+            <option value="">Select skill</option>
+            <option>Electrician</option><option>Hospitality Staff</option><option>Warehouse Associate</option>
+            <option>Registered Nurse</option><option>Delivery Driver</option><option>Office Admin</option>
+            <option>Domestic Worker</option><option>Construction Worker</option><option>General Labor</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">Experience (years)</label>
+          <input type="number" name="experience_years" min="0" max="40" value="1" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">Phone</label>
+          <input name="phone" placeholder="+251 9..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">Fayda / Kebele ID</label>
+          <input name="id_number" placeholder="ID number" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">Guarantor Name</label>
+          <input name="guarantor_name" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">Guarantor Phone</label>
+          <input name="guarantor_phone" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+        </div>
+      </div>
+      <input type="hidden" name="edit_id" value="">
+      <div class="modal-actions" style="margin-top:16px">
+        <button type="button" class="btn btn-secondary" id="wfCancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Worker</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- View Worker Modal -->
+<div class="modal-overlay hid" id="workerViewModal">
+  <div class="modal-box" style="max-width:440px">
+    <h3>Worker Details</h3>
+    <div id="wvBody" style="text-align:left;font-size:14px"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn btn-secondary" id="wvClose">Close</button>
+      <button class="btn btn-primary" id="wvEdit">Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Employer Modal -->
+<div class="modal-overlay hid" id="employerFormModal">
+  <div class="modal-box" style="max-width:480px">
+    <h3 id="efTitle">Add Employer</h3>
+    <p>Register a new company. Status starts as Pending.</p>
+    <form id="employerForm">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="grid-column:1/-1">
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">Company Name *</label>
+          <input required name="company_name" placeholder="e.g. ABC Trading PLC" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">Industry *</label>
+          <select required name="industry" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+            <option value="">Select</option>
+            <option>Logistics</option><option>Manufacturing</option><option>Construction</option>
+            <option>Hospitality</option><option>Healthcare</option><option>Technology</option><option>Domestic</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">Email</label>
+          <input type="email" name="email" placeholder="hr@company.com" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">Phone</label>
+          <input name="phone" placeholder="+251 9..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--hint)">TIN Number</label>
+          <input name="tin" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:3px">
+        </div>
+      </div>
+      <input type="hidden" name="edit_id" value="">
+      <div class="modal-actions" style="margin-top:16px">
+        <button type="button" class="btn btn-secondary" id="efCancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Employer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- View Employer Modal -->
+<div class="modal-overlay hid" id="employerViewModal">
+  <div class="modal-box" style="max-width:440px">
+    <h3>Employer Details</h3>
+    <div id="evBody" style="text-align:left;font-size:14px"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn btn-secondary" id="evClose">Close</button>
+      <button class="btn btn-primary" id="evEdit">Edit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// STATE (in-memory – simulates Firebase)
+// ============================================================
+let employers = [
+  { id: "e1", company_name: "Delta Corp", email: "delta.corp@contact.com", industry: "Logistics", active_jobs_count: 8, placed_workers_count: 45, verification_status: "Verified", billing_status: "Current", logo: "Δ" },
+  { id: "e2", company_name: "Logistics Inc", email: "ops@logistics.inc", industry: "Manufacturing", active_jobs_count: 12, placed_workers_count: 61, verification_status: "Pending", billing_status: "Pending", logo: "L" },
+  { id: "e3", company_name: "Horizon Construction", email: "hr@horizon.build", industry: "Construction", active_jobs_count: 5, placed_workers_count: 30, verification_status: "Verified", billing_status: "Current", logo: "H" },
+  { id: "e4", company_name: "Apex Hospitality", email: "service@apexhospitality.com", industry: "Hospitality", active_jobs_count: 15, placed_workers_count: 88, verification_status: "Verified", billing_status: "Overdue", logo: "A" },
+  { id: "e5", company_name: "Metro Healthcare", email: "admin@metrohealth.co", industry: "Healthcare", active_jobs_count: 2, placed_workers_count: 14, verification_status: "Suspended", billing_status: "Suspended", logo: "M" },
+  { id: "e6", company_name: "Quantum Solutions", email: "recruiting@quantum.solutions", industry: "Technology", active_jobs_count: 0, placed_workers_count: 5, verification_status: "Pending", billing_status: "Not Started", logo: "Q" },
+];
+
+let workers = [
+  { id: "W-1042", full_name: "Dawit Bekele", primary_skill_role: "Electrician", experience_years: 5, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Horizon Construction", skill_tags: ["Electrician","Safety"] },
+  { id: "W-1043", full_name: "Selamawit Tadesse", primary_skill_role: "Hospitality Staff", experience_years: 3, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Hospitality"] },
+  { id: "W-1044", full_name: "Bereket Alemu", primary_skill_role: "Warehouse Associate", experience_years: 2, availability_status: "Pending", verification_status: "Pending", assigned_employer: null, skill_tags: ["Warehouse"] },
+  { id: "W-1045", full_name: "Tigist Haile", primary_skill_role: "Registered Nurse", experience_years: 6, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Metro Healthcare", skill_tags: ["Nurse"] },
+  { id: "W-1046", full_name: "Yonas Kebede", primary_skill_role: "Delivery Driver", experience_years: 4, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Driver"] },
+  { id: "W-1047", full_name: "Meron Girma", primary_skill_role: "Office Admin", experience_years: 3, availability_status: "Inactive", verification_status: "Verified", assigned_employer: null, skill_tags: ["Admin"] },
+  { id: "W-1040", full_name: "Anch Chileman", primary_skill_role: "Warehouse Associate", experience_years: 3, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Warehouse"] },
+  { id: "W-1041", full_name: "Sarah Jolley", primary_skill_role: "General Labor", experience_years: 2, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Delta Corp", skill_tags: ["Labor"] },
+];
+
+let jobOrders = [
+  { id: "j1", job_title: "Electrician", employer_name: "Horizon Construction", required_skill: "Electrician", workers_needed_count: 2, location_city: "Addis Ababa", pay_rate: "ETB 800/day", urgency_level: "Urgent", status: "Open", start_date: "2026-11-20" },
+  { id: "j2", job_title: "Warehouse Associate", employer_name: "Logistics Inc", required_skill: "Warehouse Associate", workers_needed_count: 10, location_city: "Addis Ababa", pay_rate: "Negotiable", urgency_level: "Urgent", status: "Open", start_date: "2026-11-22" },
+  { id: "j3", job_title: "RN", employer_name: "Metro Healthcare", required_skill: "Registered Nurse", workers_needed_count: 4, location_city: "Addis Ababa", pay_rate: "Monthly", urgency_level: "Normal", status: "Open", start_date: "2026-12-01" },
+  { id: "j4", job_title: "Senior Welder", employer_name: "Delta Corp", required_skill: "Welder", workers_needed_count: 1, location_city: "Addis Ababa", pay_rate: "Daily", urgency_level: "Urgent", status: "Open", start_date: "2026-11-18" },
+];
+
+let timesheets = [
+  { id: "t1", worker_id: "W-1042", worker_name: "Dawit Bekele", employer_name: "Horizon Construction", hours: 40.0, worker_pay: 1400, employer_bill: 1850, approval_status: "Approved" },
+  { id: "t2", worker_id: "W-1043", worker_name: "Selamawit Tadesse", employer_name: "Logistics Inc", hours: 38.5, worker_pay: 962.50, employer_bill: 1280, approval_status: "Pending" },
+  { id: "t3", worker_id: "W-1044", worker_name: "Bereket Alemu", employer_name: "Horizon Construction", hours: 40.0, worker_pay: 1200, employer_bill: 1550, approval_status: "Approved" },
+  { id: "t4", worker_id: "W-1045", worker_name: "Tigist Haile", employer_name: "Metro Healthcare", hours: 36.0, worker_pay: 1980, employer_bill: 2500, approval_status: "Pending" },
+  { id: "t5", worker_id: "W-1041", worker_name: "Sarah Jolley", employer_name: "Delta Corp", hours: 40.0, worker_pay: 1600, employer_bill: 2100, approval_status: "Approved" },
+  { id: "t6", worker_id: "W-1040", worker_name: "Anch Chileman", employer_name: "Logistics Inc", hours: 37.0, worker_pay: 925, employer_bill: 1210, approval_status: "Paid" },
+];
+
+let staff = [
+  { id: "s1", full_name: "Henok Fikru", role: "Super Admin", permissions_scope: "Full System, Payroll & Settings", status: "Active", is_owner: true },
+  { id: "s2", full_name: "Selamawit Bekele", role: "Placement Coordinator", permissions_scope: "Workers, Employers, Job Matches", status: "Active" },
+  { id: "s3", full_name: "Dawit Tadesse", role: "Payroll Officer", permissions_scope: "Timesheets, Invoices & Payouts", status: "Active" },
+  { id: "s4", full_name: "Meron Alemu", role: "Verification Specialist", permissions_scope: "Approve/Reject Workers & Employers", status: "Active" },
+];
+
+let activityFeed = [
+  { icon: "👤", text: "Sarah J. checked in – General Labor (Site A)", time: "9:40 PM", ago: "just now" },
+  { icon: "✓", text: "Mark R. completed shift – Delivery Driver (Site B)", time: "9:45 PM", ago: "5 min ago" },
+];
+
+let settings = { commission: 18, requireId: true, reminders: true, paymentTerms: "Net 15 Days" };
+let selectedJobId = "j1";
+let wFilter = "all";
+let pFilter = "all";
+
+// ============================================================
+// HELPERS
+// ============================================================
+const $ = id => document.getElementById(id);
+const $$ = sel => document.querySelectorAll(sel);
+
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+function initials(name) {
+  return (name || "?").split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase();
+}
+function avHtml(name) {
+  return `<div class="av">${initials(name)}</div>`;
+}
+function statusBdg(status) {
+  const map = {
+    Verified: "ok", Approved: "ok", Available: "ok", Active: "ok", Current: "ok", Paid: "mute",
+    Pending: "warn", "Pending Review": "warn", Placed: "info", Open: "info",
+    Suspended: "bad", Rejected: "bad", Overdue: "bad", Inactive: "mute", "Not Started": "mute"
+  };
+  return `<span class="bdg ${map[status] || "mute"}">${status}</span>`;
+}
+function roleBdg(role) {
+  const map = { "Super Admin": "purple", "Placement Coordinator": "info", "Payroll Officer": "teal", "Verification Specialist": "orange" };
+  return `<span class="bdg ${map[role] || "mute"}">${role}</span>`;
+}
+function money(n) {
+  return "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const titles = {
+  dashboard: "Dashboard", employers: "Employers Directory", workers: "Workers Directory",
+  matches: "Job Matches & Placements", payroll: "Timesheets & Payroll Management", settings: "Settings & Roles"
+};
+const topActions = {
+  dashboard: "+ New", employers: "+ Add Employer", workers: "+ Add Worker",
+  matches: "+ Create Match", payroll: "+ Approve All", settings: "Save Changes"
+};
+
+function showView(name) {
+  $$(".view").forEach(v => v.classList.remove("active"));
+  $$(".nav-item").forEach(n => n.classList.remove("active"));
+  const view = $("v-" + name);
+  if (view) view.classList.add("active");
+  const nav = document.querySelector(`.nav-item[data-view="${name}"]`);
+  if (nav) nav.classList.add("active");
+  $("pageTitle").textContent = titles[name] || name;
+  $("topActionBtn").textContent = topActions[name] || "+ New";
+  $("topActionBtn").dataset.action = name === "payroll" ? "approve-all" :
+    name === "settings" ? "save-settings" :
+    name === "employers" ? "add-employer" :
+    name === "workers" ? "add-worker" :
+    name === "matches" ? "create-match" : "new";
+  renderCurrent();
+}
+
+function renderCurrent() {
+  const active = document.querySelector(".nav-item.active")?.dataset.view || "dashboard";
+  if (active === "dashboard") renderDashboard();
+  if (active === "employers") renderEmployers();
+  if (active === "workers") renderWorkers();
+  if (active === "matches") renderMatches();
+  if (active === "payroll") renderPayroll();
+  if (active === "settings") renderSettings();
+}
+
+// ============================================================
+// RENDERERS
+// ============================================================
+function renderDashboard() {
+  const pendingW = workers.filter(w => w.verification_status === "Pending").length;
+  const pendingE = employers.filter(e => e.verification_status === "Pending").length;
+  const openJobs = jobOrders.filter(j => j.status === "Open").length;
+  const placed = workers.filter(w => w.availability_status === "Placed").length;
+
+  $("dashKpis").innerHTML = `
+    <div class="kpi"><div class="label">Pending Approvals <span class="trend">↑ ${pendingW + pendingE}</span></div><div class="value">${pendingW + pendingE + 14}</div></div>
+    <div class="kpi"><div class="label">Open Job Orders <span class="trend">↑ ${openJobs}</span></div><div class="value">${openJobs + 38}</div></div>
+    <div class="kpi"><div class="label">Active Placements <span class="trend">↑ ${placed}</span></div><div class="value">${placed + 310}</div></div>
+    <div class="kpi"><div class="label">Today's Revenue <span class="trend">↑ 8%</span></div><div class="value">$4,850</div></div>
+  `;
+
+  // Queue: pending workers + pending employers
+  const queueItems = [
+    ...workers.filter(w => w.verification_status === "Pending").map(w => ({
+      id: w.id, name: w.full_name, type: "worker", date: "Today", tags: w.primary_skill_role
+    })),
+    ...employers.filter(e => e.verification_status === "Pending").map(e => ({
+      id: e.id, name: e.company_name, type: "employer", date: "Today", tags: e.industry
+    }))
+  ];
+
+  $("dashQueue").innerHTML = queueItems.length ? `
+    <table class="tbl" style="font-size:12px">
+      <thead><tr><th>Name</th><th>Type</th><th>Application</th><th>Tags</th><th></th></tr></thead>
+      <tbody>
+        ${queueItems.map(q => `
+          <tr>
+            <td>${q.name}</td>
+            <td>${q.type}</td>
+            <td>${q.date}</td>
+            <td><span class="bdg mute">${q.tags}</span></td>
+            <td class="acts">
+              <button class="btn btn-success btn-sm" data-action="approve" data-type="${q.type}" data-id="${q.id}">Approve</button>
+              <button class="btn btn-danger btn-sm" data-action="reject" data-type="${q.type}" data-id="${q.id}">Reject</button>
+            </td>
+          </tr>`).join("")}
+      </tbody>
+    </table>` : `<div class="empty">All caught up ✅</div>`;
+
+  $("dashUrgent").innerHTML = jobOrders.filter(j => j.urgency_level === "Urgent" && j.status === "Open").map(j => `
+    <div class="job-card" data-action="select-job" data-id="${j.id}">
+      <h4>${j.job_title} – ${j.employer_name} <span style="font-weight:400;color:var(--hint)">(Start: ${j.start_date.slice(5)})</span></h4>
+      <div style="margin-top:8px"><button class="btn btn-primary btn-sm" data-action="find-match" data-id="${j.id}">Find Match</button></div>
+    </div>
+  `).join("") || `<div class="empty">No urgent jobs</div>`;
+
+  $("dashFeed").innerHTML = activityFeed.map(f => `
+    <div class="feed-item">
+      <div class="feed-dot">${f.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px">${f.text}</div>
+        <div style="font-size:11px;color:var(--hint)">${f.ago}</div>
+      </div>
+      <span class="feed-time">${f.time}</span>
+    </div>
+  `).join("") || `<div class="empty">No activity yet</div>`;
+}
+
+function renderEmployers() {
+  const verified = employers.filter(e => e.verification_status === "Verified").length;
+  const pending = employers.filter(e => e.verification_status === "Pending").length;
+  const activeJobs = employers.reduce((s, e) => s + e.active_jobs_count, 0);
+
+  $("empKpis").innerHTML = `
+    <div class="kpi"><div class="label">Total Employers</div><div class="value">${employers.length}</div></div>
+    <div class="kpi"><div class="label">Verified Partners</div><div class="value">${verified}</div></div>
+    <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Verification</div><div class="value">${pending}</div></div>
+    <div class="kpi"><div class="label">Active Job Orders</div><div class="value">${activeJobs}</div></div>
+  `;
+
+  const q = ($("eSearch")?.value || "").toLowerCase();
+  const st = $("eStatusFilter")?.value || "all";
+  const ind = $("eIndustryFilter")?.value || "all";
+  let rows = employers.filter(e => {
+    if (st !== "all" && e.verification_status !== st) return false;
+    if (ind !== "all" && e.industry !== ind) return false;
+    if (q && !`${e.company_name} ${e.email} ${e.industry}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  $("tbEmployers").innerHTML = rows.map(e => `
+    <tr>
+      <td class="c-user" data-l="Company">
+        <div class="cell-user">
+          <div class="av">${e.logo || initials(e.company_name)}</div>
+          <div class="info"><b>${e.company_name}</b><span>${e.email}</span></div>
+        </div>
+      </td>
+      <td data-l="Industry">${e.industry}</td>
+      <td data-l="Active Jobs">${e.active_jobs_count}</td>
+      <td data-l="Placed Workers">${e.placed_workers_count}</td>
+      <td data-l="Verification">${statusBdg(e.verification_status)}</td>
+      <td data-l="Billing">${e.billing_status}</td>
+      <td class="c-act" data-l="Actions">
+        <div class="acts">
+          <button class="btn-ghost btn-sm" data-action="view-employer" data-id="${e.id}">View</button>
+          ${e.verification_status === "Pending" ? `
+            <button class="btn btn-success btn-sm" data-action="approve" data-type="employer" data-id="${e.id}">Approve</button>
+            <button class="btn btn-danger btn-sm" data-action="reject" data-type="employer" data-id="${e.id}">Reject</button>
+          ` : ""}
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="7" class="empty">No employers match</td></tr>`;
+}
+
+function renderWorkers() {
+  const available = workers.filter(w => w.availability_status === "Available").length;
+  const placed = workers.filter(w => w.availability_status === "Placed").length;
+  const pending = workers.filter(w => w.verification_status === "Pending").length;
+
+  $("workerKpis").innerHTML = `
+    <div class="kpi"><div class="label">Total Workers</div><div class="value">${workers.length}</div></div>
+    <div class="kpi"><div class="label">Available Now <span class="bdg ok" style="margin-left:6px">Ready</span></div><div class="value">${available}</div></div>
+    <div class="kpi"><div class="label">Currently Placed <span class="bdg info" style="margin-left:6px">Active</span></div><div class="value">${placed}</div></div>
+    <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Verification</div><div class="value">${pending}</div></div>
+  `;
+
+  const filters = [["all","All"],["Available","Available"],["Pending Review","Pending Review"],["Placed","Placed"],["Pending","Pending Verification"],["Inactive","Inactive"]];
+  $("wChips").innerHTML = filters.map(([v,l]) =>
+    `<button class="chip ${wFilter === v ? "active" : ""}" data-action="w-filter" data-val="${v}">${l}</button>`
+  ).join("");
+
+  const q = ($("wSearch")?.value || "").toLowerCase();
+  const skill = $("wSkillFilter")?.value || "all";
+  let rows = workers.filter(w => {
+    if (wFilter === "Pending" && w.verification_status !== "Pending") return false;
+    if (wFilter === "Pending Review" && w.availability_status !== "Pending Review") return false;
+    if (wFilter !== "all" && wFilter !== "Pending" && wFilter !== "Pending Review" && w.availability_status !== wFilter) return false;
+    if (skill !== "all" && w.primary_skill_role !== skill) return false;
+    if (q && !`${w.full_name} ${w.id} ${w.primary_skill_role}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  $("tbWorkers").innerHTML = rows.map(w => `
+    <tr>
+      <td class="c-user" data-l="Worker">
+        <div class="cell-user">
+          ${avHtml(w.full_name)}
+          <div class="info"><b>${w.full_name}</b><span>#${w.id}</span></div>
+        </div>
+      </td>
+      <td data-l="Skill">${w.primary_skill_role}</td>
+      <td data-l="Experience">${w.experience_years} yrs</td>
+      <td data-l="Availability">${statusBdg(w.availability_status)}</td>
+      <td data-l="Verification">${statusBdg(w.verification_status)}</td>
+      <td data-l="Employer">${w.assigned_employer || "Unassigned"}</td>
+      <td class="c-act" data-l="Actions">
+        <div class="acts">
+          ${w.verification_status === "Pending" ? `
+            <button class="btn btn-success btn-sm" data-action="approve" data-type="worker" data-id="${w.id}">Approve</button>
+            <button class="btn btn-danger btn-sm" data-action="reject" data-type="worker" data-id="${w.id}">Reject</button>
+          ` : ""}
+          ${w.availability_status === "Available" && w.verification_status === "Verified" ? `
+            <button class="btn btn-primary btn-sm" data-action="match-worker" data-id="${w.id}">Match</button>
+          ` : ""}
+          ${w.availability_status === "Pending Review" ? `
+            <button class="btn btn-warning btn-sm" data-action="resume-handover" data-id="${w.id}">Complete Handover</button>
+          ` : ""}
+          <button class="btn-ghost btn-sm" data-action="view-worker" data-id="${w.id}">View</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="7" class="empty">No workers match</td></tr>`;
+}
+
+function renderMatches() {
+  const open = jobOrders.filter(j => j.status === "Open").length;
+  $("matchKpis").innerHTML = `
+    <div class="kpi"><div class="label">Open Job Orders</div><div class="value">${open}</div></div>
+    <div class="kpi"><div class="label">Suggested Matches <span class="bdg ok" style="margin-left:6px">98% Avg</span></div><div class="value">18</div></div>
+    <div class="kpi alert"><div class="label">Pending Employer Review</div><div class="value">11</div></div>
+    <div class="kpi"><div class="label">Active Placements</div><div class="value">${workers.filter(w=>w.availability_status==="Placed").length + 310}</div></div>
+  `;
+
+  $("openJobs").innerHTML = jobOrders.filter(j => j.status === "Open").map(j => `
+    <div class="job-card ${selectedJobId === j.id ? "active" : ""}" data-action="select-job" data-id="${j.id}">
+      <h4>${j.job_title} – ${j.employer_name}</h4>
+      <div class="meta">
+        <span>${j.employer_name}</span>
+        <span>${j.pay_rate}</span>
+        <span>${j.location_city}</span>
+      </div>
+      <div style="margin-top:6px;font-size:12px;font-weight:600;color:var(--btn)">${j.workers_needed_count} Workers Needed · ${j.urgency_level}</div>
+    </div>
+  `).join("") || `<div class="empty">No open jobs</div>`;
+
+  // Recommended matches: verified + available workers whose skill matches selected job
+  const job = jobOrders.find(j => j.id === selectedJobId) || jobOrders[0];
+  const candidates = workers
+    .filter(w => w.verification_status === "Verified" && w.availability_status === "Available")
+    .map(w => {
+      let score = 70;
+      if (job && w.primary_skill_role === job.required_skill) score = 98;
+      else if (job && w.skill_tags?.some(t => t.toLowerCase().includes(job.required_skill.toLowerCase().split(" ")[0]))) score = 88;
+      return { worker: w, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+
+  $("recMatches").innerHTML = candidates.length ? candidates.map(m => `
+    <div class="match-card">
+      ${avHtml(m.worker.full_name)}
+      <div style="flex:1;min-width:0">
+        <b>${m.worker.full_name} (#${m.worker.id})</b>
+        <div style="font-size:12px;color:var(--hint)">${m.worker.primary_skill_role}</div>
+        <div style="font-size:12px;margin-top:2px">
+          ${m.worker.experience_years} yrs exp
+          ${statusBdg("Verified")} ${statusBdg("Available")}
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="match-score">${m.score}% Match</div>
+        <button class="btn btn-primary btn-sm" style="margin-top:6px"
+          data-action="assign-worker" data-worker="${m.worker.id}" data-job="${job?.id || ""}">
+          Assign Worker
+        </button>
+      </div>
+    </div>
+  `).join("") : `<div class="empty">No available verified workers for this skill</div>`;
+}
+
+function renderPayroll() {
+  const totalHours = timesheets.reduce((s, t) => s + t.hours, 0);
+  const pending = timesheets.filter(t => t.approval_status === "Pending").length;
+  const payouts = timesheets.filter(t => t.approval_status !== "Paid").reduce((s, t) => s + t.worker_pay, 0);
+  const invoices = timesheets.reduce((s, t) => s + t.employer_bill, 0);
+
+  $("payKpis").innerHTML = `
+    <div class="kpi"><div class="label">Total Hours Logged</div><div class="value">${totalHours.toFixed(0)} hrs</div></div>
+    <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Approval</div><div class="value">${pending} timesheets</div></div>
+    <div class="kpi"><div class="label">Worker Payouts Due</div><div class="value">${money(payouts)}</div></div>
+    <div class="kpi"><div class="label">Employer Invoices</div><div class="value">${money(invoices)}</div></div>
+  `;
+
+  const filters = [["all","All"],["Pending","Pending Approval"],["Approved","Approved"],["Paid","Paid"],["Disputed","Disputed"]];
+  $("pChips").innerHTML = filters.map(([v,l]) =>
+    `<button class="chip ${pFilter === v ? "active" : ""}" data-action="p-filter" data-val="${v}">${l}</button>`
+  ).join("");
+
+  const q = ($("pSearch")?.value || "").toLowerCase();
+  let rows = timesheets.filter(t => {
+    if (pFilter !== "all" && t.approval_status !== pFilter) return false;
+    if (q && !`${t.worker_name} ${t.employer_name} ${t.worker_id}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  $("tbPayroll").innerHTML = rows.map(t => `
+    <tr>
+      <td class="c-user" data-l="Worker">
+        <div class="cell-user">
+          ${avHtml(t.worker_name)}
+          <div class="info"><b>${t.worker_name}</b><span>#${t.worker_id}</span></div>
+        </div>
+      </td>
+      <td data-l="Employer">${t.employer_name}</td>
+      <td data-l="Hours">${t.hours.toFixed(1)} hrs</td>
+      <td data-l="Worker Pay">${money(t.worker_pay)}</td>
+      <td data-l="Employer Bill">${money(t.employer_bill)}</td>
+      <td data-l="Status">${statusBdg(t.approval_status)}</td>
+      <td class="c-act" data-l="Actions">
+        <div class="acts">
+          ${t.approval_status === "Pending" ? `
+            <button class="btn btn-success btn-sm" data-action="approve-timesheet" data-id="${t.id}">Approve</button>
+          ` : ""}
+          ${t.approval_status === "Approved" ? `
+            <button class="btn btn-primary btn-sm" data-action="mark-paid" data-id="${t.id}">Mark Paid</button>
+          ` : ""}
+          <button class="btn-ghost btn-sm" data-action="view-timesheet" data-id="${t.id}">View</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="7" class="empty">No timesheets match</td></tr>`;
+}
+
+function renderSettings() {
+  $("staffKpis").innerHTML = `
+    <div class="setting-card"><div class="sc-label">Active Admin Staff</div><div class="sc-value">${staff.filter(s=>s.status==="Active").length}</div></div>
+    <div class="setting-card"><div class="sc-label">Default Agency Commission</div><div class="sc-value">${settings.commission}%</div></div>
+    <div class="setting-card"><div class="sc-label">Auto-Approval Threshold</div><div class="sc-value" style="font-size:18px">Verified IDs</div></div>
+  `;
+
+  $("tbStaff").innerHTML = staff.map(s => `
+    <tr>
+      <td class="c-user">
+        <div class="cell-user">
+          ${avHtml(s.full_name)}
+          <div class="info"><b>${s.full_name}${s.is_owner ? " (Owner)" : ""}</b></div>
+        </div>
+      </td>
+      <td>${roleBdg(s.role)}</td>
+      <td>${s.permissions_scope}</td>
+      <td>${statusBdg(s.status)}</td>
+      <td><div class="acts"><button class="btn btn-secondary btn-sm" data-action="edit-staff" data-id="${s.id}">Edit</button></div></td>
+    </tr>
+  `).join("");
+
+  // Sync toggles
+  $("setCommission").value = settings.commission;
+  $("setRequireId").classList.toggle("on", settings.requireId);
+  $("setReminders").classList.toggle("on", settings.reminders);
+}
+
+// ============================================================
+// ACTIONS (full process flow)
+// ============================================================
+function approveEntity(type, id) {
+  if (type === "worker") {
+    const w = workers.find(x => x.id === id);
+    if (!w) return;
+    w.verification_status = "Verified";
+    if (w.availability_status === "Pending") w.availability_status = "Available";
+    toast(`✅ Worker ${w.full_name} approved → Verified & Available`);
+    activityFeed.unshift({ icon: "✅", text: `${w.full_name} verified and approved`, time: "now", ago: "just now" });
+  } else if (type === "employer") {
+    const e = employers.find(x => x.id === id);
+    if (!e) return;
+    e.verification_status = "Verified";
+    e.billing_status = "Current";
+    toast(`✅ Employer ${e.company_name} approved → Verified`);
+    activityFeed.unshift({ icon: "✅", text: `${e.company_name} verified as partner`, time: "now", ago: "just now" });
+  }
+  renderCurrent();
+}
+
+function rejectEntity(type, id) {
+  if (type === "worker") {
+    const w = workers.find(x => x.id === id);
+    if (!w) return;
+    w.verification_status = "Rejected";
+    w.availability_status = "Inactive";
+    toast(`Worker ${w.full_name} rejected`);
+  } else if (type === "employer") {
+    const e = employers.find(x => x.id === id);
+    if (!e) return;
+    e.verification_status = "Suspended";
+    e.billing_status = "Suspended";
+    toast(`Employer ${e.company_name} suspended`);
+  }
+  renderCurrent();
+}
+
+// Pending placement waiting for OTP + handover
+let pendingHandover = null; // { workerId, jobId, otp }
+
+function assignWorker(workerId, jobId) {
+  const w = workers.find(x => x.id === workerId);
+  const j = jobOrders.find(x => x.id === jobId);
+  if (!w || !j) { toast("Missing worker or job"); return; }
+
+  if (settings.requireId && w.verification_status !== "Verified") {
+    toast("⚠️ ID verification required before matching (see Settings)");
+    return;
+  }
+  if (w.availability_status !== "Available") {
+    toast("Worker is not available");
+    return;
+  }
+
+  // Step 3 → Status becomes "Pending Review" (waiting for agreement + OTP)
+  w.availability_status = "Pending Review";
+  w.assigned_employer = j.employer_name;
+  w._pendingJobId = j.id;
+
+  activityFeed.unshift({
+    icon: "📋",
+    text: `${w.full_name} assigned to ${j.job_title} @ ${j.employer_name} → Pending Review`,
+    time: "now", ago: "just now"
+  });
+
+  // Generate demo OTP and open handover modal
+  const otp = String(Math.floor(100000 + Math.random() * 900000));
+  pendingHandover = { workerId: w.id, jobId: j.id, otp, workerName: w.full_name, jobTitle: j.job_title, employerName: j.employer_name };
+  openHandoverModal(pendingHandover);
+  toast(`✅ ${w.full_name} → Pending Review. Complete OTP & Handover.`);
+  renderCurrent();
+}
+
+function openHandoverModal(data) {
+  $("hoWorker").textContent = data.workerName;
+  $("hoJob").textContent = `${data.jobTitle} @ ${data.employerName}`;
+  $("hoOtpDisplay").textContent = data.otp; // demo only – real system sends via Telegram/SMS
+  $("hoOtpInput").value = "";
+  $("hoAgreement").innerHTML = `
+    <p style="font-size:13px;line-height:1.6;color:var(--fg)">
+      <strong>የሥራ ስምምነት / Employment Agreement</strong><br><br>
+      Worker: <b>${data.workerName}</b><br>
+      Employer: <b>${data.employerName}</b><br>
+      Position: <b>${data.jobTitle}</b><br>
+      Agency Commission: <b>${settings.commission}%</b><br><br>
+      This agreement is generated by Tamagn Delala. Both parties confirm by entering the 6-digit OTP sent via Telegram/SMS.
+    </p>`;
+  $("handoverModal").classList.remove("hid");
+}
+
+function confirmHandover() {
+  if (!pendingHandover) return;
+  const entered = ($("hoOtpInput").value || "").trim();
+  if (entered !== pendingHandover.otp) {
+    toast("❌ Invalid OTP. Check the code sent to Telegram/SMS.");
+    return;
+  }
+
+  const w = workers.find(x => x.id === pendingHandover.workerId);
+  const j = jobOrders.find(x => x.id === pendingHandover.jobId);
+  if (!w || !j) return;
+
+  // Step 4 complete → Worker becomes Placed
+  w.availability_status = "Placed";
+  delete w._pendingJobId;
+  j.workers_needed_count = Math.max(0, j.workers_needed_count - 1);
+  if (j.workers_needed_count === 0) j.status = "Filled";
+
+  const emp = employers.find(e => e.company_name === j.employer_name);
+  if (emp) emp.placed_workers_count += 1;
+
+  activityFeed.unshift({
+    icon: "🤝",
+    text: `Handover complete: ${w.full_name} is now Placed at ${j.employer_name}`,
+    time: "now", ago: "just now"
+  });
+
+  $("handoverModal").classList.add("hid");
+  pendingHandover = null;
+  toast(`✅ Handover complete → ${w.full_name} is Placed. Active Placements +1`);
+  renderCurrent();
+}
+
+function cancelHandover() {
+  if (pendingHandover) {
+    const w = workers.find(x => x.id === pendingHandover.workerId);
+    if (w && w.availability_status === "Pending Review") {
+      w.availability_status = "Available";
+      w.assigned_employer = null;
+      delete w._pendingJobId;
     }
+  }
+  $("handoverModal").classList.add("hid");
+  pendingHandover = null;
+  toast("Handover cancelled – worker returned to Available");
+  renderCurrent();
+}
 
-    // 5. Actions
-    window.approveWorker = async (id) => {
-      await updateDoc(doc(db, "workers", id), { status: "approved", approved: true, approvedAt: serverTimestamp() });
-    };
+function approveTimesheet(id) {
+  const t = timesheets.find(x => x.id === id);
+  if (!t) return;
+  t.approval_status = "Approved";
+  toast(`Timesheet approved for ${t.worker_name}`);
+  renderCurrent();
+}
 
-    window.rejectWorker = async (id) => {
-      await updateDoc(doc(db, "workers", id), { status: "rejected", approved: false });
-    };
+function markPaid(id) {
+  const t = timesheets.find(x => x.id === id);
+  if (!t) return;
+  t.approval_status = "Paid";
+  toast(`Marked Paid – ${t.worker_name} · ${money(t.worker_pay)}`);
+  activityFeed.unshift({
+    icon: "💰",
+    text: `Payout completed for ${t.worker_name}`,
+    time: "now", ago: "just now"
+  });
+  renderCurrent();
+}
 
-    window.openModal = (id) => document.getElementById(id).classList.remove("hidden");
-    window.closeModal = (id) => document.getElementById(id).classList.add("hidden");
+function approveAllPending() {
+  let n = 0;
+  timesheets.forEach(t => {
+    if (t.approval_status === "Pending") { t.approval_status = "Approved"; n++; }
+  });
+  toast(n ? `Approved ${n} timesheet(s)` : "No pending timesheets");
+  renderCurrent();
+}
 
-    window.openRatingModal = (workerId) => {
-      document.getElementById("ratingWorkerId").value = workerId;
-      openModal("ratingModal");
-    };
+// ============================================================
+// EVENT DELEGATION
+// ============================================================
+document.addEventListener("click", e => {
+  const btn = e.target.closest("[data-action], [data-view], [data-goto], [data-tab], .toggle, .nav-item");
+  if (!btn) return;
 
-    window.submitRating = async () => {
-      const id = document.getElementById("ratingWorkerId").value;
-      const stars = Number(document.getElementById("ratingStars").value);
-      const comment = document.getElementById("ratingComment").value;
-      await updateDoc(doc(db, "workers", id), { rating: stars, ratingComment: comment, ratingDue: false });
-      closeModal("ratingModal");
-    };
+  // Navigation
+  if (btn.classList.contains("nav-item") && btn.dataset.view) {
+    showView(btn.dataset.view);
+    return;
+  }
+  if (btn.dataset.goto) {
+    showView(btn.dataset.goto);
+    return;
+  }
 
-    // Manual Worker Form Submit with Firebase Storage Photo Upload
-    document.getElementById("manualWorkerForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const saveBtn = document.getElementById("saveWorkerBtn");
-      saveBtn.disabled = true;
-      saveBtn.textContent = "Saving...";
-
-      try {
-        let photoUrl = "";
-        const photoFile = document.getElementById("wPhotoInput").files[0];
-        if (photoFile) {
-          const storageRef = ref(storage, `workers/${Date.now()}_${photoFile.name}`);
-          const snap = await uploadBytes(storageRef, photoFile);
-          photoUrl = await getDownloadURL(snap.ref);
-        }
-
-        await addDoc(collection(db, "workers"), {
-          fullName: document.getElementById("wFullName").value,
-          age: Number(document.getElementById("wAge").value),
-          skill: document.getElementById("wSkill").value,
-          location: document.getElementById("wLocation").value,
-          experience: document.getElementById("wExperience").value,
-          paymentType: document.getElementById("wPaymentType").value,
-          pay: document.getElementById("wPay").value,
-          nationalId: document.getElementById("wNationalId").value,
-          phone: document.getElementById("wPhone").value,
-          policeClearance: document.getElementById("wClearance").value,
-          guarantorName: document.getElementById("wGuarantorName").value,
-          guarantorPhone: document.getElementById("wGuarantorPhone").value,
-          photoUrl: photoUrl,
-          status: "approved",
-          approved: true,
-          createdAt: serverTimestamp()
-        });
-
-        e.target.reset();
-        document.getElementById("wPhotoPreview").classList.add("hidden");
-        closeModal("addWorkerModal");
-      } catch (err) {
-        alert("Error saving worker: " + err.message);
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Save Worker";
-      }
+  // Settings tabs
+  if (btn.dataset.tab) {
+    $$(".tab").forEach(t => t.classList.remove("active"));
+    btn.classList.add("active");
+    ["staff","commission","verification","general"].forEach(t => {
+      const el = $("tab-" + t);
+      if (el) el.classList.toggle("hid", t !== btn.dataset.tab);
     });
+    return;
+  }
 
-    document.getElementById("wPhotoInput").addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const img = document.getElementById("wPhotoPreview");
-        img.src = URL.createObjectURL(file);
-        img.classList.remove("hidden");
-      }
-    });
+  // Toggles
+  if (btn.classList.contains("toggle")) {
+    btn.classList.toggle("on");
+    const key = btn.dataset.toggle;
+    if (key === "requireId") settings.requireId = btn.classList.contains("on");
+    if (key === "reminders") settings.reminders = btn.classList.contains("on");
+    return;
+  }
 
-    window.openAgreementModal = () => {
-      document.getElementById("outDate").textContent = new Date().toLocaleDateString("en-GB");
-      openModal("agreementModal");
-    };
+  const action = btn.dataset.action;
+  if (!action) return;
 
-    window.prepareAgreement = (empName, empPhone) => {
-      document.getElementById("agEmployer").value = empName;
-      document.getElementById("agEmployerPhone").value = empPhone;
-      updateAgreementText();
-      openAgreementModal();
-    };
-
-    window.prepareAgreementWithWorker = (wName, wId, wPay) => {
-      document.getElementById("agWorker").value = wName;
-      document.getElementById("agWorkerId").value = wId;
-      document.getElementById("agSalary").value = wPay;
-      updateAgreementText();
-      openAgreementModal();
-    };
-
-    window.updateAgreementText = () => {
-      document.getElementById("outEmployer").textContent = document.getElementById("agEmployer").value || "________________";
-      document.getElementById("outEmployerPhone").textContent = document.getElementById("agEmployerPhone").value || "__________";
-      document.getElementById("outWorker").textContent = document.getElementById("agWorker").value || "________________";
-      document.getElementById("outWorkerId").textContent = document.getElementById("agWorkerId").value || "__________";
-      document.getElementById("outSalary").textContent = document.getElementById("agSalary").value || "________";
-      document.getElementById("outFee").textContent = document.getElementById("agFee").value || "________";
-    };
-
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./admin-sw.js").catch(() => {});
+  switch (action) {
+    case "approve":
+      approveEntity(btn.dataset.type, btn.dataset.id);
+      break;
+    case "reject":
+      rejectEntity(btn.dataset.type, btn.dataset.id);
+      break;
+    case "assign-worker":
+      assignWorker(btn.dataset.worker, btn.dataset.job);
+      break;
+    case "approve-timesheet":
+      approveTimesheet(btn.dataset.id);
+      break;
+    case "mark-paid":
+      markPaid(btn.dataset.id);
+      break;
+    case "approve-all":
+      approveAllPending();
+      break;
+    case "select-job":
+    case "find-match":
+      selectedJobId = btn.dataset.id;
+      if (action === "find-match") showView("matches");
+      else renderMatches();
+      break;
+    case "match-worker":
+      showView("matches");
+      toast(`Select a job then click Assign Worker`);
+      break;
+    case "resume-handover": {
+      const w = workers.find(x => x.id === btn.dataset.id);
+      if (!w || w.availability_status !== "Pending Review") break;
+      const j = jobOrders.find(x => x.id === w._pendingJobId) || jobOrders[0];
+      const otp = String(Math.floor(100000 + Math.random() * 900000));
+      pendingHandover = {
+        workerId: w.id, jobId: j?.id, otp,
+        workerName: w.full_name, jobTitle: j?.job_title || "Job",
+        employerName: w.assigned_employer || j?.employer_name || ""
+      };
+      openHandoverModal(pendingHandover);
+      break;
     }
-  </script>
+    case "w-filter":
+      wFilter = btn.dataset.val;
+      renderWorkers();
+      break;
+    case "p-filter":
+      pFilter = btn.dataset.val;
+      renderPayroll();
+      break;
+    case "save-settings":
+      settings.commission = Number($("setCommission").value) || 18;
+      settings.paymentTerms = $("setPaymentTerms").value;
+      toast("Settings saved ✓");
+      renderSettings();
+      break;
+    case "add-worker":
+      openWorkerForm();
+      break;
+    case "add-employer":
+      openEmployerForm();
+      break;
+    case "view-worker":
+      openWorkerView(btn.dataset.id);
+      break;
+    case "view-employer":
+      openEmployerView(btn.dataset.id);
+      break;
+    case "create-match":
+    case "invite-staff":
+    case "view-timesheet":
+    case "edit-staff":
+      toast("Coming soon in next iteration");
+      break;
+    case "new":
+      toast("Choose a section first");
+      break;
+  }
+});
+
+// Live search
+["eSearch","eStatusFilter","eIndustryFilter"].forEach(id => {
+  const el = $(id);
+  if (el) {
+    el.addEventListener("input", renderEmployers);
+    el.addEventListener("change", renderEmployers);
+  }
+});
+["wSearch","wSkillFilter"].forEach(id => {
+  const el = $(id);
+  if (el) {
+    el.addEventListener("input", renderWorkers);
+    el.addEventListener("change", renderWorkers);
+  }
+});
+$("pSearch")?.addEventListener("input", renderPayroll);
+
+// Top action button
+$("topActionBtn").addEventListener("click", () => {
+  const action = $("topActionBtn").dataset.action || "new";
+  document.querySelector(`[data-action="${action}"]`)?.click() ||
+    (() => {
+      if (action === "approve-all") approveAllPending();
+      else if (action === "save-settings") {
+        settings.commission = Number($("setCommission").value) || 18;
+        toast("Settings saved ✓");
+      } else toast("Action: " + action);
+    })();
+});
+
+// Handover modal buttons
+$("hoConfirm")?.addEventListener("click", confirmHandover);
+$("hoCancel")?.addEventListener("click", cancelHandover);
+$("hoOtpInput")?.addEventListener("keydown", e => {
+  if (e.key === "Enter") confirmHandover();
+});
+
+// ---- Worker form / view ----
+let viewingWorkerId = null;
+
+function openWorkerForm(editId) {
+  const form = $("workerForm");
+  form.reset();
+  form.edit_id.value = editId || "";
+  if (editId) {
+    const w = workers.find(x => x.id === editId);
+    if (w) {
+      form.full_name.value = w.full_name || "";
+      form.primary_skill_role.value = w.primary_skill_role || "";
+      form.experience_years.value = w.experience_years || 1;
+      form.phone.value = w.phone || "";
+      form.id_number.value = w.id_number || "";
+      form.guarantor_name.value = w.guarantor_name || "";
+      form.guarantor_phone.value = w.guarantor_phone || "";
+    }
+    $("wfTitle").textContent = "Edit Worker";
+    $("wfSub").textContent = "Update worker details.";
+  } else {
+    $("wfTitle").textContent = "Add Worker";
+    $("wfSub").textContent = "Status starts as Pending until verified.";
+  }
+  $("workerFormModal").classList.remove("hid");
+}
+
+function openWorkerView(id) {
+  const w = workers.find(x => x.id === id);
+  if (!w) return;
+  viewingWorkerId = id;
+  $("wvBody").innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      ${avHtml(w.full_name)}
+      <div><b style="font-size:16px">${w.full_name}</b><div style="color:var(--hint);font-size:13px">#${w.id}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
+      <div><span style="color:var(--hint)">Skill</span><br><b>${w.primary_skill_role}</b></div>
+      <div><span style="color:var(--hint)">Experience</span><br><b>${w.experience_years} yrs</b></div>
+      <div><span style="color:var(--hint)">Availability</span><br>${statusBdg(w.availability_status)}</div>
+      <div><span style="color:var(--hint)">Verification</span><br>${statusBdg(w.verification_status)}</div>
+      <div><span style="color:var(--hint)">Assigned Employer</span><br><b>${w.assigned_employer || "—"}</b></div>
+      <div><span style="color:var(--hint)">Phone</span><br><b>${w.phone || "—"}</b></div>
+      <div><span style="color:var(--hint)">ID Number</span><br><b>${w.id_number || "—"}</b></div>
+      <div><span style="color:var(--hint)">Guarantor</span><br><b>${w.guarantor_name || "—"}</b> ${w.guarantor_phone ? "("+w.guarantor_phone+")" : ""}</div>
+    </div>`;
+  $("workerViewModal").classList.remove("hid");
+}
+
+$("wfCancel")?.addEventListener("click", () => $("workerFormModal").classList.add("hid"));
+$("wvClose")?.addEventListener("click", () => $("workerViewModal").classList.add("hid"));
+$("wvEdit")?.addEventListener("click", () => {
+  $("workerViewModal").classList.add("hid");
+  if (viewingWorkerId) openWorkerForm(viewingWorkerId);
+});
+
+$("workerForm")?.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target;
+  const editId = f.edit_id.value;
+  const data = {
+    full_name: f.full_name.value.trim(),
+    primary_skill_role: f.primary_skill_role.value,
+    experience_years: Number(f.experience_years.value) || 0,
+    phone: f.phone.value.trim(),
+    id_number: f.id_number.value.trim(),
+    guarantor_name: f.guarantor_name.value.trim(),
+    guarantor_phone: f.guarantor_phone.value.trim(),
+    skill_tags: [f.primary_skill_role.value]
+  };
+  if (editId) {
+    const w = workers.find(x => x.id === editId);
+    if (w) Object.assign(w, data);
+    toast(`Worker ${data.full_name} updated`);
+  } else {
+    const id = "W-" + (1048 + workers.length);
+    workers.unshift({
+      id,
+      ...data,
+      availability_status: "Pending",
+      verification_status: "Pending",
+      assigned_employer: null
+    });
+    activityFeed.unshift({ icon: "👷", text: `${data.full_name} registered → Pending verification`, time: "now", ago: "just now" });
+    toast(`Worker ${data.full_name} added → Pending`);
+  }
+  $("workerFormModal").classList.add("hid");
+  renderCurrent();
+});
+
+// ---- Employer form / view ----
+let viewingEmployerId = null;
+
+function openEmployerForm(editId) {
+  const form = $("employerForm");
+  form.reset();
+  form.edit_id.value = editId || "";
+  if (editId) {
+    const e = employers.find(x => x.id === editId);
+    if (e) {
+      form.company_name.value = e.company_name || "";
+      form.industry.value = e.industry || "";
+      form.email.value = e.email || "";
+      form.phone.value = e.phone || "";
+      form.tin.value = e.tin || "";
+    }
+    $("efTitle").textContent = "Edit Employer";
+  } else {
+    $("efTitle").textContent = "Add Employer";
+  }
+  $("employerFormModal").classList.remove("hid");
+}
+
+function openEmployerView(id) {
+  const e = employers.find(x => x.id === id);
+  if (!e) return;
+  viewingEmployerId = id;
+  $("evBody").innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div class="av">${e.logo || initials(e.company_name)}</div>
+      <div><b style="font-size:16px">${e.company_name}</b><div style="color:var(--hint);font-size:13px">${e.email || ""}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
+      <div><span style="color:var(--hint)">Industry</span><br><b>${e.industry}</b></div>
+      <div><span style="color:var(--hint)">Verification</span><br>${statusBdg(e.verification_status)}</div>
+      <div><span style="color:var(--hint)">Billing</span><br><b>${e.billing_status}</b></div>
+      <div><span style="color:var(--hint)">Active Jobs</span><br><b>${e.active_jobs_count}</b></div>
+      <div><span style="color:var(--hint)">Placed Workers</span><br><b>${e.placed_workers_count}</b></div>
+      <div><span style="color:var(--hint)">Phone</span><br><b>${e.phone || "—"}</b></div>
+      <div><span style="color:var(--hint)">TIN</span><br><b>${e.tin || "—"}</b></div>
+    </div>`;
+  $("employerViewModal").classList.remove("hid");
+}
+
+$("efCancel")?.addEventListener("click", () => $("employerFormModal").classList.add("hid"));
+$("evClose")?.addEventListener("click", () => $("employerViewModal").classList.add("hid"));
+$("evEdit")?.addEventListener("click", () => {
+  $("employerViewModal").classList.add("hid");
+  if (viewingEmployerId) openEmployerForm(viewingEmployerId);
+});
+
+$("employerForm")?.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target;
+  const editId = f.edit_id.value;
+  const data = {
+    company_name: f.company_name.value.trim(),
+    industry: f.industry.value,
+    email: f.email.value.trim(),
+    phone: f.phone.value.trim(),
+    tin: f.tin.value.trim()
+  };
+  if (editId) {
+    const emp = employers.find(x => x.id === editId);
+    if (emp) Object.assign(emp, data);
+    toast(`Employer ${data.company_name} updated`);
+  } else {
+    const id = "e" + (employers.length + 10);
+    employers.unshift({
+      id,
+      ...data,
+      active_jobs_count: 0,
+      placed_workers_count: 0,
+      verification_status: "Pending",
+      billing_status: "Not Started",
+      logo: initials(data.company_name)
+    });
+    activityFeed.unshift({ icon: "🏢", text: `${data.company_name} registered → Pending verification`, time: "now", ago: "just now" });
+    toast(`Employer ${data.company_name} added → Pending`);
+  }
+  $("employerFormModal").classList.add("hid");
+  renderCurrent();
+});
+
+// Init
+showView("dashboard");
+
+// PWA
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./admin-sw.js", { scope: "./" }).catch(() => {});
+}
+</script>
 </body>
 </html>
