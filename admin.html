@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Tamagn Delala | Manager</title>
+<link rel="manifest" href="admin.webmanifest">
+<meta name="theme-color" content="#0369a1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TD Admin">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" type="image/png" href="admin-icon-192.png">
+<link rel="apple-touch-icon" href="admin-apple-touch-icon.png">
+<style>
+:root {
+  --bg: var(--tg-theme-bg-color, #f1f5f9);
+  --fg: var(--tg-theme-text-color, #0f172a);
+  --hint: var(--tg-theme-hint-color, #64748b);
+  --card: var(--tg-theme-secondary-bg-color, #ffffff);
+  --btn: var(--tg-theme-button-color, #0284c7);
+  --btnfg: var(--tg-theme-button-text-color, #ffffff);
+  --danger: #ef4444;
+  --success: #059669;
+  --warning: #d97706;
+  --border: #e2e8f0;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06);
+  --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 15px/1.5 system-ui, -apple-system, sans-serif;
+  padding-bottom: 50px; -webkit-font-smoothing: antialiased;
+}
+.header {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 12px max(16px, calc((100vw - 1180px) / 2)); display: flex; align-items: center; justify-content: space-between;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(135deg, #0ea5e9, #0369a1);
+  display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px;
+}
+.logo h1 { font-size: 16px; font-weight: 700; }
+.logo span { font-size: 12px; color: var(--hint); }
+.lang-btn {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+img { max-width: 100%; }
+main { padding: 0 14px 24px; }
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--btn);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 8px 0 12px;
+  padding: 4px 0;
+}
+
+.skills-wrap { margin: 6px 0 12px; overflow-x: auto; scrollbar-width: none; }
+.skills-wrap::-webkit-scrollbar { display: none; }
+.skills { display: flex; gap: 8px; width: max-content; }
+.chip {
+  padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--card); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+}
+.chip.active { background: var(--btn); color: var(--btnfg); border-color: var(--btn); }
+.card {
+  background: var(--card); border-radius: var(--radius); margin-bottom: 12px;
+  overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.card-img { display:block; width: 100%; aspect-ratio: 7 / 9; height: auto; object-fit: cover; background: #e2e8f0; }
+.card-body { padding: 13px 14px 15px; }
+.card-name { font-size: 16px; font-weight: 700; }
+.card-skill {
+  display: inline-block; background: #e0f2fe; color: #0369a1;
+  font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 20px; margin-top: 3px;
+}
+.badges { display: flex; flex-wrap: wrap; gap: 5px; margin: 7px 0 3px; }
+.badge { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px; }
+.badge-id { background: #dcfce7; color: #166534; }
+.badge-police { background: #fef3c7; color: #92400e; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 6px 0; font-size: 13px; color: var(--hint); }
+.pay { font-weight: 600; color: var(--success); font-size: 14px; margin: 4px 0 10px; }
+.btn-hire, .btn-primary {
+  width: 100%; padding: 11px; border: none; border-radius: 11px;
+  background: var(--btn); color: var(--btnfg); font-size: 15px; font-weight: 600; cursor: pointer;
+}
+.state { text-align: center; padding: 40px 16px; color: var(--hint); }
+.state-icon { font-size: 40px; margin-bottom: 10px; opacity: 0.7; }
+.state h3 { font-size: 15px; color: var(--fg); margin-bottom: 4px; }
+.admin-card, .form-card {
+  background: var(--card); border-radius: var(--radius); padding: 15px;
+  margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.admin-card.due { border: 2px solid var(--warning); background: #fffbeb; }
+.admin-card.pending { border: 2px solid #93c5fd; background: #eff6ff; }
+label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 3px; font-weight: 500; }
+input, select, textarea {
+  width: 100%; padding: 10px 11px; margin-bottom: 11px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg); color: var(--fg); font-size: 16px;
+}
+textarea { min-height: 70px; resize: vertical; }
+.btn-secondary {
+  padding: 7px 11px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--fg); font-size: 13px; font-weight: 500;
+  cursor: pointer; margin: 3px 5px 0 0;
+}
+.btn-warning { background: #fef3c7; border-color: #fbbf24; color: #92400e; font-weight: 600; }
+.btn-success { background: #dcfce7; border-color: #86efac; color: #166534; font-weight: 600; }
+.btn-danger { color: var(--danger); border-color: #fecaca; }
+.btn-info { background: #e0f2fe; border-color: #7dd3fc; color: #0369a1; font-weight: 600; }
+.hid { display: none !important; }
+.section-title { font-size: 15px; font-weight: 700; margin: 18px 0 9px; }
+.who { font-size: 13px; color: var(--hint); margin-bottom: 5px; }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+.due-label, .pending-label {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 2px 7px; border-radius: 6px; margin-bottom: 5px;
+}
+.due-label { background: #fef3c7; color: #92400e; }
+.pending-label { background: #dbeafe; color: #1e40af; }
+.status-open { color: #0369a1; font-weight: 600; }
+.status-process { color: #d97706; font-weight: 600; }
+.status-closed { color: #059669; font-weight: 600; }
+.stars { color: #eab308; letter-spacing: 1px; font-size: 13px; }
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px; z-index: 100;
+}
+.modal-overlay.hid { display: none !important; }
+.modal-box {
+  max-height: 90vh; max-height: 90dvh; overflow-y: auto;
+  background: var(--card); border-radius: 18px; padding: 22px;
+  max-width: 340px; width: 100%; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+}
+.modal-box h3 { font-size: 17px; margin-bottom: 8px; text-align: center; }
+.modal-box p { color: var(--hint); font-size: 14px; margin-bottom: 14px; text-align: center; }
+.phone-box {
+  background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px;
+  padding: 12px; text-align: center; margin-bottom: 14px;
+}
+.phone-box a { font-size: 18px; font-weight: 700; color: #166534; text-decoration: none; }
+
+.topbar-right { display:flex; gap:8px; align-items:center; }
+.wrap { max-width: 1180px; margin: 0 auto; }
+
+.photo-preview { display:block; width:105px; aspect-ratio:7/9; object-fit:cover; border-radius:8px; border:1px solid var(--border); margin-bottom:11px; }
+
+/* ===== Responsive layout ===== */
+#pendingList, #dueList, #reqs, #empList, #wl { display: grid; grid-template-columns: 1fr; gap: 12px; }
+#pendingList .admin-card, #dueList .admin-card, #reqs .admin-card, #empList .admin-card, #wl .admin-card { margin-bottom: 0; }
+#pendingList .state, #dueList .state, #reqs .state, #empList .state, #wl .state { grid-column: 1 / -1; }
+@media (min-width: 700px)  { #pendingList, #dueList, #reqs, #empList, #wl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1050px) { #pendingList, #dueList, #reqs, #empList, #wl { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+#wf { max-width: 640px; }
+#login { max-width: 460px; margin-left: auto; margin-right: auto; }
+
+.cam-box { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 12px; color: #fff; }
+.cam-view { position: relative; aspect-ratio: 7 / 9; width: min(100%, calc(68vh * 0.7778)); width: min(100%, calc(68dvh * 0.7778)); background: #000; border-radius: 12px; overflow: hidden; }
+.cam-view video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cam-view.mirror video { transform: scaleX(-1); }
+.cam-guide { position: absolute; inset: 8% 20% 24% 20%; border: 2px dashed rgba(255,255,255,.85); border-radius: 50%; pointer-events: none; }
+.cam-tip { font-size: 13px; text-align: center; color: #e2e8f0; }
+.cam-actions { display: flex; gap: 8px; width: 100%; }
+.cam-actions .btn-primary { flex: 1; }
+.cam-actions .btn-secondary { margin: 0; padding: 11px 14px; }
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">TD</div>
+    <div><h1>Tamagn Delala</h1><span>Manager panel</span></div>
+  </div>
+</header>
+
+<main><div class="wrap">
+  <div id="login" class="form-card" style="margin-top:16px">
+    <p id="loginNote" class="who" style="margin-bottom:12px">Sign in with the manager Google account.</p>
+    <button class="btn-primary" id="signIn">Sign in with Google</button>
+    <button class="btn-secondary hid" id="installBtn" style="width:100%;margin:10px 0 0;padding:11px">📲 Install as app</button>
+    <p id="iosHint" class="who hid" style="margin-top:10px">To install on iPhone: tap the Share button, then "Add to Home Screen".</p>
+    <p id="tgNote" class="who hid" style="margin-top:10px">This page does not work inside Telegram. Open it in Chrome or Safari.</p>
+  </div>
+
+  <div id="panel" class="hid">
+    <div class="who" id="who" style="margin-top:12px"></div>
+    <button class="btn-secondary" id="signOut">Sign out</button>
+
+    <h2 class="section-title">⏳ Pending Workers</h2>
+    <div id="pendingList"></div>
+
+    <h2 class="section-title">⭐ Rating Follow-up Due</h2>
+    <div id="dueList"></div>
+
+    <h2 class="section-title">📋 Hire Requests</h2>
+    <div id="reqs"></div>
+
+    <h2 class="section-title">👔 Registered Employers</h2>
+    <div id="empList"></div>
+
+    <h2 class="section-title">👷 All Workers</h2>
+    <div id="wl"></div>
+
+    <h2 class="section-title">➕ Add Worker Manually</h2>
+    <form id="wf" class="form-card">
+        <input type="hidden" id="f_id">
+        <label>Full name *</label>
+        <input id="f_name" required maxlength="80">
+        <label>Age *</label>
+        <input id="f_age" type="number" min="14" max="80" required>
+        <label>Skill *</label>
+        <select id="f_skill" required></select>
+        <label>Location *</label>
+        <input id="f_location" required maxlength="60">
+        <label>Experience *</label>
+        <input id="f_experience" required maxlength="120">
+        <label>Payment type *</label>
+        <select id="f_paymentType">
+          <option value="monthly">Monthly</option>
+          <option value="hourly">Hourly</option>
+          <option value="daily">Daily</option>
+        </select>
+        <label>Pay (optional)</label>
+        <input id="f_pay" maxlength="60">
+        <label>National ID *</label>
+        <input id="f_nationalId" required maxlength="30">
+        <label>Phone *</label>
+        <input id="f_phone" required maxlength="20">
+        <label>Police Clearance</label>
+        <select id="f_police"><option value="no">No</option><option value="yes">Yes</option></select>
+        <label>Guarantor Name</label>
+        <input id="f_guarantorName" maxlength="80">
+        <label>Guarantor Phone</label>
+        <input id="f_guarantorPhone" maxlength="20">
+        <label>Photo</label>
+        <button type="button" class="btn-secondary" id="f_photoBtn" style="margin:0 0 10px">📷 Take Photo</button>
+        <label for="f_photo" class="btn-secondary hid" id="f_photoAlt" style="margin:0 0 10px;display:inline-block">Use phone camera app</label>
+        <input id="f_photo" type="file" accept="image/*" capture="user" class="hid">
+        <img id="f_photoPreview" class="photo-preview hid" alt="">
+        <p class="who" style="margin:-6px 0 12px">Take the photo with the camera (gallery upload is not allowed). Passport style: face centered, plain background.</p>
+        <button class="btn-primary" id="saveBtn" type="submit">Save Worker</button>
+        <button class="btn-secondary hid" id="cancelEdit" type="button">Cancel</button>
+      </form>
+  </div>
+</div></main>
+
+<div id="ratingModal" class="modal-overlay hid">
+  <div class="modal-box" style="text-align:left">
+    <h3 style="text-align:center">Save Rating</h3>
+    <p class="who" id="ratingWorkerName" style="text-align:center"></p>
+    <label>Stars (1-5)</label>
+    <select id="ratingStars">
+      <option value="5">5 ★★★★★</option><option value="4">4 ★★★★</option><option value="3">3 ★★★</option>
+      <option value="2">2 ★★</option><option value="1">1 ★</option>
+    </select>
+    <label>Comment / Recommendation</label>
+    <textarea id="ratingComment"></textarea>
+    <button class="btn-primary" id="saveRatingBtn">Save Rating</button>
+    <button class="btn-secondary" id="cancelRatingBtn" style="width:100%;margin-top:8px">Cancel</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, getDocs, getDoc, updateDoc, deleteDoc, writeBatch, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const ADMIN_EMAIL = "henokj2000@gmail.com";
+const firebaseConfig = {
+  apiKey: "AIzaSyDOzRzt9k35kokQOD1rEIpkIVPjNyd0Q3c",
+  authDomain: "tamagn-delala.firebaseapp.com",
+  projectId: "tamagn-delala",
+  storageBucket: "tamagn-delala.firebasestorage.app",
+  messagingSenderId: "996483381337",
+  appId: "1:996483381337:web:f20127638e8da2aee7d948"
+};
+
+const SKILLS = [
+  { en: "House Maid", am: "የቤት ሰራተኛ" },
+  { en: "Babysitter", am: "ህጻናት አሳዳጊ" },
+  { en: "Cook / Chef", am: "ምግብ አብሳይ" },
+  { en: "Gardener", am: "አትክልተኛ" },
+  { en: "Security Guard", am: "ጠባቂ" },
+  { en: "Plumber", am: "የቧንቧ ሰራተኛ" },
+  { en: "Electrician", am: "ኤሌክትሪሺያን" },
+  { en: "Construction Worker", am: "የግንባታ ሰራተኛ" },
+  { en: "Daily Laborer", am: "ዕለታዊ ሰራተኛ" },
+  { en: "Driver", am: "ሹፌር" },
+  { en: "Cleaner", am: "ጽዳት ሰራተኛ" },
+  { en: "Laundry Worker", am: "የልብስ ማጠቢያ" },
+  { en: "Waiter / Waitress", am: "አስተናጋጅ" },
+  { en: "Office Assistant", am: "የቢሮ ረዳት" },
+  { en: "Nanny", am: "ሞግዚት" },
+  { en: "Other", am: "ሌላ" }
+];
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const auth = getAuth(fbApp);
+
+const tg = window.Telegram?.WebApp;
+const inTelegram = /Telegram/i.test(navigator.userAgent) || !!(tg && tg.initData);
+if (inTelegram) { $_tgNote(); }
+function $_tgNote() { document.getElementById("tgNote").classList.remove("hid"); document.getElementById("signIn").classList.add("hid"); }
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ts = x => (x?.seconds) ? x.seconds : 0;
+let ratingRequestId = null, ratingWorkerId = null;
+
+$("f_skill").innerHTML = SKILLS.map(s => `<option value="${esc(s.en)}">${s.en}</option>`).join("");
+$("f_police").innerHTML = '<option value="no">No</option><option value="yes">Yes</option>';
+
+function starsHtml(avg, count) {
+  if (!count) return "";
+  const full = Math.round(avg||0);
+  return `<div class="stars">${"★".repeat(full)}${"☆".repeat(5-full)} <span style="color:var(--hint);font-size:12px">(${count})</span></div>`;
+}
+
+
+// ---- Live camera capture (passport 7:9 frame). Gallery picking is not offered. ----
+function takePassportPhoto(L) {
+  return new Promise(async (resolve, reject) => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return reject(new Error("nocam"));
+    let stream = null, facing = "user";
+    const open = async f => {
+      if (stream) stream.getTracks().forEach(t => t.stop());
+      stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: f }, width: { ideal: 1280 }, height: { ideal: 1280 } } });
+    };
+    try { await open(facing); } catch (e) { return reject(new Error("nocam")); }
+    const ov = document.createElement("div");
+    ov.className = "modal-overlay"; ov.style.zIndex = 300; ov.style.background = "#000";
+    ov.innerHTML = '<div class="cam-box"><div class="cam-view mirror"><video playsinline muted autoplay></video><div class="cam-guide"></div></div>' +
+      '<p class="cam-tip"></p><div class="cam-actions"><button type="button" class="btn-secondary" data-c="cancel"></button>' +
+      '<button type="button" class="btn-primary" data-c="snap"></button><button type="button" class="btn-secondary" data-c="flip">🔄</button></div></div>';
+    document.body.appendChild(ov);
+    const video = ov.querySelector("video"), view = ov.querySelector(".cam-view");
+    ov.querySelector(".cam-tip").textContent = L.tip;
+    ov.querySelector('[data-c="cancel"]').textContent = L.cancel;
+    ov.querySelector('[data-c="snap"]').textContent = L.snap;
+    video.srcObject = stream;
+    const close = () => { if (stream) stream.getTracks().forEach(t => t.stop()); ov.remove(); };
+    ov.onclick = async e => {
+      const c = e.target.dataset && e.target.dataset.c;
+      if (c === "cancel") { close(); resolve(null); }
+      else if (c === "flip") {
+        facing = facing === "user" ? "environment" : "user";
+        try { await open(facing); video.srcObject = stream; view.classList.toggle("mirror", facing === "user"); } catch (_) {}
+      } else if (c === "snap") {
+        const vw = video.videoWidth, vh = video.videoHeight;
+        if (!vw || !vh) return;
+        const W = 350, H = 450, R = W / H;
+        let sw, sh, sx, sy;
+        if (vw / vh > R) { sh = vh; sw = vh * R; sx = (vw - sw) / 2; sy = 0; }
+        else { sw = vw; sh = vw / R; sx = 0; sy = (vh - sh) / 2; }
+        const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+        cv.getContext("2d").drawImage(video, sx, sy, sw, sh, 0, 0, W, H);
+        const data = cv.toDataURL("image/jpeg", 0.75);
+        close(); resolve(data);
+      }
+    };
+  });
+}
+
+function shrink(file) {
+  // Passport-size photo: 35x45 mm ratio (7:9), stored as 350x450 JPEG
+  const W = 350, H = 450, RATIO = W / H;
+  return new Promise((res, rej) => {
+    if (!file || !/^image\//.test(file.type)) return rej(new Error("Please choose an image file."));
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const w = img.naturalWidth, h = img.naturalHeight;
+      if (w < 200 || h < 260) return rej(new Error("Photo is too small. Use a clear passport-size photo."));
+      if (w / h > 1.05) return rej(new Error("Please upload a portrait passport-size photo (not a wide/landscape picture)."));
+      let sw = w, sh = h, sx = 0, sy = 0;
+      if (w / h > RATIO) { sw = h * RATIO; sx = (w - sw) / 2; }       // too wide: trim sides
+      else { sh = w / RATIO; sy = (h - sh) * 0.15; }                  // too tall: trim, keep the head
+      const c = document.createElement("canvas");
+      c.width = W; c.height = H;
+      c.getContext("2d").drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+      res(c.toDataURL("image/jpeg", 0.75));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Could not read this image.")); };
+    img.src = url;
+  });
+}
+
+// Admin
+let allW = [], reqs = [], pending = [], employers = [];
+$("signIn").onclick = async () => {
+  const provider = new GoogleAuthProvider();
+  try { await signInWithPopup(auth, provider); }
+  catch (e) {
+    if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") {
+      try { await signInWithRedirect(auth, provider); } catch (e2) { alert(e2.code || e2.message); }
+    } else if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
+      alert(e.code || e.message);
+    }
+  }
+};
+$("signOut").onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { $("login").classList.remove("hid"); $("panel").classList.add("hid"); return; }
+  if (user.email !== ADMIN_EMAIL) { alert("Not admin"); signOut(auth); return; }
+  $("who").textContent = "Signed in: " + user.email;
+  $("login").classList.add("hid"); $("panel").classList.remove("hid");
+  await loadAdmin();
+});
+
+async function loadAdmin() {
+  const [rs, ws, es] = await Promise.all([
+    getDocs(query(collection(db,"requests"), orderBy("createdAt","desc"), limit(80))),
+    getDocs(collection(db,"workers")),
+    getDocs(collection(db,"employers"))
+  ]);
+  reqs = rs.docs.map(d => ({id:d.id, ...d.data()}));
+  allW = ws.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>ts(b.createdAt)-ts(a.createdAt));
+  pending = allW.filter(w => w.status === "pending");
+  employers = es.docs.map(d => ({id:d.id, ...d.data()})).sort((a,b)=>ts(b.createdAt)-ts(a.createdAt));
+  renderAdmin();
+}
+
+function isDue(r) {
+  if (r.followUpSent || r.rating || r.status==="closed") return false;
+  if (!r.followUpAt) return false;
+  const d = r.followUpAt.toDate ? r.followUpAt.toDate() : new Date(ts(r.followUpAt)*1000);
+  return d <= new Date();
+}
+
+function renderAdmin() {
+  $("pendingList").innerHTML = pending.length ? pending.map(w => `
+    <div class="admin-card pending">
+      <div class="pending-label">PENDING</div>
+      <b>${esc(w.name)}</b> · ${esc(w.skill)} · ${esc(w.location)}
+      <div class="who">Age ${esc(w.age)} · ${esc(w.experience)}</div>
+      <button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button>
+      <button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ Reject</button>
+    </div>`).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
+
+  const due = reqs.filter(isDue);
+  $("dueList").innerHTML = due.length ? due.map(r => {
+    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : "#";
+    return `<div class="admin-card due">
+      <div class="due-label">RATING DUE</div>
+      <b>${esc(r.workerName)}</b>
+      <div class="who"><a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")}</div>
+      <button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask</button>
+      <button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Rate</button>
+      <button class="btn-secondary" data-marksent="${esc(r.id)}">Mark Sent</button>
+    </div>`;
+  }).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
+
+  $("reqs").innerHTML = reqs.length ? reqs.map(r => {
+    const when = r.createdAt ? new Date(ts(r.createdAt)*1000).toLocaleString() : "";
+    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : "#";
+    const stClass = r.status==="open"?"status-open":r.status==="on_process"?"status-process":"status-closed";
+    return `<div class="admin-card">
+      <b>${esc(r.workerName)}</b>
+      <div class="who"><a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")} · ${when}</div>
+      <div class="who">Status: <span class="${stClass}">${esc(r.status||"open")}</span> · Pay: ${r.paymentReceived?"✅":"❌"}</div>
+      <button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>
+      <button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button>
+      <button class="btn-secondary" data-pay="${esc(r.id)}">Mark Paid</button>
+      <button class="btn-secondary" data-showphone="${esc(r.workerId)}">Show Phone</button>
+      <button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">Delete</button>
+    </div>`;
+  }).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
+
+  // Registered Employers (stay forever until deleted)
+  $("empList").innerHTML = employers.length ? employers.map(e => {
+    const when = e.createdAt ? new Date(ts(e.createdAt)*1000).toLocaleDateString() : "";
+    const un = e.username ? "@" + esc(e.username) : "";
+    return `<div class="admin-card">
+      <b>${esc(e.name)}</b>
+      <div class="who">📞 ${esc(e.phone||"—")} · 📍 ${esc(e.location||"—")}</div>
+      <div class="who">${un} · Registered: ${when}</div>
+      <button class="btn-secondary btn-danger" data-de="${esc(e.id)}">${"Delete"}</button>
+    </div>`;
+  }).join("") : `<div class="state" style="padding:16px"><p>${"No employers registered yet"}</p></div>`;
+
+  $("wl").innerHTML = allW.length ? allW.map(w => `
+    <div class="admin-card">
+      <b>${esc(w.name)}</b>
+      <span class="who"> · ${esc(w.skill)} · ${w.status}</span>
+      ${starsHtml(w.ratingAvg, w.ratingCount)}
+      <button class="btn-secondary" data-tg="${esc(w.id)}">${w.available?"Unavailable":"Available"}</button>
+      <button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button>
+      <button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>
+    </div>`).join("") : `<div class="state"><p>—</p></div>`;
+}
+
+$("panel").onclick = async e => {
+  const d = e.target.dataset;
+  try {
+    if (d.approve) await updateDoc(doc(db,"workers",d.approve),{status:"approved",available:true});
+    else if (d.reject) { if(!confirm("Reject?"))return; await updateDoc(doc(db,"workers",d.reject),{status:"rejected",available:false}); }
+    else if (d.ask) {
+      const r = reqs.find(x=>x.id===d.ask); if(!r)return;
+      const msg = `ሰላም ${r.employerName}\n\nከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።\n\nእባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ።`;
+      const url = r.employerUsername ? `https://t.me/${r.employerUsername}?text=${encodeURIComponent(msg)}` : `tg://user?id=${r.employerTgId}`;
+      window.open(url,"_blank"); return;
+    }
+    else if (d.rate) {
+      ratingRequestId=d.rate; ratingWorkerId=d.wid;
+      const r=reqs.find(x=>x.id===d.rate);
+      $("ratingWorkerName").textContent=(r?.workerName||"")+" ← "+(r?.employerName||"");
+      $("ratingModal").classList.remove("hid"); return;
+    }
+    else if (d.marksent) await updateDoc(doc(db,"requests",d.marksent),{followUpSent:true});
+    else if (d.status) await updateDoc(doc(db,"requests",d.status),{status:d.val});
+    else if (d.pay) await updateDoc(doc(db,"requests",d.pay),{paymentReceived:true});
+    else if (d.showphone) {
+      const p = await getDoc(doc(db,"workers_private",d.showphone));
+      alert("Phone: "+(p.exists()?p.data().phone:"N/A")); return;
+    }
+    else if (d.dr) { if(!confirm("Delete?"))return; await deleteDoc(doc(db,"requests",d.dr)); }
+    else if (d.de) { if(!confirm("Delete this employer permanently?"))return; await deleteDoc(doc(db,"employers",d.de)); }
+    else if (d.tg) { const w=allW.find(x=>x.id===d.tg); await updateDoc(doc(db,"workers",d.tg),{available:!w.available}); }
+    else if (d.dw) {
+      if(!confirm("Delete?"))return;
+      const b=writeBatch(db); b.delete(doc(db,"workers",d.dw)); b.delete(doc(db,"workers_private",d.dw)); await b.commit();
+    }
+    else if (d.ed) return startEdit(d.ed);
+    else return;
+    await loadAdmin();
+  } catch(err) { alert(err.message); }
+};
+
+$("saveRatingBtn").onclick = async () => {
+  if (!ratingRequestId||!ratingWorkerId) return;
+  const stars=Number($("ratingStars").value), comment=$("ratingComment").value.trim();
+  try {
+    await updateDoc(doc(db,"requests",ratingRequestId),{rating:stars,ratingComment:comment,followUpSent:true,ratedAt:serverTimestamp()});
+    const wRef=doc(db,"workers",ratingWorkerId); const wSnap=await getDoc(wRef);
+    if (wSnap.exists()) {
+      const w=wSnap.data(); const cnt=(w.ratingCount||0)+1;
+      const avg=(((w.ratingAvg||0)*(cnt-1))+stars)/cnt;
+      await updateDoc(wRef,{ratingAvg:Math.round(avg*10)/10,ratingCount:cnt});
+    }
+    $("ratingModal").classList.add("hid"); await loadAdmin();
+  } catch(e){alert(e.message);}
+};
+$("cancelRatingBtn").onclick = () => $("ratingModal").classList.add("hid");
+
+async function startEdit(id) {
+  const w=allW.find(x=>x.id===id); const p=await getDoc(doc(db,"workers_private",id)); const priv=p.exists()?p.data():{};
+  $("f_id").value=id; $("f_name").value=w.name||""; $("f_age").value=w.age||"";
+  $("f_skill").value=w.skill||""; $("f_location").value=w.location||""; $("f_experience").value=w.experience||"";
+  $("f_paymentType").value=w.paymentType||"monthly"; $("f_pay").value=w.pay||"";
+  $("f_nationalId").value=priv.nationalId||""; $("f_phone").value=priv.phone||"";
+  $("f_police").value=w.hasPoliceClearance?"yes":"no";
+  $("f_guarantorName").value=priv.guarantorName||""; $("f_guarantorPhone").value=priv.guarantorPhone||"";
+  $("cancelEdit").classList.remove("hid"); $("wf").scrollIntoView({behavior:"smooth"});
+}
+$("cancelEdit").onclick = () => { $("wf").reset(); setAdminPhoto(null); $("f_id").value=""; $("cancelEdit").classList.add("hid"); };
+
+let adminPhotoData = null;
+function setAdminPhoto(d) {
+  adminPhotoData = d;
+  const pv = $("f_photoPreview");
+  if (d) { pv.src = d; pv.classList.remove("hid"); } else pv.classList.add("hid");
+  $("f_photoBtn").textContent = d ? "📷 Retake Photo" : "📷 Take Photo";
+}
+$("f_photoBtn").onclick = async () => {
+  if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { $("f_photo").click(); return; }
+  try {
+    const d = await takePassportPhoto({ tip: "Place the face inside the oval and look straight at the camera.", snap: "Capture", cancel: "Cancel" });
+    if (d) setAdminPhoto(d);
+  } catch (e) {
+    $("f_photoAlt").classList.remove("hid");
+    alert('Camera could not be opened. Allow camera access, or tap "Use phone camera app".');
+  }
+};
+$("f_photo").onchange = async () => {
+  const f = $("f_photo").files[0];
+  if (!f) return;
+  try { setAdminPhoto(await shrink(f)); }
+  catch (e) { alert(e.message); setAdminPhoto(null); }
+  $("f_photo").value = "";
+};
+
+$("wf").onsubmit = async e => {
+  e.preventDefault(); const btn=$("saveBtn"); btn.disabled=true;
+  try {
+    const id=$("f_id").value; const ref=id?doc(db,"workers",id):doc(collection(db,"workers"));
+    const publicData={
+      name:$("f_name").value.trim(), age:Number($("f_age").value), skill:$("f_skill").value,
+      location:$("f_location").value.trim(), experience:$("f_experience").value.trim(),
+      paymentType:$("f_paymentType").value, pay:$("f_pay").value.trim()||"Negotiable",
+      hasNationalId:true, hasPoliceClearance:$("f_police").value==="yes", status:"approved", available:true
+    };
+    if (adminPhotoData) publicData.photo=adminPhotoData;
+    const privateData={ phone:$("f_phone").value.trim(), nationalId:$("f_nationalId").value.trim(),
+      guarantorName:$("f_guarantorName").value.trim(), guarantorPhone:$("f_guarantorPhone").value.trim() };
+    const b=writeBatch(db);
+    if (id) b.update(ref,publicData);
+    else b.set(ref,{...publicData, photo:publicData.photo||"", ratingAvg:0, ratingCount:0, createdAt:serverTimestamp(), source:"admin"});
+    b.set(doc(db,"workers_private",ref.id), privateData, {merge:true});
+    await b.commit();
+    $("wf").reset(); setAdminPhoto(null); $("f_id").value=""; $("cancelEdit").classList.add("hid");
+    await loadAdmin();
+  } catch(err){alert(err.message);}
+  btn.disabled=false; btn.textContent="Save Worker";
+};
+
+
+
+// ---- Install as app (PWA) ----
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./admin-sw.js", { scope: "./admin.html" }).catch(() => {});
+}
+let deferredInstall = null;
+const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault(); deferredInstall = e;
+  if (!isStandalone) $("installBtn").classList.remove("hid");
+});
+$("installBtn").onclick = async () => {
+  if (!deferredInstall) return;
+  deferredInstall.prompt();
+  await deferredInstall.userChoice.catch(() => {});
+  deferredInstall = null; $("installBtn").classList.add("hid");
+};
+window.addEventListener("appinstalled", () => $("installBtn").classList.add("hid"));
+if (!isStandalone && /iphone|ipad|ipod/i.test(navigator.userAgent)) $("iosHint").classList.remove("hid");
+</script>
+</body>
+</html>
