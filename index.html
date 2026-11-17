@@ -492,9 +492,15 @@ body.home .hero-footer strong { font-size: 12px; }
       <div class="divider"></div>
       <label id="lblWrId">National ID Number *</label>
       <input id="wr_nationalId" maxlength="30">
+      <label id="lblWrIdPhoto">National ID Photo *</label>
+      <button type="button" class="btn-secondary" id="wr_idPhotoBtn" style="margin:0 0 10px">🪪 Take / Upload ID Photo</button>
+      <label for="wr_idPhoto" class="btn-secondary" id="wr_idPhotoAlt" style="margin:0 0 10px;display:inline-block">Upload ID image</label>
+      <input id="wr_idPhoto" type="file" accept="image/*" capture="environment" class="hid">
+      <img id="wr_idPhotoPreview" class="photo-preview hid" alt="ID preview">
+      <p class="who" id="wrIdPhotoHint" style="margin:-6px 0 12px">Clear photo of your Fayda / Kebele ID (front).</p>
       <label id="lblWrPhone">Phone Number *</label>
       <input id="wr_phone" maxlength="20" placeholder="09xxxxxxxx">
-      <label id="lblWrPhoto">Profile Photo</label>
+      <label id="lblWrPhoto">Profile Photo *</label>
       <button type="button" class="btn-secondary" id="wr_photoBtn" style="margin:0 0 10px">📷 Take Photo</button>
       <label for="wr_photo" class="btn-secondary hid" id="wr_photoAlt" style="margin:0 0 10px;display:inline-block">Use phone camera app</label>
       <input id="wr_photo" type="file" accept="image/*" capture="user" class="hid">
@@ -616,6 +622,10 @@ const i18n = {
     camTip: "Place your face inside the oval and look straight at the camera.",
     camFail: "Camera could not be opened. Allow camera access, or tap \"Use phone camera app\".",
     photoRequired: "Please take a photo with your camera.",
+    idPhotoRequired: "Please upload a clear photo of your National ID (Fayda / Kebele).",
+    idPhotoBtn: "🪪 Take / Upload ID Photo",
+    idPhotoHint: "Clear photo of your Fayda / Kebele ID (front).",
+    idPhotoRetake: "🪪 Retake ID Photo",
     wrGName: "Guarantor Name (optional)", wrGPhone: "Guarantor Phone (optional)",
     wrPolice: "Police Clearance",
     wrSubmit: "Submit Registration",
@@ -687,6 +697,10 @@ const i18n = {
     camTip: "ፊትዎን በኦቫሉ ውስጥ ያድርጉ እና ካሜራውን በቀጥታ ይመልከቱ።",
     camFail: "ካሜራ መክፈት አልተቻለም። የካሜራ ፈቃድ ይስጡ ወይም \"የስልክ ካሜራ ተጠቀም\" ይጫኑ።",
     photoRequired: "እባክዎ በካሜራ ፎቶ ያንሱ።",
+    idPhotoRequired: "እባክዎ የብሔራዊ መታወቂያዎን (ፋይዳ / ቀበሌ) ግልጽ ፎቶ ያስገቡ።",
+    idPhotoBtn: "🪪 የመታወቂያ ፎቶ",
+    idPhotoHint: "የፋይዳ / ቀበሌ መታወቂያ ፊት ግልጽ ፎቶ።",
+    idPhotoRetake: "🪪 መታወቂያ እንደገና ያንሱ",
     wrGName: "የዋስ ስም (አማራጭ)", wrGPhone: "የዋስ ስልክ (አማራጭ)",
     wrPolice: "የፖሊስ ማረጋገጫ",
     wrSubmit: "ምዝገባ አስገባ",
@@ -767,6 +781,9 @@ function applyLang() {
   $("lblWrPhoto").textContent = t("wrPhoto");
   $("wrPhotoHint").textContent = t("wrPhotoHint");
   $("wr_photoBtn").textContent = wrPhotoData ? t("camRetake") : t("camBtn");
+  if ($("wrIdPhotoHint")) $("wrIdPhotoHint").textContent = t("idPhotoHint");
+  if ($("wr_idPhotoBtn")) $("wr_idPhotoBtn").textContent = wrIdPhotoData ? t("idPhotoRetake") : t("idPhotoBtn");
+  if ($("lblWrIdPhoto")) $("lblWrIdPhoto").textContent = lang === "am" ? "የብሔራዊ መታወቂያ ፎቶ *" : "National ID Photo *";
   $("wr_photoAlt").textContent = t("camAlt");
   $("lblWrGName").textContent = t("wrGName");
   $("lblWrGPhone").textContent = t("wrGPhone");
@@ -1060,12 +1077,37 @@ function shrink(file) {
 }
 
 let wrPhotoData = null;
+let wrIdPhotoData = null;
 function setWrPhoto(d) {
   wrPhotoData = d;
   const pv = $("wr_photoPreview");
   if (d) { pv.src = d; pv.classList.remove("hid"); } else pv.classList.add("hid");
   $("wr_photoBtn").textContent = d ? t("camRetake") : t("camBtn");
 }
+function setWrIdPhoto(d) {
+  wrIdPhotoData = d;
+  const pv = $("wr_idPhotoPreview");
+  if (d) { pv.src = d; pv.classList.remove("hid"); } else pv.classList.add("hid");
+  if ($("wr_idPhotoBtn")) $("wr_idPhotoBtn").textContent = d ? t("idPhotoRetake") : t("idPhotoBtn");
+}
+$("wr_idPhotoBtn").onclick = async () => {
+  // Prefer camera for ID, fallback to file picker
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      const d = await takePassportPhoto({ tip: t("idPhotoHint"), snap: t("camSnap"), cancel: t("camCancel") });
+      if (d) setWrIdPhoto(d);
+      return;
+    } catch (_) {}
+  }
+  $("wr_idPhoto").click();
+};
+$("wr_idPhoto").onchange = async () => {
+  const f = $("wr_idPhoto").files[0];
+  if (!f) return;
+  try { setWrIdPhoto(await shrink(f)); }
+  catch (e) { alert(e.message); setWrIdPhoto(null); }
+  $("wr_idPhoto").value = "";
+};
 const camLabels = () => ({ tip: t("camTip"), snap: t("camSnap"), cancel: t("camCancel") });
 $("wr_photoBtn").onclick = async () => {
   if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { $("wr_photo").click(); return; }
@@ -1100,19 +1142,21 @@ $("wrSubmitBtn").onclick = async () => {
     return alert(lang==="am"?"እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ":"Please fill all required fields");
   }
   if (!wrPhotoData) return alert(t("photoRequired"));
+  if (!wrIdPhotoData) return alert(t("idPhotoRequired"));
   const btn = $("wrSubmitBtn"); btn.disabled = true; btn.textContent = "...";
   try {
     const photo = wrPhotoData;
+    const idPhoto = wrIdPhotoData;
     const ref = doc(collection(db, "workers"));
     const batch = writeBatch(db);
     batch.set(ref, {
       name, age, skill, location, experience, paymentType, pay, photo,
-      hasNationalId: true, hasPoliceClearance: $("wr_police").value==="yes",
+      hasNationalId: true, hasIdPhoto: true, hasPoliceClearance: $("wr_police").value==="yes",
       status: "pending", available: false, ratingAvg:0, ratingCount:0,
       createdAt: serverTimestamp(), source: "self"
     });
     batch.set(doc(db, "workers_private", ref.id), {
-      phone, nationalId,
+      phone, nationalId, idPhoto,
       guarantorName: $("wr_guarantorName").value.trim(),
       guarantorPhone: $("wr_guarantorPhone").value.trim()
     });
