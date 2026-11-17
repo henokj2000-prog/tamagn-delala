@@ -29,7 +29,7 @@ body {
 .header {
   position: sticky; top: 0; z-index: 50;
   background: var(--card); border-bottom: 1px solid var(--border);
-  padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+  padding: 12px max(16px, calc((100vw - 1180px) / 2)); display: flex; align-items: center; justify-content: space-between;
 }
 .logo { display: flex; align-items: center; gap: 10px; }
 .logo-icon {
@@ -43,7 +43,10 @@ body {
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
 }
-main { padding: 0 14px 24px; }
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+img { max-width: 100%; }
+main { max-width: 1180px; margin: 0 auto; padding: 0 14px 24px; }
 
 /* Landing - Hero */
 #vLanding {
@@ -70,6 +73,7 @@ main { padding: 0 14px 24px; }
   gap: 16px;
   padding: 20px 14px 18px;
   min-height: calc(100vh - 160px);
+  min-height: calc(100dvh - 160px);
 }
 .hero-left {
   display: flex;
@@ -236,7 +240,7 @@ main { padding: 0 14px 24px; }
   background: var(--card); border-radius: var(--radius); margin-bottom: 12px;
   overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border);
 }
-.card-img { width: 100%; height: 160px; object-fit: cover; background: #e2e8f0; }
+.card-img { display:block; width: 100%; aspect-ratio: 7 / 9; height: auto; object-fit: cover; background: #e2e8f0; }
 .card-body { padding: 13px 14px 15px; }
 .card-name { font-size: 16px; font-weight: 700; }
 .card-skill {
@@ -266,7 +270,7 @@ label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 3px;
 input, select, textarea {
   width: 100%; padding: 10px 11px; margin-bottom: 11px;
   border: 1px solid var(--border); border-radius: 10px;
-  background: var(--bg); color: var(--fg); font-size: 15px;
+  background: var(--bg); color: var(--fg); font-size: 16px;
 }
 textarea { min-height: 70px; resize: vertical; }
 .btn-secondary {
@@ -299,6 +303,7 @@ textarea { min-height: 70px; resize: vertical; }
 }
 .modal-overlay.hid { display: none !important; }
 .modal-box {
+  max-height: 90vh; max-height: 90dvh; overflow-y: auto;
   background: var(--card); border-radius: 18px; padding: 22px;
   max-width: 340px; width: 100%; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
 }
@@ -309,9 +314,82 @@ textarea { min-height: 70px; resize: vertical; }
   padding: 12px; text-align: center; margin-bottom: 14px;
 }
 .phone-box a { font-size: 18px; font-weight: 700; color: #166534; text-decoration: none; }
+
+.photo-preview { display:block; width:105px; aspect-ratio:7/9; object-fit:cover; border-radius:8px; border:1px solid var(--border); margin-bottom:11px; }
+
+/* ===== Responsive layout (phone -> tablet -> PC) ===== */
+#list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+#list .card { margin-bottom: 0; }
+#list .state { grid-column: 1 / -1; }
+#list .card-body { padding: 10px 10px 12px; }
+#list .card-name { font-size: 15px; }
+@media (min-width: 560px)  { #list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; } #list .card-body { padding: 12px 14px 14px; } }
+@media (min-width: 860px)  { #list { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { #list { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+#empRegisterGate, #wrFormCard, #wrSuccess { max-width: 640px; margin-left: auto; margin-right: auto; }
+@media (min-width: 900px) {
+  .skills-wrap { overflow: visible; }
+  .skills { width: auto; flex-wrap: wrap; }
+  body { font-size: 16px; }
+}
+
+.cam-box { width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 12px; color: #fff; }
+.cam-view { position: relative; aspect-ratio: 7 / 9; width: min(100%, calc(68vh * 0.7778)); width: min(100%, calc(68dvh * 0.7778)); background: #000; border-radius: 12px; overflow: hidden; }
+.cam-view video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cam-view.mirror video { transform: scaleX(-1); }
+.cam-guide { position: absolute; inset: 8% 20% 24% 20%; border: 2px dashed rgba(255,255,255,.85); border-radius: 50%; pointer-events: none; }
+.cam-tip { font-size: 13px; text-align: center; color: #e2e8f0; }
+.cam-actions { display: flex; gap: 8px; width: 100%; }
+.cam-actions .btn-primary { flex: 1; }
+.cam-actions .btn-secondary { margin: 0; padding: 11px 14px; }
+
+/* ===== HOME PAGE: fixed to the window, no scrolling ===== */
+body.home { height: 100vh; height: 100dvh; overflow: hidden; padding-bottom: 0; display: flex; flex-direction: column; }
+body.home .header { position: static; flex: 0 0 auto; }
+body.home main { flex: 1 1 auto; min-height: 0; max-width: none; width: 100%; margin: 0; padding: 0; display: flex; }
+body.home #vLanding { margin: 0; flex: 1 1 auto; min-height: 0; width: 100%; display: flex; }
+body.home .hero { flex: 1 1 auto; min-height: 0; width: 100%; display: flex; flex-direction: column; border-radius: 0; }
+body.home .hero-content {
+  flex: 1 1 auto; min-height: 0; width: 100%; max-width: 1180px; margin: 0 auto;
+  padding: clamp(8px, 2vh, 24px) 14px; gap: clamp(6px, 1.6vh, 18px);
+  justify-content: space-between; overflow: hidden;
+}
+body.home .hero-left { min-height: 0; justify-content: center; }
+body.home .hero-left h2 { font-size: clamp(17px, 3.4vh, 28px); margin-bottom: 4px; }
+body.home .hero-left p { font-size: clamp(11px, 2vh, 15px); margin-bottom: clamp(6px, 1.6vh, 16px); }
+body.home .role-btn { padding: clamp(7px, 1.5vh, 14px) 14px; margin-bottom: clamp(6px, 1.2vh, 10px); display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: center; }
+body.home .role-btn .icon { grid-row: 1 / span 2; font-size: clamp(20px, 3.4vh, 28px); margin: 0; }
+body.home .role-btn .title { font-size: clamp(14px, 2.2vh, 17px); }
+body.home .role-btn .desc { font-size: clamp(10.5px, 1.6vh, 13px); margin: 0; }
+body.home .hero-skills-wrap { margin-top: 0; min-height: 0; }
+body.home .hero-skills-title { font-size: 11px; margin-bottom: 5px; }
+body.home .hero-right {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(4px, 0.9vh, 8px);
+  overflow: visible; max-height: none;
+}
+body.home .skill-pill { padding: clamp(4px, 0.9vh, 8px) 2px; font-size: 10px; display: block; text-align: center; border-radius: 9px; }
+body.home .skill-pill span { display: block; font-size: clamp(14px, 2.4vh, 20px); margin-bottom: 1px; }
+body.home .hero-footer {
+  flex: 0 0 auto; padding: 8px 14px; font-size: 11px; line-height: 1.4;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 16px;
+}
+body.home .hero-footer br { display: none; }
+body.home .hero-footer strong { font-size: 12px; }
+@media (max-height: 640px) { body.home .role-btn .desc { display: none; } body.home .role-btn { grid-template-columns: auto 1fr; } }
+@media (min-width: 640px) {
+  body.home .hero-content { flex-direction: row; align-items: center; justify-content: space-between; gap: 28px; padding: 16px 24px; }
+  body.home .hero-left { flex: 1 1 auto; max-width: 460px; }
+  body.home .hero-skills-wrap { width: min(400px, 46%); flex: 0 0 auto; display: block; }
+  body.home .hero-right { grid-template-columns: repeat(2, 1fr); }
+  body.home .skill-pill { display: flex; align-items: center; gap: 8px; text-align: left; padding: clamp(5px, 1vh, 9px) 10px; font-size: 12px; }
+  body.home .skill-pill span { display: inline; font-size: 16px; margin: 0; }
+}
+@media (min-width: 1000px) { body.home .hero-right { grid-template-columns: repeat(2, 1fr); } }
+/* extremely small windows: let the home content scroll inside rather than cut off */
+@media (max-height: 480px) { body.home .hero-content { overflow-y: auto; } }
 </style>
 </head>
-<body>
+<body class="home">
 
 <header class="header">
   <div class="logo">
@@ -353,10 +431,10 @@ textarea { min-height: 70px; resize: vertical; }
         </div>
       </div>
       <div class="hero-footer">
-        <strong>Tamagn Delala</strong><br>
-        📍 Legetafo, Ethiopia<br>
-        📞 <a href="tel:+251911000000">+251 911 00 00 00</a><br>
-        ✉️ <a href="mailto:info@tamagndelala.com">info@tamagndelala.com</a>
+        <strong>Tamagn Delala</strong>
+        <span>📍 Legetafo, Ethiopia</span>
+        <span>📞 <a href="tel:+251911000000">+251 911 00 00 00</a></span>
+        <span>✉️ <a href="mailto:info@tamagndelala.com">info@tamagndelala.com</a></span>
       </div>
     </div>
   </section>
@@ -417,7 +495,11 @@ textarea { min-height: 70px; resize: vertical; }
       <label id="lblWrPhone">Phone Number *</label>
       <input id="wr_phone" maxlength="20" placeholder="09xxxxxxxx">
       <label id="lblWrPhoto">Profile Photo</label>
-      <input id="wr_photo" type="file" accept="image/*">
+      <button type="button" class="btn-secondary" id="wr_photoBtn" style="margin:0 0 10px">📷 Take Photo</button>
+      <label for="wr_photo" class="btn-secondary hid" id="wr_photoAlt" style="margin:0 0 10px;display:inline-block">Use phone camera app</label>
+      <input id="wr_photo" type="file" accept="image/*" capture="user" class="hid">
+      <img id="wr_photoPreview" class="photo-preview hid" alt="">
+      <p class="who" id="wrPhotoHint" style="margin:-6px 0 12px"></p>
       <div class="divider"></div>
       <label id="lblWrGName">Guarantor Name (optional)</label>
       <input id="wr_guarantorName" maxlength="80">
@@ -528,7 +610,12 @@ const i18n = {
     workerRegNote: "Fill the form. Admin will review and approve you.",
     wrName: "Full Name *", wrAge: "Age *", wrSkill: "Skill *", wrLoc: "Location *",
     wrExp: "Experience *", wrPayType: "Payment Type *", wrPay: "Expected Pay (optional)",
-    wrId: "National ID Number *", wrPhone: "Phone Number *", wrPhoto: "Profile Photo",
+    wrId: "National ID Number *", wrPhone: "Phone Number *", wrPhoto: "Passport-size Photo *",
+    wrPhotoHint: "Take the photo with your camera (gallery upload is not allowed). Passport style: face centered, plain background, no hat or sunglasses.",
+    camBtn: "📷 Take Photo", camRetake: "📷 Retake Photo", camAlt: "Use phone camera app", camSnap: "Capture", camCancel: "Cancel",
+    camTip: "Place your face inside the oval and look straight at the camera.",
+    camFail: "Camera could not be opened. Allow camera access, or tap \"Use phone camera app\".",
+    photoRequired: "Please take a photo with your camera.",
     wrGName: "Guarantor Name (optional)", wrGPhone: "Guarantor Phone (optional)",
     wrPolice: "Police Clearance",
     wrSubmit: "Submit Registration",
@@ -594,7 +681,12 @@ const i18n = {
     workerRegNote: "ቅጹን ይሙሉ። አስተዳዳሪው ከገመገመ በኋላ ይፀድቃል።",
     wrName: "ሙሉ ስም *", wrAge: "ዕድሜ *", wrSkill: "ክህሎት *", wrLoc: "አካባቢ *",
     wrExp: "ልምድ *", wrPayType: "የክፍያ አይነት *", wrPay: "የሚጠበቅ ክፍያ (አማራጭ)",
-    wrId: "የመታወቂያ ቁጥር *", wrPhone: "ስልክ ቁጥር *", wrPhoto: "ፎቶ",
+    wrId: "የመታወቂያ ቁጥር *", wrPhone: "ስልክ ቁጥር *", wrPhoto: "ፓስፖርት መጠን ፎቶ *",
+    wrPhotoHint: "ፎቶውን በካሜራ ያንሱ (ከጋለሪ መጫን አይፈቀድም)። ፓስፖርት መሰል፤ ፊት መሃል፣ ንጹህ ጀርባ፣ ኮፍያ ወይም መነጽር የለም።",
+    camBtn: "📷 ፎቶ አንሳ", camRetake: "📷 ፎቶ እንደገና አንሳ", camAlt: "የስልክ ካሜራ ተጠቀም", camSnap: "ፎቶ አንሳ", camCancel: "ሰርዝ",
+    camTip: "ፊትዎን በኦቫሉ ውስጥ ያድርጉ እና ካሜራውን በቀጥታ ይመልከቱ።",
+    camFail: "ካሜራ መክፈት አልተቻለም። የካሜራ ፈቃድ ይስጡ ወይም \"የስልክ ካሜራ ተጠቀም\" ይጫኑ።",
+    photoRequired: "እባክዎ በካሜራ ፎቶ ያንሱ።",
     wrGName: "የዋስ ስም (አማራጭ)", wrGPhone: "የዋስ ስልክ (አማራጭ)",
     wrPolice: "የፖሊስ ማረጋገጫ",
     wrSubmit: "ምዝገባ አስገባ",
@@ -673,6 +765,9 @@ function applyLang() {
   $("lblWrId").textContent = t("wrId");
   $("lblWrPhone").textContent = t("wrPhone");
   $("lblWrPhoto").textContent = t("wrPhoto");
+  $("wrPhotoHint").textContent = t("wrPhotoHint");
+  $("wr_photoBtn").textContent = wrPhotoData ? t("camRetake") : t("camBtn");
+  $("wr_photoAlt").textContent = t("camAlt");
   $("lblWrGName").textContent = t("wrGName");
   $("lblWrGPhone").textContent = t("wrGPhone");
   $("lblWrPolice").textContent = t("wrPolice");
@@ -743,6 +838,8 @@ $("langBtn").onclick = () => { lang = lang === "en" ? "am" : "en"; localStorage.
 
 // Navigation
 function show(view) {
+  document.body.classList.toggle("home", view === "Landing");
+  window.scrollTo(0, 0);
   ["Landing","E","R"].forEach(v => {
     const el = $("v" + v);
     if (el) el.classList.toggle("hid", v !== view);
@@ -892,21 +989,102 @@ function showDone(w) {
 }
 $("doneClose").onclick = () => $("done").classList.add("hid");
 
-function shrink(file, max=400) {
-  return new Promise((res,rej) => {
-    const img = new Image();
-    img.onload = () => {
-      const s = Math.min(1, max/Math.max(img.width,img.height));
-      const c = document.createElement("canvas");
-      c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
-      c.getContext("2d").drawImage(img,0,0,c.width,c.height);
-      URL.revokeObjectURL(img.src);
-      res(c.toDataURL("image/jpeg",0.65));
+
+// ---- Live camera capture (passport 7:9 frame). Gallery picking is not offered. ----
+function takePassportPhoto(L) {
+  return new Promise(async (resolve, reject) => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return reject(new Error("nocam"));
+    let stream = null, facing = "user";
+    const open = async f => {
+      if (stream) stream.getTracks().forEach(t => t.stop());
+      stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: f }, width: { ideal: 1280 }, height: { ideal: 1280 } } });
     };
-    img.onerror = () => rej(new Error("Bad image"));
-    img.src = URL.createObjectURL(file);
+    try { await open(facing); } catch (e) { return reject(new Error("nocam")); }
+    const ov = document.createElement("div");
+    ov.className = "modal-overlay"; ov.style.zIndex = 300; ov.style.background = "#000";
+    ov.innerHTML = '<div class="cam-box"><div class="cam-view mirror"><video playsinline muted autoplay></video><div class="cam-guide"></div></div>' +
+      '<p class="cam-tip"></p><div class="cam-actions"><button type="button" class="btn-secondary" data-c="cancel"></button>' +
+      '<button type="button" class="btn-primary" data-c="snap"></button><button type="button" class="btn-secondary" data-c="flip">🔄</button></div></div>';
+    document.body.appendChild(ov);
+    const video = ov.querySelector("video"), view = ov.querySelector(".cam-view");
+    ov.querySelector(".cam-tip").textContent = L.tip;
+    ov.querySelector('[data-c="cancel"]').textContent = L.cancel;
+    ov.querySelector('[data-c="snap"]').textContent = L.snap;
+    video.srcObject = stream;
+    const close = () => { if (stream) stream.getTracks().forEach(t => t.stop()); ov.remove(); };
+    ov.onclick = async e => {
+      const c = e.target.dataset && e.target.dataset.c;
+      if (c === "cancel") { close(); resolve(null); }
+      else if (c === "flip") {
+        facing = facing === "user" ? "environment" : "user";
+        try { await open(facing); video.srcObject = stream; view.classList.toggle("mirror", facing === "user"); } catch (_) {}
+      } else if (c === "snap") {
+        const vw = video.videoWidth, vh = video.videoHeight;
+        if (!vw || !vh) return;
+        const W = 350, H = 450, R = W / H;
+        let sw, sh, sx, sy;
+        if (vw / vh > R) { sh = vh; sw = vh * R; sx = (vw - sw) / 2; sy = 0; }
+        else { sw = vw; sh = vw / R; sx = 0; sy = (vh - sh) / 2; }
+        const cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+        cv.getContext("2d").drawImage(video, sx, sy, sw, sh, 0, 0, W, H);
+        const data = cv.toDataURL("image/jpeg", 0.75);
+        close(); resolve(data);
+      }
+    };
   });
 }
+
+function shrink(file) {
+  // Passport-size photo: 35x45 mm ratio (7:9), stored as 350x450 JPEG
+  const W = 350, H = 450, RATIO = W / H;
+  return new Promise((res, rej) => {
+    if (!file || !/^image\//.test(file.type)) return rej(new Error("Please choose an image file."));
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const w = img.naturalWidth, h = img.naturalHeight;
+      if (w < 200 || h < 260) return rej(new Error("Photo is too small. Use a clear passport-size photo."));
+      if (w / h > 1.05) return rej(new Error("Please upload a portrait passport-size photo (not a wide/landscape picture)."));
+      let sw = w, sh = h, sx = 0, sy = 0;
+      if (w / h > RATIO) { sw = h * RATIO; sx = (w - sw) / 2; }       // too wide: trim sides
+      else { sh = w / RATIO; sy = (h - sh) * 0.15; }                  // too tall: trim, keep the head
+      const c = document.createElement("canvas");
+      c.width = W; c.height = H;
+      c.getContext("2d").drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+      res(c.toDataURL("image/jpeg", 0.75));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Could not read this image.")); };
+    img.src = url;
+  });
+}
+
+let wrPhotoData = null;
+function setWrPhoto(d) {
+  wrPhotoData = d;
+  const pv = $("wr_photoPreview");
+  if (d) { pv.src = d; pv.classList.remove("hid"); } else pv.classList.add("hid");
+  $("wr_photoBtn").textContent = d ? t("camRetake") : t("camBtn");
+}
+const camLabels = () => ({ tip: t("camTip"), snap: t("camSnap"), cancel: t("camCancel") });
+$("wr_photoBtn").onclick = async () => {
+  if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { $("wr_photo").click(); return; }
+  try {
+    const d = await takePassportPhoto(camLabels());
+    if (d) setWrPhoto(d);
+  } catch (e) {
+    $("wr_photoAlt").classList.remove("hid");
+    alert(t("camFail"));
+  }
+};
+// fallback: phone's own camera app (capture attribute)
+$("wr_photo").onchange = async () => {
+  const f = $("wr_photo").files[0];
+  if (!f) return;
+  try { setWrPhoto(await shrink(f)); }
+  catch (e) { alert(e.message); setWrPhoto(null); }
+  $("wr_photo").value = "";
+};
 
 $("wrSubmitBtn").onclick = async () => {
   const name = $("wr_name").value.trim();
@@ -921,10 +1099,10 @@ $("wrSubmitBtn").onclick = async () => {
   if (!name||!age||!skill||!location||!experience||!nationalId||!phone) {
     return alert(lang==="am"?"እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ":"Please fill all required fields");
   }
+  if (!wrPhotoData) return alert(t("photoRequired"));
   const btn = $("wrSubmitBtn"); btn.disabled = true; btn.textContent = "...";
   try {
-    let photo = "";
-    if ($("wr_photo").files[0]) photo = await shrink($("wr_photo").files[0]);
+    const photo = wrPhotoData;
     const ref = doc(collection(db, "workers"));
     const batch = writeBatch(db);
     batch.set(ref, {
