@@ -98,6 +98,8 @@ a { color: var(--btn); text-decoration: none; }
 .kpi .trend { font-size: 12px; font-weight: 600; margin-left: 6px; color: var(--success); }
 .kpi.alert { border-color: #fbbf24; background: #fffbeb; }
 .kpi.alert .value { color: #b45309; }
+.kpi[data-kpi]:hover { border-color: #0284c7; box-shadow: 0 0 0 2px rgba(2,132,199,.15); }
+.kpi[data-kpi]:active { transform: scale(0.98); }
 
 .panel {
   background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
@@ -984,19 +986,29 @@ function renderDashboard() {
   const available = workers.filter(w => w.availability_status === "Available").length;
 
   $("dashKpis").innerHTML = `
-    <div class="kpi ${pendingW + pendingE ? "alert" : ""}" data-action="goto-kpi" data-kpi="pending" style="cursor:pointer" title="View pending workers">
+    <div class="kpi ${pendingW + pendingE ? "alert" : ""}" role="button" tabindex="0" data-kpi="pending" style="cursor:pointer" title="View pending workers">
       <div class="label">Pending Approvals</div><div class="value">${pendingW + pendingE}</div>
     </div>
-    <div class="kpi" data-action="goto-kpi" data-kpi="requests" style="cursor:pointer" title="View open hire requests">
+    <div class="kpi" role="button" tabindex="0" data-kpi="requests" style="cursor:pointer" title="View open hire requests">
       <div class="label">Open Hire Requests</div><div class="value">${openJobs}</div>
     </div>
-    <div class="kpi" data-action="goto-kpi" data-kpi="available" style="cursor:pointer" title="View available workers">
+    <div class="kpi" role="button" tabindex="0" data-kpi="available" style="cursor:pointer" title="View available workers">
       <div class="label">Available Workers</div><div class="value">${available}</div>
     </div>
-    <div class="kpi" data-action="goto-kpi" data-kpi="placed" style="cursor:pointer" title="View placed / busy workers">
+    <div class="kpi" role="button" tabindex="0" data-kpi="placed" style="cursor:pointer" title="View placed / busy workers">
       <div class="label">Placed / Busy</div><div class="value">${placed}</div>
     </div>
   `;
+  // Bind clicks directly (reliable even if global delegation fails)
+  $("dashKpis").onclick = (ev) => {
+    const card = ev.target.closest("[data-kpi]");
+    if (!card) return;
+    const k = card.getAttribute("data-kpi");
+    if (k === "pending") { wFilter = "Pending"; showView("workers"); }
+    else if (k === "available") { wFilter = "Available"; showView("workers"); }
+    else if (k === "placed") { wFilter = "Placed"; showView("workers"); }
+    else if (k === "requests") { showView("matches"); }
+  };
 
   const queueItems = [
     ...workers.filter(w => w.status === "pending").map(w => ({
