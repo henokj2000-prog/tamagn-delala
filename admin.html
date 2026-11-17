@@ -571,28 +571,117 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 
 <div class="toast" id="toast"></div>
 
-<!-- Handover / OTP Modal (Step 4) -->
-<!-- Employment Agreement modal (after On Process) -->
+<!-- Employment Agreement modal (after On Process) — editable Amharic + fee + signed upload -->
 <div class="modal-overlay hid" id="agreementModal">
-  <div class="modal-box" style="max-width:560px">
-    <h3>የሥራ ስምምነት / Employment Agreement</h3>
-    <p style="margin-bottom:10px">Prepared for signature by Worker, Employer, Guarantor & Agency</p>
-    <div id="agreementBody" style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;max-height:55vh;overflow-y:auto;font-size:13px;line-height:1.55;color:var(--fg);text-align:left"></div>
+  <div class="modal-box" style="max-width:720px">
+    <h3>የሥራ ስምምነት ደብዳቤ · Employment Agreement</h3>
+    <p style="margin-bottom:8px;font-size:12px;color:var(--hint)">
+      አብዛኛው መረጃ ከስርዓቱ ይሞላል · ያልተገኘውን ይሙሉ · አትም · ፊርማ ይስቀሉ · ክፍያ ያረጋግጡ · ሰራተኛውን «በሥራ ላይ» ያድርጉ
+    </p>
+
+    <!-- Editable data panel -->
+    <div id="agEditPanel" style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">የሰራተኛ ስም / Worker name</label>
+          <input id="agWorkerName" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">ክህሎት / Skill</label>
+          <input id="agSkill" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">የሰራተኛ ስልክ / Worker phone</label>
+          <input id="agWorkerPhone" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">ብሔራዊ መታወቂያ / National ID</label>
+          <input id="agNationalId" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">የአሰሪ ስም / Employer</label>
+          <input id="agEmpName" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">የአሰሪ ስልክ / Employer phone</label>
+          <input id="agEmpPhone" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">የሥራ ቦታ / Work location</label>
+          <input id="agEmpLoc" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">የዋስ ስም / Guarantor</label>
+          <input id="agGName" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">የዋስ ስልክ / Guarantor phone</label>
+          <input id="agGPhone" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">የደመወዝ መጠን / Salary (ETB)</label>
+          <input id="agPay" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px" placeholder="e.g. 5000">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">የክፍያ አይነት / Pay type</label>
+          <select id="agPayType" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px">
+            <option value="ወርሃዊ">ወርሃዊ / Monthly</option>
+            <option value="ሳምንታዊ">ሳምንታዊ / Weekly</option>
+            <option value="ዕለታዊ">ዕለታዊ / Daily</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">የአገልግሎት ክፍያ (ETB) / Service fee</label>
+          <input type="number" id="agServiceFee" min="0" step="50" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px" placeholder="0">
+        </div>
+        <div style="grid-column:1/-1">
+          <label style="font-size:11px;font-weight:600;color:var(--hint)">ተጨማሪ ውሎች / Extra terms</label>
+          <textarea id="agExtraTerms" rows="2" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:2px;resize:vertical" placeholder="ተጨማሪ ሁኔታዎች ካሉ እዚህ ይጻፉ…"></textarea>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+        <button type="button" class="btn btn-secondary btn-sm" id="agRefreshPreview">↻ ቅድመ እይታ አድስ</button>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="agFeeCollected"> የአገልግሎት ክፍያ ተሰብስቧል
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="agPartiesPresent"> አሰሪ እና ሰራተኛ በአካል መጥተዋል (Telegram OTP ተረጋግጧል)
+        </label>
+      </div>
+      <div style="margin-top:10px">
+        <label style="font-size:11px;font-weight:600;color:var(--hint)">የተፈረመ ስምምነት ስቀል / Upload signed agreement (PDF or image)</label>
+        <input type="file" id="agSignedFile" accept="image/*,application/pdf" style="width:100%;margin-top:4px;font-size:13px">
+        <div id="agSignedPreview" style="margin-top:6px;font-size:12px;color:var(--hint)"></div>
+      </div>
+    </div>
+
+    <!-- Printable Amharic agreement body -->
+    <div id="agreementBody" style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;max-height:42vh;overflow-y:auto;font-size:13px;line-height:1.6;color:var(--fg);text-align:left"></div>
+
     <div class="modal-actions" style="margin-top:14px;flex-wrap:wrap">
-      <button class="btn btn-secondary" id="agClose">Close</button>
-      <button class="btn btn-secondary" id="agPrint">🖨 Print</button>
-      <button class="btn btn-primary" id="agMarkSigned">Mark as Signed</button>
+      <button class="btn btn-secondary" id="agClose">ዝጋ / Close</button>
+      <button class="btn btn-secondary" id="agPrint">🖨 አትም / Print</button>
+      <button class="btn btn-primary" id="agFinalize">ፊርማ + ክፍያ + በሥራ ላይ · Finalize</button>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay hid" id="handoverModal">
   <div class="modal-box" style="max-width:440px">
-    <h3>Agreement & Handover</h3>
-    <p style="margin-bottom:12px">Legacy OTP step (optional)</p>
+    <h3>Telegram OTP ማረጋገጫ</h3>
+    <p style="margin-bottom:12px;font-size:13px;color:var(--hint)">
+      አሰሪ እና ሰራተኛ በቴሌግራም OTP ተልኳል። ኮዱን ያስገቡ ወይም በአካል መገኘታቸውን ያረጋግጡ።
+    </p>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--hint)">OTP ኮድ</label>
+      <input id="hoOtpInput" placeholder="6-digit code" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;margin-top:4px;letter-spacing:4px;text-align:center;font-size:18px">
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:14px;cursor:pointer">
+      <input type="checkbox" id="hoPresentCheck"> በአካል መጥተዋል (OTP አልተጠየቀም)
+    </label>
     <div class="modal-actions">
       <button class="btn btn-secondary" id="hoCancel">Cancel</button>
-      <button class="btn btn-primary" id="hoConfirm">Close</button>
+      <button class="btn btn-primary" id="hoConfirm">Verify & Continue</button>
     </div>
   </div>
 </div>
@@ -785,11 +874,12 @@ function statusBdg(status) {
   const map = {
     Verified: "ok", Approved: "ok", Available: "ok", Active: "ok", Current: "ok", Paid: "mute",
     approved: "ok", pending: "warn", Pending: "warn", "Pending Review": "warn", Placed: "info", Open: "info",
-    open: "info", on_process: "warn", closed: "ok",
+    open: "info", on_process: "warn", closed: "ok", on_work: "teal", "On Work": "teal",
     Suspended: "bad", Rejected: "bad", rejected: "bad", Overdue: "bad", Inactive: "mute", "Not Started": "mute"
   };
   const label = status === "approved" ? "Verified" : status === "pending" ? "Pending" : status === "rejected" ? "Rejected"
-    : status === "open" ? "Open" : status === "on_process" ? "On Process" : status === "closed" ? "Closed" : status;
+    : status === "open" ? "Open" : status === "on_process" ? "On Process" : status === "closed" ? "Closed"
+    : status === "on_work" ? "On Work" : status;
   return `<span class="bdg ${map[status] || map[label] || "mute"}">${label}</span>`;
 }
 function roleBdg(role) {
@@ -816,6 +906,7 @@ function normWorker(id, d) {
   let availability = "Inactive";
   if (status === "pending") availability = "Pending";
   else if (status === "rejected") availability = "Inactive";
+  else if (d.work_status === "on_work" || d.availability_status === "On Work") availability = "On Work";
   else if (status === "approved" && d.available) availability = "Available";
   else if (status === "approved" && !d.available) availability = "Placed";
   if (d.availability_status === "Pending Review") availability = "Pending Review";
@@ -1027,17 +1118,23 @@ function renderDashboard() {
       </tbody>
     </table>` : `<div class="empty">All caught up ✅</div>`;
 
-  const openReqs = requests.filter(r => (r.status || "open") === "open").slice(0, 6);
-  $("dashUrgent").innerHTML = openReqs.length ? openReqs.map(r => `
+  const urgentReqs = requests
+    .filter(r => (r.status || "open") === "open" || r.status === "on_process")
+    .slice(0, 6);
+  $("dashUrgent").innerHTML = urgentReqs.length ? urgentReqs.map(r => {
+    const st = r.status || "open";
+    return `
     <div class="job-card">
-      <h4>${esc(r.workerName || "Worker")} ← ${esc(r.employerName || "Employer")}</h4>
+      <h4>${esc(r.workerName || "Worker")} ← ${esc(r.employerName || "Employer")} ${statusBdg(st)}</h4>
       <div class="meta"><span>${esc(r.employerPhone || "")}</span><span>${esc(r.employerLocation || "")}</span></div>
       <div style="margin-top:8px" class="acts">
-        <button class="btn btn-primary btn-sm" data-action="req-process" data-id="${esc(r.id)}">On Process</button>
+        ${st === "open" ? `<button class="btn btn-primary btn-sm" data-action="req-process" data-id="${esc(r.id)}">On Process</button>` : ""}
+        ${st === "on_process" ? `<button class="btn btn-secondary btn-sm" data-action="req-agreement" data-id="${esc(r.id)}">Agreement</button>
+        <button class="btn btn-warning btn-sm" data-action="req-otp" data-id="${esc(r.id)}">OTP / In person</button>` : ""}
         <button class="btn btn-success btn-sm" data-action="req-close" data-id="${esc(r.id)}">Close</button>
       </div>
-    </div>
-  `).join("") : `<div class="empty">No open hire requests</div>`;
+    </div>`;
+  }).join("") : `<div class="empty">No open hire requests</div>`;
 
   // (Agreement opens automatically after On Process)
 
@@ -1103,17 +1200,18 @@ function renderEmployers() {
 
 function renderWorkers() {
   const available = workers.filter(w => w.availability_status === "Available").length;
+  const onWork = workers.filter(w => w.availability_status === "On Work").length;
   const placed = workers.filter(w => w.availability_status === "Placed").length;
   const pending = workers.filter(w => w.status === "pending").length;
 
   $("workerKpis").innerHTML = `
     <div class="kpi"><div class="label">Total Workers</div><div class="value">${workers.length}</div></div>
     <div class="kpi"><div class="label">Available Now <span class="bdg ok" style="margin-left:6px">Ready</span></div><div class="value">${available}</div></div>
-    <div class="kpi"><div class="label">Placed / Busy</div><div class="value">${placed}</div></div>
+    <div class="kpi"><div class="label">On Work</div><div class="value">${onWork}</div></div>
     <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Verification</div><div class="value">${pending}</div></div>
   `;
 
-  const filters = [["all","All"],["Available","Available"],["Placed","Placed"],["Pending","Pending Verification"],["Inactive","Inactive"]];
+  const filters = [["all","All"],["Available","Available"],["On Work","On Work"],["Placed","Placed"],["Pending","Pending Verification"],["Inactive","Inactive"]];
   $("wChips").innerHTML = filters.map(([v,l]) =>
     `<button class="chip ${wFilter === v ? "active" : ""}" data-action="w-filter" data-val="${v}">${l}</button>`
   ).join("");
@@ -1123,6 +1221,7 @@ function renderWorkers() {
   let rows = workers.filter(w => {
     if (wFilter === "Pending" && w.status !== "pending") return false;
     if (wFilter === "Available" && w.availability_status !== "Available") return false;
+    if (wFilter === "On Work" && w.availability_status !== "On Work") return false;
     if (wFilter === "Placed" && w.availability_status !== "Placed") return false;
     if (wFilter === "Inactive" && w.availability_status !== "Inactive") return false;
     if (skill !== "all" && w.skill !== skill) return false;
@@ -1161,29 +1260,36 @@ function renderWorkers() {
 
 function renderMatches() {
   const open = requests.filter(r => (r.status || "open") === "open");
+  const onProcess = requests.filter(r => r.status === "on_process");
+  const onWork = requests.filter(r => r.status === "on_work");
   $("matchKpis").innerHTML = `
     <div class="kpi"><div class="label">Open Hire Requests</div><div class="value">${open.length}</div></div>
     <div class="kpi"><div class="label">Available Workers</div><div class="value">${workers.filter(w=>w.availability_status==="Available").length}</div></div>
-    <div class="kpi"><div class="label">On Process</div><div class="value">${requests.filter(r=>r.status==="on_process").length}</div></div>
-    <div class="kpi"><div class="label">Closed</div><div class="value">${requests.filter(r=>r.status==="closed").length}</div></div>
+    <div class="kpi"><div class="label">On Process</div><div class="value">${onProcess.length}</div></div>
+    <div class="kpi"><div class="label">On Work</div><div class="value">${onWork.length}</div></div>
   `;
 
-  $("openJobs").innerHTML = open.length ? open.map(r => `
+  // Show open + on_process so admin can continue agreement / OTP / finalize
+  const pipeline = [...open, ...onProcess];
+  $("openJobs").innerHTML = pipeline.length ? pipeline.map(r => {
+    const st = r.status || "open";
+    return `
     <div class="job-card">
-      <h4>Request: ${esc(r.workerName || "Worker")}</h4>
+      <h4>Request: ${esc(r.workerName || "Worker")} ${statusBdg(st)}</h4>
       <div class="meta">
         <span>👔 ${esc(r.employerName || "")}</span>
         <span>📞 ${esc(r.employerPhone || "")}</span>
         <span>📍 ${esc(r.employerLocation || "")}</span>
       </div>
       <div style="margin-top:8px" class="acts">
-        <button class="btn btn-primary btn-sm" data-action="req-process" data-id="${esc(r.id)}">On Process</button>
-        <button class="btn btn-secondary btn-sm" data-action="req-agreement" data-id="${esc(r.id)}">Agreement</button>
-        <button class="btn btn-success btn-sm" data-action="req-close" data-id="${esc(r.id)}">Close</button>
+        ${st === "open" ? `<button class="btn btn-primary btn-sm" data-action="req-process" data-id="${esc(r.id)}">On Process</button>` : ""}
+        ${st === "on_process" || r.agreementPrepared ? `<button class="btn btn-secondary btn-sm" data-action="req-agreement" data-id="${esc(r.id)}">Agreement</button>` : ""}
+        ${st === "on_process" ? `<button class="btn btn-warning btn-sm" data-action="req-otp" data-id="${esc(r.id)}">OTP / In person</button>` : ""}
+        ${st !== "closed" && st !== "on_work" ? `<button class="btn btn-success btn-sm" data-action="req-close" data-id="${esc(r.id)}">Close</button>` : ""}
         ${r.employerUsername ? `<a class="btn btn-secondary btn-sm" href="https://t.me/${esc(r.employerUsername)}" target="_blank">Telegram</a>` : ""}
       </div>
-    </div>
-  `).join("") : `<div class="empty">No open requests from Mini App</div>`;
+    </div>`;
+  }).join("") : `<div class="empty">No open requests from Mini App</div>`;
 
   const avail = workers.filter(w => w.status === "approved" && w.available).slice(0, 10);
   $("recMatches").innerHTML = avail.length ? avail.map(w => `
@@ -1202,28 +1308,31 @@ function renderMatches() {
 }
 
 function renderPayroll() {
-  // Use closed/on_process requests as timesheet-like rows
-  const rows = requests.filter(r => r.status === "on_process" || r.status === "closed" || r.paymentReceived);
+  const rows = requests.filter(r => r.status === "on_process" || r.status === "on_work" || r.status === "closed" || r.paymentReceived || r.serviceFeeCollected);
+  const feeCollected = requests.filter(r => r.serviceFeeCollected).length;
   $("payKpis").innerHTML = `
     <div class="kpi"><div class="label">Active / Closed Requests</div><div class="value">${rows.length}</div></div>
-    <div class="kpi"><div class="label">Awaiting Payment</div><div class="value">${requests.filter(r => r.status !== "open" && !r.paymentReceived).length}</div></div>
-    <div class="kpi"><div class="label">Payment Received</div><div class="value">${requests.filter(r => r.paymentReceived).length}</div></div>
+    <div class="kpi"><div class="label">Service Fee Collected</div><div class="value">${feeCollected}</div></div>
+    <div class="kpi"><div class="label">On Work</div><div class="value">${requests.filter(r => r.status === "on_work").length}</div></div>
     <div class="kpi"><div class="label">Commission Setting</div><div class="value">${settings.commission}%</div></div>
   `;
 
   $("pChips").innerHTML = [
-    ["all","All"],["on_process","On Process"],["closed","Closed"],["unpaid","Unpaid"]
+    ["all","All"],["on_process","On Process"],["on_work","On Work"],["closed","Closed"],["unpaid","Unpaid"]
   ].map(([v,l]) => `<button class="chip ${pFilter===v?"active":""}" data-action="p-filter" data-val="${v}">${l}</button>`).join("");
 
   let list = requests.filter(r => {
     if (pFilter === "on_process" && r.status !== "on_process") return false;
+    if (pFilter === "on_work" && r.status !== "on_work") return false;
     if (pFilter === "closed" && r.status !== "closed") return false;
-    if (pFilter === "unpaid" && r.paymentReceived) return false;
+    if (pFilter === "unpaid" && (r.serviceFeeCollected || r.paymentReceived)) return false;
     if (pFilter === "unpaid" && r.status === "open") return false;
     return true;
   });
 
-  $("tbPayroll").innerHTML = list.map(r => `
+  $("tbPayroll").innerHTML = list.map(r => {
+    const fee = r.serviceFee != null ? r.serviceFee : (r.agreementData?.serviceFee);
+    return `
     <tr>
       <td class="c-user" data-l="Worker">
         <div class="cell-user">
@@ -1232,20 +1341,21 @@ function renderPayroll() {
         </div>
       </td>
       <td data-l="Employer">${esc(r.employerName || "—")}<div class="who" style="margin:0">${esc(r.employerPhone || "")}</div></td>
-      <td data-l="Type">${esc(r.paymentType || "—")}</td>
-      <td data-l="Pay">—</td>
-      <td data-l="Bill">—</td>
-      <td data-l="Status">${statusBdg(r.status || "open")} ${r.paymentReceived ? statusBdg("Paid") : ""}</td>
+      <td data-l="Type">${esc(r.paymentType || r.agreementData?.payType || "—")}</td>
+      <td data-l="Pay">${fee != null && fee !== "" ? money(fee) : "—"}</td>
+      <td data-l="Bill">${r.serviceFeeCollected ? statusBdg("Paid") : "—"}</td>
+      <td data-l="Status">${statusBdg(r.status || "open")} ${r.agreementSignedAt || r.agreementPrepared ? statusBdg("Verified") : ""}</td>
       <td class="c-act" data-l="Actions">
         <div class="acts">
           ${r.status === "open" ? `<button class="btn btn-primary btn-sm" data-action="req-process" data-id="${esc(r.id)}">On Process</button>` : ""}
           ${r.status === "on_process" || r.agreementPrepared ? `<button class="btn btn-secondary btn-sm" data-action="req-agreement" data-id="${esc(r.id)}">Agreement</button>` : ""}
-          ${r.status !== "closed" ? `<button class="btn btn-success btn-sm" data-action="req-close" data-id="${esc(r.id)}">Close</button>` : ""}
-          ${!r.paymentReceived && r.status !== "open" ? `<button class="btn btn-secondary btn-sm" data-action="req-paid" data-id="${esc(r.id)}">Mark Paid</button>` : ""}
+          ${r.status === "on_process" ? `<button class="btn btn-warning btn-sm" data-action="req-otp" data-id="${esc(r.id)}">OTP</button>` : ""}
+          ${r.status !== "closed" && r.status !== "on_work" ? `<button class="btn btn-success btn-sm" data-action="req-close" data-id="${esc(r.id)}">Close</button>` : ""}
+          ${!r.serviceFeeCollected && r.status !== "open" ? `<button class="btn btn-secondary btn-sm" data-action="req-paid" data-id="${esc(r.id)}">Mark Fee Paid</button>` : ""}
         </div>
       </td>
-    </tr>
-  `).join("") || `<tr><td colspan="7" class="empty">No hire requests yet</td></tr>`;
+    </tr>`;
+  }).join("") || `<tr><td colspan="7" class="empty">No hire requests yet</td></tr>`;
 }
 
 function renderSettings() {
@@ -1307,8 +1417,8 @@ async function updateRequest(id, patch) {
     const r = requests.find(x => x.id === id);
     await updateDoc(doc(db, "requests", id), patch);
 
-    // When hire is accepted (on process / closed), hide worker from Telegram employer list
-    if (r && r.workerId && (patch.status === "on_process" || patch.status === "closed")) {
+    // When hire is accepted (on process / on_work / closed), hide worker from Telegram employer list
+    if (r && r.workerId && (patch.status === "on_process" || patch.status === "on_work" || patch.status === "closed")) {
       await updateDoc(doc(db, "workers", r.workerId), {
         available: false,
         assigned_employer: r.employerName || null
@@ -1316,7 +1426,7 @@ async function updateRequest(id, patch) {
     }
 
     if (patch.status === "on_process" && r) {
-      toast("On process — preparing agreement…");
+      toast("ወደ «በሂደት ላይ» ተቀይሯል — ስምምነት እየተዘጋጀ…");
       await loadAll();
       await openAgreementForRequest(id);
       return;
@@ -1324,18 +1434,150 @@ async function updateRequest(id, patch) {
 
     toast(patch.status === "closed"
       ? "Closed — worker stays unavailable until Set Available"
+      : patch.status === "on_work"
+      ? "Worker is now On Work"
       : "Request updated");
     await loadAll();
   } catch (e) { toast("Error: " + e.message); }
 }
 
 let currentAgreementRequestId = null;
+let currentAgreementWorkerId = null;
+let signedAgreementDataUrl = null;
+
+function val(id) {
+  return ($(id)?.value || "").trim();
+}
+
+function buildAmharicAgreementHtml(data) {
+  const {
+    ref, today, workerName, skill, workerPhone, nationalId, empName, empPhone, empLoc,
+    gName, gPhone, pay, payType, serviceFee, commission, extraTerms
+  } = data;
+
+  const feeLine = serviceFee
+    ? `የአገልግሎት ክፍያ (Service fee): <b>${esc(String(serviceFee))} ብር</b> ለ ታማኝ ደላላ ተከፍሏል/ይከፈላል።`
+    : `የአገልግሎት ክፍያ፡ በኤጀንሲው ደንብ (${commission}%) ወይም በተስማሙት መጠን።`;
+
+  const extra = extraTerms
+    ? `<p><b>ተጨማሪ ውሎች</b><br>${esc(extraTerms).replace(/\n/g, "<br>")}</p>`
+    : "";
+
+  return `
+    <div style="text-align:center;margin-bottom:14px">
+      <div style="font-size:17px;font-weight:800">ታማኝ ደላላ</div>
+      <div style="font-size:13px;color:#475569;margin-top:2px">የሥራ አቀማመጥ እና የቅጥር ስምምነት</div>
+      <div style="font-size:12px;color:#64748b;margin-top:6px">ቀን፡ ${esc(today)} · ማጣቀሻ፡ ${esc(ref)}</div>
+    </div>
+
+    <p style="text-align:justify">
+      ይህ ስምምነት በ <b>ታማኝ ደላላ</b> የሥራ አቀማመጥ ኤጀንሲ አማካይነት በአሰሪው እና በሰራተኛው መካከል የተደረገ የቅጥር ስምምነት ነው።
+      ሁሉም ወገኖች ከዚህ በታች የተገለጹትን ውሎች ተረድተው ተቀብለዋል።
+    </p>
+
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:14px 0">
+
+    <p><b>አንቀጽ ፩ — ሰራተኛ (Worker)</b><br>
+      ሙሉ ስም፡ <b>${esc(workerName)}</b><br>
+      ክህሎት / የሥራ ዓይነት፡ <b>${esc(skill)}</b><br>
+      ስልክ፡ <b>${esc(workerPhone)}</b><br>
+      ብሔራዊ መታወቂያ ቁጥር፡ <b>${esc(nationalId)}</b>
+    </p>
+
+    <p><b>አንቀጽ ፪ — አሰሪ (Employer)</b><br>
+      ስም / ተቋም፡ <b>${esc(empName)}</b><br>
+      ስልክ፡ <b>${esc(empPhone)}</b><br>
+      የሥራ ቦታ / አድራሻ፡ <b>${esc(empLoc)}</b>
+    </p>
+
+    <p><b>አንቀጽ ፫ — ዋስ (Guarantor)</b><br>
+      ስም፡ <b>${esc(gName)}</b><br>
+      ስልክ፡ <b>${esc(gPhone)}</b><br>
+      ዋሱ የሰራተኛውን ማንነት እና ታማኝነት ያረጋግጣል።
+    </p>
+
+    <p><b>አንቀጽ ፬ — ደመወዝ እና ክፍያ</b><br>
+      የተስማሙበት ደመወዝ፡ <b>${esc(pay)}</b> ብር (${esc(payType)})<br>
+      ${feeLine}<br>
+      የኤጀንሲ ኮሚሽን መጠን፡ <b>${commission}%</b> (በቢሮ ፖሊሲ መሠረት)።
+    </p>
+
+    <p><b>አንቀጽ ፭ — የሥራ ግዴታዎች</b><br>
+      ፩. ሰራተኛው በ <b>${esc(skill)}</b> ላይ የተመሠረተ ሥራ በአሰሪው ቦታ በታማኝነት ያከናውናል።<br>
+      ፪. ሰራተኛው በታማኝ ደላላ በኩል ተቀምጧል፤ ሁኔታው «በሥራ ላይ» እስኪዘጋ ድረስ በሂደት ላይ ነው።<br>
+      ፫. አሰሪው የተስማሙበትን ደመወዝ እና የአገልግሎት ክፍያ በጊዜው ይከፍላል።<br>
+      ፬. ማንኛውም ወገን ስምምነቱን ለመሻር ከፈለገ በአግባቡ ማሳወቅ አለበት።
+    </p>
+
+    ${extra}
+
+    <p style="font-size:12px;color:#64748b">
+      ይህ ሰነድ በአማርኛ ተዘጋጅቷል። የተፈረመ ቅጂ በኤጀንሲው ስርዓት ላይ ይቀመጣል። ሁሉም ወገኖች ቅጂ ማግኘት ይችላሉ።
+    </p>
+
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;font-size:12px">
+      <div>
+        <b>የሰራተኛ ፊርማ</b><br><br>
+        ___________________________<br>
+        ስም፡ ${esc(workerName)}<br>
+        ቀን፡ ____________
+      </div>
+      <div>
+        <b>የአሰሪ ፊርማ</b><br><br>
+        ___________________________<br>
+        ስም፡ ${esc(empName)}<br>
+        ቀን፡ ____________
+      </div>
+      <div>
+        <b>የዋስ ፊርማ</b><br><br>
+        ___________________________<br>
+        ስም፡ ${esc(gName)}<br>
+        ቀን፡ ____________
+      </div>
+      <div>
+        <b>ታማኝ ደላላ (ኤጀንሲ)</b><br><br>
+        ___________________________<br>
+        ባለሥልጣን፡ ____________<br>
+        ቀን፡ ____________
+      </div>
+    </div>
+  `;
+}
+
+function refreshAgreementPreview() {
+  const today = new Date().toLocaleDateString("am-ET", { day: "2-digit", month: "long", year: "numeric" })
+    || new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
+  const commission = settings.commission || 18;
+  const data = {
+    ref: currentAgreementRequestId || "—",
+    today,
+    workerName: val("agWorkerName") || "—",
+    skill: val("agSkill") || "—",
+    workerPhone: val("agWorkerPhone") || "—",
+    nationalId: val("agNationalId") || "—",
+    empName: val("agEmpName") || "—",
+    empPhone: val("agEmpPhone") || "—",
+    empLoc: val("agEmpLoc") || "—",
+    gName: val("agGName") || "—",
+    gPhone: val("agGPhone") || "—",
+    pay: val("agPay") || "በስምምነት",
+    payType: val("agPayType") || "ወርሃዊ",
+    serviceFee: val("agServiceFee") || "",
+    commission,
+    extraTerms: val("agExtraTerms")
+  };
+  if ($("agreementBody")) $("agreementBody").innerHTML = buildAmharicAgreementHtml(data);
+}
 
 async function openAgreementForRequest(requestId) {
   const r = requests.find(x => x.id === requestId) ||
     (await getDoc(doc(db, "requests", requestId)).then(s => s.exists() ? { id: s.id, ...s.data() } : null));
   if (!r) { toast("Request not found"); return; }
   currentAgreementRequestId = r.id;
+  currentAgreementWorkerId = r.workerId || null;
+  signedAgreementDataUrl = r.signedAgreementUrl || null;
 
   const w = workers.find(x => x.id === r.workerId) || {};
   let priv = {};
@@ -1346,83 +1588,106 @@ async function openAgreementForRequest(requestId) {
     }
   } catch (_) {}
 
-  const today = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
-  const commission = settings.commission || 18;
-  const workerName = r.workerName || w.full_name || w.name || "—";
-  const skill = w.skill || w.primary_skill_role || "—";
-  const empName = r.employerName || "—";
-  const empPhone = r.employerPhone || "—";
-  const empLoc = r.employerLocation || "—";
-  const payType = r.paymentType || w.paymentType || "monthly";
-  const pay = w.pay || "As agreed";
-  const gName = priv.guarantorName || "________________";
-  const gPhone = priv.guarantorPhone || "________________";
-  const nationalId = priv.nationalId || "________________";
-  const workerPhone = priv.phone || "________________";
+  // Prefill editable fields (system data + previously saved agreement fields)
+  const saved = r.agreementData || {};
+  $("agWorkerName").value = saved.workerName || r.workerName || w.full_name || w.name || "";
+  $("agSkill").value = saved.skill || w.skill || w.primary_skill_role || r.workerSkill || "";
+  $("agWorkerPhone").value = saved.workerPhone || priv.phone || w.phone || "";
+  $("agNationalId").value = saved.nationalId || priv.nationalId || w.id_number || "";
+  $("agEmpName").value = saved.empName || r.employerName || "";
+  $("agEmpPhone").value = saved.empPhone || r.employerPhone || "";
+  $("agEmpLoc").value = saved.empLoc || r.employerLocation || "";
+  $("agGName").value = saved.gName || priv.guarantorName || "";
+  $("agGPhone").value = saved.gPhone || priv.guarantorPhone || "";
+  $("agPay").value = saved.pay || w.pay || "";
+  $("agPayType").value = saved.payType || (r.paymentType === "weekly" ? "ሳምንታዊ" : r.paymentType === "daily" ? "ዕለታዊ" : "ወርሃዊ");
+  $("agServiceFee").value = saved.serviceFee != null ? saved.serviceFee : (r.serviceFee || "");
+  $("agExtraTerms").value = saved.extraTerms || "";
+  if ($("agFeeCollected")) $("agFeeCollected").checked = !!(r.serviceFeeCollected || saved.feeCollected);
+  if ($("agPartiesPresent")) $("agPartiesPresent").checked = !!(r.partiesPresent || saved.partiesPresent);
+  if ($("agSignedPreview")) {
+    $("agSignedPreview").textContent = signedAgreementDataUrl
+      ? "✓ Signed document already on file"
+      : "";
+  }
+  if ($("agSignedFile")) $("agSignedFile").value = "";
 
-  $("agreementBody").innerHTML = `
-    <div style="text-align:center;margin-bottom:12px">
-      <b style="font-size:15px">ታማኝ ደላላ / Tamagn Delala</b><br>
-      <span style="color:var(--hint)">Employment Placement Agreement · የሥራ አቀማመጥ ስምምነት</span><br>
-      <span style="font-size:12px;color:var(--hint)">Date / ቀን: ${today} · Ref: ${esc(r.id)}</span>
-    </div>
-    <p>This agreement is prepared when a hire request moves to <b>On Process</b>. Parties sign below.</p>
-    <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
-    <p><b>1. Worker / ሰራተኛ</b><br>
-      Name: <b>${esc(workerName)}</b><br>
-      Skill: <b>${esc(skill)}</b><br>
-      Phone: <b>${esc(workerPhone)}</b><br>
-      National ID: <b>${esc(nationalId)}</b><br>
-      Expected pay: <b>${esc(pay)}</b> (${esc(payType)})
-    </p>
-    <p><b>2. Employer / አሰሪ</b><br>
-      Name: <b>${esc(empName)}</b><br>
-      Phone: <b>${esc(empPhone)}</b><br>
-      Location: <b>${esc(empLoc)}</b>
-    </p>
-    <p><b>3. Guarantor / ዋስ</b><br>
-      Name: <b>${esc(gName)}</b><br>
-      Phone: <b>${esc(gPhone)}</b>
-    </p>
-    <p><b>4. Agency / ደላላ</b><br>
-      Tamagn Delala · Commission: <b>${commission}%</b> of agreed arrangement (or as office policy).
-    </p>
-    <p><b>5. Terms (summary)</b><br>
-      • Worker will perform duties related to <b>${esc(skill)}</b> at the employer’s location.<br>
-      • Worker is placed through Tamagn Delala; status is On Process until closed.<br>
-      • Employer pays agreed worker compensation and agency commission.<br>
-      • Guarantor confirms identity/reliability of the worker as provided at registration.<br>
-      • All parties may keep a signed copy (print this page).
-    </p>
-    <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:12px">
-      <div>
-        <b>Worker signature</b><br><br>
-        _______________________<br>
-        Name: ${esc(workerName)}<br>
-        Date: ____________
-      </div>
-      <div>
-        <b>Employer signature</b><br><br>
-        _______________________<br>
-        Name: ${esc(empName)}<br>
-        Date: ____________
-      </div>
-      <div>
-        <b>Guarantor signature</b><br><br>
-        _______________________<br>
-        Name: ${esc(gName)}<br>
-        Date: ____________
-      </div>
-      <div>
-        <b>Agency (Tamagn Delala)</b><br><br>
-        _______________________<br>
-        Officer: ____________<br>
-        Date: ____________
-      </div>
-    </div>
-  `;
+  refreshAgreementPreview();
   $("agreementModal").classList.remove("hid");
+}
+
+async function finalizeAgreement() {
+  if (!currentAgreementRequestId) return;
+
+  const partiesOk = $("agPartiesPresent")?.checked;
+  const feeOk = $("agFeeCollected")?.checked;
+  const feeAmt = Number($("agServiceFee")?.value) || 0;
+
+  if (!partiesOk) {
+    toast("አሰሪ እና ሰራተኛ በአካል መገኘታቸውን (ወይም Telegram OTP) ያረጋግጡ");
+    return;
+  }
+  if (!feeOk) {
+    toast("የአገልግሎት ክፍያ መሰብሰቡን ያረጋግጡ");
+    return;
+  }
+
+  const agreementData = {
+    workerName: val("agWorkerName"),
+    skill: val("agSkill"),
+    workerPhone: val("agWorkerPhone"),
+    nationalId: val("agNationalId"),
+    empName: val("agEmpName"),
+    empPhone: val("agEmpPhone"),
+    empLoc: val("agEmpLoc"),
+    gName: val("agGName"),
+    gPhone: val("agGPhone"),
+    pay: val("agPay"),
+    payType: val("agPayType"),
+    serviceFee: feeAmt,
+    extraTerms: val("agExtraTerms"),
+    feeCollected: true,
+    partiesPresent: true
+  };
+
+  try {
+    const patch = {
+      status: "on_work",
+      agreementPrepared: true,
+      agreementSignedAt: serverTimestamp(),
+      agreementData,
+      serviceFee: feeAmt,
+      serviceFeeCollected: true,
+      partiesPresent: true,
+      paymentReceived: feeAmt > 0 ? true : undefined
+    };
+    if (signedAgreementDataUrl) {
+      // Store only a short flag + truncated preview if huge; full base64 can exceed Firestore limits
+      if (signedAgreementDataUrl.length < 900000) {
+        patch.signedAgreementUrl = signedAgreementDataUrl;
+      } else {
+        patch.signedAgreementUrl = "uploaded_large_file";
+        patch.signedAgreementNote = "File too large for Firestore; keep local print copy";
+      }
+    }
+
+    await updateDoc(doc(db, "requests", currentAgreementRequestId), patch);
+
+    if (currentAgreementWorkerId) {
+      await updateDoc(doc(db, "workers", currentAgreementWorkerId), {
+        available: false,
+        work_status: "on_work",
+        availability_status: "On Work",
+        assigned_employer: agreementData.empName || null
+      }).catch(() => {});
+    }
+
+    toast("✅ ስምምነት ተፈርሟል · ክፍያ ተሰብስቧል · ሰራተኛ በሥራ ላይ");
+    $("agreementModal").classList.add("hid");
+    await loadAll();
+  } catch (e) {
+    toast("Error: " + e.message);
+  }
 }
 
 // ============================================================
@@ -1654,8 +1919,14 @@ document.addEventListener("click", async e => {
     case "toggle-available": await toggleAvailable(btn.dataset.id); break;
     case "req-process": await updateRequest(btn.dataset.id, { status: "on_process" }); break;
     case "req-close": await updateRequest(btn.dataset.id, { status: "closed" }); break;
-    case "req-paid": await updateRequest(btn.dataset.id, { paymentReceived: true }); break;
+    case "req-paid": await updateRequest(btn.dataset.id, { paymentReceived: true, serviceFeeCollected: true }); break;
     case "req-agreement": await openAgreementForRequest(btn.dataset.id); break;
+    case "req-otp":
+      currentAgreementRequestId = btn.dataset.id;
+      if ($("hoOtpInput")) $("hoOtpInput").value = "";
+      if ($("hoPresentCheck")) $("hoPresentCheck").checked = false;
+      $("handoverModal")?.classList.remove("hid");
+      break;
     case "add-worker": openWorkerForm(); break;
     case "add-employer": openEmployerForm(); break;
     case "view-worker": openWorkerView(btn.dataset.id); break;
@@ -1717,34 +1988,55 @@ $("evEdit")?.addEventListener("click", () => {
 $("employerForm")?.addEventListener("submit", e => { e.preventDefault(); saveEmployerFromForm(e.target); });
 
 $("hoCancel")?.addEventListener("click", () => $("handoverModal")?.classList.add("hid"));
-$("hoConfirm")?.addEventListener("click", () => $("handoverModal")?.classList.add("hid"));
+$("hoConfirm")?.addEventListener("click", () => {
+  const present = $("hoPresentCheck")?.checked;
+  const code = ($("hoOtpInput")?.value || "").trim();
+  if (!present && code.length < 4) {
+    toast("OTP ያስገቡ ወይም በአካል መገኘትን ያረጋግጡ");
+    return;
+  }
+  if ($("agPartiesPresent")) $("agPartiesPresent").checked = true;
+  $("handoverModal")?.classList.add("hid");
+  toast("✓ ማረጋገጫ ተሳክቷል — ስምምነቱን ያትሙ / ፊርማ ይስቀሉ");
+});
 
 $("agClose")?.addEventListener("click", () => $("agreementModal")?.classList.add("hid"));
+$("agRefreshPreview")?.addEventListener("click", () => refreshAgreementPreview());
+["agWorkerName","agSkill","agWorkerPhone","agNationalId","agEmpName","agEmpPhone","agEmpLoc","agGName","agGPhone","agPay","agPayType","agServiceFee","agExtraTerms"].forEach(id => {
+  $(id)?.addEventListener("input", () => refreshAgreementPreview());
+  $(id)?.addEventListener("change", () => refreshAgreementPreview());
+});
 $("agPrint")?.addEventListener("click", () => {
+  refreshAgreementPreview();
   const body = $("agreementBody")?.innerHTML || "";
   const w = window.open("", "_blank");
   if (!w) { toast("Allow pop-ups to print"); return; }
-  w.document.write(`<!DOCTYPE html><html><head><title>Agreement</title>
-    <style>body{font-family:system-ui,sans-serif;padding:24px;max-width:720px;margin:0 auto;line-height:1.5;font-size:14px}
-    @media print{button{display:none}}</style></head><body>
+  w.document.write(`<!DOCTYPE html><html lang="am"><head><meta charset="utf-8"><title>የሥራ ስምምነት · Tamagn Delala</title>
+    <style>
+      body{font-family:"Noto Sans Ethiopic",system-ui,sans-serif;padding:28px;max-width:720px;margin:0 auto;line-height:1.65;font-size:14px;color:#0f172a}
+      @media print{button{display:none} body{padding:12px}}
+    </style></head><body>
     ${body}
-    <p style="margin-top:24px"><button onclick="print()">Print</button></p>
+    <p style="margin-top:28px"><button onclick="print()">አትም / Print</button></p>
     </body></html>`);
   w.document.close();
 });
-$("agMarkSigned")?.addEventListener("click", async () => {
-  if (!currentAgreementRequestId) return;
-  try {
-    await updateDoc(doc(db, "requests", currentAgreementRequestId), {
-      agreementPrepared: true,
-      agreementSignedAt: serverTimestamp(),
-      status: "on_process"
-    });
-    toast("Agreement marked as signed");
-    $("agreementModal").classList.add("hid");
-    await loadAll();
-  } catch (e) { toast("Error: " + e.message); }
+$("agSignedFile")?.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  if (!file) { signedAgreementDataUrl = null; if ($("agSignedPreview")) $("agSignedPreview").textContent = ""; return; }
+  if (file.size > 4 * 1024 * 1024) {
+    toast("File too large (max ~4MB for storage in DB). Print & keep physical copy.");
+    e.target.value = "";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    signedAgreementDataUrl = reader.result;
+    if ($("agSignedPreview")) $("agSignedPreview").textContent = `✓ ${file.name} (${Math.round(file.size/1024)} KB) ready to save`;
+  };
+  reader.readAsDataURL(file);
 });
+$("agFinalize")?.addEventListener("click", () => finalizeAgreement());
 
 // Auth
 $("signInBtn")?.addEventListener("click", async () => {
