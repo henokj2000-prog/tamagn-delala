@@ -180,6 +180,102 @@ textarea { min-height: 70px; resize: vertical; }
 .cam-actions { display: flex; gap: 8px; width: 100%; }
 .cam-actions .btn-primary { flex: 1; }
 .cam-actions .btn-secondary { margin: 0; padding: 11px 14px; }
+
+/* ===== Admin shell: sidebar + views ===== */
+.wrap { max-width: 1280px; }
+.header { padding-left: max(16px, calc((100vw - 1280px) / 2)); padding-right: max(16px, calc((100vw - 1280px) / 2)); }
+.topbar-right .who { margin: 0; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topbar-right .btn-secondary { margin: 0; }
+a.btn-secondary { display: inline-block; text-decoration: none; }
+.shell { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 20px; align-items: start; margin-top: 16px; }
+.content { min-width: 0; }
+.side { position: sticky; top: 76px; display: flex; flex-direction: column; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); }
+.nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 0; border-radius: 10px; background: none; color: var(--fg); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; }
+.nav-btn:hover { background: var(--bg); }
+.nav-btn.active { background: #e0f2fe; color: #0369a1; }
+.nav-btn .ni { font-size: 17px; width: 22px; text-align: center; }
+.nav-btn .nb { margin-left: auto; min-width: 20px; padding: 1px 6px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 11px; font-weight: 700; text-align: center; }
+.view-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.view-head h2 { font-size: 20px; }
+.btn-add { padding: 9px 16px; border: 0; border-radius: 10px; background: var(--btn); color: var(--btnfg); font-size: 14px; font-weight: 600; cursor: pointer; }
+
+/* KPI cards */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.kpi { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.kpi .k-l { font-size: 13px; font-weight: 600; color: var(--hint); }
+.kpi .k-v { font-size: 28px; font-weight: 800; line-height: 1.2; margin-top: 2px; }
+.kpi .k-s { font-size: 12px; color: var(--hint); }
+.kpi.alert { border-color: #fbbf24; background: #fffbeb; }
+.kpi.alert .k-v { color: #b45309; }
+
+/* Dashboard panels */
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+.panel-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
+.panel-card h3 { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 15px; }
+.panel-card .sub { font-size: 12px; color: var(--hint); margin-bottom: 6px; }
+.link-btn { background: none; border: 0; color: var(--btn); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.row-item { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 9px 0; border-top: 1px solid var(--border); }
+.row-main { flex: 1; min-width: 140px; }
+.row-main b, .row-main .who { display: block; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-act { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.row-act .btn-secondary { margin: 0; }
+.feed-dot { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--bg); display: grid; place-items: center; font-size: 14px; }
+.feed-time { font-size: 12px; color: var(--hint); white-space: nowrap; }
+.empty { padding: 18px 4px; text-align: center; color: var(--hint); font-size: 14px; }
+.chart svg { width: 100%; height: auto; display: block; }
+.legend { display: flex; gap: 14px; font-size: 12px; color: var(--hint); margin-top: 4px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+
+/* Avatars, badges */
+.av { width: 38px; height: 38px; flex: none; border-radius: 50%; object-fit: cover; background: #e0f2fe; color: #0369a1; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+.bdg { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.bdg.ok { background: #dcfce7; color: #166534; }
+.bdg.warn { background: #fef3c7; color: #92400e; }
+.bdg.info { background: #dbeafe; color: #1e40af; }
+.bdg.bad { background: #fee2e2; color: #991b1b; }
+.bdg.mute { background: #e2e8f0; color: #475569; }
+
+/* Toolbars and filter chips */
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.toolbar input, .toolbar select { width: auto; margin: 0; flex: 1 1 200px; padding: 9px 12px; font-size: 15px; }
+.toolbar select { flex: 0 1 190px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.chips .chip { font: inherit; font-size: 13px; font-weight: 500; }
+.chips .chip:not(.active) { color: var(--fg); }
+
+/* Tables */
+.tbl-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tbl th { padding: 10px 12px; background: var(--bg); text-align: left; font-size: 12px; font-weight: 600; color: var(--hint); white-space: nowrap; }
+.tbl td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
+.tbl tbody tr:hover td { background: rgba(2, 132, 199, .05); }
+.cell-id { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.cell-id b { display: block; }
+.cell-id .who { margin: 0; }
+.acts { display: flex; flex-wrap: wrap; gap: 5px; }
+.acts .btn-secondary { margin: 0; padding: 5px 9px; font-size: 12px; }
+.tbl-empty { padding: 28px 16px; text-align: center; color: var(--hint); }
+
+@media (max-width: 1000px) { .grid2 { grid-template-columns: 1fr; } }
+@media (max-width: 819px) {
+  body { padding-bottom: 86px; }
+  .shell { grid-template-columns: 1fr; margin-top: 8px; }
+  .side { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 60; flex-direction: row; justify-content: space-around; gap: 0; border-width: 1px 0 0; border-radius: 0; padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px)); }
+  .nav-btn { position: relative; flex: 1; flex-direction: column; justify-content: center; gap: 2px; padding: 6px 2px; font-size: 11px; text-align: center; }
+  .nav-btn .nb { position: absolute; top: 0; left: calc(50% + 6px); margin: 0; }
+}
+@media (max-width: 700px) {
+  .topbar-right .who { display: none; }
+  .tbl thead { display: none; }
+  .tbl, .tbl tbody, .tbl tr { display: block; width: 100%; }
+  .tbl tr { padding: 12px; border-top: 1px solid var(--border); }
+  .tbl tbody tr:first-child { border-top: 0; }
+  .tbl td { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0; border: 0; }
+  .tbl td::before { content: attr(data-l); flex: none; font-size: 12px; font-weight: 600; color: var(--hint); }
+  .tbl td.c-id, .tbl td.c-act { display: block; }
+  .tbl td.c-id::before, .tbl td.c-act::before { content: none; }
+  .tbl td.c-act { padding-top: 8px; }
+}
 </style>
 </head>
 <body>
@@ -187,6 +283,10 @@ textarea { min-height: 70px; resize: vertical; }
   <div class="logo">
     <div class="logo-icon">TD</div>
     <div><h1>Tamagn Delala</h1><span>Manager panel</span></div>
+  </div>
+  <div class="topbar-right hid" id="hdrUser">
+    <span class="who" id="who"></span>
+    <button class="btn-secondary" id="signOut">Sign out</button>
   </div>
 </header>
 
@@ -200,64 +300,121 @@ textarea { min-height: 70px; resize: vertical; }
   </div>
 
   <div id="panel" class="hid">
-    <div class="who" id="who" style="margin-top:12px"></div>
-    <button class="btn-secondary" id="signOut">Sign out</button>
+    <div class="shell">
+      <nav class="side">
+        <button class="nav-btn active" data-view="dashboard"><span class="ni">📊</span><span>Dashboard</span></button>
+        <button class="nav-btn" data-view="requests"><span class="ni">📋</span><span>Requests</span><span class="nb hid" id="nbReq"></span></button>
+        <button class="nav-btn" data-view="workers"><span class="ni">👷</span><span>Workers</span><span class="nb hid" id="nbW"></span></button>
+        <button class="nav-btn" data-view="employers"><span class="ni">👔</span><span>Employers</span></button>
+        <button class="nav-btn" data-view="add"><span class="ni">➕</span><span>Add Worker</span></button>
+      </nav>
 
-    <h2 class="section-title">⏳ Pending Workers</h2>
-    <div id="pendingList"></div>
+      <section class="content">
+        <!-- Dashboard -->
+        <div id="v-dashboard" class="view">
+          <div class="view-head"><h2>Dashboard</h2></div>
+          <div class="kpis" id="kpis"></div>
+          <div class="grid2">
+            <div class="panel-card">
+              <h3>⏳ Verification Queue <button class="link-btn" data-view="workers">View all</button></h3>
+              <div class="sub">New workers waiting for approval</div>
+              <div id="dQueue"></div>
+            </div>
+            <div class="panel-card">
+              <h3>📋 Active Requests <button class="link-btn" data-view="requests">View all</button></h3>
+              <div class="sub">Hire requests that still need action</div>
+              <div id="dReqs"></div>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="panel-card chart">
+              <h3>Requests per week</h3>
+              <div class="sub">Last 8 weeks</div>
+              <div id="dChart"></div>
+            </div>
+            <div class="panel-card">
+              <h3>⭐ Rating Follow-up Due</h3>
+              <div class="sub">Ask the employer how the worker is doing</div>
+              <div id="dDue"></div>
+            </div>
+          </div>
+          <div class="panel-card">
+            <h3>🕒 Recent Activity</h3>
+            <div id="dFeed"></div>
+          </div>
+        </div>
 
-    <h2 class="section-title">⭐ Rating Follow-up Due</h2>
-    <div id="dueList"></div>
+        <!-- Hire requests -->
+        <div id="v-requests" class="view hid">
+          <div class="view-head"><h2>Hire Requests</h2></div>
+          <div class="chips" id="rChips"></div>
+          <div class="toolbar"><input id="rSearch" type="search" placeholder="Search worker, employer or phone..."></div>
+          <div id="tbReq"></div>
+        </div>
 
-    <h2 class="section-title">📋 Hire Requests</h2>
-    <div id="reqs"></div>
+        <!-- Workers -->
+        <div id="v-workers" class="view hid">
+          <div class="view-head"><h2>Workers</h2><button class="btn-add" data-view="add">+ Add Worker</button></div>
+          <div class="chips" id="wChips"></div>
+          <div class="toolbar">
+            <input id="wSearch" type="search" placeholder="Search name, skill or location...">
+            <select id="wSkill"></select>
+          </div>
+          <div id="tbWorkers"></div>
+        </div>
 
-    <h2 class="section-title">👔 Registered Employers</h2>
-    <div id="empList"></div>
+        <!-- Employers -->
+        <div id="v-employers" class="view hid">
+          <div class="view-head"><h2>Registered Employers</h2></div>
+          <div class="toolbar"><input id="eSearch" type="search" placeholder="Search name, phone or location..."></div>
+          <div id="tbEmp"></div>
+        </div>
 
-    <h2 class="section-title">👷 All Workers</h2>
-    <div id="wl"></div>
-
-    <h2 class="section-title">➕ Add Worker Manually</h2>
-    <form id="wf" class="form-card">
-        <input type="hidden" id="f_id">
-        <label>Full name *</label>
-        <input id="f_name" required maxlength="80">
-        <label>Age *</label>
-        <input id="f_age" type="number" min="14" max="80" required>
-        <label>Skill *</label>
-        <select id="f_skill" required></select>
-        <label>Location *</label>
-        <input id="f_location" required maxlength="60">
-        <label>Experience *</label>
-        <input id="f_experience" required maxlength="120">
-        <label>Payment type *</label>
-        <select id="f_paymentType">
-          <option value="monthly">Monthly</option>
-          <option value="hourly">Hourly</option>
-          <option value="daily">Daily</option>
-        </select>
-        <label>Pay (optional)</label>
-        <input id="f_pay" maxlength="60">
-        <label>National ID *</label>
-        <input id="f_nationalId" required maxlength="30">
-        <label>Phone *</label>
-        <input id="f_phone" required maxlength="20">
-        <label>Police Clearance</label>
-        <select id="f_police"><option value="no">No</option><option value="yes">Yes</option></select>
-        <label>Guarantor Name</label>
-        <input id="f_guarantorName" maxlength="80">
-        <label>Guarantor Phone</label>
-        <input id="f_guarantorPhone" maxlength="20">
-        <label>Photo</label>
-        <button type="button" class="btn-secondary" id="f_photoBtn" style="margin:0 0 10px">📷 Take Photo</button>
-        <label for="f_photo" class="btn-secondary hid" id="f_photoAlt" style="margin:0 0 10px;display:inline-block">Use phone camera app</label>
-        <input id="f_photo" type="file" accept="image/*" capture="user" class="hid">
-        <img id="f_photoPreview" class="photo-preview hid" alt="">
-        <p class="who" style="margin:-6px 0 12px">Take the photo with the camera (gallery upload is not allowed). Passport style: face centered, plain background.</p>
-        <button class="btn-primary" id="saveBtn" type="submit">Save Worker</button>
-        <button class="btn-secondary hid" id="cancelEdit" type="button">Cancel</button>
-      </form>
+        <!-- Add / edit worker -->
+        <div id="v-add" class="view hid">
+          <div class="view-head"><h2 id="formTitle">➕ Add Worker</h2></div>
+          <form id="wf" class="form-card">
+            <input type="hidden" id="f_id">
+            <label>Full name *</label>
+            <input id="f_name" required maxlength="80">
+            <label>Age *</label>
+            <input id="f_age" type="number" min="14" max="80" required>
+            <label>Skill *</label>
+            <select id="f_skill" required></select>
+            <label>Location *</label>
+            <input id="f_location" required maxlength="60">
+            <label>Experience *</label>
+            <input id="f_experience" required maxlength="120">
+            <label>Payment type *</label>
+            <select id="f_paymentType">
+              <option value="monthly">Monthly</option>
+              <option value="hourly">Hourly</option>
+              <option value="daily">Daily</option>
+            </select>
+            <label>Pay (optional)</label>
+            <input id="f_pay" maxlength="60">
+            <label>National ID *</label>
+            <input id="f_nationalId" required maxlength="30">
+            <label>Phone *</label>
+            <input id="f_phone" required maxlength="20">
+            <label>Police Clearance</label>
+            <select id="f_police"><option value="no">No</option><option value="yes">Yes</option></select>
+            <label>Guarantor Name</label>
+            <input id="f_guarantorName" maxlength="80">
+            <label>Guarantor Phone</label>
+            <input id="f_guarantorPhone" maxlength="20">
+            <label>Photo</label>
+            <button type="button" class="btn-secondary" id="f_photoBtn" style="margin:0 0 10px">📷 Take Photo</button>
+            <label for="f_photo" class="btn-secondary hid" id="f_photoAlt" style="margin:0 0 10px;display:inline-block">Use phone camera app</label>
+            <input id="f_photo" type="file" accept="image/*" capture="user" class="hid">
+            <img id="f_photoPreview" class="photo-preview hid" alt="">
+            <p class="who" style="margin:-6px 0 12px">Take the photo with the camera (gallery upload is not allowed). Passport style: face centered, plain background.</p>
+            <button class="btn-primary" id="saveBtn" type="submit">Save Worker</button>
+            <button class="btn-secondary hid" id="cancelEdit" type="button">Cancel</button>
+          </form>
+        </div>
+      </section>
+    </div>
   </div>
 </div></main>
 
@@ -327,6 +484,7 @@ let ratingRequestId = null, ratingWorkerId = null;
 
 $("f_skill").innerHTML = SKILLS.map(s => `<option value="${esc(s.en)}">${s.en}</option>`).join("");
 $("f_police").innerHTML = '<option value="no">No</option><option value="yes">Yes</option>';
+$("wSkill").innerHTML = '<option value="">All skills</option>' + SKILLS.map(s => `<option value="${esc(s.en)}">${s.en}</option>`).join("");
 
 function starsHtml(avg, count) {
   if (!count) return "";
@@ -406,6 +564,7 @@ function shrink(file) {
 
 // Admin
 let allW = [], reqs = [], pending = [], employers = [];
+let wFilter = "all", rFilter = "all";
 $("signIn").onclick = async () => {
   const provider = new GoogleAuthProvider();
   try { await signInWithPopup(auth, provider); }
@@ -420,10 +579,10 @@ $("signIn").onclick = async () => {
 $("signOut").onclick = () => signOut(auth);
 
 onAuthStateChanged(auth, async user => {
-  if (!user) { $("login").classList.remove("hid"); $("panel").classList.add("hid"); return; }
+  if (!user) { $("login").classList.remove("hid"); $("panel").classList.add("hid"); $("hdrUser").classList.add("hid"); return; }
   if (user.email !== ADMIN_EMAIL) { alert("Not admin"); signOut(auth); return; }
   $("who").textContent = "Signed in: " + user.email;
-  $("login").classList.add("hid"); $("panel").classList.remove("hid");
+  $("login").classList.add("hid"); $("panel").classList.remove("hid"); $("hdrUser").classList.remove("hid");
   await loadAdmin();
 });
 
@@ -447,71 +606,209 @@ function isDue(r) {
   return d <= new Date();
 }
 
-function renderAdmin() {
-  $("pendingList").innerHTML = pending.length ? pending.map(w => `
-    <div class="admin-card pending">
-      <div class="pending-label">PENDING</div>
-      <b>${esc(w.name)}</b> · ${esc(w.skill)} · ${esc(w.location)}
-      <div class="who">Age ${esc(w.age)} · ${esc(w.experience)}</div>
-      <button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button>
-      <button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ Reject</button>
-    </div>`).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
+// ---------- helpers ----------
+const ago = sec => {
+  if (!sec) return "";
+  const m = Math.floor((Date.now() / 1000 - sec) / 60);
+  if (m < 1) return "just now";
+  if (m < 60) return m + "m ago";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + "h ago";
+  const d = Math.floor(h / 24);
+  return d < 30 ? d + "d ago" : new Date(sec * 1000).toLocaleDateString();
+};
+const initials = n => String(n || "?").trim().split(/\s+/).slice(0, 2).map(s => s[0]).join("").toUpperCase();
+const avatar = o => (o && o.photo) ? `<img class="av" src="${esc(o.photo)}" alt="">` : `<div class="av">${esc(initials(o && o.name))}</div>`;
+const bdg = (cls, t) => `<span class="bdg ${cls}">${esc(t)}</span>`;
+const reqStatus = r => r.status || "open";
+const reqBadge = r => reqStatus(r) === "closed" ? bdg("ok", "Closed") : reqStatus(r) === "on_process" ? bdg("warn", "On process") : bdg("info", "Open");
+const payBadge = r => r.paymentReceived ? bdg("ok", "Paid") : bdg("mute", "Unpaid");
+const workerBadge = w => w.status === "pending" ? bdg("warn", "Pending") : w.status === "rejected" ? bdg("bad", "Rejected") : w.available ? bdg("ok", "Available") : bdg("mute", "Unavailable");
+const tgLink = (u, t) => u ? `<a href="https://t.me/${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>` : esc(t);
+const needle = id => ($(id).value || "").trim().toLowerCase();
+const hay = (...a) => a.map(x => String(x ?? "")).join(" ").toLowerCase();
+const wMap = () => new Map(allW.map(w => [w.id, w]));
+const table = (heads, rows, empty) => rows.length
+  ? `<div class="tbl-wrap"><table class="tbl"><thead><tr>${heads.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`
+  : `<div class="tbl-wrap"><div class="tbl-empty">${empty}</div></div>`;
+const chipsHtml = (list, attr, cur) => list.map(([k, label, n]) => `<button class="chip${cur === k ? " active" : ""}" data-${attr}="${k}">${label} (${n})</button>`).join("");
 
-  const due = reqs.filter(isDue);
-  $("dueList").innerHTML = due.length ? due.map(r => {
-    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : "#";
-    return `<div class="admin-card due">
-      <div class="due-label">RATING DUE</div>
-      <b>${esc(r.workerName)}</b>
-      <div class="who"><a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")}</div>
-      <button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask</button>
-      <button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Rate</button>
-      <button class="btn-secondary" data-marksent="${esc(r.id)}">Mark Sent</button>
-    </div>`;
-  }).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
-
-  $("reqs").innerHTML = reqs.length ? reqs.map(r => {
-    const when = r.createdAt ? new Date(ts(r.createdAt)*1000).toLocaleString() : "";
-    const href = r.employerUsername ? `https://t.me/${esc(r.employerUsername)}` : "#";
-    const stClass = r.status==="open"?"status-open":r.status==="on_process"?"status-process":"status-closed";
-    return `<div class="admin-card">
-      <b>${esc(r.workerName)}</b>
-      <div class="who"><a href="${href}">${esc(r.employerName)}</a> · ${esc(r.employerPhone||"")} · ${when}</div>
-      <div class="who">Status: <span class="${stClass}">${esc(r.status||"open")}</span> · Pay: ${r.paymentReceived?"✅":"❌"}</div>
-      <button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>
-      <button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button>
-      <button class="btn-secondary" data-pay="${esc(r.id)}">Mark Paid</button>
-      <button class="btn-secondary" data-showphone="${esc(r.workerId)}">Show Phone</button>
-      <button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">Delete</button>
-    </div>`;
-  }).join("") : `<div class="state" style="padding:16px"><p>—</p></div>`;
-
-  // Registered Employers (stay forever until deleted)
-  $("empList").innerHTML = employers.length ? employers.map(e => {
-    const when = e.createdAt ? new Date(ts(e.createdAt)*1000).toLocaleDateString() : "";
-    const un = e.username ? "@" + esc(e.username) : "";
-    return `<div class="admin-card">
-      <b>${esc(e.name)}</b>
-      <div class="who">📞 ${esc(e.phone||"—")} · 📍 ${esc(e.location||"—")}</div>
-      <div class="who">${un} · Registered: ${when}</div>
-      <button class="btn-secondary btn-danger" data-de="${esc(e.id)}">${"Delete"}</button>
-    </div>`;
-  }).join("") : `<div class="state" style="padding:16px"><p>${"No employers registered yet"}</p></div>`;
-
-  $("wl").innerHTML = allW.length ? allW.map(w => `
-    <div class="admin-card">
-      <b>${esc(w.name)}</b>
-      <span class="who"> · ${esc(w.skill)} · ${w.status}</span>
-      ${starsHtml(w.ratingAvg, w.ratingCount)}
-      <button class="btn-secondary" data-tg="${esc(w.id)}">${w.available?"Unavailable":"Available"}</button>
-      <button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button>
-      <button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>
-    </div>`).join("") : `<div class="state"><p>—</p></div>`;
+function showView(v) {
+  document.querySelectorAll(".view").forEach(x => x.classList.toggle("hid", x.id !== "v-" + v));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("active", b.dataset.view === v));
+  window.scrollTo({ top: 0 });
 }
 
+// ---------- action buttons (same data-attributes the click handler already uses) ----------
+const approveBtns = w => `<button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button><button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ Reject</button>`;
+const dueBtns = r => `<button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask</button><button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Rate</button><button class="btn-secondary" data-marksent="${esc(r.id)}">Mark Sent</button>`;
+const reqBtns = r =>
+  (reqStatus(r) !== "on_process" ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : "") +
+  (reqStatus(r) !== "closed" ? `<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button>` : "") +
+  (!r.paymentReceived ? `<button class="btn-secondary" data-pay="${esc(r.id)}">Mark Paid</button>` : "") +
+  `<button class="btn-secondary" data-showphone="${esc(r.workerId)}">Show Phone</button>` +
+  `<button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">Delete</button>`;
+
+function chartHtml() {
+  const WK = 8, now = Date.now() / 1000, bk = Array.from({ length: WK }, () => ({ n: 0, c: 0 }));
+  reqs.forEach(r => {
+    const s = ts(r.createdAt); if (!s) return;
+    const i = Math.floor((now - s) / 604800);
+    if (i >= 0 && i < WK) { bk[WK - 1 - i].n++; if (reqStatus(r) === "closed") bk[WK - 1 - i].c++; }
+  });
+  const max = Math.max(4, ...bk.map(b => b.n)), W = 400, H = 150, px = 28, py = 16;
+  const X = i => px + i * (W - px - 10) / (WK - 1), Y = v => H - py - v * (H - 2 * py) / max;
+  const pts = k => bk.map((b, i) => `${X(i).toFixed(1)},${Y(b[k]).toFixed(1)}`).join(" ");
+  const grid = [0, 0.5, 1].map(f => { const v = Math.round(max * f), y = Y(v); return `<line x1="${px}" x2="${W - 10}" y1="${y}" y2="${y}" stroke="var(--border)"/><text x="${px - 6}" y="${y + 3}" text-anchor="end" font-size="10" fill="var(--hint)">${v}</text>`; }).join("");
+  const lbl = bk.map((_, i) => `<text x="${X(i)}" y="${H - 2}" text-anchor="middle" font-size="10" fill="var(--hint)">${i === WK - 1 ? "Now" : "-" + (WK - 1 - i) + "w"}</text>`).join("");
+  const dots = (k, c) => bk.map((b, i) => `<circle cx="${X(i)}" cy="${Y(b[k])}" r="3" fill="${c}"/>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Requests per week">${grid}${lbl}
+    <polyline points="${pts("n")}" fill="none" stroke="#0284c7" stroke-width="2.5"/>${dots("n", "#0284c7")}
+    <polyline points="${pts("c")}" fill="none" stroke="#059669" stroke-width="2.5"/>${dots("c", "#059669")}</svg>
+    <div class="legend"><span><i style="background:#0284c7"></i>Requests</span><span><i style="background:#059669"></i>Closed</span></div>`;
+}
+
+// ---------- renderers ----------
+function renderNav() {
+  const open = reqs.filter(r => reqStatus(r) === "open").length;
+  $("nbReq").textContent = open; $("nbReq").classList.toggle("hid", !open);
+  $("nbW").textContent = pending.length; $("nbW").classList.toggle("hid", !pending.length);
+}
+
+function renderDash() {
+  const wm = wMap();
+  const open = reqs.filter(r => reqStatus(r) === "open"), proc = reqs.filter(r => reqStatus(r) === "on_process");
+  const approved = allW.filter(w => w.status === "approved"), avail = approved.filter(w => w.available);
+  const unpaid = reqs.filter(r => reqStatus(r) !== "open" && !r.paymentReceived);
+  const due = reqs.filter(isDue);
+
+  $("kpis").innerHTML = [
+    ["Pending Approvals", pending.length, pending.length ? "alert" : "", "Workers to verify"],
+    ["Open Requests", open.length, "", `${proc.length} on process`],
+    ["Available Workers", avail.length, "", `of ${approved.length} approved`],
+    ["Awaiting Payment", unpaid.length, unpaid.length ? "alert" : "", "In process or closed"],
+    ["Ratings Due", due.length, due.length ? "alert" : "", "Follow-ups to send"]
+  ].map(([l, v, c, s]) => `<div class="kpi ${c}"><div class="k-l">${l}</div><div class="k-v">${v}</div><div class="k-s">${s}</div></div>`).join("");
+
+  $("dQueue").innerHTML = pending.length ? pending.slice(0, 5).map(w => `
+    <div class="row-item">${avatar(w)}
+      <div class="row-main"><b>${esc(w.name)}</b><span class="who">${esc(w.skill)} · ${esc(w.location)} · Age ${esc(w.age)}</span></div>
+      <div class="row-act">${approveBtns(w)}</div>
+    </div>`).join("") : `<div class="empty">All caught up ✅</div>`;
+
+  const active = reqs.filter(r => reqStatus(r) !== "closed").slice(0, 5);
+  $("dReqs").innerHTML = active.length ? active.map(r => `
+    <div class="row-item">${avatar(wm.get(r.workerId) || { name: r.workerName })}
+      <div class="row-main"><b>${esc(r.workerName)}</b><span class="who">${esc(r.employerName)} · ${ago(ts(r.createdAt))}</span></div>
+      ${reqBadge(r)}
+      <div class="row-act">${reqStatus(r) === "open" ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : ""}<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button></div>
+    </div>`).join("") : `<div class="empty">No active requests</div>`;
+
+  $("dChart").innerHTML = chartHtml();
+
+  $("dDue").innerHTML = due.length ? due.slice(0, 5).map(r => `
+    <div class="row-item">
+      <div class="row-main"><b>${esc(r.workerName)}</b><span class="who">${tgLink(r.employerUsername, r.employerName || "")} · ${esc(r.employerPhone || "")}</span></div>
+      <div class="row-act">${dueBtns(r)}</div>
+    </div>`).join("") : `<div class="empty">Nothing due 🎉</div>`;
+
+  const feed = [
+    ...reqs.map(r => ({ t: ts(r.createdAt), i: "📋", x: `${r.employerName || "Employer"} requested ${r.workerName || "a worker"}` })),
+    ...allW.map(w => ({ t: ts(w.createdAt), i: w.source === "admin" ? "➕" : "👷", x: `${w.name} ${w.source === "admin" ? "added" : "applied"} · ${w.skill}` })),
+    ...employers.map(e => ({ t: ts(e.createdAt), i: "👔", x: `${e.name} registered as employer` }))
+  ].filter(x => x.t).sort((a, b) => b.t - a.t).slice(0, 8);
+  $("dFeed").innerHTML = feed.length ? feed.map(f => `
+    <div class="row-item"><div class="feed-dot">${f.i}</div><div class="row-main"><span class="who" style="color:var(--fg)">${esc(f.x)}</span></div><span class="feed-time">${ago(f.t)}</span></div>`).join("") : `<div class="empty">No activity yet</div>`;
+}
+
+function renderRequests() {
+  const wm = wMap();
+  const cnt = f => reqs.filter(f).length;
+  $("rChips").innerHTML = chipsHtml([
+    ["all", "All", reqs.length],
+    ["open", "Open", cnt(r => reqStatus(r) === "open")],
+    ["on_process", "On process", cnt(r => reqStatus(r) === "on_process")],
+    ["closed", "Closed", cnt(r => reqStatus(r) === "closed")],
+    ["unpaid", "Unpaid", cnt(r => !r.paymentReceived)]
+  ], "fr", rFilter);
+  let rows = reqs.filter(r => rFilter === "all" || (rFilter === "unpaid" ? !r.paymentReceived : reqStatus(r) === rFilter));
+  const q = needle("rSearch");
+  if (q) rows = rows.filter(r => hay(r.workerName, r.employerName, r.employerPhone, r.employerUsername).includes(q));
+  $("tbReq").innerHTML = table(["Worker", "Employer", "Requested", "Status", "Payment", "Actions"], rows.map(r => `
+    <tr>
+      <td class="c-id"><div class="cell-id">${avatar(wm.get(r.workerId) || { name: r.workerName })}<div><b>${esc(r.workerName)}</b></div></div></td>
+      <td data-l="Employer"><div>${tgLink(r.employerUsername, r.employerName || "")}<div class="who" style="margin:0">${esc(r.employerPhone || "")}</div></div></td>
+      <td data-l="Requested">${r.createdAt ? new Date(ts(r.createdAt) * 1000).toLocaleDateString() : ""}</td>
+      <td data-l="Status">${reqBadge(r)}</td>
+      <td data-l="Payment">${payBadge(r)}</td>
+      <td class="c-act"><div class="acts">${reqBtns(r)}</div></td>
+    </tr>`), "No requests match");
+}
+
+function renderWorkers() {
+  const cnt = f => allW.filter(f).length;
+  const isAv = w => w.status === "approved" && w.available, isUn = w => w.status === "approved" && !w.available;
+  $("wChips").innerHTML = chipsHtml([
+    ["all", "All", allW.length],
+    ["available", "Available", cnt(isAv)],
+    ["unavailable", "Unavailable", cnt(isUn)],
+    ["pending", "Pending", pending.length],
+    ["rejected", "Rejected", cnt(w => w.status === "rejected")]
+  ], "fw", wFilter);
+  let rows = allW.filter(w => wFilter === "all" || (wFilter === "available" ? isAv(w) : wFilter === "unavailable" ? isUn(w) : w.status === wFilter));
+  const sk = $("wSkill").value, q = needle("wSearch");
+  if (sk) rows = rows.filter(w => w.skill === sk);
+  if (q) rows = rows.filter(w => hay(w.name, w.skill, w.location).includes(q));
+  const acts = w => w.status === "pending" ? approveBtns(w) + `<button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button>`
+    : w.status === "rejected" ? `<button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button><button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>`
+    : `<button class="btn-secondary" data-tg="${esc(w.id)}">${w.available ? "Set Unavailable" : "Set Available"}</button><button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button><button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>`;
+  $("tbWorkers").innerHTML = table(["Worker", "Skill", "Location", "Experience", "Status", "Checks", "Rating", "Actions"], rows.map(w => `
+    <tr>
+      <td class="c-id"><div class="cell-id">${avatar(w)}<div><b>${esc(w.name)}</b><div class="who">Age ${esc(w.age)}</div></div></div></td>
+      <td data-l="Skill">${esc(w.skill)}</td>
+      <td data-l="Location">${esc(w.location)}</td>
+      <td data-l="Experience">${esc(w.experience)}</td>
+      <td data-l="Status">${workerBadge(w)}</td>
+      <td data-l="Checks">${bdg("ok", "ID ✓")} ${w.hasPoliceClearance ? bdg("ok", "Police ✓") : bdg("mute", "No police")}</td>
+      <td data-l="Rating">${starsHtml(w.ratingAvg, w.ratingCount) || '<span class="who" style="margin:0">—</span>'}</td>
+      <td class="c-act"><div class="acts">${acts(w)}</div></td>
+    </tr>`), "No workers match");
+}
+
+function renderEmployers() {
+  let rows = employers;
+  const q = needle("eSearch");
+  if (q) rows = rows.filter(e => hay(e.name, e.phone, e.location, e.username).includes(q));
+  $("tbEmp").innerHTML = table(["Employer", "Phone", "Location", "Requests", "Registered", "Actions"], rows.map(e => {
+    const n = reqs.filter(r => (e.phone && r.employerPhone === e.phone) || (e.name && r.employerName === e.name)).length;
+    return `<tr>
+      <td class="c-id"><div class="cell-id">${avatar(e)}<div><b>${esc(e.name)}</b>${e.username ? `<div class="who">@${esc(e.username)}</div>` : ""}</div></div></td>
+      <td data-l="Phone">${e.phone ? `<a href="tel:${esc(e.phone)}">${esc(e.phone)}</a>` : "—"}</td>
+      <td data-l="Location">${esc(e.location || "—")}</td>
+      <td data-l="Requests">${n}</td>
+      <td data-l="Registered">${e.createdAt ? new Date(ts(e.createdAt) * 1000).toLocaleDateString() : ""}</td>
+      <td class="c-act"><div class="acts">${e.username ? `<a class="btn-secondary" href="https://t.me/${esc(e.username)}" target="_blank" rel="noopener">Telegram</a>` : ""}<button class="btn-secondary btn-danger" data-de="${esc(e.id)}">Delete</button></div></td>
+    </tr>`;
+  }), "No employers registered yet");
+}
+
+function renderAdmin() { renderNav(); renderDash(); renderRequests(); renderWorkers(); renderEmployers(); }
+
+// live search / skill filter: re-render only the table that changed
+$("panel").addEventListener("input", e => {
+  const id = e.target.id;
+  if (id === "rSearch") renderRequests();
+  else if (id === "wSearch" || id === "wSkill") renderWorkers();
+  else if (id === "eSearch") renderEmployers();
+});
+
 $("panel").onclick = async e => {
-  const d = e.target.dataset;
+  const el = e.target.closest("button");
+  const d = el ? el.dataset : {};
   try {
+    if (d.view) { if (d.view === "add") resetForm(); return showView(d.view); }
+    if (d.fw) { wFilter = d.fw; return renderWorkers(); }
+    if (d.fr) { rFilter = d.fr; return renderRequests(); }
     if (d.approve) await updateDoc(doc(db,"workers",d.approve),{status:"approved",available:true});
     else if (d.reject) { if(!confirm("Reject?"))return; await updateDoc(doc(db,"workers",d.reject),{status:"rejected",available:false}); }
     else if (d.ask) {
@@ -570,9 +867,16 @@ async function startEdit(id) {
   $("f_nationalId").value=priv.nationalId||""; $("f_phone").value=priv.phone||"";
   $("f_police").value=w.hasPoliceClearance?"yes":"no";
   $("f_guarantorName").value=priv.guarantorName||""; $("f_guarantorPhone").value=priv.guarantorPhone||"";
-  $("cancelEdit").classList.remove("hid"); $("wf").scrollIntoView({behavior:"smooth"});
+  setAdminPhoto(null);
+  if (w.photo) { $("f_photoPreview").src = w.photo; $("f_photoPreview").classList.remove("hid"); }
+  $("formTitle").textContent = "✏️ Edit Worker";
+  $("cancelEdit").classList.remove("hid"); showView("add");
 }
-$("cancelEdit").onclick = () => { $("wf").reset(); setAdminPhoto(null); $("f_id").value=""; $("cancelEdit").classList.add("hid"); };
+function resetForm() {
+  $("wf").reset(); setAdminPhoto(null); $("f_id").value = "";
+  $("cancelEdit").classList.add("hid"); $("formTitle").textContent = "➕ Add Worker";
+}
+$("cancelEdit").onclick = () => { resetForm(); showView("workers"); };
 
 let adminPhotoData = null;
 function setAdminPhoto(d) {
@@ -617,7 +921,7 @@ $("wf").onsubmit = async e => {
     else b.set(ref,{...publicData, photo:publicData.photo||"", ratingAvg:0, ratingCount:0, createdAt:serverTimestamp(), source:"admin"});
     b.set(doc(db,"workers_private",ref.id), privateData, {merge:true});
     await b.commit();
-    $("wf").reset(); setAdminPhoto(null); $("f_id").value=""; $("cancelEdit").classList.add("hid");
+    resetForm(); showView("workers");
     await loadAdmin();
   } catch(err){alert(err.message);}
   btn.disabled=false; btn.textContent="Save Worker";
