@@ -861,6 +861,7 @@ let settings = { commission: 18, requireId: true, reminders: true, paymentTerms:
 let selectedJobId = null;
 let wFilter = "all";
 let pFilter = "all";
+let dashPeriod = "today"; // today | week | month
 let loading = false;
 
 // Job orders derived from open requests (for Job Matches screen)
@@ -1075,36 +1076,120 @@ function renderCurrent() {
 // ============================================================
 // RENDER
 // ============================================================
+function periodRange(period) {
+  const now = new Date();
+  const end = now.getTime() / 1000 + 86400; // include today
+  let start;
+  if (period === "week") {
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - 6); // last 7 days including today
+    start = d.getTime() / 1000;
+  } else if (period === "month") {
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(1);
+    start = d.getTime() / 1000;
+  } else {
+    // today
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    start = d.getTime() / 1000;
+  }
+  return { start, end };
+}
+
+function inPeriod(createdAt, period) {
+  const t = ts(createdAt);
+  if (!t) return false;
+  const { start, end } = periodRange(period);
+  return t >= start && t < end;
+}
+
 function renderDashboard() {
+  const period = dashPeriod || "today";
   const pendingW = workers.filter(w => w.status === "pending").length;
   const pendingE = employers.filter(e => e.verification_status === "Pending").length;
   const openJobs = requests.filter(r => (r.status || "open") === "open").length;
-  const placed = workers.filter(w => w.availability_status === "Placed").length;
   const available = workers.filter(w => w.availability_status === "Available").length;
+  const onWork = workers.filter(w => w.availability_status === "On Work").length;
+  const placed = workers.filter(w => w.availability_status === "Placed" || w.availability_status === "On Work").length;
+
+  // Period-scoped metrics
+  const regWorkers = workers.filter(w => inPeriod(w.createdAt, period)).length;
+  const regEmployers = employers.filter(e => inPeriod(e.createdAt, period)).length;
+  const hireReqs = requests.filter(r => inPeriod(r.createdAt, period)).length;
+  const hired = requests.filter(r => {
+    const st = r.status || "";
+    if (!(st === "on_work" || st === "closed" || r.agreementSigned)) return false;
+    // prefer signed/closed time, else createdAt
+    return inPeriod(r.agreementSignedAt || r.createdAt, period);
+  }).length;
+  const rejectedW = workers.filter(w => w.status === "rejected" && inPeriod(w.createdAt, period)).length;
+  const rejectedR = requests.filter(r => (r.status === "rejected" || r.status === "cancelled") && inPeriod(r.createdAt, period)).length;
+  const rejected = rejectedW + rejectedR;
+
+  const periodLabel = period === "week" ? "This week" : period === "month" ? "This month" : "Today";
 
   $("dashKpis").innerHTML = `
-    <div class="kpi ${pendingW + pendingE ? "alert" : ""}" role="button" tabindex="0" data-kpi="pending" style="cursor:pointer" title="View pending workers">
+    <div style="grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:4px">
+      <span style="font-size:13px;font-weight:600;color:var(--hint)">Period</span>
+      <button class="chip ${period === "today" ? "active" : ""}" data-action="dash-period" data-val="today">Today</button>
+      <button class="chip ${period === "week" ? "active" : ""}" data-action="dash-period" data-val="week">Weekly</button>
+      <button class="chip ${period === "month" ? "active" : ""}" data-action="dash-period" data-val="month">Monthly</button>
+      <span style="font-size:12px;color:var(--hint);margin-left:4px">${periodLabel} snapshot</span>
+    </div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="reg-workers" style="cursor:pointer" title="Workers registered in period">
+      <div class="label">Registered Workers <span class="bdg mute" style="margin-left:4px">${periodLabel}</span></div>
+      <div class="value">${regWorkers}</div>
+    </div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="reg-employers" style="cursor:pointer" title="Employers registered in period">
+      <div class="label">Registered Employers <span class="bdg mute" style="margin-left:4px">${periodLabel}</span></div>
+      <div class="value">${regEmployers}</div>
+    </div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="hire-in" style="cursor:pointer" title="Hire requests in period">
+      <div class="label">Hire Requests <span class="bdg mute" style="margin-left:4px">${periodLabel}</span></div>
+      <div class="value">${hireReqs}</div>
+    </div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="hired" style="cursor:pointer" title="Hired / On Work in period">
+      <div class="label">Hired <span class="bdg mute" style="margin-left:4px">${periodLabel}</span></div>
+      <div class="value">${hired}</div>
+    </div>
+    <div class="kpi ${rejected ? "alert" : ""}" role="button" tabindex="0" data-kpi="rejected" style="cursor:pointer" title="Rejected in period">
+      <div class="label">Rejected <span class="bdg mute" style="margin-left:4px">${periodLabel}</span></div>
+      <div class="value">${rejected}</div>
+    </div>
+    <div class="kpi ${pendingW + pendingE ? "alert" : ""}" role="button" tabindex="0" data-kpi="pending" style="cursor:pointer" title="Pending approvals">
       <div class="label">Pending Approvals</div><div class="value">${pendingW + pendingE}</div>
     </div>
-    <div class="kpi" role="button" tabindex="0" data-kpi="requests" style="cursor:pointer" title="View open hire requests">
+    <div class="kpi" role="button" tabindex="0" data-kpi="requests" style="cursor:pointer" title="Open hire requests">
       <div class="label">Open Hire Requests</div><div class="value">${openJobs}</div>
     </div>
-    <div class="kpi" role="button" tabindex="0" data-kpi="available" style="cursor:pointer" title="View available workers">
+    <div class="kpi" role="button" tabindex="0" data-kpi="available" style="cursor:pointer" title="Available workers">
       <div class="label">Available Workers</div><div class="value">${available}</div>
     </div>
-    <div class="kpi" role="button" tabindex="0" data-kpi="placed" style="cursor:pointer" title="View placed / busy workers">
-      <div class="label">Placed / Busy</div><div class="value">${placed}</div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="onwork" style="cursor:pointer" title="Workers on work">
+      <div class="label">On Work</div><div class="value">${onWork}</div>
     </div>
   `;
-  // Bind clicks directly (reliable even if global delegation fails)
+
   $("dashKpis").onclick = (ev) => {
+    const periodBtn = ev.target.closest("[data-action='dash-period']");
+    if (periodBtn) {
+      dashPeriod = periodBtn.getAttribute("data-val") || "today";
+      renderDashboard();
+      return;
+    }
     const card = ev.target.closest("[data-kpi]");
     if (!card) return;
     const k = card.getAttribute("data-kpi");
     if (k === "pending") { wFilter = "Pending"; showView("workers"); }
     else if (k === "available") { wFilter = "Available"; showView("workers"); }
-    else if (k === "placed") { wFilter = "Placed"; showView("workers"); }
-    else if (k === "requests") { showView("matches"); }
+    else if (k === "placed" || k === "onwork") { wFilter = "On Work"; showView("workers"); }
+    else if (k === "rejected") { wFilter = "Inactive"; showView("workers"); }
+    else if (k === "reg-workers") { wFilter = "all"; showView("workers"); }
+    else if (k === "reg-employers") { showView("employers"); }
+    else if (k === "hire-in" || k === "requests" || k === "hired") { showView("matches"); }
   };
 
   const queueItems = [
@@ -1121,7 +1206,7 @@ function renderDashboard() {
       <thead><tr><th></th><th>Name</th><th>Type</th><th>Info</th><th></th></tr></thead>
       <tbody>
         ${queueItems.map(q => `
-          <tr>
+          <tr style="cursor:pointer" data-action="view-${q.type}" data-id="${esc(q.id)}">
             <td>${avHtml(q.name, q.photo)}</td>
             <td>${esc(q.name)}</td>
             <td>${q.type}</td>
@@ -1152,8 +1237,6 @@ function renderDashboard() {
     </div>`;
   }).join("") : `<div class="empty">No open hire requests</div>`;
 
-  // (Agreement opens automatically after On Process)
-
   $("dashFeed").innerHTML = activityFeed.length ? activityFeed.map(f => `
     <div class="feed-item">
       <div class="feed-dot">${f.icon}</div>
@@ -1168,11 +1251,21 @@ function renderEmployers() {
   const pending = employers.filter(e => e.verification_status === "Pending").length;
 
   $("empKpis").innerHTML = `
-    <div class="kpi"><div class="label">Total Employers</div><div class="value">${employers.length}</div></div>
-    <div class="kpi"><div class="label">Verified</div><div class="value">${verified}</div></div>
-    <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending</div><div class="value">${pending}</div></div>
-    <div class="kpi"><div class="label">Open Requests</div><div class="value">${requests.filter(r => (r.status||"open")==="open").length}</div></div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="e-all" style="cursor:pointer"><div class="label">Total Employers</div><div class="value">${employers.length}</div></div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="e-verified" style="cursor:pointer"><div class="label">Verified</div><div class="value">${verified}</div></div>
+    <div class="kpi ${pending ? "alert" : ""}" role="button" tabindex="0" data-kpi="e-pending" style="cursor:pointer"><div class="label">Pending</div><div class="value">${pending}</div></div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="e-requests" style="cursor:pointer"><div class="label">Open Requests</div><div class="value">${requests.filter(r => (r.status||"open")==="open").length}</div></div>
   `;
+  $("empKpis").onclick = (ev) => {
+    const card = ev.target.closest("[data-kpi]");
+    if (!card) return;
+    const k = card.getAttribute("data-kpi");
+    if (k === "e-requests") { showView("matches"); return; }
+    if (k === "e-verified" && $("eStatusFilter")) $("eStatusFilter").value = "Verified";
+    else if (k === "e-pending" && $("eStatusFilter")) $("eStatusFilter").value = "Pending";
+    else if (k === "e-all" && $("eStatusFilter")) $("eStatusFilter").value = "all";
+    renderEmployers();
+  };
 
   const q = ($("eSearch")?.value || "").toLowerCase();
   const st = $("eStatusFilter")?.value || "all";
@@ -1221,11 +1314,21 @@ function renderWorkers() {
   const pending = workers.filter(w => w.status === "pending").length;
 
   $("workerKpis").innerHTML = `
-    <div class="kpi"><div class="label">Total Workers</div><div class="value">${workers.length}</div></div>
-    <div class="kpi"><div class="label">Available Now <span class="bdg ok" style="margin-left:6px">Ready</span></div><div class="value">${available}</div></div>
-    <div class="kpi"><div class="label">On Work</div><div class="value">${onWork}</div></div>
-    <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Verification</div><div class="value">${pending}</div></div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="w-all" style="cursor:pointer"><div class="label">Total Workers</div><div class="value">${workers.length}</div></div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="w-available" style="cursor:pointer"><div class="label">Available Now <span class="bdg ok" style="margin-left:6px">Ready</span></div><div class="value">${available}</div></div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="w-onwork" style="cursor:pointer"><div class="label">On Work</div><div class="value">${onWork}</div></div>
+    <div class="kpi ${pending ? "alert" : ""}" role="button" tabindex="0" data-kpi="w-pending" style="cursor:pointer"><div class="label">Pending Verification</div><div class="value">${pending}</div></div>
   `;
+  $("workerKpis").onclick = (ev) => {
+    const card = ev.target.closest("[data-kpi]");
+    if (!card) return;
+    const k = card.getAttribute("data-kpi");
+    if (k === "w-all") wFilter = "all";
+    else if (k === "w-available") wFilter = "Available";
+    else if (k === "w-onwork") wFilter = "On Work";
+    else if (k === "w-pending") wFilter = "Pending";
+    renderWorkers();
+  };
 
   const filters = [["all","All"],["Available","Available"],["On Work","On Work"],["Placed","Placed"],["Pending","Pending Verification"],["Inactive","Inactive"]];
   $("wChips").innerHTML = filters.map(([v,l]) =>
@@ -1279,11 +1382,19 @@ function renderMatches() {
   const onProcess = requests.filter(r => r.status === "on_process");
   const onWork = requests.filter(r => r.status === "on_work");
   $("matchKpis").innerHTML = `
-    <div class="kpi"><div class="label">Open Hire Requests</div><div class="value">${open.length}</div></div>
-    <div class="kpi"><div class="label">Available Workers</div><div class="value">${workers.filter(w=>w.availability_status==="Available").length}</div></div>
-    <div class="kpi"><div class="label">On Process</div><div class="value">${onProcess.length}</div></div>
-    <div class="kpi"><div class="label">On Work</div><div class="value">${onWork.length}</div></div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="m-open" style="cursor:pointer"><div class="label">Open Hire Requests</div><div class="value">${open.length}</div></div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="m-available" style="cursor:pointer"><div class="label">Available Workers</div><div class="value">${workers.filter(w=>w.availability_status==="Available").length}</div></div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="m-process" style="cursor:pointer"><div class="label">On Process</div><div class="value">${onProcess.length}</div></div>
+    <div class="kpi" role="button" tabindex="0" data-kpi="m-onwork" style="cursor:pointer"><div class="label">On Work</div><div class="value">${onWork.length}</div></div>
   `;
+  $("matchKpis").onclick = (ev) => {
+    const card = ev.target.closest("[data-kpi]");
+    if (!card) return;
+    const k = card.getAttribute("data-kpi");
+    if (k === "m-available") { wFilter = "Available"; showView("workers"); }
+    else if (k === "m-onwork") { wFilter = "On Work"; showView("workers"); }
+    // open / process stay on matches (already here)
+  };
 
   // Show open + on_process so admin can continue agreement / OTP / finalize
   const pipeline = [...open, ...onProcess];
@@ -1720,53 +1831,79 @@ async function finalizeAgreement() {
     if (signedUrl) patch.signedAgreementUrl = signedUrl;
     if (signedNote) patch.signedAgreementNote = signedNote;
 
+    // 1) Always update the hire request first (core path)
     await updateDoc(doc(db, "requests", currentAgreementRequestId), patch);
 
-    // Dedicated agreements collection — visible on both worker & employer profiles
-    const agRef = doc(collection(db, "agreements"));
-    await setDoc(agRef, {
-      requestId: currentAgreementRequestId,
-      workerId: workerId || null,
-      employerId: employerId || null,
-      workerName: agreementData.workerName,
-      employerName: agreementData.empName,
-      employerPhone: agreementData.empPhone,
-      skill: agreementData.skill,
-      pay: agreementData.pay,
-      payType: agreementData.payType,
-      serviceFee: feeAmt,
-      serviceFeeCollected: true,
-      agreementData,
-      signedAgreementUrl: signedUrl || null,
-      signedAgreementNote: signedNote || null,
-      status: "signed",
-      agreementSignedAt: serverTimestamp(),
-      createdAt: serverTimestamp()
-    });
-
-    // Link latest agreement id on worker + employer
-    if (workerId) {
-      await updateDoc(doc(db, "workers", workerId), {
-        available: false,
-        work_status: "on_work",
-        availability_status: "On Work",
-        assigned_employer: agreementData.empName || null,
-        latestAgreementId: agRef.id
-      }).catch(() => {});
-    }
-    if (employerId) {
-      await updateDoc(doc(db, "employers", employerId), {
-        latestAgreementId: agRef.id
-      }).catch(async () => {
-        await setDoc(doc(db, "employers", employerId), { latestAgreementId: agRef.id }, { merge: true });
+    // 2) Agreements collection (may fail if Firestore rules block it — non-fatal)
+    let agId = null;
+    try {
+      const agRef = doc(collection(db, "agreements"));
+      await setDoc(agRef, {
+        requestId: currentAgreementRequestId,
+        workerId: workerId || null,
+        employerId: employerId || null,
+        workerName: agreementData.workerName,
+        employerName: agreementData.empName,
+        employerPhone: agreementData.empPhone,
+        skill: agreementData.skill,
+        pay: agreementData.pay,
+        payType: agreementData.payType,
+        serviceFee: feeAmt,
+        serviceFeeCollected: true,
+        agreementData,
+        signedAgreementUrl: signedUrl || null,
+        signedAgreementNote: signedNote || null,
+        status: "signed",
+        agreementSignedAt: serverTimestamp(),
+        createdAt: serverTimestamp()
       });
+      agId = agRef.id;
+    } catch (agErr) {
+      console.warn("agreements collection write failed (check Firestore rules):", agErr);
     }
 
-    toast("✅ ተፈርሟል · ተሰቅሏል · ክፍያ · ሰራተኛ በሥራ ላይ");
+    // 3) Worker → On Work
+    if (workerId) {
+      try {
+        const wPatch = {
+          available: false,
+          work_status: "on_work",
+          availability_status: "On Work",
+          assigned_employer: agreementData.empName || null
+        };
+        if (agId) wPatch.latestAgreementId = agId;
+        await updateDoc(doc(db, "workers", workerId), wPatch);
+      } catch (wErr) {
+        console.warn("worker update:", wErr);
+        toast("Agreement saved on request, but worker status update failed: " + wErr.message);
+      }
+    }
+
+    // 4) Employer link (optional)
+    if (employerId) {
+      try {
+        const ePatch = agId ? { latestAgreementId: agId } : {};
+        if (Object.keys(ePatch).length) {
+          await updateDoc(doc(db, "employers", employerId), ePatch);
+        }
+      } catch (_) {
+        try {
+          if (agId) await setDoc(doc(db, "employers", employerId), { latestAgreementId: agId }, { merge: true });
+        } catch (__) {}
+      }
+    }
+
+    toast(agId
+      ? "✅ ተፈርሟል · ተሰቅሏል · ክፍያ · ሰራተኛ በሥራ ላይ"
+      : "✅ Saved on request · worker On Work (add Firestore rules for /agreements for full archive)");
     $("agreementModal").classList.add("hid");
     await loadAll();
   } catch (e) {
-    toast("Error: " + e.message);
+    const msg = (e && (e.code === "permission-denied" || /insufficient permissions|permission/i.test(e.message || "")))
+      ? "Firestore permission denied. Update rules for requests/workers/agreements. See console."
+      : (e.message || String(e));
+    console.error("finalizeAgreement", e);
+    toast("Error: " + msg);
   }
 }
 
