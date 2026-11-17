@@ -10,52 +10,34 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="TD Admin">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="icon" type="image/png" href="admin-icon-192.png">
 <link rel="apple-touch-icon" href="admin-apple-touch-icon.png">
 <style>
 :root {
-  --bg: #f1f5f9;
-  --fg: #0f172a;
-  --hint: #64748b;
-  --card: #ffffff;
-  --btn: #0284c7;
-  --btn-hover: #0369a1;
-  --btnfg: #ffffff;
-  --danger: #ef4444;
-  --success: #059669;
-  --warning: #d97706;
-  --border: #e2e8f0;
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-  --radius: 12px;
-  --sidebar-w: 240px;
-  --header-h: 64px;
+  --bg: #f1f5f9; --fg: #0f172a; --hint: #64748b; --card: #ffffff;
+  --btn: #0284c7; --btn-hover: #0369a1; --btnfg: #ffffff;
+  --danger: #ef4444; --success: #059669; --warning: #d97706;
+  --border: #e2e8f0; --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+  --radius: 12px; --sidebar-w: 240px; --header-h: 64px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   background: var(--bg); color: var(--fg);
   font: 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
 }
 img { max-width: 100%; display: block; }
 button, input, select, textarea { font: inherit; }
 a { color: var(--btn); text-decoration: none; }
 .hid { display: none !important; }
 
-/* ===== Layout ===== */
 .app { display: flex; min-height: 100vh; }
 .sidebar {
-  width: var(--sidebar-w); background: var(--card);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  position: fixed; top: 0; left: 0; bottom: 0; z-index: 40;
+  width: var(--sidebar-w); background: var(--card); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 40;
 }
-.sidebar-brand {
-  display: flex; align-items: center; gap: 10px;
-  padding: 18px 20px; border-bottom: 1px solid var(--border);
-}
+.sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 18px 20px; border-bottom: 1px solid var(--border); }
 .brand-icon {
   width: 36px; height: 36px; border-radius: 10px;
   background: linear-gradient(135deg, #0ea5e9, #0369a1);
@@ -65,47 +47,32 @@ a { color: var(--btn); text-decoration: none; }
 .brand-text span { display: block; font-size: 11px; font-weight: 500; color: var(--hint); }
 .nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
 .nav-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px; border-radius: 10px;
-  background: none; border: 0; color: var(--fg);
-  font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; width: 100%;
-  transition: background .15s;
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px;
+  background: none; border: 0; color: var(--fg); font-size: 14px; font-weight: 500;
+  cursor: pointer; text-align: left; width: 100%; transition: background .15s;
 }
 .nav-item:hover { background: #f1f5f9; }
 .nav-item.active { background: #e0f2fe; color: #0369a1; font-weight: 600; }
 .nav-item .ni { font-size: 18px; width: 22px; text-align: center; }
-.nav-item .badge {
-  margin-left: auto; min-width: 20px; padding: 1px 7px;
-  border-radius: 999px; background: var(--danger); color: #fff;
-  font-size: 11px; font-weight: 700; text-align: center;
-}
-.sidebar-footer {
-  padding: 12px 16px; border-top: 1px solid var(--border);
-  font-size: 12px; color: var(--hint);
-}
+.sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--hint); }
 
 .main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .topbar {
-  height: var(--header-h); background: var(--card);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 24px; position: sticky; top: 0; z-index: 30;
+  height: var(--header-h); background: var(--card); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+  position: sticky; top: 0; z-index: 30;
 }
 .topbar h1 { font-size: 18px; font-weight: 700; }
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
 .btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 16px; border-radius: 8px; border: 0;
-  font-size: 13px; font-weight: 600; cursor: pointer;
-  transition: background .15s, opacity .15s;
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px;
+  border: 0; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s, opacity .15s;
 }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
 .btn-primary { background: var(--btn); color: var(--btnfg); }
 .btn-primary:hover:not(:disabled) { background: var(--btn-hover); }
-.btn-secondary {
-  background: var(--card); color: var(--fg);
-  border: 1px solid var(--border);
-}
+.btn-secondary { background: var(--card); color: var(--fg); border: 1px solid var(--border); }
 .btn-secondary:hover:not(:disabled) { background: #f8fafc; }
 .btn-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
 .btn-warning { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
@@ -113,54 +80,42 @@ a { color: var(--btn); text-decoration: none; }
 .btn-ghost { background: none; color: var(--btn); border: 0; padding: 6px 10px; }
 .btn-sm { padding: 5px 10px; font-size: 12px; }
 .btn-icon {
-  width: 36px; height: 36px; padding: 0;
-  display: grid; place-items: center; border-radius: 8px;
-  background: none; border: 1px solid var(--border); cursor: pointer;
+  width: 36px; height: 36px; padding: 0; display: grid; place-items: center;
+  border-radius: 8px; background: none; border: 1px solid var(--border); cursor: pointer;
 }
 
 .content { padding: 20px 24px 40px; flex: 1; }
 .view { display: none; }
 .view.active { display: block; }
 
-/* ===== Shared UI ===== */
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
 .kpi {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow);
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 18px; box-shadow: var(--shadow);
 }
 .kpi .label { font-size: 13px; font-weight: 600; color: var(--hint); display: flex; align-items: center; gap: 6px; }
 .kpi .value { font-size: 28px; font-weight: 800; line-height: 1.15; margin-top: 4px; }
-.kpi .sub { font-size: 12px; color: var(--hint); margin-top: 2px; }
-.kpi .trend { font-size: 12px; font-weight: 600; margin-left: 6px; }
-.kpi .trend.up { color: var(--success); }
-.kpi .trend.down { color: var(--danger); }
+.kpi .trend { font-size: 12px; font-weight: 600; margin-left: 6px; color: var(--success); }
 .kpi.alert { border-color: #fbbf24; background: #fffbeb; }
 .kpi.alert .value { color: #b45309; }
 
 .panel {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 16px;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); margin-bottom: 16px;
 }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 18px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap;
 }
 .panel-head h3 { font-size: 15px; font-weight: 700; }
-.panel-body { padding: 0; }
 .panel-body.pad { padding: 16px 18px; }
 
-.toolbar {
-  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center;
-}
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center; }
 .toolbar .search {
-  flex: 1 1 220px; max-width: 340px;
-  display: flex; align-items: center; gap: 8px;
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 8px; padding: 0 12px;
+  flex: 1 1 220px; max-width: 340px; display: flex; align-items: center; gap: 8px;
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 0 12px;
 }
-.toolbar .search input {
-  border: 0; background: transparent; padding: 9px 0; width: 100%; outline: none;
-}
+.toolbar .search input { border: 0; background: transparent; padding: 9px 0; width: 100%; outline: none; }
 .toolbar select, .filter-select {
   padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
   background: var(--card); color: var(--fg); min-width: 140px;
@@ -168,32 +123,26 @@ a { color: var(--btn); text-decoration: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
   padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
-  background: var(--card); font-size: 13px; font-weight: 500; cursor: pointer;
-  color: var(--fg);
+  background: var(--card); font-size: 13px; font-weight: 500; cursor: pointer; color: var(--fg);
 }
 .chip.active { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; font-weight: 600; }
 
-/* Tables */
 .tbl-wrap { overflow-x: auto; }
 table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 .tbl th {
   padding: 11px 14px; text-align: left; font-size: 12px; font-weight: 600;
-  color: var(--hint); background: #f8fafc; white-space: nowrap;
-  border-bottom: 1px solid var(--border);
+  color: var(--hint); background: #f8fafc; white-space: nowrap; border-bottom: 1px solid var(--border);
 }
 .tbl td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
 .tbl tbody tr:last-child td { border-bottom: 0; }
 .tbl tbody tr:hover td { background: #f8fafc; }
 .cell-user { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.cell-user .info { min-width: 0; }
 .cell-user .info b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cell-user .info span { font-size: 12px; color: var(--hint); }
 .av {
-  width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
-  background: #e0f2fe; color: #0369a1; display: grid; place-items: center;
-  font-size: 13px; font-weight: 700; flex: none;
+  width: 36px; height: 36px; border-radius: 50%; background: #e0f2fe; color: #0369a1;
+  display: grid; place-items: center; font-size: 13px; font-weight: 700; flex: none;
 }
-.av img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 .acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .bdg {
   display: inline-block; padding: 3px 9px; border-radius: 999px;
@@ -217,7 +166,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 }
 .pagination button { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 
-/* Dashboard specific */
 .feed-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
 .feed-item:last-child { border-bottom: 0; }
 .feed-dot { width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; display: grid; place-items: center; font-size: 14px; flex: none; }
@@ -230,13 +178,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 .job-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
 .job-card .meta { font-size: 12px; color: var(--hint); display: flex; flex-wrap: wrap; gap: 8px; }
 .match-card {
-  display: flex; align-items: center; gap: 12px; padding: 12px 0;
-  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border);
 }
 .match-card:last-child { border-bottom: 0; }
 .match-score { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: #dcfce7; color: #166534; }
 
-/* Settings */
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; overflow-x: auto; }
 .tab {
   padding: 10px 16px; border: 0; background: none; font-size: 13px; font-weight: 600;
@@ -253,8 +199,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 .form-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 14px; align-items: center; }
 .form-row label { font-size: 13px; font-weight: 500; color: var(--fg); min-width: 200px; }
 .form-row input[type="text"], .form-row input[type="number"], .form-row select {
-  padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff;
-  min-width: 160px;
+  padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; min-width: 160px;
 }
 .toggle {
   position: relative; width: 44px; height: 24px; background: #cbd5e1;
@@ -262,29 +207,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 }
 .toggle.on { background: var(--btn); }
 .toggle::after {
-  content: ""; position: absolute; top: 3px; left: 3px;
-  width: 18px; height: 18px; background: #fff; border-radius: 50%;
-  transition: transform .2s; box-shadow: 0 1px 2px rgb(0 0 0 / .15);
+  content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+  background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 2px rgb(0 0 0 / .15);
 }
 .toggle.on::after { transform: translateX(20px); }
 
-/* Modal */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(15,23,42,.5);
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px; z-index: 100;
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #0f172a; color: #fff; padding: 12px 20px; border-radius: 10px;
+  font-size: 14px; font-weight: 500; z-index: 200; box-shadow: 0 10px 25px rgb(0 0 0 / .2);
+  opacity: 0; transition: opacity .25s; pointer-events: none;
 }
-.modal-box {
-  background: var(--card); border-radius: 14px; padding: 24px;
-  max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-}
-.modal-box h3 { font-size: 17px; margin-bottom: 6px; text-align: center; }
-.modal-box p { color: var(--hint); font-size: 13px; margin-bottom: 16px; text-align: center; }
-.modal-actions { display: flex; gap: 10px; margin-top: 18px; }
-.modal-actions .btn { flex: 1; justify-content: center; }
+.toast.show { opacity: 1; }
 
-/* Mobile */
 @media (max-width: 900px) {
   .sidebar {
     width: 100%; height: auto; position: fixed; left: 0; right: 0; bottom: 0; top: auto;
@@ -292,16 +227,9 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
     z-index: 50; padding-bottom: env(safe-area-inset-bottom, 0);
   }
   .sidebar-brand, .sidebar-footer { display: none; }
-  .nav {
-    flex-direction: row; justify-content: space-around; padding: 6px 4px;
-    width: 100%; gap: 0; overflow-x: auto;
-  }
-  .nav-item {
-    flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 10px;
-    flex: 1; text-align: center; min-width: 0;
-  }
+  .nav { flex-direction: row; justify-content: space-around; padding: 6px 4px; width: 100%; gap: 0; }
+  .nav-item { flex-direction: column; gap: 2px; padding: 6px 4px; font-size: 10px; flex: 1; text-align: center; }
   .nav-item .ni { font-size: 18px; }
-  .nav-item .badge { position: absolute; top: 2px; right: 4px; margin: 0; }
   .main { margin-left: 0; padding-bottom: 72px; }
   .content { padding: 14px 12px 24px; }
   .topbar { padding: 0 14px; }
@@ -310,22 +238,16 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
   .tbl thead { display: none; }
   .tbl, .tbl tbody, .tbl tr { display: block; width: 100%; }
   .tbl tr { padding: 12px 14px; border-bottom: 1px solid var(--border); }
-  .tbl td {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 4px 0; border: 0; gap: 10px;
-  }
+  .tbl td { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border: 0; gap: 10px; }
   .tbl td::before { content: attr(data-l); font-size: 12px; font-weight: 600; color: var(--hint); flex: none; }
   .tbl td.c-user, .tbl td.c-act { display: block; }
   .tbl td.c-user::before, .tbl td.c-act::before { display: none; }
 }
-@media (max-width: 500px) {
-  .kpis { grid-template-columns: 1fr; }
-}
+@media (max-width: 500px) { .kpis { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 <div class="app">
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-icon">TD</div>
@@ -339,21 +261,20 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
       <button class="nav-item" data-view="payroll"><span class="ni">⏱️</span> Timesheets & Payroll</button>
       <button class="nav-item" data-view="settings"><span class="ni">⚙️</span> Settings</button>
     </nav>
-    <div class="sidebar-footer">v2.0 · Manager Panel</div>
+    <div class="sidebar-footer">v2.0 · Interactive Demo</div>
   </aside>
 
-  <!-- Main -->
   <div class="main">
     <header class="topbar">
       <h1 id="pageTitle">Dashboard</h1>
       <div class="topbar-actions">
-        <button class="btn-icon" title="Notifications">🔔</button>
+        <button class="btn-icon" title="Notifications" id="notifBtn">🔔</button>
         <button class="btn btn-primary" id="topActionBtn">+ New</button>
       </div>
     </header>
 
     <div class="content">
-      <!-- ========== DASHBOARD ========== -->
+      <!-- DASHBOARD -->
       <section id="v-dashboard" class="view active">
         <div class="kpis" id="dashKpis"></div>
         <div class="grid-2">
@@ -375,7 +296,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
         <div class="grid-2">
           <div class="panel">
             <div class="panel-head"><h3>Weekly Job Requests vs Placements</h3></div>
-            <div class="panel-body pad" id="dashChart">
+            <div class="panel-body pad">
               <svg viewBox="0 0 320 140" width="100%" height="140">
                 <polyline fill="none" stroke="#0ea5e9" stroke-width="2.5" points="20,90 80,70 140,95 200,55 260,75 300,40"/>
                 <polyline fill="none" stroke="#14b8a6" stroke-width="2.5" points="20,110 80,60 140,75 200,90 260,50 300,30"/>
@@ -399,10 +320,10 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
         </div>
       </section>
 
-      <!-- ========== EMPLOYERS ========== -->
+      <!-- EMPLOYERS -->
       <section id="v-employers" class="view">
         <div class="toolbar">
-          <button class="btn btn-primary" id="btnAddEmployer">+ Add Employer</button>
+          <button class="btn btn-primary" data-action="add-employer">+ Add Employer</button>
           <div class="search"><span>🔍</span><input type="search" id="eSearch" placeholder="Search Employers..."></div>
           <select id="eStatusFilter" class="filter-select">
             <option value="all">All Status</option>
@@ -422,33 +343,27 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
             <table class="tbl">
               <thead>
                 <tr>
-                  <th>Company Name</th>
-                  <th>Industry</th>
-                  <th>Active Jobs</th>
-                  <th>Placed Workers</th>
-                  <th>Verification Status</th>
-                  <th>Billing Status</th>
-                  <th>Actions</th>
+                  <th>Company Name</th><th>Industry</th><th>Active Jobs</th><th>Placed Workers</th>
+                  <th>Verification Status</th><th>Billing Status</th><th>Actions</th>
                 </tr>
               </thead>
               <tbody id="tbEmployers"></tbody>
             </table>
           </div>
-          <div class="pagination"><button disabled>‹</button><span>1 of 12</span><button>›</button></div>
+          <div class="pagination"><button disabled>‹</button><span>1 of 1</span><button disabled>›</button></div>
         </div>
       </section>
 
-      <!-- ========== WORKERS ========== -->
+      <!-- WORKERS -->
       <section id="v-workers" class="view">
         <div class="toolbar">
-          <button class="btn btn-primary" id="btnAddWorker">+ Add Worker</button>
+          <button class="btn btn-primary" data-action="add-worker">+ Add Worker</button>
           <div class="search"><span>🔍</span><input type="search" id="wSearch" placeholder="Search Workers by name, skill, or ID..."></div>
           <div class="chips" id="wChips"></div>
           <select id="wSkillFilter" class="filter-select">
             <option value="all">Filter by Skill</option>
             <option>Electrician</option><option>Hospitality Staff</option><option>Warehouse Associate</option>
             <option>Registered Nurse</option><option>Delivery Driver</option><option>Office Admin</option>
-            <option>Domestic Worker</option><option>Construction Worker</option>
           </select>
         </div>
         <div class="kpis" id="workerKpis"></div>
@@ -457,26 +372,21 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
             <table class="tbl">
               <thead>
                 <tr>
-                  <th>Worker Name & ID</th>
-                  <th>Primary Skill / Role</th>
-                  <th>Experience</th>
-                  <th>Availability Status</th>
-                  <th>Verification</th>
-                  <th>Assigned Employer</th>
-                  <th>Actions</th>
+                  <th>Worker Name & ID</th><th>Primary Skill / Role</th><th>Experience</th>
+                  <th>Availability Status</th><th>Verification</th><th>Assigned Employer</th><th>Actions</th>
                 </tr>
               </thead>
               <tbody id="tbWorkers"></tbody>
             </table>
           </div>
-          <div class="pagination"><button disabled>‹</button><span>1 of 45</span><button>›</button></div>
+          <div class="pagination"><button disabled>‹</button><span>1 of 1</span><button disabled>›</button></div>
         </div>
       </section>
 
-      <!-- ========== JOB MATCHES ========== -->
+      <!-- JOB MATCHES -->
       <section id="v-matches" class="view">
         <div class="toolbar">
-          <button class="btn btn-primary" id="btnCreateMatch">+ Create Match</button>
+          <button class="btn btn-primary" data-action="create-match">+ Create Match</button>
           <div class="search"><span>🔍</span><input type="search" id="mSearch" placeholder="Search jobs, workers, skills..."></div>
           <select id="mStatusFilter" class="filter-select">
             <option value="all">Filter by Status</option>
@@ -496,17 +406,17 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
           <div class="panel">
             <div class="panel-head">
               <h3>Recommended Worker Matches</h3>
-              <span class="bdg ok" id="matchAvg">98% Avg</span>
+              <span class="bdg ok">98% Avg</span>
             </div>
             <div class="panel-body pad" id="recMatches"></div>
           </div>
         </div>
       </section>
 
-      <!-- ========== TIMESHEETS & PAYROLL ========== -->
+      <!-- PAYROLL -->
       <section id="v-payroll" class="view">
         <div class="toolbar">
-          <button class="btn btn-primary" id="btnApproveAll">+ Approve All</button>
+          <button class="btn btn-primary" data-action="approve-all">+ Approve All</button>
           <div class="search"><span>🔍</span><input type="search" id="pSearch" placeholder="Search timesheets, workers, or employers..."></div>
           <div class="chips" id="pChips"></div>
           <select id="pPeriod" class="filter-select">
@@ -522,55 +432,42 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
             <table class="tbl">
               <thead>
                 <tr>
-                  <th>Worker Name & ID</th>
-                  <th>Employer</th>
-                  <th>Hours Logged</th>
-                  <th>Worker Pay</th>
-                  <th>Employer Bill</th>
-                  <th>Approval Status</th>
-                  <th>Actions</th>
+                  <th>Worker Name & ID</th><th>Employer</th><th>Hours Logged</th>
+                  <th>Worker Pay</th><th>Employer Bill</th><th>Approval Status</th><th>Actions</th>
                 </tr>
               </thead>
               <tbody id="tbPayroll"></tbody>
             </table>
           </div>
-          <div class="pagination"><button disabled>‹</button><span>1 of 8</span><button>›</button></div>
+          <div class="pagination"><button disabled>‹</button><span>1 of 1</span><button disabled>›</button></div>
         </div>
       </section>
 
-      <!-- ========== SETTINGS ========== -->
+      <!-- SETTINGS -->
       <section id="v-settings" class="view">
-        <div class="tabs" id="settingsTabs">
+        <div class="tabs">
           <button class="tab active" data-tab="staff">Staff & Permissions</button>
           <button class="tab" data-tab="commission">Commission & Billing Rules</button>
           <button class="tab" data-tab="verification">Verification & Alerts</button>
           <button class="tab" data-tab="general">General Agency Info</button>
         </div>
-
         <div id="tab-staff">
           <div class="settings-grid" id="staffKpis"></div>
           <div class="panel">
             <div class="panel-head">
               <h3>Staff Roles & Access Control</h3>
-              <button class="btn btn-primary btn-sm" id="btnInviteStaff">+ Invite Staff</button>
+              <button class="btn btn-primary btn-sm" data-action="invite-staff">+ Invite Staff</button>
             </div>
             <div class="tbl-wrap">
               <table class="tbl">
                 <thead>
-                  <tr>
-                    <th>Staff Member</th>
-                    <th>Role</th>
-                    <th>Permissions Scope</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
+                  <tr><th>Staff Member</th><th>Role</th><th>Permissions Scope</th><th>Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="tbStaff"></tbody>
               </table>
             </div>
           </div>
         </div>
-
         <div id="tab-commission" class="hid">
           <div class="panel">
             <div class="panel-head"><h3>Agency Rules & Commission Settings</h3></div>
@@ -581,11 +478,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
               </div>
               <div class="form-row">
                 <label>Require ID & License Verification Before Matching</label>
-                <button class="toggle on" id="setRequireId" aria-label="Toggle"></button>
+                <button class="toggle on" id="setRequireId" data-toggle="requireId"></button>
               </div>
               <div class="form-row">
                 <label>Automated Shift Check-In Reminders (SMS/Telegram)</label>
-                <button class="toggle on" id="setReminders" aria-label="Toggle"></button>
+                <button class="toggle on" id="setReminders" data-toggle="reminders"></button>
               </div>
               <div class="form-row">
                 <label>Invoice Payment Terms</label>
@@ -597,12 +494,11 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
                 </select>
               </div>
               <div style="margin-top:16px">
-                <button class="btn btn-primary" id="btnSaveSettings">Save Changes</button>
+                <button class="btn btn-primary" data-action="save-settings">Save Changes</button>
               </div>
             </div>
           </div>
         </div>
-
         <div id="tab-verification" class="hid">
           <div class="panel">
             <div class="panel-head"><h3>Verification Rules</h3></div>
@@ -613,36 +509,23 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
               </div>
               <div class="form-row">
                 <label>Require Guarantor for Domestic Workers</label>
-                <button class="toggle on" aria-label="Toggle"></button>
+                <button class="toggle on" data-toggle="guarantor"></button>
               </div>
               <div class="form-row">
                 <label>Police Clearance Required for Security Roles</label>
-                <button class="toggle on" aria-label="Toggle"></button>
+                <button class="toggle on" data-toggle="police"></button>
               </div>
             </div>
           </div>
         </div>
-
         <div id="tab-general" class="hid">
           <div class="panel">
             <div class="panel-head"><h3>Agency Information</h3></div>
             <div class="panel-body pad">
-              <div class="form-row">
-                <label>Agency Name</label>
-                <input type="text" value="Tamagn Delala">
-              </div>
-              <div class="form-row">
-                <label>Support Phone</label>
-                <input type="text" value="+251 9XX XXX XXX">
-              </div>
-              <div class="form-row">
-                <label>Telegram Bot</label>
-                <input type="text" value="@TamagnDelalaBot">
-              </div>
-              <div class="form-row">
-                <label>Default City</label>
-                <input type="text" value="Addis Ababa">
-              </div>
+              <div class="form-row"><label>Agency Name</label><input type="text" value="Tamagn Delala"></div>
+              <div class="form-row"><label>Support Phone</label><input type="text" value="+251 9XX XXX XXX"></div>
+              <div class="form-row"><label>Telegram Bot</label><input type="text" value="@TamagnDelalaBot"></div>
+              <div class="form-row"><label>Default City</label><input type="text" value="Addis Ababa"></div>
             </div>
           </div>
         </div>
@@ -651,25 +534,13 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
   </div>
 </div>
 
-<!-- Simple modal -->
-<div class="modal-overlay hid" id="modal">
-  <div class="modal-box">
-    <h3 id="modalTitle">Confirm</h3>
-    <p id="modalMsg"></p>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" id="modalCancel">Cancel</button>
-      <button class="btn btn-primary" id="modalConfirm">Confirm</button>
-    </div>
-  </div>
-</div>
+<div class="toast" id="toast"></div>
 
 <script>
 // ============================================================
-// MOCK DATA (matches screenshots + requirements)
-// Field names follow the exact schema you specified.
-// Swap the arrays for Firestore snapshots when ready.
+// STATE (in-memory – simulates Firebase)
 // ============================================================
-const employers = [
+let employers = [
   { id: "e1", company_name: "Delta Corp", email: "delta.corp@contact.com", industry: "Logistics", active_jobs_count: 8, placed_workers_count: 45, verification_status: "Verified", billing_status: "Current", logo: "Δ" },
   { id: "e2", company_name: "Logistics Inc", email: "ops@logistics.inc", industry: "Manufacturing", active_jobs_count: 12, placed_workers_count: 61, verification_status: "Pending", billing_status: "Pending", logo: "L" },
   { id: "e3", company_name: "Horizon Construction", email: "hr@horizon.build", industry: "Construction", active_jobs_count: 5, placed_workers_count: 30, verification_status: "Verified", billing_status: "Current", logo: "H" },
@@ -678,25 +549,25 @@ const employers = [
   { id: "e6", company_name: "Quantum Solutions", email: "recruiting@quantum.solutions", industry: "Technology", active_jobs_count: 0, placed_workers_count: 5, verification_status: "Pending", billing_status: "Not Started", logo: "Q" },
 ];
 
-const workers = [
-  { id: "W-1042", full_name: "Dawit Bekele", primary_skill_role: "Electrician", experience_years: 5, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Horizon Construction", skill_tags: ["Electrician","Safety"], photo: null },
-  { id: "W-1043", full_name: "Selamawit Tadesse", primary_skill_role: "Hospitality Staff", experience_years: 3, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Hospitality"], photo: null },
-  { id: "W-1044", full_name: "Bereket Alemu", primary_skill_role: "Warehouse Associate", experience_years: 2, availability_status: "Pending", verification_status: "Pending", assigned_employer: null, skill_tags: ["Warehouse"], photo: null },
-  { id: "W-1045", full_name: "Tigist Haile", primary_skill_role: "Registered Nurse", experience_years: 6, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Metro Healthcare", skill_tags: ["Nurse","Healthcare"], photo: null },
-  { id: "W-1046", full_name: "Yonas Kebede", primary_skill_role: "Delivery Driver", experience_years: 4, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Driver"], photo: null },
-  { id: "W-1047", full_name: "Meron Girma", primary_skill_role: "Office Admin", experience_years: 3, availability_status: "Inactive", verification_status: "Verified", assigned_employer: null, skill_tags: ["Admin"], photo: null },
-  { id: "W-1040", full_name: "Anch Chileman", primary_skill_role: "Warehouse Associate", experience_years: 3, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Warehouse"], photo: null },
-  { id: "W-1041", full_name: "Sarah Jolley", primary_skill_role: "General Labor", experience_years: 2, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Delta Corp", skill_tags: ["Labor"], photo: null },
+let workers = [
+  { id: "W-1042", full_name: "Dawit Bekele", primary_skill_role: "Electrician", experience_years: 5, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Horizon Construction", skill_tags: ["Electrician","Safety"] },
+  { id: "W-1043", full_name: "Selamawit Tadesse", primary_skill_role: "Hospitality Staff", experience_years: 3, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Hospitality"] },
+  { id: "W-1044", full_name: "Bereket Alemu", primary_skill_role: "Warehouse Associate", experience_years: 2, availability_status: "Pending", verification_status: "Pending", assigned_employer: null, skill_tags: ["Warehouse"] },
+  { id: "W-1045", full_name: "Tigist Haile", primary_skill_role: "Registered Nurse", experience_years: 6, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Metro Healthcare", skill_tags: ["Nurse"] },
+  { id: "W-1046", full_name: "Yonas Kebede", primary_skill_role: "Delivery Driver", experience_years: 4, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Driver"] },
+  { id: "W-1047", full_name: "Meron Girma", primary_skill_role: "Office Admin", experience_years: 3, availability_status: "Inactive", verification_status: "Verified", assigned_employer: null, skill_tags: ["Admin"] },
+  { id: "W-1040", full_name: "Anch Chileman", primary_skill_role: "Warehouse Associate", experience_years: 3, availability_status: "Available", verification_status: "Verified", assigned_employer: null, skill_tags: ["Warehouse"] },
+  { id: "W-1041", full_name: "Sarah Jolley", primary_skill_role: "General Labor", experience_years: 2, availability_status: "Placed", verification_status: "Verified", assigned_employer: "Delta Corp", skill_tags: ["Labor"] },
 ];
 
-const jobOrders = [
-  { id: "j1", job_title: "Electrician", employer_id: "e3", employer_name: "Horizon Construction", required_skill: "Electrician", workers_needed_count: 2, location_city: "Seattle, WA", pay_rate: "$35/hr", urgency_level: "Urgent", status: "Open", start_date: "2026-09-25" },
-  { id: "j2", job_title: "Warehouse Associate", employer_id: "e2", employer_name: "Logistics Inc", required_skill: "Warehouse Associate", workers_needed_count: 10, location_city: "Addis Ababa", pay_rate: "Negotiable", urgency_level: "Urgent", status: "Open", start_date: "2026-09-26" },
-  { id: "j3", job_title: "RN", employer_id: "e5", employer_name: "Metro Healthcare", required_skill: "Registered Nurse", workers_needed_count: 4, location_city: "Addis Ababa", pay_rate: "Monthly", urgency_level: "Normal", status: "Open", start_date: "2026-10-01" },
-  { id: "j4", job_title: "Senior Welder", employer_id: "e1", employer_name: "Delta Corp", required_skill: "Welder", workers_needed_count: 1, location_city: "Addis Ababa", pay_rate: "Daily", urgency_level: "Urgent", status: "Open", start_date: "2026-09-25" },
+let jobOrders = [
+  { id: "j1", job_title: "Electrician", employer_name: "Horizon Construction", required_skill: "Electrician", workers_needed_count: 2, location_city: "Addis Ababa", pay_rate: "ETB 800/day", urgency_level: "Urgent", status: "Open", start_date: "2026-11-20" },
+  { id: "j2", job_title: "Warehouse Associate", employer_name: "Logistics Inc", required_skill: "Warehouse Associate", workers_needed_count: 10, location_city: "Addis Ababa", pay_rate: "Negotiable", urgency_level: "Urgent", status: "Open", start_date: "2026-11-22" },
+  { id: "j3", job_title: "RN", employer_name: "Metro Healthcare", required_skill: "Registered Nurse", workers_needed_count: 4, location_city: "Addis Ababa", pay_rate: "Monthly", urgency_level: "Normal", status: "Open", start_date: "2026-12-01" },
+  { id: "j4", job_title: "Senior Welder", employer_name: "Delta Corp", required_skill: "Welder", workers_needed_count: 1, location_city: "Addis Ababa", pay_rate: "Daily", urgency_level: "Urgent", status: "Open", start_date: "2026-11-18" },
 ];
 
-const timesheets = [
+let timesheets = [
   { id: "t1", worker_id: "W-1042", worker_name: "Dawit Bekele", employer_name: "Horizon Construction", hours: 40.0, worker_pay: 1400, employer_bill: 1850, approval_status: "Approved" },
   { id: "t2", worker_id: "W-1043", worker_name: "Selamawit Tadesse", employer_name: "Logistics Inc", hours: 38.5, worker_pay: 962.50, employer_bill: 1280, approval_status: "Pending" },
   { id: "t3", worker_id: "W-1044", worker_name: "Bereket Alemu", employer_name: "Horizon Construction", hours: 40.0, worker_pay: 1200, employer_bill: 1550, approval_status: "Approved" },
@@ -705,18 +576,22 @@ const timesheets = [
   { id: "t6", worker_id: "W-1040", worker_name: "Anch Chileman", employer_name: "Logistics Inc", hours: 37.0, worker_pay: 925, employer_bill: 1210, approval_status: "Paid" },
 ];
 
-const staff = [
+let staff = [
   { id: "s1", full_name: "Henok Fikru", role: "Super Admin", permissions_scope: "Full System, Payroll & Settings", status: "Active", is_owner: true },
   { id: "s2", full_name: "Selamawit Bekele", role: "Placement Coordinator", permissions_scope: "Workers, Employers, Job Matches", status: "Active" },
   { id: "s3", full_name: "Dawit Tadesse", role: "Payroll Officer", permissions_scope: "Timesheets, Invoices & Payouts", status: "Active" },
   { id: "s4", full_name: "Meron Alemu", role: "Verification Specialist", permissions_scope: "Approve/Reject Workers & Employers", status: "Active" },
 ];
 
-const activityFeed = [
-  { icon: "👤", text: "Sarah J. checked in – General Labor (Site A)", time: "9:40 PM", ago: "3 months ago" },
-  { icon: "✓", text: "Mark R. completed shift – Delivery Driver (Site B)", time: "9:45 PM", ago: "1 month ago" },
-  { icon: "✓", text: "Mark R. completed shift – Delivery Driver (Site B)", time: "9:45 PM", ago: "1 month ago" },
+let activityFeed = [
+  { icon: "👤", text: "Sarah J. checked in – General Labor (Site A)", time: "9:40 PM", ago: "just now" },
+  { icon: "✓", text: "Mark R. completed shift – Delivery Driver (Site B)", time: "9:45 PM", ago: "5 min ago" },
 ];
+
+let settings = { commission: 18, requireId: true, reminders: true, paymentTerms: "Net 15 Days" };
+let selectedJobId = "j1";
+let wFilter = "all";
+let pFilter = "all";
 
 // ============================================================
 // HELPERS
@@ -724,30 +599,29 @@ const activityFeed = [
 const $ = id => document.getElementById(id);
 const $$ = sel => document.querySelectorAll(sel);
 
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
 function initials(name) {
   return (name || "?").split(" ").map(p => p[0]).slice(0, 2).join("").toUpperCase();
 }
-function avHtml(name, photo) {
-  if (photo) return `<div class="av"><img src="${photo}" alt=""></div>`;
+function avHtml(name) {
   return `<div class="av">${initials(name)}</div>`;
 }
 function statusBdg(status) {
   const map = {
     Verified: "ok", Approved: "ok", Available: "ok", Active: "ok", Current: "ok", Paid: "mute",
-    Pending: "warn", "Pending Approval": "warn",
-    Placed: "info", Open: "info",
-    Suspended: "bad", Rejected: "bad", Overdue: "bad", Inactive: "mute",
-    "Not Started": "mute"
+    Pending: "warn", Placed: "info", Open: "info",
+    Suspended: "bad", Rejected: "bad", Overdue: "bad", Inactive: "mute", "Not Started": "mute"
   };
   return `<span class="bdg ${map[status] || "mute"}">${status}</span>`;
 }
 function roleBdg(role) {
-  const map = {
-    "Super Admin": "purple",
-    "Placement Coordinator": "info",
-    "Payroll Officer": "teal",
-    "Verification Specialist": "orange"
-  };
+  const map = { "Super Admin": "purple", "Placement Coordinator": "info", "Payroll Officer": "teal", "Verification Specialist": "orange" };
   return `<span class="bdg ${map[role] || "mute"}">${role}</span>`;
 }
 function money(n) {
@@ -758,20 +632,12 @@ function money(n) {
 // NAVIGATION
 // ============================================================
 const titles = {
-  dashboard: "Dashboard",
-  employers: "Employers Directory",
-  workers: "Workers Directory",
-  matches: "Job Matches & Placements",
-  payroll: "Timesheets & Payroll Management",
-  settings: "Settings & Roles"
+  dashboard: "Dashboard", employers: "Employers Directory", workers: "Workers Directory",
+  matches: "Job Matches & Placements", payroll: "Timesheets & Payroll Management", settings: "Settings & Roles"
 };
 const topActions = {
-  dashboard: "+ New",
-  employers: "+ Add Employer",
-  workers: "+ Add Worker",
-  matches: "+ Create Match",
-  payroll: "+ Approve All",
-  settings: "Save Changes"
+  dashboard: "+ New", employers: "+ Add Employer", workers: "+ Add Worker",
+  matches: "+ Create Match", payroll: "+ Approve All", settings: "Save Changes"
 };
 
 function showView(name) {
@@ -783,65 +649,72 @@ function showView(name) {
   if (nav) nav.classList.add("active");
   $("pageTitle").textContent = titles[name] || name;
   $("topActionBtn").textContent = topActions[name] || "+ New";
-  if (name === "dashboard") renderDashboard();
-  if (name === "employers") renderEmployers();
-  if (name === "workers") renderWorkers();
-  if (name === "matches") renderMatches();
-  if (name === "payroll") renderPayroll();
-  if (name === "settings") renderSettings();
+  $("topActionBtn").dataset.action = name === "payroll" ? "approve-all" :
+    name === "settings" ? "save-settings" :
+    name === "employers" ? "add-employer" :
+    name === "workers" ? "add-worker" :
+    name === "matches" ? "create-match" : "new";
+  renderCurrent();
 }
 
-$$(".nav-item").forEach(btn => {
-  btn.addEventListener("click", () => showView(btn.dataset.view));
-});
-document.addEventListener("click", e => {
-  const goto = e.target.closest("[data-goto]");
-  if (goto) showView(goto.dataset.goto);
-});
+function renderCurrent() {
+  const active = document.querySelector(".nav-item.active")?.dataset.view || "dashboard";
+  if (active === "dashboard") renderDashboard();
+  if (active === "employers") renderEmployers();
+  if (active === "workers") renderWorkers();
+  if (active === "matches") renderMatches();
+  if (active === "payroll") renderPayroll();
+  if (active === "settings") renderSettings();
+}
 
 // ============================================================
 // RENDERERS
 // ============================================================
 function renderDashboard() {
-  const pendingWorkers = workers.filter(w => w.verification_status === "Pending").length;
+  const pendingW = workers.filter(w => w.verification_status === "Pending").length;
+  const pendingE = employers.filter(e => e.verification_status === "Pending").length;
   const openJobs = jobOrders.filter(j => j.status === "Open").length;
-  const activePlacements = workers.filter(w => w.availability_status === "Placed").length;
+  const placed = workers.filter(w => w.availability_status === "Placed").length;
 
   $("dashKpis").innerHTML = `
-    <div class="kpi"><div class="label">Pending Approvals <span class="trend up">↑ 3</span></div><div class="value">${pendingWorkers + 16}</div></div>
-    <div class="kpi"><div class="label">Open Job Orders <span class="trend up">↑ 5</span></div><div class="value">${openJobs + 38}</div></div>
-    <div class="kpi"><div class="label">Active Placements <span class="trend up">↑ 12</span></div><div class="value">${activePlacements + 310}</div></div>
-    <div class="kpi"><div class="label">Today's Revenue <span class="trend up">↑ 8%</span></div><div class="value">$4,850</div></div>
+    <div class="kpi"><div class="label">Pending Approvals <span class="trend">↑ ${pendingW + pendingE}</span></div><div class="value">${pendingW + pendingE + 14}</div></div>
+    <div class="kpi"><div class="label">Open Job Orders <span class="trend">↑ ${openJobs}</span></div><div class="value">${openJobs + 38}</div></div>
+    <div class="kpi"><div class="label">Active Placements <span class="trend">↑ ${placed}</span></div><div class="value">${placed + 310}</div></div>
+    <div class="kpi"><div class="label">Today's Revenue <span class="trend">↑ 8%</span></div><div class="value">$4,850</div></div>
   `;
 
-  const queue = [
-    { name: "Sarah Jolley", type: "worker", date: "9/25/25", tags: "Approve" },
-    { name: "Anch Chileman", type: "worker", date: "9/23/26", tags: "work tags" },
-    { name: "Job Matches", type: "employer", date: "9/23/26", tags: "worker" },
-    { name: "Sauran I. Brees", type: "employer", date: "9/23/26", tags: "Skills" },
+  // Queue: pending workers + pending employers
+  const queueItems = [
+    ...workers.filter(w => w.verification_status === "Pending").map(w => ({
+      id: w.id, name: w.full_name, type: "worker", date: "Today", tags: w.primary_skill_role
+    })),
+    ...employers.filter(e => e.verification_status === "Pending").map(e => ({
+      id: e.id, name: e.company_name, type: "employer", date: "Today", tags: e.industry
+    }))
   ];
-  $("dashQueue").innerHTML = `
+
+  $("dashQueue").innerHTML = queueItems.length ? `
     <table class="tbl" style="font-size:12px">
-      <thead><tr><th>Name</th><th>Type</th><th>Application</th><th>Skill Tags</th><th></th></tr></thead>
+      <thead><tr><th>Name</th><th>Type</th><th>Application</th><th>Tags</th><th></th></tr></thead>
       <tbody>
-        ${queue.map(q => `
+        ${queueItems.map(q => `
           <tr>
             <td>${q.name}</td>
             <td>${q.type}</td>
             <td>${q.date}</td>
             <td><span class="bdg mute">${q.tags}</span></td>
             <td class="acts">
-              <button class="btn btn-success btn-sm">Approve</button>
-              <button class="btn btn-danger btn-sm">Reject</button>
+              <button class="btn btn-success btn-sm" data-action="approve" data-type="${q.type}" data-id="${q.id}">Approve</button>
+              <button class="btn btn-danger btn-sm" data-action="reject" data-type="${q.type}" data-id="${q.id}">Reject</button>
             </td>
           </tr>`).join("")}
       </tbody>
-    </table>`;
+    </table>` : `<div class="empty">All caught up ✅</div>`;
 
-  $("dashUrgent").innerHTML = jobOrders.filter(j => j.urgency_level === "Urgent").map(j => `
-    <div class="job-card">
+  $("dashUrgent").innerHTML = jobOrders.filter(j => j.urgency_level === "Urgent" && j.status === "Open").map(j => `
+    <div class="job-card" data-action="select-job" data-id="${j.id}">
       <h4>${j.job_title} – ${j.employer_name} <span style="font-weight:400;color:var(--hint)">(Start: ${j.start_date.slice(5)})</span></h4>
-      <div style="margin-top:8px"><button class="btn btn-primary btn-sm">Find Match</button></div>
+      <div style="margin-top:8px"><button class="btn btn-primary btn-sm" data-action="find-match" data-id="${j.id}">Find Match</button></div>
     </div>
   `).join("") || `<div class="empty">No urgent jobs</div>`;
 
@@ -854,25 +727,24 @@ function renderDashboard() {
       </div>
       <span class="feed-time">${f.time}</span>
     </div>
-  `).join("");
+  `).join("") || `<div class="empty">No activity yet</div>`;
 }
 
 function renderEmployers() {
-  const total = employers.length;
   const verified = employers.filter(e => e.verification_status === "Verified").length;
   const pending = employers.filter(e => e.verification_status === "Pending").length;
   const activeJobs = employers.reduce((s, e) => s + e.active_jobs_count, 0);
 
   $("empKpis").innerHTML = `
-    <div class="kpi"><div class="label">Total Employers <span class="trend up">↑ 3</span></div><div class="value">${total + 142}</div></div>
-    <div class="kpi"><div class="label">Verified Partners <span class="trend up">↑ 124</span></div><div class="value">${verified + 118}</div></div>
-    <div class="kpi alert"><div class="label">Pending Verification ⚠</div><div class="value">${pending + 12}</div></div>
-    <div class="kpi"><div class="label">Active Job Orders <span class="trend up">↑ 42</span></div><div class="value">${activeJobs + 20}</div></div>
+    <div class="kpi"><div class="label">Total Employers</div><div class="value">${employers.length}</div></div>
+    <div class="kpi"><div class="label">Verified Partners</div><div class="value">${verified}</div></div>
+    <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Verification</div><div class="value">${pending}</div></div>
+    <div class="kpi"><div class="label">Active Job Orders</div><div class="value">${activeJobs}</div></div>
   `;
 
-  const q = ($("eSearch").value || "").toLowerCase();
-  const st = $("eStatusFilter").value;
-  const ind = $("eIndustryFilter").value;
+  const q = ($("eSearch")?.value || "").toLowerCase();
+  const st = $("eStatusFilter")?.value || "all";
+  const ind = $("eIndustryFilter")?.value || "all";
   let rows = employers.filter(e => {
     if (st !== "all" && e.verification_status !== st) return false;
     if (ind !== "all" && e.industry !== ind) return false;
@@ -895,9 +767,11 @@ function renderEmployers() {
       <td data-l="Billing">${e.billing_status}</td>
       <td class="c-act" data-l="Actions">
         <div class="acts">
-          <button class="btn-ghost btn-sm">View</button>
-          ${e.verification_status === "Pending" ? `<button class="btn btn-success btn-sm">Approve</button>` : ""}
-          <button class="btn-ghost btn-sm">⋮</button>
+          <button class="btn-ghost btn-sm" data-action="view-employer" data-id="${e.id}">View</button>
+          ${e.verification_status === "Pending" ? `
+            <button class="btn btn-success btn-sm" data-action="approve" data-type="employer" data-id="${e.id}">Approve</button>
+            <button class="btn btn-danger btn-sm" data-action="reject" data-type="employer" data-id="${e.id}">Reject</button>
+          ` : ""}
         </div>
       </td>
     </tr>
@@ -905,32 +779,27 @@ function renderEmployers() {
 }
 
 function renderWorkers() {
-  const total = workers.length;
   const available = workers.filter(w => w.availability_status === "Available").length;
   const placed = workers.filter(w => w.availability_status === "Placed").length;
   const pending = workers.filter(w => w.verification_status === "Pending").length;
 
   $("workerKpis").innerHTML = `
-    <div class="kpi"><div class="label">Total Workers <span class="trend up">↑ 18</span></div><div class="value">${total + 1232}</div></div>
-    <div class="kpi"><div class="label">Available Now <span class="bdg ok" style="margin-left:6px">Ready</span></div><div class="value">${available + 406}</div></div>
-    <div class="kpi"><div class="label">Currently Placed <span class="bdg info" style="margin-left:6px">Active</span></div><div class="value">${placed + 779}</div></div>
-    <div class="kpi alert"><div class="label">Pending Verification ⚠ Review</div><div class="value">${pending + 41}</div></div>
+    <div class="kpi"><div class="label">Total Workers</div><div class="value">${workers.length}</div></div>
+    <div class="kpi"><div class="label">Available Now <span class="bdg ok" style="margin-left:6px">Ready</span></div><div class="value">${available}</div></div>
+    <div class="kpi"><div class="label">Currently Placed <span class="bdg info" style="margin-left:6px">Active</span></div><div class="value">${placed}</div></div>
+    <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Verification</div><div class="value">${pending}</div></div>
   `;
 
-  const filters = [
-    ["all", "All"], ["Available", "Available"], ["Placed", "Placed"],
-    ["Pending", "Pending Verification"], ["Inactive", "Inactive"]
-  ];
-  const activeFilter = window._wFilter || "all";
-  $("wChips").innerHTML = filters.map(([v, l]) =>
-    `<button class="chip ${activeFilter === v ? "active" : ""}" data-wf="${v}">${l}</button>`
+  const filters = [["all","All"],["Available","Available"],["Placed","Placed"],["Pending","Pending Verification"],["Inactive","Inactive"]];
+  $("wChips").innerHTML = filters.map(([v,l]) =>
+    `<button class="chip ${wFilter === v ? "active" : ""}" data-action="w-filter" data-val="${v}">${l}</button>`
   ).join("");
 
-  const q = ($("wSearch").value || "").toLowerCase();
-  const skill = $("wSkillFilter").value;
+  const q = ($("wSearch")?.value || "").toLowerCase();
+  const skill = $("wSkillFilter")?.value || "all";
   let rows = workers.filter(w => {
-    if (activeFilter === "Pending" && w.verification_status !== "Pending") return false;
-    if (activeFilter !== "all" && activeFilter !== "Pending" && w.availability_status !== activeFilter) return false;
+    if (wFilter === "Pending" && w.verification_status !== "Pending") return false;
+    if (wFilter !== "all" && wFilter !== "Pending" && w.availability_status !== wFilter) return false;
     if (skill !== "all" && w.primary_skill_role !== skill) return false;
     if (q && !`${w.full_name} ${w.id} ${w.primary_skill_role}`.toLowerCase().includes(q)) return false;
     return true;
@@ -940,7 +809,7 @@ function renderWorkers() {
     <tr>
       <td class="c-user" data-l="Worker">
         <div class="cell-user">
-          ${avHtml(w.full_name, w.photo)}
+          ${avHtml(w.full_name)}
           <div class="info"><b>${w.full_name}</b><span>#${w.id}</span></div>
         </div>
       </td>
@@ -951,10 +820,14 @@ function renderWorkers() {
       <td data-l="Employer">${w.assigned_employer || "Unassigned"}</td>
       <td class="c-act" data-l="Actions">
         <div class="acts">
-          ${w.availability_status === "Available" ? `<button class="btn btn-primary btn-sm">Match</button>` : ""}
-          ${w.verification_status === "Pending" ? `<button class="btn btn-warning btn-sm">Review</button>` : ""}
-          <button class="btn-ghost btn-sm">View</button>
-          <button class="btn-ghost btn-sm">⋮</button>
+          ${w.verification_status === "Pending" ? `
+            <button class="btn btn-success btn-sm" data-action="approve" data-type="worker" data-id="${w.id}">Approve</button>
+            <button class="btn btn-danger btn-sm" data-action="reject" data-type="worker" data-id="${w.id}">Reject</button>
+          ` : ""}
+          ${w.availability_status === "Available" && w.verification_status === "Verified" ? `
+            <button class="btn btn-primary btn-sm" data-action="match-worker" data-id="${w.id}">Match</button>
+          ` : ""}
+          <button class="btn-ghost btn-sm" data-action="view-worker" data-id="${w.id}">View</button>
         </div>
       </td>
     </tr>
@@ -962,36 +835,45 @@ function renderWorkers() {
 }
 
 function renderMatches() {
+  const open = jobOrders.filter(j => j.status === "Open").length;
   $("matchKpis").innerHTML = `
-    <div class="kpi"><div class="label">Open Job Orders <span class="trend up">↑ 5</span></div><div class="value">42</div></div>
+    <div class="kpi"><div class="label">Open Job Orders</div><div class="value">${open}</div></div>
     <div class="kpi"><div class="label">Suggested Matches <span class="bdg ok" style="margin-left:6px">98% Avg</span></div><div class="value">18</div></div>
-    <div class="kpi alert"><div class="label">Pending Employer Review <span class="bdg warn">Urgent</span></div><div class="value">11</div></div>
-    <div class="kpi"><div class="label">Active Placements <span class="trend up">↑ 12</span></div><div class="value">315</div></div>
+    <div class="kpi alert"><div class="label">Pending Employer Review</div><div class="value">11</div></div>
+    <div class="kpi"><div class="label">Active Placements</div><div class="value">${workers.filter(w=>w.availability_status==="Placed").length + 310}</div></div>
   `;
 
-  $("openJobs").innerHTML = jobOrders.map((j, i) => `
-    <div class="job-card ${i === 0 ? "active" : ""}" data-job="${j.id}">
+  $("openJobs").innerHTML = jobOrders.filter(j => j.status === "Open").map(j => `
+    <div class="job-card ${selectedJobId === j.id ? "active" : ""}" data-action="select-job" data-id="${j.id}">
       <h4>${j.job_title} – ${j.employer_name}</h4>
       <div class="meta">
         <span>${j.employer_name}</span>
         <span>${j.pay_rate}</span>
         <span>${j.location_city}</span>
       </div>
-      <div style="margin-top:6px;font-size:12px;font-weight:600;color:var(--btn)">${j.workers_needed_count} Workers Needed</div>
+      <div style="margin-top:6px;font-size:12px;font-weight:600;color:var(--btn)">${j.workers_needed_count} Workers Needed · ${j.urgency_level}</div>
     </div>
-  `).join("");
+  `).join("") || `<div class="empty">No open jobs</div>`;
 
-  const matches = [
-    { worker: workers[0], score: 98, tags: ["Electrician", "Safety"] },
-    { worker: workers[1], score: 94, tags: ["Hospitality Staff"] },
-    { worker: workers[2], score: 88, tags: ["Registered Nurse"] },
-  ];
-  $("recMatches").innerHTML = matches.map(m => `
+  // Recommended matches: verified + available workers whose skill matches selected job
+  const job = jobOrders.find(j => j.id === selectedJobId) || jobOrders[0];
+  const candidates = workers
+    .filter(w => w.verification_status === "Verified" && w.availability_status === "Available")
+    .map(w => {
+      let score = 70;
+      if (job && w.primary_skill_role === job.required_skill) score = 98;
+      else if (job && w.skill_tags?.some(t => t.toLowerCase().includes(job.required_skill.toLowerCase().split(" ")[0]))) score = 88;
+      return { worker: w, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+
+  $("recMatches").innerHTML = candidates.length ? candidates.map(m => `
     <div class="match-card">
       ${avHtml(m.worker.full_name)}
       <div style="flex:1;min-width:0">
         <b>${m.worker.full_name} (#${m.worker.id})</b>
-        <div style="font-size:12px;color:var(--hint)">${m.tags.join(" , ")}</div>
+        <div style="font-size:12px;color:var(--hint)">${m.worker.primary_skill_role}</div>
         <div style="font-size:12px;margin-top:2px">
           ${m.worker.experience_years} yrs exp
           ${statusBdg("Verified")} ${statusBdg("Available")}
@@ -999,10 +881,13 @@ function renderMatches() {
       </div>
       <div style="text-align:right">
         <div class="match-score">${m.score}% Match</div>
-        <button class="btn btn-primary btn-sm" style="margin-top:6px">Assign Worker</button>
+        <button class="btn btn-primary btn-sm" style="margin-top:6px"
+          data-action="assign-worker" data-worker="${m.worker.id}" data-job="${job?.id || ""}">
+          Assign Worker
+        </button>
       </div>
     </div>
-  `).join("");
+  `).join("") : `<div class="empty">No available verified workers for this skill</div>`;
 }
 
 function renderPayroll() {
@@ -1012,21 +897,20 @@ function renderPayroll() {
   const invoices = timesheets.reduce((s, t) => s + t.employer_bill, 0);
 
   $("payKpis").innerHTML = `
-    <div class="kpi"><div class="label">Total Hours Logged <span class="trend up">↑ 12%</span></div><div class="value">${(totalHours + 2800).toLocaleString()} hrs</div></div>
-    <div class="kpi alert"><div class="label">Pending Approval ⚠</div><div class="value">${pending + 36} timesheets</div></div>
-    <div class="kpi"><div class="label">Worker Payouts Due 💰</div><div class="value">${money(payouts + 40000)}</div></div>
-    <div class="kpi"><div class="label">Employer Invoices 📄</div><div class="value">${money(invoices + 55000)}</div></div>
+    <div class="kpi"><div class="label">Total Hours Logged</div><div class="value">${totalHours.toFixed(0)} hrs</div></div>
+    <div class="kpi ${pending ? "alert" : ""}"><div class="label">Pending Approval</div><div class="value">${pending} timesheets</div></div>
+    <div class="kpi"><div class="label">Worker Payouts Due</div><div class="value">${money(payouts)}</div></div>
+    <div class="kpi"><div class="label">Employer Invoices</div><div class="value">${money(invoices)}</div></div>
   `;
 
   const filters = [["all","All"],["Pending","Pending Approval"],["Approved","Approved"],["Paid","Paid"],["Disputed","Disputed"]];
-  const active = window._pFilter || "all";
   $("pChips").innerHTML = filters.map(([v,l]) =>
-    `<button class="chip ${active === v ? "active" : ""}" data-pf="${v}">${l}</button>`
+    `<button class="chip ${pFilter === v ? "active" : ""}" data-action="p-filter" data-val="${v}">${l}</button>`
   ).join("");
 
-  const q = ($("pSearch").value || "").toLowerCase();
+  const q = ($("pSearch")?.value || "").toLowerCase();
   let rows = timesheets.filter(t => {
-    if (active !== "all" && t.approval_status !== active) return false;
+    if (pFilter !== "all" && t.approval_status !== pFilter) return false;
     if (q && !`${t.worker_name} ${t.employer_name} ${t.worker_id}`.toLowerCase().includes(q)) return false;
     return true;
   });
@@ -1046,9 +930,13 @@ function renderPayroll() {
       <td data-l="Status">${statusBdg(t.approval_status)}</td>
       <td class="c-act" data-l="Actions">
         <div class="acts">
-          ${t.approval_status === "Pending" ? `<button class="btn btn-success btn-sm">Approve</button>` : ""}
-          <button class="btn-ghost btn-sm">View</button>
-          <button class="btn-ghost btn-sm">⋮</button>
+          ${t.approval_status === "Pending" ? `
+            <button class="btn btn-success btn-sm" data-action="approve-timesheet" data-id="${t.id}">Approve</button>
+          ` : ""}
+          ${t.approval_status === "Approved" ? `
+            <button class="btn btn-primary btn-sm" data-action="mark-paid" data-id="${t.id}">Mark Paid</button>
+          ` : ""}
+          <button class="btn-ghost btn-sm" data-action="view-timesheet" data-id="${t.id}">View</button>
         </div>
       </td>
     </tr>
@@ -1057,8 +945,8 @@ function renderPayroll() {
 
 function renderSettings() {
   $("staffKpis").innerHTML = `
-    <div class="setting-card"><div class="sc-label">Active Admin Staff</div><div class="sc-value">${staff.length + 2}</div></div>
-    <div class="setting-card"><div class="sc-label">Default Agency Commission</div><div class="sc-value">18%</div></div>
+    <div class="setting-card"><div class="sc-label">Active Admin Staff</div><div class="sc-value">${staff.filter(s=>s.status==="Active").length}</div></div>
+    <div class="setting-card"><div class="sc-label">Default Agency Commission</div><div class="sc-value">${settings.commission}%</div></div>
     <div class="setting-card"><div class="sc-label">Auto-Approval Threshold</div><div class="sc-value" style="font-size:18px">Verified IDs</div></div>
   `;
 
@@ -1073,63 +961,247 @@ function renderSettings() {
       <td>${roleBdg(s.role)}</td>
       <td>${s.permissions_scope}</td>
       <td>${statusBdg(s.status)}</td>
-      <td>
-        <div class="acts">
-          <button class="btn btn-secondary btn-sm">Edit</button>
-          <button class="btn-ghost btn-sm">⋮</button>
-        </div>
-      </td>
+      <td><div class="acts"><button class="btn btn-secondary btn-sm" data-action="edit-staff" data-id="${s.id}">Edit</button></div></td>
     </tr>
   `).join("");
+
+  // Sync toggles
+  $("setCommission").value = settings.commission;
+  $("setRequireId").classList.toggle("on", settings.requireId);
+  $("setReminders").classList.toggle("on", settings.reminders);
 }
 
 // ============================================================
-// EVENTS
+// ACTIONS (full process flow)
 // ============================================================
+function approveEntity(type, id) {
+  if (type === "worker") {
+    const w = workers.find(x => x.id === id);
+    if (!w) return;
+    w.verification_status = "Verified";
+    if (w.availability_status === "Pending") w.availability_status = "Available";
+    toast(`✅ Worker ${w.full_name} approved → Verified & Available`);
+    activityFeed.unshift({ icon: "✅", text: `${w.full_name} verified and approved`, time: "now", ago: "just now" });
+  } else if (type === "employer") {
+    const e = employers.find(x => x.id === id);
+    if (!e) return;
+    e.verification_status = "Verified";
+    e.billing_status = "Current";
+    toast(`✅ Employer ${e.company_name} approved → Verified`);
+    activityFeed.unshift({ icon: "✅", text: `${e.company_name} verified as partner`, time: "now", ago: "just now" });
+  }
+  renderCurrent();
+}
+
+function rejectEntity(type, id) {
+  if (type === "worker") {
+    const w = workers.find(x => x.id === id);
+    if (!w) return;
+    w.verification_status = "Rejected";
+    w.availability_status = "Inactive";
+    toast(`Worker ${w.full_name} rejected`);
+  } else if (type === "employer") {
+    const e = employers.find(x => x.id === id);
+    if (!e) return;
+    e.verification_status = "Suspended";
+    e.billing_status = "Suspended";
+    toast(`Employer ${e.company_name} suspended`);
+  }
+  renderCurrent();
+}
+
+function assignWorker(workerId, jobId) {
+  const w = workers.find(x => x.id === workerId);
+  const j = jobOrders.find(x => x.id === jobId);
+  if (!w || !j) { toast("Missing worker or job"); return; }
+
+  if (settings.requireId && w.verification_status !== "Verified") {
+    toast("⚠️ ID verification required before matching (see Settings)");
+    return;
+  }
+
+  // Step 3 → 4 of process flow
+  w.availability_status = "Placed";
+  w.assigned_employer = j.employer_name;
+  j.workers_needed_count = Math.max(0, j.workers_needed_count - 1);
+  if (j.workers_needed_count === 0) j.status = "Filled";
+
+  // Bump employer placed count
+  const emp = employers.find(e => e.company_name === j.employer_name);
+  if (emp) emp.placed_workers_count += 1;
+
+  activityFeed.unshift({
+    icon: "🤝",
+    text: `${w.full_name} assigned to ${j.job_title} @ ${j.employer_name}`,
+    time: "now", ago: "just now"
+  });
+
+  toast(`✅ ${w.full_name} assigned → Status: Placed. OTP & agreement would be sent next.`);
+  renderCurrent();
+}
+
+function approveTimesheet(id) {
+  const t = timesheets.find(x => x.id === id);
+  if (!t) return;
+  t.approval_status = "Approved";
+  toast(`Timesheet approved for ${t.worker_name}`);
+  renderCurrent();
+}
+
+function markPaid(id) {
+  const t = timesheets.find(x => x.id === id);
+  if (!t) return;
+  t.approval_status = "Paid";
+  toast(`Marked Paid – ${t.worker_name} · ${money(t.worker_pay)}`);
+  activityFeed.unshift({
+    icon: "💰",
+    text: `Payout completed for ${t.worker_name}`,
+    time: "now", ago: "just now"
+  });
+  renderCurrent();
+}
+
+function approveAllPending() {
+  let n = 0;
+  timesheets.forEach(t => {
+    if (t.approval_status === "Pending") { t.approval_status = "Approved"; n++; }
+  });
+  toast(n ? `Approved ${n} timesheet(s)` : "No pending timesheets");
+  renderCurrent();
+}
+
+// ============================================================
+// EVENT DELEGATION
+// ============================================================
+document.addEventListener("click", e => {
+  const btn = e.target.closest("[data-action], [data-view], [data-goto], [data-tab], .toggle, .nav-item");
+  if (!btn) return;
+
+  // Navigation
+  if (btn.classList.contains("nav-item") && btn.dataset.view) {
+    showView(btn.dataset.view);
+    return;
+  }
+  if (btn.dataset.goto) {
+    showView(btn.dataset.goto);
+    return;
+  }
+
+  // Settings tabs
+  if (btn.dataset.tab) {
+    $$(".tab").forEach(t => t.classList.remove("active"));
+    btn.classList.add("active");
+    ["staff","commission","verification","general"].forEach(t => {
+      const el = $("tab-" + t);
+      if (el) el.classList.toggle("hid", t !== btn.dataset.tab);
+    });
+    return;
+  }
+
+  // Toggles
+  if (btn.classList.contains("toggle")) {
+    btn.classList.toggle("on");
+    const key = btn.dataset.toggle;
+    if (key === "requireId") settings.requireId = btn.classList.contains("on");
+    if (key === "reminders") settings.reminders = btn.classList.contains("on");
+    return;
+  }
+
+  const action = btn.dataset.action;
+  if (!action) return;
+
+  switch (action) {
+    case "approve":
+      approveEntity(btn.dataset.type, btn.dataset.id);
+      break;
+    case "reject":
+      rejectEntity(btn.dataset.type, btn.dataset.id);
+      break;
+    case "assign-worker":
+      assignWorker(btn.dataset.worker, btn.dataset.job);
+      break;
+    case "approve-timesheet":
+      approveTimesheet(btn.dataset.id);
+      break;
+    case "mark-paid":
+      markPaid(btn.dataset.id);
+      break;
+    case "approve-all":
+      approveAllPending();
+      break;
+    case "select-job":
+    case "find-match":
+      selectedJobId = btn.dataset.id;
+      if (action === "find-match") showView("matches");
+      else renderMatches();
+      break;
+    case "match-worker":
+      // Jump to matches with this worker highlighted conceptually
+      showView("matches");
+      toast(`Select a job then Assign ${btn.dataset.id}`);
+      break;
+    case "w-filter":
+      wFilter = btn.dataset.val;
+      renderWorkers();
+      break;
+    case "p-filter":
+      pFilter = btn.dataset.val;
+      renderPayroll();
+      break;
+    case "save-settings":
+      settings.commission = Number($("setCommission").value) || 18;
+      settings.paymentTerms = $("setPaymentTerms").value;
+      toast("Settings saved ✓");
+      renderSettings();
+      break;
+    case "add-employer":
+    case "add-worker":
+    case "create-match":
+    case "invite-staff":
+    case "view-employer":
+    case "view-worker":
+    case "view-timesheet":
+    case "edit-staff":
+      toast("Form / detail view would open here (demo)");
+      break;
+    case "new":
+      toast("Choose a section first");
+      break;
+  }
+});
+
+// Live search
 ["eSearch","eStatusFilter","eIndustryFilter"].forEach(id => {
-  const el = $(id); if (el) el.addEventListener("input", renderEmployers);
-  if (el && el.tagName === "SELECT") el.addEventListener("change", renderEmployers);
+  const el = $(id);
+  if (el) {
+    el.addEventListener("input", renderEmployers);
+    el.addEventListener("change", renderEmployers);
+  }
 });
 ["wSearch","wSkillFilter"].forEach(id => {
-  const el = $(id); if (el) el.addEventListener("input", renderWorkers);
-  if (el && el.tagName === "SELECT") el.addEventListener("change", renderWorkers);
+  const el = $(id);
+  if (el) {
+    el.addEventListener("input", renderWorkers);
+    el.addEventListener("change", renderWorkers);
+  }
 });
 $("pSearch")?.addEventListener("input", renderPayroll);
 
-document.addEventListener("click", e => {
-  const wf = e.target.closest("[data-wf]");
-  if (wf) { window._wFilter = wf.dataset.wf; renderWorkers(); }
-  const pf = e.target.closest("[data-pf]");
-  if (pf) { window._pFilter = pf.dataset.pf; renderPayroll(); }
-
-  if (e.target.classList.contains("toggle")) {
-    e.target.classList.toggle("on");
-  }
-
-  const tab = e.target.closest(".tab");
-  if (tab && tab.dataset.tab) {
-    $$(".tab").forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-    ["staff","commission","verification","general"].forEach(t => {
-      const el = $("tab-" + t);
-      if (el) el.classList.toggle("hid", t !== tab.dataset.tab);
-    });
-  }
-});
-
+// Top action button
 $("topActionBtn").addEventListener("click", () => {
-  const view = document.querySelector(".nav-item.active")?.dataset.view;
-  if (view === "settings") {
-    alert("Settings saved (demo). Wire to Firestore agency_settings collection.");
-  } else if (view === "payroll") {
-    alert("Approve All – will mark all Pending timesheets as Approved (demo).");
-  } else {
-    alert("Open create form for: " + (titles[view] || view) + "\n\nConnect to Firebase write methods next.");
-  }
+  const action = $("topActionBtn").dataset.action || "new";
+  document.querySelector(`[data-action="${action}"]`)?.click() ||
+    (() => {
+      if (action === "approve-all") approveAllPending();
+      else if (action === "save-settings") {
+        settings.commission = Number($("setCommission").value) || 18;
+        toast("Settings saved ✓");
+      } else toast("Action: " + action);
+    })();
 });
 
 // Init
-renderDashboard();
+showView("dashboard");
 
 // PWA
 if ("serviceWorker" in navigator) {
