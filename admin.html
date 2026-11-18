@@ -309,6 +309,26 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
   .nav-btn { flex: 0 0 auto; min-width: 74px; }
   .nav-sep { display: none; }
 }
+/* ===== merged additions: agreements, toast ===== */
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #0f172a; color: #fff; padding: 11px 18px; border-radius: 10px; font-size: 14px; font-weight: 500; z-index: 400; opacity: 0; pointer-events: none; transition: opacity .25s; max-width: 90vw; text-align: center; box-shadow: 0 10px 25px rgb(0 0 0 / .2); }
+.toast.show { opacity: 1; }
+@media (max-width: 819px) { .toast { bottom: 96px; } }
+.modal-box.xl { max-width: 760px; text-align: left; }
+.modal-box.xl h3 { text-align: center; }
+.ag-panel { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
+.ag-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+.ag-grid .full { grid-column: 1 / -1; }
+.ag-grid label { font-size: 12px; }
+.ag-body { background: #fff; color: #0f172a; border: 1px solid var(--border); border-radius: 12px; padding: 16px; max-height: 34vh; overflow-y: auto; font-size: 13px; line-height: 1.6; text-align: left; }
+.ag-upload { margin-top: 12px; padding: 14px; border: 2px dashed var(--btn); border-radius: 12px; background: #f0f9ff; color: #0f172a; }
+.ag-upload .ttl { font-size: 14px; font-weight: 700; color: #0369a1; margin-bottom: 4px; }
+.ag-upload .stp { font-size: 12px; color: #64748b; margin-bottom: 10px; }
+.ag-upload .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ag-upload label.btn-secondary { display: inline-block; margin: 0; cursor: pointer; color: var(--fg); }
+.ag-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.ag-actions .btn-secondary { margin: 0; padding: 10px 14px; font-size: 14px; }
+.ag-actions .btn-primary { width: auto; flex: 1 1 200px; }
+@media (max-width: 600px) { .ag-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -340,6 +360,7 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
         <button class="nav-btn" data-view="workers"><span class="ni">👷</span><span>Workers</span><span class="nb hid" id="nbW"></span></button>
         <button class="nav-btn" data-view="matches"><span class="ni">🔎</span><span>Job Matches</span></button>
         <button class="nav-btn" data-view="placements"><span class="ni">🤝</span><span>Placements</span><span class="nb hid" id="nbPl"></span></button>
+        <button class="nav-btn" data-view="agreements"><span class="ni">📄</span><span>Agreements</span></button>
         <button class="nav-btn" data-view="timesheets"><span class="ni">🧾</span><span>Payroll</span><span class="nb hid" id="nbTs"></span></button>
         <button class="nav-btn" data-view="requests"><span class="ni">📋</span><span>Requests</span><span class="nb hid" id="nbReq"></span></button>
         <button class="nav-btn" data-view="settings"><span class="ni">⚙️</span><span>Settings</span></button>
@@ -406,6 +427,15 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
           <div class="chips" id="pChips"></div>
           <div class="toolbar"><input id="pSearch" type="search" placeholder="Search worker, employer or job..."></div>
           <div id="tbPl"></div>
+        </div>
+
+        <!-- Agreements -->
+        <div id="v-agreements" class="view hid">
+          <div class="view-head"><h2>Agreements</h2></div>
+          <div class="kpis" id="agKpis"></div>
+          <div class="chips" id="agChips"></div>
+          <div class="toolbar"><input id="aSearch" type="search" placeholder="Search worker, employer or skill..."></div>
+          <div id="tbAg"></div>
         </div>
 
         <!-- Timesheets & payroll -->
@@ -499,6 +529,55 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
     <button class="btn-secondary" data-act="closeInfo" style="width:100%;margin-top:10px">Close</button></div>
 </div>
 
+<!-- Employment agreement (Amharic) editor / viewer -->
+<div id="agreementModal" class="modal-overlay hid">
+  <div class="modal-box xl">
+    <h3>የሥራ ስምምነት ደብዳቤ · Employment Agreement</h3>
+    <p class="who" style="text-align:center">መረጃው ከስርዓቱ ይሞላል · ያልተገኘውን ይሙሉ · አትም · የተፈረመውን ይስቀሉ · Finalize</p>
+    <div id="agEditPanel" class="ag-panel">
+      <div class="ag-grid">
+        <div><label>የሰራተኛ ስም / Worker name</label><input id="agWorkerName"></div>
+        <div><label>ክህሎት / Skill</label><input id="agSkill"></div>
+        <div><label>የሰራተኛ ስልክ / Worker phone</label><input id="agWorkerPhone"></div>
+        <div><label>ብሔራዊ መታወቂያ / National ID</label><input id="agNationalId"></div>
+        <div><label>የአሰሪ ስም / Employer</label><input id="agEmpName"></div>
+        <div><label>የአሰሪ ስልክ / Employer phone</label><input id="agEmpPhone"></div>
+        <div><label>የሥራ ቦታ / Work location</label><input id="agEmpLoc"></div>
+        <div><label>የዋስ ስም / Guarantor</label><input id="agGName"></div>
+        <div><label>የዋስ ስልክ / Guarantor phone</label><input id="agGPhone"></div>
+        <div><label>የደመወዝ መጠን / Salary (ETB)</label><input id="agPay" placeholder="e.g. 5000"></div>
+        <div><label>የክፍያ አይነት / Pay type</label>
+          <select id="agPayType"><option value="ወርሃዊ">ወርሃዊ / Monthly</option><option value="ሳምንታዊ">ሳምንታዊ / Weekly</option><option value="ዕለታዊ">ዕለታዊ / Daily</option></select></div>
+        <div><label>የአገልግሎት ክፍያ (ETB) / Service fee</label><input id="agServiceFee" type="number" min="0" step="50" placeholder="0"></div>
+        <div class="full"><label>ተጨማሪ ውሎች / Extra terms</label><textarea id="agExtraTerms" rows="2" placeholder="ተጨማሪ ሁኔታዎች ካሉ እዚህ ይጻፉ…"></textarea></div>
+      </div>
+      <button type="button" class="btn-secondary" id="agRefreshPreview">↻ ቅድመ እይታ አድስ · Refresh preview</button>
+      <label class="switch"><input type="checkbox" id="agFeeCollected"><span></span>የአገልግሎት ክፍያ ተሰብስቧል · Service fee collected</label>
+      <label class="switch"><input type="checkbox" id="agPartiesPresent"><span></span>አሰሪ እና ሰራተኛ በአካል መጥተዋል (OTP ተረጋግጧል) · Parties present / OTP verified</label>
+    </div>
+    <div id="agreementBody" class="ag-body"></div>
+    <div id="agUploadBox" class="ag-upload">
+      <div class="ttl">📄 የተፈረመ ስምምነት ስቀል · Upload signed agreement</div>
+      <div class="stp">1) Print → 2) Sign → 3) Scan / photo or PDF → 4) Upload here → 5) Finalize</div>
+      <div class="row">
+        <label class="btn-secondary">⬆ Choose file (PDF / photo)<input type="file" id="agSignedFile" accept="image/*,application/pdf,.pdf,.jpg,.jpeg,.png,.webp" style="display:none"></label>
+        <button type="button" class="btn-secondary hid" id="agClearSigned" style="margin:0">Clear file</button>
+        <div id="agSignedPreview" style="font-size:13px;font-weight:600;color:#166534;flex:1;min-width:140px"></div>
+      </div>
+      <div id="agSignedThumb" class="hid" style="margin-top:10px"><img id="agSignedImg" alt="Signed preview" style="max-height:120px;max-width:100%;border-radius:8px;border:1px solid var(--border)"></div>
+    </div>
+    <div class="ag-actions">
+      <button type="button" class="btn-secondary" id="agClose">Close</button>
+      <button type="button" class="btn-secondary" id="agPrint">🖨 Print</button>
+      <button type="button" class="btn-secondary hid" id="agOpenSigned">📎 Signed file</button>
+      <button type="button" class="btn-secondary btn-danger hid" id="agDelete">🗑 Delete</button>
+      <button type="button" class="btn-primary" id="agFinalize">ፊርማ + ክፍያ + በሥራ ላይ · Finalize</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
 <div id="ratingModal" class="modal-overlay hid">
   <div class="modal-box" style="text-align:left">
     <h3 style="text-align:center">Save Rating</h3>
@@ -545,10 +624,10 @@ const PAY_METHODS = ["Telebirr", "CBE Birr", "Bank Transfer", "Cash"];
 const R_SA = "Super Admin", R_PC = "Placement Coordinator", R_PO = "Payroll Officer", R_VS = "Verification Specialist";
 const ROLES = [R_SA, R_PC, R_PO, R_VS];
 const ROLE_SCOPE = { [R_SA]: "Full System, Payroll & Settings", [R_PC]: "Workers, Employers, Job Matches", [R_PO]: "Timesheets, Invoices & Payouts", [R_VS]: "Approve/Reject Workers & Employers" };
-const PERMS = { verify: [R_SA, R_VS], manage: [R_SA, R_PC], place: [R_SA, R_PC], payroll: [R_SA, R_PO], settings: [R_SA] };
+const PERMS = { verify: [R_SA, R_VS], manage: [R_SA, R_PC], place: [R_SA, R_PC], payroll: [R_SA, R_PO], settings: [R_SA], agree: [R_SA, R_PC] };
 const ROLE_VIEWS = {
-  [R_SA]: ["dashboard", "employers", "workers", "matches", "placements", "timesheets", "requests", "settings", "add"],
-  [R_PC]: ["dashboard", "employers", "workers", "matches", "placements", "requests", "add"],
+  [R_SA]: ["dashboard", "employers", "workers", "matches", "placements", "agreements", "timesheets", "requests", "settings", "add"],
+  [R_PC]: ["dashboard", "employers", "workers", "matches", "placements", "agreements", "requests", "add"],
   [R_PO]: ["dashboard", "timesheets"],
   [R_VS]: ["dashboard", "employers", "workers"]
 };
@@ -602,9 +681,9 @@ function starsHtml(avg, count) {
 
 // ---------- state ----------
 let me = { email: "", name: "", role: R_SA };
-let allW = [], reqs = [], pending = [], employers = [], jobs = [], places = [], sheets = [], staff = [], checkins = [];
+let allW = [], reqs = [], pending = [], employers = [], jobs = [], places = [], sheets = [], staff = [], checkins = [], ags = [];
 let settings = { ...DEFAULTS }, loadErrors = [];
-let wFilter = "all", rFilter = "all", eFilter = "all", pFilter = "all", tFilter = "all", tPeriod = "all", selJobId = null;
+let wFilter = "all", rFilter = "all", eFilter = "all", pFilter = "all", tFilter = "all", aFilter = "all", tPeriod = "all", selJobId = null;
 let ratingRequestId = null, ratingWorkerId = null;
 
 const can = a => PERMS[a].includes(me.role);
@@ -614,7 +693,7 @@ const jById = id => jobs.find(j => j.id === id);
 const plById = id => places.find(p => p.id === id);
 const eVer = e => e.verificationStatus || "pending";
 const filledCount = jid => places.filter(p => p.jobId === jid && FILL.includes(p.status)).length;
-const wAvail = w => w.status === "pending" ? "Pending" : w.status === "rejected" ? "Rejected" : w.assignedEmployerId ? "Placed" : w.available ? "Available" : "Inactive";
+const wAvail = w => w.status === "pending" ? "Pending" : w.status === "rejected" ? "Rejected" : (w.assignedEmployerId || w.assignedEmployerName || w.work_status === "on_work") ? "Placed" : w.available ? "Available" : "Inactive";
 
 $("f_skill").innerHTML = SKILLS.map(s => `<option value="${esc(s.en)}">${s.en}</option>`).join("");
 $("wSkill").innerHTML = '<option value="">All skills</option>' + SKILLS.map(s => `<option value="${esc(s.en)}">${s.en}</option>`).join("");
@@ -726,7 +805,7 @@ async function loadAdmin() {
   loadErrors = [];
   const safe = (p, name) => p.catch(() => { loadErrors.push(name); return { docs: [] }; });
   const col = n => getDocs(collection(db, n));
-  const [rs, ws, es, js, ps, tss, ss, cs, st] = await Promise.all([
+  const [rs, ws, es, js, ps, tss, ss, cs, st, agr] = await Promise.all([
     safe(getDocs(query(collection(db, "requests"), orderBy("createdAt", "desc"), limit(80))), "requests"),
     safe(col("workers"), "workers"),
     safe(col("employers"), "employers"),
@@ -735,7 +814,8 @@ async function loadAdmin() {
     safe(col("timesheets"), "timesheets"),
     me.role === R_SA ? safe(col("admin_users"), "admin_users") : Promise.resolve({ docs: [] }),
     getDocs(query(collection(db, "checkins"), orderBy("at", "desc"), limit(20))).catch(() => ({ docs: [] })),   // optional, written by the bot
-    getDoc(doc(db, "agency_settings", "main")).catch(() => { loadErrors.push("agency_settings"); return null; })
+    getDoc(doc(db, "agency_settings", "main")).catch(() => { loadErrors.push("agency_settings"); return null; }),
+    safe(col("agreements"), "agreements")
   ]);
   const map = s => s.docs.map(d => ({ id: d.id, ...d.data() }));
   const byNew = (a, b) => ts(b.createdAt) - ts(a.createdAt);
@@ -748,6 +828,14 @@ async function loadAdmin() {
   sheets = map(tss).sort(byNew);
   staff = map(ss);
   checkins = map(cs);
+  // agreements: the archive collection plus older ones that only live on the hire request
+  const dbAgs = map(agr), have = new Set(dbAgs.map(a => a.requestId).filter(Boolean));
+  const legacy = reqs.filter(r => hasAg(r) && !have.has(r.id)).map(r => { const d = r.agreementData || {}; return {
+    id: "req_" + r.id, requestId: r.id, _fromRequest: true, workerId: r.workerId || null, employerId: r.employerId || null,
+    workerName: d.workerName || r.workerName, employerName: d.empName || r.employerName, employerPhone: d.empPhone || r.employerPhone,
+    skill: d.skill || r.workerSkill, pay: d.pay, payType: d.payType, serviceFee: r.serviceFee, agreementData: r.agreementData,
+    signedAgreementUrl: r.signedAgreementUrl, status: r.agreementSigned ? "signed" : "draft", agreementSignedAt: r.agreementSignedAt, createdAt: r.createdAt }; });
+  ags = [...dbAgs, ...legacy].sort((a, b) => agTime(b) - agTime(a));
   settings = { ...DEFAULTS, ...((st && st.exists && st.exists()) ? st.data() : {}) };
   renderAdmin();
 }
@@ -787,7 +875,7 @@ function candidates(job) {
 
 // ================= badges =================
 const reqStatus = r => r.status || "open";
-const reqBadge = r => reqStatus(r) === "closed" ? bdg("ok", "Closed") : reqStatus(r) === "on_process" ? bdg("warn", "On process") : bdg("info", "Open");
+const reqBadge = r => reqStatus(r) === "closed" ? bdg("ok", "Closed") : reqStatus(r) === "on_work" ? bdg("ok", "On work") : reqStatus(r) === "on_process" ? bdg("warn", "On process") : bdg("info", "Open");
 const payBadge = r => r.paymentReceived ? bdg("ok", "Paid") : bdg("mute", "Unpaid");
 const availBadge = w => { const a = wAvail(w); return bdg({ Available: "ok", Placed: "info", Pending: "warn", Rejected: "bad", Inactive: "mute" }[a], a); };
 const verBadge = w => w.status === "approved" ? bdg("ok", "Verified") : w.status === "rejected" ? bdg("bad", "Rejected") : bdg("warn", "Pending");
@@ -803,7 +891,8 @@ const A = (act, label, cls = "", extra = "") => `<button class="btn-secondary ${
 const approveBtns = w => can("verify") ? `<button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button><button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ Reject</button>` : "";
 const dueBtns = r => `<button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask</button><button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Rate</button><button class="btn-secondary" data-marksent="${esc(r.id)}">Mark Sent</button>`;
 const reqBtns = r =>
-  (reqStatus(r) !== "on_process" ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : "") +
+  (!["on_process", "on_work"].includes(reqStatus(r)) ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : "") +
+  (can("agree") ? A("openAgreement", hasAg(r) ? "📄 Agreement" : "📄 Prepare Agreement", "btn-info", `data-id="${esc(r.id)}"`) : "") +
   (reqStatus(r) !== "closed" ? `<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button>` : "") +
   (!r.paymentReceived ? `<button class="btn-secondary" data-pay="${esc(r.id)}">Mark Paid</button>` : "") +
   `<button class="btn-secondary" data-showphone="${esc(r.workerId)}">Show Phone</button>` +
@@ -830,7 +919,7 @@ function chartHtml(series) {
 function renderAdmin() {
   $("banner").classList.toggle("hid", !loadErrors.length);
   if (loadErrors.length) $("banner").textContent = "⚠️ Could not load: " + loadErrors.join(", ") + ". Update your Firestore rules for these collections (see setup notes).";
-  renderNav(); renderDash(); renderEmployers(); renderWorkers(); renderMatches(); renderPlacements(); renderSheets(); renderRequests(); renderSettings();
+  renderNav(); renderDash(); renderEmployers(); renderWorkers(); renderMatches(); renderPlacements(); renderAgreements(); renderSheets(); renderRequests(); renderSettings();
   $("btnNewEmp").classList.toggle("hid", !can("manage")); $("btnNewW").classList.toggle("hid", !can("manage"));
   $("btnNewJob").classList.toggle("hid", !can("place")); $("btnNewSheet").classList.toggle("hid", !can("payroll")); $("btnApproveAll").classList.toggle("hid", !can("payroll"));
 }
@@ -1006,6 +1095,7 @@ function renderPlacements() {
     if (p.status === "OTP Verified") h += p.commissionPaid ? A("handover", "✍️ Sign Handover", "btn-success", id) : A("commission", "💰 Record Commission", "btn-warning", id);
     if (p.status === "Active Placement") h += (can("payroll") ? A("newSheet", "+ Timesheet", "btn-info", id) : "") + (settings.checkinReminders ? A("remind", "🔔 Remind", "", id) : "") + A("completePl", "Complete", "btn-success", id);
     if (["Pending Employer Review", "OTP Verified"].includes(p.status)) h += A("cancelPl", "Cancel", "btn-danger", id);
+    h += A("delPlacement", "Delete", "btn-danger", id);
     return h;
   };
   $("tbPl").innerHTML = table(["Worker → Job", "Employer", "Match", "Status", "Employer OTP", "Worker OTP", "Commission", "Handover", "Actions"], rows.map(p => `
@@ -1055,7 +1145,7 @@ function renderSheets() {
 function renderRequests() {
   const wm = new Map(allW.map(w => [w.id, w]));
   const cnt = f => reqs.filter(f).length;
-  $("rChips").innerHTML = chipsHtml([["all", "All", reqs.length], ["open", "Open", cnt(r => reqStatus(r) === "open")], ["on_process", "On process", cnt(r => reqStatus(r) === "on_process")], ["closed", "Closed", cnt(r => reqStatus(r) === "closed")], ["unpaid", "Unpaid", cnt(r => !r.paymentReceived)]], "fr", rFilter);
+  $("rChips").innerHTML = chipsHtml([["all", "All", reqs.length], ["open", "Open", cnt(r => reqStatus(r) === "open")], ["on_process", "On process", cnt(r => reqStatus(r) === "on_process")], ["on_work", "On work", cnt(r => reqStatus(r) === "on_work")], ["closed", "Closed", cnt(r => reqStatus(r) === "closed")], ["unpaid", "Unpaid", cnt(r => !r.paymentReceived)]], "fr", rFilter);
   let rows = reqs.filter(r => rFilter === "all" || (rFilter === "unpaid" ? !r.paymentReceived : reqStatus(r) === rFilter));
   const q = needle("rSearch"); if (q) rows = rows.filter(r => hay(r.workerName, r.employerName, r.employerPhone, r.employerUsername).includes(q));
   $("tbReq").innerHTML = table(["Worker", "Employer", "Requested", "Status", "Payment", "Actions"], rows.map(r => `
@@ -1082,7 +1172,7 @@ function renderSettings() {
 }
 
 // live search / dropdown filters: re-render only the affected screen
-const LIVE = { rSearch: renderRequests, wSearch: renderWorkers, wSkill: renderWorkers, eSearch: renderEmployers, eInd: renderEmployers, jSearch: renderMatches, jStatus: renderMatches, jUrg: renderMatches, pSearch: renderPlacements, tSearch: renderSheets };
+const LIVE = { rSearch: renderRequests, wSearch: renderWorkers, wSkill: renderWorkers, eSearch: renderEmployers, eInd: renderEmployers, jSearch: renderMatches, jStatus: renderMatches, jUrg: renderMatches, pSearch: renderPlacements, tSearch: renderSheets, aSearch: renderAgreements };
 $("panel").addEventListener("input", e => {
   if (e.target.id === "tPeriodSel") { tPeriod = e.target.value; return renderSheets(); }
   const fn = LIVE[e.target.id]; if (fn) fn();
@@ -1224,36 +1314,296 @@ ol li{margin-bottom:8px}.sig{display:flex;justify-content:space-between;gap:20px
 <p class="note">Draft template generated by the admin panel. Have a lawyer review the wording before relying on it.</p></body></html>`;
 }
 
+// ================= toast =================
+let toastT = null;
+function toast(msg) { const t = $("toast"); if (!t) return; t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 3200); }
+
+// ================= agreements (Amharic) =================
+let infoCtx = null;                                   // which profile is open in the info modal (so lists refresh after a delete)
+let agReqId = null, agWorkerId = null, agSignedData = null, agCurrent = null;
+const hasAg = r => !!(r.agreementSigned || r.agreementData);
+const agSigned = a => a.status === "signed" || !!a.agreementSignedAt;
+const agHasFile = a => !!a.signedAgreementUrl && a.signedAgreementUrl !== "uploaded_large_file";
+const agTime = a => ts(a.agreementSignedAt) || ts(a.createdAt);
+const agTitle = a => a.workerName && a.employerName ? `${a.workerName} ↔ ${a.employerName}` : (a.workerName || a.employerName || a.skill || "Agreement");
+const agAttrs = a => `data-id="${esc(a.id)}"`;   // only data-id: other data-* names (fr, fe, fw…) are claimed by the filter chips
+const agFor = id => ags.find(a => a.id === id);
+const agVal = id => ($(id).value || "").trim();
+
+function agsForEmployer(e) {
+  const ph = String(e.phone || "").replace(/\s+/g, ""), nm = String(e.name || "").toLowerCase();
+  return ags.filter(a => a.employerId === e.id
+    || (ph && String(a.employerPhone || a.agreementData?.empPhone || "").replace(/\s+/g, "") === ph)
+    || (nm && String(a.employerName || a.agreementData?.empName || "").toLowerCase() === nm));
+}
+function agListHtml(list, empty) {
+  return list.length ? list.map(a => `
+    <div class="row-item">
+      <div class="row-main"><b>${esc(agTitle(a))}</b><span class="who">${esc(a.skill || "")} · ${a.serviceFee != null && a.serviceFee !== "" ? etb(a.serviceFee) : "—"} · ${fmtDate(a.agreementSignedAt || a.createdAt) || "—"}</span></div>
+      ${agSigned(a) ? bdg("ok", "Signed") : bdg("warn", "Draft")}
+      <div class="row-act">${A("viewAgreement", "View", "", agAttrs(a))}${agHasFile(a) ? A("openSigned", "Signed file", "", agAttrs(a)) : ""}${can("agree") ? A("delAgreement", "Delete", "btn-danger", agAttrs(a)) : ""}</div>
+    </div>`).join("") : `<div class="empty">${empty}</div>`;
+}
+
+function renderAgreements() {
+  const cnt = f => ags.filter(f).length;
+  const fees = ags.filter(agSigned).reduce((t, a) => t + Number(a.serviceFee || 0), 0);
+  $("agKpis").innerHTML = kpiHtml([["Total Agreements", ags.length], ["Signed", cnt(agSigned), "", "Finalized"], ["Signed File Stored", cnt(agHasFile)], ["Service Fees", etb(fees), "", "Signed agreements"]]);
+  $("agChips").innerHTML = chipsHtml([["all", "All", ags.length], ["signed", "Signed", cnt(agSigned)], ["draft", "Draft", cnt(a => !agSigned(a))]], "fa", aFilter);
+  let rows = ags.filter(a => aFilter === "all" || (aFilter === "signed") === agSigned(a));
+  const q = needle("aSearch"); if (q) rows = rows.filter(a => hay(a.workerName, a.employerName, a.skill, a.employerPhone).includes(q));
+  $("tbAg").innerHTML = table(["Worker ↔ Employer", "Skill", "Pay", "Service Fee", "Date", "Status", "Actions"], rows.map(a => `
+    <tr>
+      <td class="c-id"><b>${esc(a.workerName || "—")}</b><div class="who" style="margin:0">↔ ${esc(a.employerName || "—")}</div></td>
+      <td data-l="Skill">${esc(a.skill || "—")}</td>
+      <td data-l="Pay">${esc(a.pay || "—")}${a.payType ? " · " + esc(a.payType) : ""}</td>
+      <td data-l="Service Fee" class="num">${a.serviceFee != null && a.serviceFee !== "" ? etb(a.serviceFee) : "—"}</td>
+      <td data-l="Date">${fmtDate(a.agreementSignedAt || a.createdAt) || "—"}</td>
+      <td data-l="Status">${agSigned(a) ? bdg("ok", "Signed") : bdg("warn", "Draft")}${agHasFile(a) ? '<span class="mini">file stored</span>' : ""}</td>
+      <td class="c-act"><div class="acts">${A("viewAgreement", "View", "", agAttrs(a))}${agHasFile(a) ? A("openSigned", "Signed file", "", agAttrs(a)) : ""}${can("agree") ? A("delAgreement", "Delete", "btn-danger", agAttrs(a)) : ""}</div></td>
+    </tr>`), "No agreements yet. Move a hire request to “On Process” to prepare one.");
+}
+
+function buildAmharicAgreementHtml(x) {
+  const { ref, today, workerName, skill, workerPhone, nationalId, empName, empPhone, empLoc, gName, gPhone, pay, payType, serviceFee, commission, extraTerms } = x;
+  const feeLine = serviceFee ? `የአገልግሎት ክፍያ (Service fee): <b>${esc(String(serviceFee))} ብር</b> ለ ታማኝ ደላላ ተከፍሏል/ይከፈላል።` : `የአገልግሎት ክፍያ፡ በኤጀንሲው ደንብ (${esc(commission)}%) ወይም በተስማሙት መጠን።`;
+  const extra = extraTerms ? `<p><b>ተጨማሪ ውሎች</b><br>${esc(extraTerms).replace(/\n/g, "<br>")}</p>` : "";
+  return `
+    <div style="text-align:center;margin-bottom:14px">
+      <div style="font-size:17px;font-weight:800">ታማኝ ደላላ</div>
+      <div style="font-size:13px;color:#475569;margin-top:2px">የሥራ አቀማመጥ እና የቅጥር ስምምነት</div>
+      <div style="font-size:12px;color:#64748b;margin-top:6px">ቀን፡ ${esc(today)} · ማጣቀሻ፡ ${esc(ref)}</div>
+    </div>
+    <p style="text-align:justify">ይህ ስምምነት በ <b>ታማኝ ደላላ</b> የሥራ አቀማመጥ ኤጀንሲ አማካይነት በአሰሪው እና በሰራተኛው መካከል የተደረገ የቅጥር ስምምነት ነው። ሁሉም ወገኖች ከዚህ በታች የተገለጹትን ውሎች ተረድተው ተቀብለዋል።</p>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:14px 0">
+    <p><b>አንቀጽ ፩ — ሰራተኛ (Worker)</b><br>ሙሉ ስም፡ <b>${esc(workerName)}</b><br>ክህሎት / የሥራ ዓይነት፡ <b>${esc(skill)}</b><br>ስልክ፡ <b>${esc(workerPhone)}</b><br>ብሔራዊ መታወቂያ ቁጥር፡ <b>${esc(nationalId)}</b></p>
+    <p><b>አንቀጽ ፪ — አሰሪ (Employer)</b><br>ስም / ተቋም፡ <b>${esc(empName)}</b><br>ስልክ፡ <b>${esc(empPhone)}</b><br>የሥራ ቦታ / አድራሻ፡ <b>${esc(empLoc)}</b></p>
+    <p><b>አንቀጽ ፫ — ዋስ (Guarantor)</b><br>ስም፡ <b>${esc(gName)}</b><br>ስልክ፡ <b>${esc(gPhone)}</b><br>ዋሱ የሰራተኛውን ማንነት እና ታማኝነት ያረጋግጣል።</p>
+    <p><b>አንቀጽ ፬ — ደመወዝ እና ክፍያ</b><br>የተስማሙበት ደመወዝ፡ <b>${esc(pay)}</b> ብር (${esc(payType)})<br>${feeLine}<br>የኤጀንሲ ኮሚሽን መጠን፡ <b>${esc(commission)}%</b> (በቢሮ ፖሊሲ መሠረት)።</p>
+    <p><b>አንቀጽ ፭ — የሥራ ግዴታዎች</b><br>፩. ሰራተኛው በ <b>${esc(skill)}</b> ላይ የተመሠረተ ሥራ በአሰሪው ቦታ በታማኝነት ያከናውናል።<br>፪. ሰራተኛው በታማኝ ደላላ በኩል ተቀምጧል፤ ሁኔታው «በሥራ ላይ» እስኪዘጋ ድረስ በሂደት ላይ ነው።<br>፫. አሰሪው የተስማሙበትን ደመወዝ እና የአገልግሎት ክፍያ በጊዜው ይከፍላል።<br>፬. ማንኛውም ወገን ስምምነቱን ለመሻር ከፈለገ በአግባቡ ማሳወቅ አለበት።</p>
+    ${extra}
+    <p style="font-size:12px;color:#64748b">ይህ ሰነድ በአማርኛ ተዘጋጅቷል። የተፈረመ ቅጂ በኤጀንሲው ስርዓት ላይ ይቀመጣል። ሁሉም ወገኖች ቅጂ ማግኘት ይችላሉ።</p>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;font-size:12px">
+      <div><b>የሰራተኛ ፊርማ</b><br><br>___________________________<br>ስም፡ ${esc(workerName)}<br>ቀን፡ ____________</div>
+      <div><b>የአሰሪ ፊርማ</b><br><br>___________________________<br>ስም፡ ${esc(empName)}<br>ቀን፡ ____________</div>
+      <div><b>የዋስ ፊርማ</b><br><br>___________________________<br>ስም፡ ${esc(gName)}<br>ቀን፡ ____________</div>
+      <div><b>ታማኝ ደላላ (ኤጀንሲ)</b><br><br>___________________________<br>ባለሥልጣን፡ ____________<br>ቀን፡ ____________</div>
+    </div>`;
+}
+
+function agToday() {
+  const o = { day: "2-digit", month: "long", year: "numeric" };
+  try { return new Date().toLocaleDateString("am-ET", o); } catch (_) { return new Date().toLocaleDateString("en-GB", o); }
+}
+function refreshAgPreview() {
+  $("agreementBody").innerHTML = buildAmharicAgreementHtml({
+    ref: agReqId || "—", today: agToday(), workerName: agVal("agWorkerName") || "—", skill: agVal("agSkill") || "—", workerPhone: agVal("agWorkerPhone") || "—",
+    nationalId: agVal("agNationalId") || "—", empName: agVal("agEmpName") || "—", empPhone: agVal("agEmpPhone") || "—", empLoc: agVal("agEmpLoc") || "—",
+    gName: agVal("agGName") || "—", gPhone: agVal("agGPhone") || "—", pay: agVal("agPay") || "በስምምነት", payType: agVal("agPayType") || "ወርሃዊ",
+    serviceFee: agVal("agServiceFee"), commission: settings.defaultCommissionPct, extraTerms: agVal("agExtraTerms")
+  });
+}
+function setAgMode(readOnly) {
+  $("agEditPanel").classList.toggle("hid", readOnly);
+  $("agUploadBox").classList.toggle("hid", readOnly);
+  $("agFinalize").classList.toggle("hid", readOnly);
+  $("agDelete").classList.toggle("hid", !(readOnly && agCurrent && can("agree")));
+  $("agOpenSigned").classList.toggle("hid", !(readOnly && agCurrent && agHasFile(agCurrent)));
+}
+function clearSigned() {
+  agSignedData = null; $("agSignedFile").value = ""; $("agSignedPreview").textContent = "";
+  $("agSignedThumb").classList.add("hid"); $("agSignedImg").removeAttribute("src"); $("agClearSigned").classList.add("hid");
+}
+function setSigned(dataUrl, label) {
+  agSignedData = dataUrl; $("agSignedPreview").textContent = label || "✓ Signed file ready"; $("agClearSigned").classList.remove("hid");
+  if (dataUrl && String(dataUrl).startsWith("data:image/")) { $("agSignedImg").src = dataUrl; $("agSignedThumb").classList.remove("hid"); }
+  else $("agSignedThumb").classList.add("hid");
+}
+
+async function openAgreementForRequest(requestId) {
+  const r = reqs.find(x => x.id === requestId) || await getDoc(doc(db, "requests", requestId)).then(sn => sn.exists() ? { id: sn.id, ...sn.data() } : null).catch(() => null);
+  if (!r) { toast("Request not found"); return; }
+  agReqId = r.id; agWorkerId = r.workerId || null; agCurrent = null; agSignedData = r.signedAgreementUrl || null;
+  const w = wById(r.workerId) || {}, pr = r.workerId ? (await workerContact(r.workerId)).priv : {}, sv = r.agreementData || {};
+  const set = (id, v) => { $(id).value = v ?? ""; };
+  set("agWorkerName", sv.workerName || r.workerName || w.name); set("agSkill", sv.skill || w.skill || r.workerSkill);
+  set("agWorkerPhone", sv.workerPhone || pr.phone); set("agNationalId", sv.nationalId || pr.nationalId);
+  set("agEmpName", sv.empName || r.employerName); set("agEmpPhone", sv.empPhone || r.employerPhone); set("agEmpLoc", sv.empLoc || r.employerLocation);
+  set("agGName", sv.gName || pr.guarantorName); set("agGPhone", sv.gPhone || pr.guarantorPhone);
+  set("agPay", sv.pay || (w.pay && w.pay !== "Negotiable" ? w.pay : "")); set("agPayType", sv.payType || ({ weekly: "ሳምንታዊ", daily: "ዕለታዊ" }[r.paymentType] || "ወርሃዊ"));
+  set("agServiceFee", sv.serviceFee != null ? sv.serviceFee : (r.serviceFee || "")); set("agExtraTerms", sv.extraTerms);
+  $("agFeeCollected").checked = !!(r.serviceFeeCollected || sv.feeCollected); $("agPartiesPresent").checked = !!(r.partiesPresent || sv.partiesPresent);
+  if (agSignedData && agSignedData !== "uploaded_large_file") setSigned(agSignedData, "✓ Signed document already on file");
+  else { clearSigned(); if (r.signedAgreementNote) $("agSignedPreview").textContent = r.signedAgreementNote; }
+  setAgMode(false); refreshAgPreview(); $("agreementModal").classList.remove("hid");
+}
+
+function viewAgreementById(id) {
+  const a = agFor(id); if (!a) { toast("Agreement not found"); return; }
+  const x = a.agreementData || {};
+  agCurrent = a; agReqId = a.requestId || null;
+  $("agreementBody").innerHTML = buildAmharicAgreementHtml({
+    ref: a.requestId || a.id, today: fmtDate(a.agreementSignedAt || a.createdAt) || "—", workerName: x.workerName || a.workerName || "—", skill: x.skill || a.skill || "—",
+    workerPhone: x.workerPhone || "—", nationalId: x.nationalId || "—", empName: x.empName || a.employerName || "—", empPhone: x.empPhone || a.employerPhone || "—",
+    empLoc: x.empLoc || "—", gName: x.gName || "—", gPhone: x.gPhone || "—", pay: x.pay || a.pay || "—", payType: x.payType || a.payType || "—",
+    serviceFee: x.serviceFee ?? a.serviceFee ?? "", commission: settings.defaultCommissionPct, extraTerms: x.extraTerms || ""
+  });
+  setAgMode(true); $("agreementModal").classList.remove("hid");
+}
+
+async function openSignedFor(a) {
+  if (!a || !agHasFile(a)) { toast("No signed file is stored for this agreement"); return; }
+  const win = window.open("", "_blank");
+  try { const blob = await (await fetch(a.signedAgreementUrl)).blob(); const url = URL.createObjectURL(blob); if (win) win.location.href = url; else window.open(url, "_blank"); }
+  catch (_) { if (win) win.close(); toast("Could not open the file"); }
+}
+
+function findEmployerIdForRequest(r, x) {
+  const phone = String(x?.empPhone || r?.employerPhone || "").replace(/\s+/g, ""), name = String(x?.empName || r?.employerName || "").toLowerCase(), tg = r?.employerTgId != null ? String(r.employerTgId) : "";
+  const m = employers.find(e => (tg && (String(e.tgId) === tg || e.id === tg)) || (phone && String(e.phone || "").replace(/\s+/g, "") === phone) || (name && String(e.name || "").toLowerCase() === name));
+  return m ? m.id : null;
+}
+
+async function finalizeAgreement() {
+  if (!agReqId) return;
+  if (!$("agPartiesPresent").checked) { toast("አሰሪ እና ሰራተኛ በአካል መገኘታቸውን (ወይም OTP) ያረጋግጡ · Confirm both parties were present"); return; }
+  if (!$("agFeeCollected").checked) { toast("የአገልግሎት ክፍያ መሰብሰቡን ያረጋግጡ · Confirm the service fee was collected"); return; }
+  if (!agSignedData && !confirm("የተፈረመ ስምምነት አልተሰቀለም። ቢቀጥሉ?\nNo signed agreement uploaded. Continue anyway?")) return;
+  const feeAmt = Number($("agServiceFee").value) || 0;
+  const x = { workerName: agVal("agWorkerName"), skill: agVal("agSkill"), workerPhone: agVal("agWorkerPhone"), nationalId: agVal("agNationalId"), empName: agVal("agEmpName"), empPhone: agVal("agEmpPhone"),
+    empLoc: agVal("agEmpLoc"), gName: agVal("agGName"), gPhone: agVal("agGPhone"), pay: agVal("agPay"), payType: agVal("agPayType"), serviceFee: feeAmt, extraTerms: agVal("agExtraTerms"), feeCollected: true, partiesPresent: true };
+  const r = reqs.find(q => q.id === agReqId) || {}, employerId = findEmployerIdForRequest(r, x), workerId = agWorkerId || r.workerId || null;
+  let signedUrl = null, signedNote = null;
+  if (agSignedData) { if (agSignedData.length < 900000) signedUrl = agSignedData; else { signedUrl = "uploaded_large_file"; signedNote = "File too large for Firestore; keep the printed copy"; } }
+  const b = $("agFinalize"); b.disabled = true;
+  try {
+    const patch = { status: "on_work", agreementPrepared: true, agreementSigned: true, agreementSignedAt: serverTimestamp(), agreementData: x, serviceFee: feeAmt, serviceFeeCollected: true, partiesPresent: true, workerId, employerId: employerId || null };
+    if (feeAmt > 0) patch.paymentReceived = true;
+    if (signedUrl) patch.signedAgreementUrl = signedUrl;
+    if (signedNote) patch.signedAgreementNote = signedNote;
+    await updateDoc(doc(db, "requests", agReqId), patch);                                   // 1) the hire request (core path)
+    let agId = null;
+    try {                                                                                     // 2) archive copy (needs a Firestore rule for /agreements)
+      const ref = doc(collection(db, "agreements"));
+      await setDoc(ref, { requestId: agReqId, workerId, employerId: employerId || null, workerName: x.workerName, employerName: x.empName, employerPhone: x.empPhone, skill: x.skill, pay: x.pay, payType: x.payType,
+        serviceFee: feeAmt, serviceFeeCollected: true, agreementData: x, signedAgreementUrl: signedUrl || null, signedAgreementNote: signedNote || null, status: "signed", agreementSignedAt: serverTimestamp(), createdAt: serverTimestamp() });
+      agId = ref.id;
+    } catch (e) { console.warn("agreements write failed (check Firestore rules):", e); }
+    if (workerId) {                                                                           // 3) worker → on work
+      try {
+        const wp = { available: false, work_status: "on_work", availability_status: "On Work", assigned_employer: x.empName || null, assignedEmployerName: x.empName || "" };
+        if (employerId) wp.assignedEmployerId = employerId; if (agId) wp.latestAgreementId = agId;
+        await updateDoc(doc(db, "workers", workerId), wp);
+      } catch (e) { toast("Agreement saved, but the worker status update failed: " + e.message); }
+    }
+    if (employerId && agId) await updateDoc(doc(db, "employers", employerId), { latestAgreementId: agId }).catch(() => {});   // 4) employer link
+    toast(agId ? "✅ ተፈርሟል · ተሰቅሏል · ሰራተኛ በሥራ ላይ — Agreement saved, worker is On Work" : "✅ Saved on the request · worker On Work (add a Firestore rule for /agreements to keep the archive)");
+    $("agreementModal").classList.add("hid"); await loadAdmin();
+  } catch (e) {
+    toast(e && e.code === "permission-denied" ? "Firestore permission denied. Update the rules for requests / workers / agreements." : "Error: " + (e.message || e));
+  }
+  b.disabled = false;
+}
+
+async function deleteAgreementRecord(a) {
+  if (!a || !can("agree")) return false;
+  if (!confirm(`Delete this agreement?\n${agTitle(a)}\n\nThe signed file stored with it is removed too. This cannot be undone.`)) return false;
+  try {
+    if (!a._fromRequest) await deleteDoc(doc(db, "agreements", a.id));
+    if (a.requestId) await updateDoc(doc(db, "requests", a.requestId), { agreementSigned: false, agreementPrepared: false, signedAgreementUrl: null, signedAgreementNote: null, agreementData: null, agreementSignedAt: null }).catch(() => {});
+    const w = a.workerId && wById(a.workerId);
+    if (w && w.work_status === "on_work" && confirm(`Also release ${w.name} and set them available again?`))
+      await updateDoc(doc(db, "workers", w.id), { available: true, work_status: "", availability_status: "", assigned_employer: null, assignedEmployerName: "", assignedEmployerId: null, latestAgreementId: null });
+    else if (w && w.latestAgreementId === a.id) await updateDoc(doc(db, "workers", w.id), { latestAgreementId: null }).catch(() => {});
+    toast("Agreement deleted"); return true;
+  } catch (e) { alert(e.message); return false; }
+}
+async function refreshInfo() {
+  if (!infoCtx || $("infoModal").classList.contains("hid")) return;
+  await ACTIONS[infoCtx.t === "w" ? "viewWorker" : "viewEmp"]({ id: infoCtx.id });
+}
+
+// modal wiring
+$("agRefreshPreview").onclick = refreshAgPreview;
+$("agreementModal").addEventListener("input", e => { if (e.target.closest("#agEditPanel")) refreshAgPreview(); });
+$("agClose").onclick = () => { $("agreementModal").classList.add("hid"); agCurrent = null; };
+$("agFinalize").onclick = finalizeAgreement;
+$("agClearSigned").onclick = () => { clearSigned(); toast("Upload cleared"); };
+$("agOpenSigned").onclick = () => openSignedFor(agCurrent);
+$("agDelete").onclick = async () => {
+  if (!(await deleteAgreementRecord(agCurrent))) return;
+  $("agreementModal").classList.add("hid"); agCurrent = null; await loadAdmin(); await refreshInfo();
+};
+$("agPrint").onclick = () => {
+  const w = window.open("", "_blank"); if (!w) { toast("Allow pop-ups to print"); return; }
+  w.document.write(`<!DOCTYPE html><html lang="am"><head><meta charset="utf-8"><title>የሥራ ስምምነት · Tamagn Delala</title><style>body{font-family:"Noto Sans Ethiopic",system-ui,sans-serif;padding:28px;max-width:720px;margin:0 auto;line-height:1.65;font-size:14px;color:#0f172a}@media print{button{display:none}body{padding:12px}}</style></head><body>${$("agreementBody").innerHTML}<p style="margin-top:28px"><button onclick="print()">አትም / Print</button></p></body></html>`);
+  w.document.close();
+};
+$("agSignedFile").onchange = e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return clearSigned();
+  if (f.size > 4 * 1024 * 1024) { toast("File too large (max ~4 MB). Compress the photo or use a smaller PDF."); e.target.value = ""; return; }
+  const rd = new FileReader();
+  rd.onload = () => { setSigned(rd.result, `✓ ${f.name} (${Math.round(f.size / 1024)} KB) — ready to Finalize`); toast("Signed agreement loaded. Tap Finalize to save."); };
+  rd.onerror = () => toast("Could not read the file");
+  rd.readAsDataURL(f);
+};
+
 // ================= actions (buttons with data-act) =================
 const ACTIONS = {
-  closeInfo() { $("infoModal").classList.add("hid"); return false; },
+  closeInfo() { $("infoModal").classList.add("hid"); infoCtx = null; return false; },
+
+  // --- agreements ---
+  async openAgreement(d) { await openAgreementForRequest(d.id); return false; },
+  viewAgreement(d) { viewAgreementById(d.id); return false; },
+  async openSigned(d) { await openSignedFor(agFor(d.id)); return false; },
+  async delAgreement(d) { if (!(await deleteAgreementRecord(agFor(d.id)))) return false; await loadAdmin(); await refreshInfo(); return false; },
+
+  // --- placements: delete ---
+  async delPlacement(d) {
+    const p = plById(d.id); if (!p) return false;
+    const n = sheets.filter(t => t.placementId === p.id).length;
+    if (!confirm(`Delete the placement ${p.workerName} → ${p.jobTitle} (${p.employerName})?` + (p.status === "Active Placement" ? "\nThe worker will be released and set available again." : "") + (n ? `\n${n} linked timesheet(s) will be kept.` : "") + "\nThis cannot be undone.")) return false;
+    const b = writeBatch(db), w = wById(p.workerId);
+    b.delete(doc(db, "placements", p.id));
+    if (p.status === "Active Placement" && w && w.assignedEmployerId === p.employerId) b.update(doc(db, "workers", w.id), { assignedEmployerId: null, assignedEmployerName: "", available: true });
+    await b.commit();
+    if (FILL.includes(p.status)) await setJobFill(jById(p.jobId), filledCount(p.jobId) - 1);
+    toast("Placement deleted");
+  },
   selJob(d) { selJobId = d.id; renderMatches(); return false; },
   findMatch(d) { selJobId = d.id; $("jStatus").value = ""; $("jUrg").value = ""; $("jSearch").value = ""; showView("matches"); renderMatches(); return false; },
 
   // --- employers ---
   newEmp() { empForm(null); return false; },
-  editEmp(d) { empForm(eById(d.id)); return false; },
+  editEmp(d) { $("infoModal").classList.add("hid"); empForm(eById(d.id)); return false; },
   async empVerify(d) { await updateDoc(doc(db, "employers", d.id), { verificationStatus: "verified" }); },
   async empSuspend(d) { if (!confirm("Reject / suspend this employer?")) return false; await updateDoc(doc(db, "employers", d.id), { verificationStatus: "suspended" }); },
   viewEmp(d) {
     const e = eById(d.id); if (!e) return false;
+    infoCtx = { t: "e", id: e.id };
     $("imBody").innerHTML = `<div style="text-align:center">${avatar(e).replace('class="av"', 'class="av" style="width:64px;height:64px;margin:0 auto 8px;font-size:20px"')}</div><h3>${esc(e.name)}</h3><p style="text-align:center">${empVerBadge(e)} ${billBadge(e)}</p>` + kv([
       ["Employer ID", sid("E", e.id)], ["Industry", esc(e.industry)], ["Email", esc(e.email)], ["Phone", esc(e.phone)], ["Location", esc(e.location)],
       ["Telegram", e.username ? "@" + esc(String(e.username).replace(/^@/, "")) : ""], ["TIN", esc(e.tin)], ["Business license", linkOrDash(e.licenseUrl)], ["ID document", linkOrDash(e.idDocUrl)],
       ["Active jobs", jobs.filter(j => j.employerId === e.id && ["Open", "Partially Filled"].includes(j.status)).length], ["Placed workers", places.filter(p => p.employerId === e.id && p.status === "Active Placement").length], ["Registered", fmtDate(e.createdAt)]
-    ]) + `<div class="acts" style="justify-content:center">${empVerBtns(e)}</div>`;
+    ]) + `<div class="acts" style="justify-content:center">${empVerBtns(e)}${can("manage") ? A("editEmp", "Edit", "", `data-id="${esc(e.id)}"`) + `<button class="btn-secondary btn-danger" data-de="${esc(e.id)}">Delete</button>` : ""}</div>`
+      + `<h4 style="margin:14px 0 2px">የሥራ ስምምነቶች · Agreements</h4>` + agListHtml(agsForEmployer(e), "No agreements for this employer yet");
     $("infoModal").classList.remove("hid"); return false;
   },
 
   // --- workers ---
   async viewWorker(d) {
     const w = wById(d.id); if (!w) return false;
+    infoCtx = { t: "w", id: w.id };
     let pr = {}; try { const s = await getDoc(doc(db, "workers_private", w.id)); if (s.exists()) pr = s.data(); } catch (_) {}
-    $("imBody").innerHTML = (w.photo ? `<img class="big-photo" src="${esc(w.photo)}" alt="">` : "") + `<h3>${esc(w.name)}</h3><p style="text-align:center">${availBadge(w)} ${verBadge(w)}</p>` + kv([
+    const nm = String(w.name || "worker").replace(/\s+/g, "_");
+    const pic = (src, cap, file) => src ? `<div style="text-align:center"><div class="mini" style="margin-bottom:4px">${cap}</div><img class="big-photo" style="margin:0 auto 6px" src="${esc(src)}" alt=""><a class="btn-secondary" style="display:inline-block;margin:0" href="${esc(src)}" download="${esc(file)}">⬇ Download</a></div>` : "";
+    $("imBody").innerHTML = `<div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">${pic(w.photo, "Profile photo", nm + "_photo.jpg")}${pic(pr.idPhoto, "National ID photo", nm + "_ID.jpg")}</div>` + `<h3>${esc(w.name)}</h3><p style="text-align:center">${availBadge(w)} ${verBadge(w)}</p>` + kv([
       ["Worker ID", sid("W", w.id)], ["Primary skill", esc(w.skill)], ["Other skills", esc((w.skillTags || []).join(", "))], ["Experience", esc(w.experience) + (w.experienceYears != null ? " (" + esc(w.experienceYears) + " yrs)" : "")],
       ["Age", esc(w.age)], ["Location", esc(w.location)], ["Pay", esc(w.pay) + " · " + esc(w.paymentType)], ["Fayda / Kebele ID", esc(pr.nationalId)], ["Phone", esc(pr.phone)], ["Telegram ID", esc(pr.telegramUserId)],
       ["Police clearance", w.hasPoliceClearance ? "Yes" : "No"], ["Guarantor", esc(pr.guarantorName)], ["Guarantor phone", esc(pr.guarantorPhone)], ["Employer", esc(w.assignedEmployerName)]
-    ]) + (w.status === "pending" ? `<div class="acts" style="justify-content:center">${approveBtns(w)}</div>` : "");
+    ]) + `<div class="acts" style="justify-content:center">${w.status === "pending" ? approveBtns(w) : ""}${can("manage") ? `<button class="btn-secondary" data-ed="${esc(w.id)}">Edit</button><button class="btn-secondary btn-danger" data-dw="${esc(w.id)}">Delete</button>` : ""}</div>`
+      + `<h4 style="margin:14px 0 2px">የሥራ ስምምነቶች · Agreements</h4>` + agListHtml(ags.filter(a => a.workerId === w.id), "No agreements for this worker yet");
     $("infoModal").classList.remove("hid"); return false;
   },
 
@@ -1404,6 +1754,7 @@ async function onAction(e) {
     if (d.fe) { eFilter = d.fe; return renderEmployers(); }
     if (d.fp) { pFilter = d.fp; return renderPlacements(); }
     if (d.ft) { tFilter = d.ft; return renderSheets(); }
+    if (d.fa) { aFilter = d.fa; return renderAgreements(); }
     if (d.act) { const fn = ACTIONS[d.act]; if (!fn) return; const res = await fn(d); if (res !== false) await loadAdmin(); return; }
     if (d.approve) await updateDoc(doc(db,"workers",d.approve),{status:"approved",available:true});
     else if (d.reject) { if(!confirm("Reject?"))return; await updateDoc(doc(db,"workers",d.reject),{status:"rejected",available:false}); }
@@ -1420,20 +1771,42 @@ async function onAction(e) {
       $("ratingModal").classList.remove("hid"); return;
     }
     else if (d.marksent) await updateDoc(doc(db,"requests",d.marksent),{followUpSent:true});
-    else if (d.status) await updateDoc(doc(db,"requests",d.status),{status:d.val});
+    else if (d.status) {
+      await updateDoc(doc(db,"requests",d.status),{status:d.val});
+      if (d.val === "on_process") {                       // hire accepted: hide the worker from employers and open the agreement
+        const r = reqs.find(x=>x.id===d.status);
+        if (r && r.workerId && wById(r.workerId)) await updateDoc(doc(db,"workers",r.workerId),{available:false, assigned_employer:r.employerName||null, assignedEmployerName:r.employerName||""}).catch(()=>{});
+        await loadAdmin();
+        if (can("agree")) await openAgreementForRequest(d.status);
+        return;
+      }
+    }
     else if (d.pay) await updateDoc(doc(db,"requests",d.pay),{paymentReceived:true});
     else if (d.showphone) {
       const p = await getDoc(doc(db,"workers_private",d.showphone));
       alert("Phone: "+(p.exists()?p.data().phone:"N/A")); return;
     }
-    else if (d.dr) { if(!confirm("Delete?"))return; await deleteDoc(doc(db,"requests",d.dr)); }
-    else if (d.de) { if(!confirm("Delete this employer permanently?"))return; await deleteDoc(doc(db,"employers",d.de)); }
-    else if (d.tg) { const w=wById(d.tg); await updateDoc(doc(db,"workers",d.tg),{available:!w.available}); }
-    else if (d.dw) {
-      if(!confirm("Delete?"))return;
-      const b=writeBatch(db); b.delete(doc(db,"workers",d.dw)); b.delete(doc(db,"workers_private",d.dw)); await b.commit();
+    else if (d.dr) {
+      const r=reqs.find(x=>x.id===d.dr);
+      if(!confirm(`Delete this hire request${r?` (${r.workerName} ← ${r.employerName})`:""}?`+(r&&hasAg(r)?"\nIts agreement stays in the Agreements list.":"")+"\nThis cannot be undone."))return;
+      await deleteDoc(doc(db,"requests",d.dr)); toast("Request deleted");
     }
-    else if (d.ed) return startEdit(d.ed);
+    else if (d.de) {
+      const e=eById(d.de), n=jobs.filter(j=>j.employerId===d.de&&["Open","Partially Filled"].includes(j.status)).length, a=places.filter(p=>p.employerId===d.de&&BUSY.includes(p.status)).length;
+      if(!confirm(`Delete ${e?e.name:"this employer"} permanently?`+(n||a?`\nThey still have ${n} open job order(s) and ${a} live placement(s).`:"")+"\nThis cannot be undone."))return;
+      await deleteDoc(doc(db,"employers",d.de)); toast("Employer deleted");
+    }
+    else if (d.tg) {
+      const w=wById(d.tg), upd={available:!w.available};
+      if (!w.available) Object.assign(upd,{assignedEmployerName:"",assigned_employer:null,work_status:"",availability_status:""});   // freeing a worker clears the on-work state
+      await updateDoc(doc(db,"workers",d.tg),upd);
+    }
+    else if (d.dw) {
+      const w=wById(d.dw), live=places.filter(p=>p.workerId===d.dw&&BUSY.includes(p.status)).length;
+      if(!confirm(`Delete ${w?w.name:"this worker"} permanently?`+(live?`\nThis worker has ${live} live placement(s).`:"")+"\nTheir private details (phone, ID, guarantor) are removed too. This cannot be undone."))return;
+      const b=writeBatch(db); b.delete(doc(db,"workers",d.dw)); b.delete(doc(db,"workers_private",d.dw)); await b.commit(); toast("Worker deleted");
+    }
+    else if (d.ed) { $("infoModal").classList.add("hid"); return startEdit(d.ed); }
     else return;
     $("infoModal").classList.add("hid");
     await loadAdmin();
