@@ -43,7 +43,7 @@ body {
   position: sticky; top: 0; z-index: 50;
   background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 60%, #0284c7 100%);
   border-bottom: none;
-  padding: 12px max(16px, calc((100vw - 1280px) / 2));
+  padding: 10px max(16px, calc((100vw - 1280px) / 2));
   display: flex; align-items: center; justify-content: space-between;
   color: #fff;
   box-shadow: 0 4px 18px rgba(3, 105, 161, 0.28);
@@ -63,7 +63,7 @@ body {
 }
 img { max-width: 100%; }
 main {
-  padding: 0 14px 24px;
+  padding: 0 12px 12px;
 }
 
 .back-btn {
@@ -211,10 +211,10 @@ textarea { min-height: 70px; resize: vertical; }
 a.btn-secondary { display: inline-block; text-decoration: none; }
 .shell {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 12px;
   align-items: start;
-  margin-top: 16px;
+  margin-top: 10px;
 }
 .content {
   min-width: 0;
@@ -265,8 +265,8 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
   font-size: 11px; font-weight: 700; text-align: center;
 }
 .nav-sep { height: 1px; background: rgba(255,255,255,0.1); margin: 8px 6px; }
-.view-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
-.view-head h2 { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; color: #0f172a; }
+.view-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.view-head h2 { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: #0f172a; }
 .btn-add {
   padding: 10px 16px; border: 0; border-radius: 11px;
   background: var(--btn); color: var(--btnfg);
@@ -276,14 +276,14 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 }
 .btn-add:active { transform: scale(0.97); }
 
-/* KPI cards */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+/* KPI cards — compact for no-scroll dashboard */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 8px; margin-bottom: 10px; }
 .kpi {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
   box-shadow: var(--shadow);
-  padding: 12px 13px;
+  padding: 8px 10px;
   transition: box-shadow .15s, transform .12s;
   position: relative;
   overflow: hidden;
@@ -294,28 +294,28 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
   background: linear-gradient(180deg, #0284c7, #0369a1);
   opacity: 0.7;
 }
-.kpi:hover { box-shadow: 0 8px 22px -4px rgb(15 23 42 / 0.14); transform: translateY(-1px); }
-.kpi .k-l { font-size: 10.5px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: 0.04em; }
-.kpi .k-v { font-size: 22px; font-weight: 800; line-height: 1.15; margin-top: 3px; color: #0f172a; letter-spacing: -0.02em; }
-.kpi .k-s { font-size: 11px; color: var(--hint); margin-top: 2px; line-height: 1.3; }
+.kpi:hover { box-shadow: 0 6px 16px -4px rgb(15 23 42 / 0.12); transform: translateY(-1px); }
+.kpi .k-l { font-size: 9.5px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: 0.03em; }
+.kpi .k-v { font-size: 17px; font-weight: 800; line-height: 1.15; margin-top: 2px; color: #0f172a; letter-spacing: -0.02em; }
+.kpi .k-s { font-size: 10px; color: var(--hint); margin-top: 1px; line-height: 1.25; }
 .kpi.alert { border-color: #fbbf24; background: #fffbeb; }
 .kpi.alert::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
 .kpi.alert .k-v { color: #b45309; }
 
-/* Dashboard panels */
-.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
-.panel-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; min-width: 0; }
-.panel-card h3 { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 15px; }
-.panel-card .sub { font-size: 12px; color: var(--hint); margin-bottom: 6px; }
-.link-btn { background: none; border: 0; color: var(--btn); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
-.row-item { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 9px 0; border-top: 1px solid var(--border); }
+/* Dashboard panels — tighter */
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 10px; }
+.panel-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); padding: 10px 12px; min-width: 0; }
+.panel-card h3 { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13.5px; margin: 0; }
+.panel-card .sub { font-size: 11px; color: var(--hint); margin-bottom: 4px; }
+.link-btn { background: none; border: 0; color: var(--btn); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.row-item { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 6px 0; border-top: 1px solid var(--border); }
 .row-main { flex: 1; min-width: 140px; }
 .row-main b, .row-main .who { display: block; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-act { display: flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
 .row-act .btn-secondary { margin: 0; }
 .feed-dot { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--bg); display: grid; place-items: center; font-size: 14px; }
 .feed-time { font-size: 12px; color: var(--hint); white-space: nowrap; }
-.empty { padding: 18px 4px; text-align: center; color: var(--hint); font-size: 14px; }
+.empty { padding: 10px 4px; text-align: center; color: var(--hint); font-size: 13px; }
 .chart svg { width: 100%; height: auto; display: block; }
 .legend { display: flex; gap: 14px; font-size: 12px; color: var(--hint); margin-top: 4px; }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
@@ -1029,7 +1029,7 @@ const empVerBtns = e => !can("verify") ? "" : eVer(e) === "pending"
 // ================= chart =================
 function weekly(times) { const WK = 8, now = Date.now() / 1000, out = Array(WK).fill(0); times.forEach(s => { if (!s) return; const i = Math.floor((now - s) / 604800); if (i >= 0 && i < WK) out[WK - 1 - i]++; }); return out; }
 function chartHtml(series) {
-  const WK = 8, W = 400, H = 150, px = 28, py = 16;
+  const WK = 8, W = 400, H = 100, px = 28, py = 14;
   const data = series.map(s => ({ ...s, v: weekly(s.times) }));
   const max = Math.max(4, ...data.flatMap(s => s.v));
   const X = i => px + i * (W - px - 10) / (WK - 1), Y = v => H - py - v * (H - 2 * py) / max;
@@ -1126,14 +1126,14 @@ function renderDash() {
     ["Pending Approvals", pending.length + pe.length, (pending.length + pe.length) ? "alert" : "", `${pending.length} workers · ${pe.length} employers`]
   ]);
 
-  const queue = [...pending.map(w => ({ t: "worker", o: w })), ...pe.map(e => ({ t: "employer", o: e }))].slice(0, 6);
+  const queue = [...pending.map(w => ({ t: "worker", o: w })), ...pe.map(e => ({ t: "employer", o: e }))].slice(0, 3);
   $("dQueue").innerHTML = queue.length ? queue.map(({ t, o }) => `
     <div class="row-item">${avatar(o)}
       <div class="row-main"><b>${esc(o.name)}</b><span class="who">${t === "worker" ? "Worker · " + esc(o.skill) : "Employer · " + esc(o.industry || o.location || "")}</span></div>
       <div class="row-act">${t === "worker" ? approveBtns(o) : empVerBtns(o)}</div>
     </div>`).join("") : `<div class="empty">All caught up ✅</div>`;
 
-  const urgent = openJobs.filter(j => j.urgency === "Urgent").slice(0, 5);
+  const urgent = openJobs.filter(j => j.urgency === "Urgent").slice(0, 3);
   $("dUrgent").innerHTML = urgent.length ? urgent.map(j => `
     <div class="row-item"><div class="row-main"><b>${esc(j.title)}</b><span class="who">${esc(j.employerName)} · Start ${esc(j.startDate || "—")} · ${filledCount(j.id)}/${esc(j.workersNeeded)}</span></div>
       ${can("place") ? `<div class="row-act">${A("findMatch", "Find Match", "btn-info", `data-id="${esc(j.id)}"`)}</div>` : ""}</div>`).join("") : `<div class="empty">No urgent jobs 🎉</div>`;
@@ -1150,7 +1150,7 @@ function renderDash() {
     ...reqs.map(r => ({ t: ts(r.createdAt), i: "📋", x: `${r.employerName || "Employer"} requested ${r.workerName || "a worker"}` })),
     ...allW.map(w => ({ t: ts(w.createdAt), i: w.source === "admin" ? "➕" : "👷", x: `${w.name} ${w.source === "admin" ? "added" : "applied"} · ${w.skill}` })),
     ...employers.map(e => ({ t: ts(e.createdAt), i: "👔", x: `${e.name} registered as employer` }))
-  ].filter(x => x.t).sort((a, b) => b.t - a.t).slice(0, 8);
+  ].filter(x => x.t).sort((a, b) => b.t - a.t).slice(0, 4);
   $("dFeed").innerHTML = feed.length ? feed.map(f => `<div class="row-item"><div class="feed-dot">${f.i}</div><div class="row-main"><span class="who" style="color:var(--fg)">${esc(f.x)}</span></div><span class="feed-time">${ago(f.t)}</span></div>`).join("") : `<div class="empty">No activity yet</div>`;
 
   const act = reqs.filter(r => reqStatus(r) !== "closed").slice(0, 5);
