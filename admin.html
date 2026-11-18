@@ -29,14 +29,24 @@
   --radius: 14px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  -webkit-text-size-adjust: 100%;
+  height: 100%;
+}
 body {
   background: var(--bg); color: var(--fg);
   font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
-  padding-bottom: 50px; -webkit-font-smoothing: antialiased;
+  padding-bottom: 0;
+  -webkit-font-smoothing: antialiased;
   min-height: 100vh; min-height: 100dvh;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 .header {
   position: sticky; top: 0; z-index: 50;
+  flex: 0 0 auto;
   background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 60%, #0284c7 100%);
   border-bottom: none;
   padding: 12px max(16px, calc((100vw - 1280px) / 2));
@@ -57,10 +67,14 @@ body {
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer;
 }
-html { -webkit-text-size-adjust: 100%; }
-body { overflow-x: hidden; }
 img { max-width: 100%; }
-main { padding: 0 14px 24px; }
+main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 14px 16px;
+}
 
 .back-btn {
   display: inline-flex;
@@ -164,7 +178,7 @@ textarea { min-height: 70px; resize: vertical; }
 .phone-box a { font-size: 18px; font-weight: 700; color: #166534; text-decoration: none; }
 
 .topbar-right { display:flex; gap:8px; align-items:center; }
-.wrap { max-width: 1180px; margin: 0 auto; }
+.wrap { max-width: 1280px; width: 100%; margin: 0 auto; }
 
 .photo-preview { display:block; width:105px; aspect-ratio:7/9; object-fit:cover; border-radius:8px; border:1px solid var(--border); margin-bottom:11px; }
 
@@ -188,7 +202,15 @@ textarea { min-height: 70px; resize: vertical; }
 .cam-actions .btn-secondary { margin: 0; padding: 11px 14px; }
 
 /* ===== Admin shell: sidebar + views ===== */
-.wrap { max-width: 1280px; }
+.wrap {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
 .header { padding-left: max(16px, calc((100vw - 1280px) / 2)); padding-right: max(16px, calc((100vw - 1280px) / 2)); }
 .topbar-right { display:flex; gap:10px; align-items:center; }
 .topbar-right .who { margin: 0; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,0.92); font-size: 13px; }
@@ -201,35 +223,78 @@ textarea { min-height: 70px; resize: vertical; }
 }
 .topbar-right .btn-secondary:hover { background: rgba(255,255,255,0.28); }
 a.btn-secondary { display: inline-block; text-decoration: none; }
-.shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 18px; }
-.content { min-width: 0; }
+.shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+  margin-top: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.content {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+#panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#panel.hid { display: none !important; }
+#login { flex: 0 0 auto; }
 .side {
   position: sticky; top: 78px;
-  display: flex; flex-direction: column; gap: 3px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 10px 8px;
-  box-shadow: var(--shadow);
+  align-self: start;
+  max-height: calc(100vh - 94px);
+  max-height: calc(100dvh - 94px);
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 4px;
+  background: linear-gradient(180deg, #0c1e33 0%, #0f2744 100%);
+  border: 1px solid #1e3a5f;
+  border-radius: 18px;
+  padding: 14px 10px;
+  box-shadow: 0 10px 30px -8px rgba(12, 30, 51, 0.45);
+  color: #e2e8f0;
+}
+.side::before {
+  content: "Tamagn Delala";
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7dd3fc;
+  padding: 2px 10px 10px;
+  opacity: 0.9;
 }
 .nav-btn {
   display: flex; align-items: center; gap: 10px;
   width: 100%; padding: 11px 12px;
-  border: 0; border-radius: 11px;
-  background: none; color: var(--fg);
-  font: inherit; font-size: 14px; font-weight: 600;
+  border: 0; border-radius: 12px;
+  background: transparent; color: #cbd5e1;
+  font: inherit; font-size: 13.5px; font-weight: 600;
   cursor: pointer; text-align: left;
-  transition: background .12s, color .12s;
+  transition: background .15s, color .15s, transform .1s;
   -webkit-tap-highlight-color: transparent;
 }
-.nav-btn:hover { background: #f1f5f9; }
-.nav-btn.active { background: #e0f2fe; color: #0369a1; box-shadow: inset 3px 0 0 #0369a1; }
+.nav-btn:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.nav-btn.active {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+}
 .nav-btn .ni { font-size: 17px; width: 24px; text-align: center; flex: none; }
 .nav-btn .nb {
   margin-left: auto; min-width: 20px; padding: 1px 6px;
-  border-radius: 999px; background: var(--danger); color: #fff;
+  border-radius: 999px; background: #f43f5e; color: #fff;
   font-size: 11px; font-weight: 700; text-align: center;
 }
+.nav-sep { height: 1px; background: rgba(255,255,255,0.1); margin: 8px 6px; }
 .view-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
 .view-head h2 { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; color: #0f172a; }
 .btn-add {
@@ -242,20 +307,29 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 .btn-add:active { transform: scale(0.97); }
 
 /* KPI cards */
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 18px; }
 .kpi {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 14px;
   box-shadow: var(--shadow);
-  padding: 14px 16px;
-  transition: box-shadow .15s;
+  padding: 14px 15px;
+  transition: box-shadow .15s, transform .12s;
+  position: relative;
+  overflow: hidden;
 }
-.kpi:hover { box-shadow: 0 6px 18px -4px rgb(15 23 42 / 0.12); }
-.kpi .k-l { font-size: 12px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.03em; }
-.kpi .k-v { font-size: 26px; font-weight: 800; line-height: 1.2; margin-top: 4px; color: #0f172a; }
-.kpi .k-s { font-size: 12px; color: var(--hint); margin-top: 2px; }
+.kpi::before {
+  content: "";
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, #0284c7, #0369a1);
+  opacity: 0.7;
+}
+.kpi:hover { box-shadow: 0 8px 22px -4px rgb(15 23 42 / 0.14); transform: translateY(-1px); }
+.kpi .k-l { font-size: 11px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: 0.04em; }
+.kpi .k-v { font-size: 24px; font-weight: 800; line-height: 1.2; margin-top: 4px; color: #0f172a; letter-spacing: -0.02em; }
+.kpi .k-s { font-size: 11.5px; color: var(--hint); margin-top: 3px; line-height: 1.35; }
 .kpi.alert { border-color: #fbbf24; background: #fffbeb; }
+.kpi.alert::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
 .kpi.alert .k-v { color: #b45309; }
 
 /* Dashboard panels */
@@ -317,26 +391,38 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 
 @media (max-width: 1000px) { .grid2 { grid-template-columns: 1fr; } }
 @media (max-width: 819px) {
-  body { padding-bottom: 92px; }
-  .shell { grid-template-columns: 1fr; margin-top: 10px; }
+  body { padding-bottom: 0; }
+  main { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+  .shell { grid-template-columns: 1fr; margin-top: 10px; align-items: start; }
+  .side {
+    max-height: none;
+    overflow: visible;
+  }
+  .content { overflow: visible; }
   .side {
     position: fixed; left: 0; right: 0; bottom: 0; top: auto;
     z-index: 60;
     flex-direction: row; justify-content: space-around; gap: 0;
-    border-width: 1px 0 0; border-radius: 16px 16px 0 0;
+    border: none; border-top: 1px solid #1e3a5f;
+    border-radius: 18px 18px 0 0;
     padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
-    box-shadow: 0 -6px 24px rgba(15,23,42,0.1);
-    background: #fff;
+    box-shadow: 0 -8px 28px rgba(12,30,51,0.35);
+    background: linear-gradient(180deg, #0f2744 0%, #0c1e33 100%);
   }
+  .side::before { display: none; }
   .nav-btn {
     position: relative; flex: 1;
     flex-direction: column; justify-content: center; gap: 3px;
     padding: 8px 2px; font-size: 10px; text-align: center;
-    min-height: 52px; border-radius: 12px;
+    min-height: 52px; border-radius: 12px; color: #94a3b8;
   }
-  .nav-btn.active { box-shadow: none; background: #e0f2fe; }
+  .nav-btn.active {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: #fff; box-shadow: 0 2px 10px rgba(2,132,199,0.45);
+  }
   .nav-btn .ni { font-size: 18px; width: auto; }
   .nav-btn .nb { position: absolute; top: 2px; left: calc(50% + 8px); margin: 0; }
+  .nav-sep { display: none; }
 }
 @media (max-width: 700px) {
   .topbar-right .who { display: none; }
@@ -1011,22 +1097,69 @@ function renderNav() {
   $("nbDash").classList.add("hid");
 }
 
+function periodBounds() {
+  const now = new Date();
+  const startOfDay = new Date(now); startOfDay.setHours(0, 0, 0, 0);
+  const startOfWeek = new Date(startOfDay);
+  const day = startOfWeek.getDay(); // 0=Sun
+  startOfWeek.setDate(startOfWeek.getDate() - (day === 0 ? 6 : day - 1)); // Monday start
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  return {
+    today: startOfDay.getTime() / 1000,
+    week: startOfWeek.getTime() / 1000,
+    month: startOfMonth.getTime() / 1000,
+    year: startOfYear.getTime() / 1000
+  };
+}
+function inPeriod(t, from) { return t && t >= from; }
+function sumCommission(from) {
+  const fromPl = places.filter(p => p.commissionPaid && inPeriod(ts(p.commissionPaidAt), from))
+    .reduce((a, p) => a + Number(p.commissionAmount || 0), 0);
+  const fromTs = sheets.filter(s => s.approvalStatus === "Paid" && inPeriod(ts(s.paidAt), from))
+    .reduce((a, s) => a + Number(s.commission || 0), 0);
+  return fromPl + fromTs;
+}
+function countCreated(list, from) {
+  return list.filter(x => inPeriod(ts(x.createdAt), from)).length;
+}
+
 function renderDash() {
   const pe = employers.filter(e => eVer(e) === "pending");
   const openJobs = jobs.filter(j => ["Open", "Partially Filled"].includes(j.status));
   const active = places.filter(p => p.status === "Active Placement");
-  const m0 = new Date(); m0.setDate(1); m0.setHours(0, 0, 0, 0); const ms = m0 / 1000;
-  const revenue = places.filter(p => p.commissionPaid && ts(p.commissionPaidAt) >= ms).reduce((a, p) => a + Number(p.commissionAmount || 0), 0)
-                + sheets.filter(s => s.approvalStatus === "Paid" && ts(s.paidAt) >= ms).reduce((a, s) => a + Number(s.commission || 0), 0);
+  const bounds = periodBounds();
+  const revToday = sumCommission(bounds.today);
+  const revWeek = sumCommission(bounds.week);
+  const revMonth = sumCommission(bounds.month);
+  const revYtd = sumCommission(bounds.year);
+  const placesToday = countCreated(places, bounds.today);
+  const placesWeek = countCreated(places, bounds.week);
+  const placesMonth = countCreated(places, bounds.month);
+  const placesYtd = countCreated(places, bounds.year);
+  const reqsToday = countCreated(reqs, bounds.today);
+  const reqsWeek = countCreated(reqs, bounds.week);
+  const reqsMonth = countCreated(reqs, bounds.month);
+  const reqsYtd = countCreated(reqs, bounds.year);
+  const workersTotal = allW.length;
+  const workersApproved = allW.filter(w => w.status === "approved").length;
+  const employersTotal = employers.length;
+  const employersVerified = employers.filter(e => eVer(e) === "verified").length;
   const payouts = sheets.filter(s => s.approvalStatus === "Approved").reduce((a, s) => a + Number(s.workerPay || 0), 0);
   const due = reqs.filter(isDue), wm = new Map(allW.map(w => [w.id, w]));
+
   $("kpis").innerHTML = kpiHtml([
-    ["Pending Approvals", pending.length + pe.length, (pending.length + pe.length) ? "alert" : "", `${pending.length} workers · ${pe.length} employers`],
-    ["Open Job Orders", openJobs.length, "", `${openJobs.filter(j => j.urgency === "Urgent").length} urgent`],
+    ["Total Employers", employersTotal, "", `${employersVerified} verified · ${pe.length} pending`],
+    ["Total Workers", workersTotal, "", `${workersApproved} approved · ${pending.length} pending`],
     ["Active Placements", active.length, "", `${places.filter(p => p.status === "Pending Employer Review").length} awaiting review`],
-    ["Revenue This Month", etb(revenue), "", "Commissions collected"],
+    ["Open Job Orders", openJobs.length, "", `${openJobs.filter(j => j.urgency === "Urgent").length} urgent`],
+    ["Revenue Today", etb(revToday), "", `${placesToday} placements · ${reqsToday} hire requests`],
+    ["Revenue This Week", etb(revWeek), "", `${placesWeek} placements · ${reqsWeek} hire requests`],
+    ["Revenue This Month", etb(revMonth), "", `${placesMonth} placements · ${reqsMonth} hire requests`],
+    ["Revenue YTD", etb(revYtd), "", `${placesYtd} placements · ${reqsYtd} hire requests · Year to date`],
     ["Worker Payouts Due", etb(payouts), payouts ? "alert" : "", "Approved timesheets"],
-    ["Ratings Due", due.length, due.length ? "alert" : "", "Follow-ups to send"]
+    ["Ratings Due", due.length, due.length ? "alert" : "", "Follow-ups to send"],
+    ["Pending Approvals", pending.length + pe.length, (pending.length + pe.length) ? "alert" : "", `${pending.length} workers · ${pe.length} employers`]
   ]);
 
   const queue = [...pending.map(w => ({ t: "worker", o: w })), ...pe.map(e => ({ t: "employer", o: e }))].slice(0, 6);
