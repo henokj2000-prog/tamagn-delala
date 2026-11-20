@@ -566,7 +566,7 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
           <h3 style="margin-bottom:10px" id="jobPostTitle">Post a Job Request</h3>
           <p class="who" id="jobPostNote">Admin will verify your request. Matching workers will then see it.</p>
           <label id="lblJobTitle">Job title *</label>
-          <input id="job_title" maxlength="80" placeholder="e.g. Live-in house maid">
+          <input id="job_title" maxlength="80" placeholder="ለምሳሌ፦ ተመላላሽ ሠራተኛ">
           <label id="lblJobSkill">Required skill *</label>
           <select id="job_skill"></select>
           <label id="lblJobPlaceType">Desired placement type *</label>
@@ -586,7 +586,7 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
             <option value="hourly">Hourly</option>
           </select>
           <label id="lblJobPay">Pay rate (ETB) *</label>
-          <input id="job_pay" type="number" min="0" step="1" placeholder="e.g. 5000">
+          <input id="job_pay" type="number" min="0" step="1" placeholder="ለምሳሌ፦ 5000">
           <label id="lblJobNeed">Workers needed</label>
           <input id="job_need" type="number" min="1" value="1">
           <label id="lblJobUrg">Urgency</label>
@@ -595,7 +595,7 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
             <option value="Urgent">Urgent</option>
           </select>
           <label id="lblJobNotes">Notes (optional)</label>
-          <textarea id="job_notes" maxlength="300" placeholder="Shift times, live-in, etc."></textarea>
+          <textarea id="job_notes" maxlength="300" placeholder="ሌላ ማብራሪያ..."></textarea>
           <button class="btn-primary" id="jobPostBtn" style="margin-top:8px">Submit Job Request</button>
         </div>
         <div id="jobPostSuccess" class="form-card hid" style="text-align:center">
@@ -1040,8 +1040,8 @@ const i18n = {
     genderFemale: "ሴት", genderMale: "ወንድ",
     skillRequired: "እባክዎ ቢያንስ አንድ ክህሎት ይምረጡ",
     expYearsRequired: "እባክዎ የልምድ ዓመታት ያስገቡ",
-    placeLiveIn: "ከቤት ውስጥ (Live-in)", placeFullTime: "ሙሉ ጊዜ (ከቤት ውጭ)", placePartTime: "ከፊል ጊዜ / ሺፍት",
-    placeOnCall: "በጥሪ / ዕለታዊ", placeFixed: "ጊዜያዊ ውል",
+    placeLiveIn: "አብሮ ነዋሪ", placeFullTime: "ሙሉ ጊዜ (ከቤት ውጭ)", placePartTime: "ከፊል ጊዜ / ሺፍት",
+    placeOnCall: "በጥሪ / ዕለታዊ / ተመላላሽ", placeFixed: "ጊዜያዊ ውል",
     tabBrowse: "ሰራተኞችን ይመልከቱ", tabPostJob: "የስራ ጥያቄ ይላኩ",
     jobPostTitle: "የስራ ጥያቄ ይላኩ",
     jobPostNote: "አስተዳዳሪው ያረጋግጣል። ከዚያ የሚመቹ ሰራተኞች ያዩታል።",
@@ -1056,7 +1056,7 @@ const i18n = {
     wGateNote: "በምዝገባዎ የተጠቀሙበት ቴሌግራም ይክፈቱ፣ ወይም መጀመሪያ ይመዝገቡ።",
     wGoRegister: "እንደ ሰራተኛ ይመዝገቡ",
     wEditTitle: "መገለጫ አርትዕ",
-    wEditBtn: "✏️ መገለጫ አርትዕ",
+    wEditBtn: "✏️ መገለጫ ማስተካከያ",
     wUpdate: "ለውጦችን አስቀምጥ",
     wJobsTitle: "ከክህሎትዎ ጋር የሚመቹ ስራዎች",
     wJobsSub: "የተረጋገጡ (የታተሙ) የስራ ጥያቄዎች ብቻ እዚህ ይታያሉ። አዲስ የሚመቹ ስራዎች ከዚህ በታች ይታያሉ።",
