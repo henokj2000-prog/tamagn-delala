@@ -749,13 +749,19 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
             <select id="f_paymentType"><option value="monthly">Monthly</option><option value="hourly">Hourly</option><option value="daily">Daily</option></select>
             <label>Pay (optional)</label><input id="f_pay" maxlength="60">
             <label>Fayda / Kebele ID number *</label><input id="f_nationalId" required maxlength="30">
+            <label>National ID Photo *</label>
+            <button type="button" class="btn-secondary" id="f_idPhotoBtn" style="margin:0 0 10px">🪪 Take / Upload ID Photo</button>
+            <label for="f_idPhoto" class="btn-secondary" id="f_idPhotoAlt" style="margin:0 0 10px;display:inline-block">Upload ID image</label>
+            <input id="f_idPhoto" type="file" accept="image/*" capture="environment" class="hid">
+            <img id="f_idPhotoPreview" class="photo-preview hid" alt="ID preview">
+            <p class="who" style="margin:-6px 0 12px">Clear photo of the Fayda / Kebele ID (front).</p>
             <label>Phone *</label><input id="f_phone" required maxlength="20">
             <label>Telegram user ID (optional)</label><input id="f_tgid" maxlength="20" inputmode="numeric">
             <label>Police Clearance</label>
             <select id="f_police"><option value="no">No</option><option value="yes">Yes</option></select>
             <label>Guarantor Name</label><input id="f_guarantorName" maxlength="80">
             <label>Guarantor Phone</label><input id="f_guarantorPhone" maxlength="20">
-            <label>Photo</label>
+            <label>Profile Photo *</label>
             <button type="button" class="btn-secondary" id="f_photoBtn" style="margin:0 0 10px">📷 Take Photo</button>
             <label for="f_photo" class="btn-secondary hid" id="f_photoAlt" style="margin:0 0 10px;display:inline-block">Use phone camera app</label>
             <input id="f_photo" type="file" accept="image/*" capture="user" class="hid">
@@ -2394,23 +2400,31 @@ async function startEdit(id) {
   $("f_nationalId").value=priv.nationalId||""; $("f_phone").value=priv.phone||""; $("f_tgid").value=priv.telegramUserId||"";
   $("f_police").value=w.hasPoliceClearance?"yes":"no";
   $("f_guarantorName").value=priv.guarantorName||""; $("f_guarantorPhone").value=priv.guarantorPhone||"";
-  setAdminPhoto(null);
-  if (w.photo) { $("f_photoPreview").src = w.photo; $("f_photoPreview").classList.remove("hid"); }
+  setAdminPhoto(null); setAdminIdPhoto(null);
+  if (w.photo) { setAdminPhoto(w.photo); }
+  if (priv.idPhoto) { setAdminIdPhoto(priv.idPhoto); }
   $("formTitle").textContent = "✏️ Edit Worker";
   $("cancelEdit").classList.remove("hid"); showView("add");
 }
 function resetForm() {
-  $("wf").reset(); setAdminPhoto(null); $("f_id").value = "";
+  $("wf").reset(); setAdminPhoto(null); setAdminIdPhoto(null); $("f_id").value = "";
   $("cancelEdit").classList.add("hid"); $("formTitle").textContent = "➕ Add Worker";
 }
 $("cancelEdit").onclick = () => { resetForm(); showView("workers"); };
 
 let adminPhotoData = null;
+let adminIdPhotoData = null;
 function setAdminPhoto(d) {
   adminPhotoData = d;
   const pv = $("f_photoPreview");
   if (d) { pv.src = d; pv.classList.remove("hid"); } else pv.classList.add("hid");
   $("f_photoBtn").textContent = d ? "📷 Retake Photo" : "📷 Take Photo";
+}
+function setAdminIdPhoto(d) {
+  adminIdPhotoData = d;
+  const pv = $("f_idPhotoPreview");
+  if (d) { pv.src = d; pv.classList.remove("hid"); } else pv.classList.add("hid");
+  if ($("f_idPhotoBtn")) $("f_idPhotoBtn").textContent = d ? "🪪 Retake ID Photo" : "🪪 Take / Upload ID Photo";
 }
 $("f_photoBtn").onclick = async () => {
   if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { $("f_photo").click(); return; }
@@ -2429,22 +2443,45 @@ $("f_photo").onchange = async () => {
   catch (e) { alert(e.message); setAdminPhoto(null); }
   $("f_photo").value = "";
 };
+$("f_idPhotoBtn").onclick = async () => {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      const d = await takePassportPhoto({ tip: "Clear photo of the Fayda / Kebele ID (front).", snap: "Capture", cancel: "Cancel" });
+      if (d) setAdminIdPhoto(d);
+      return;
+    } catch (_) {}
+  }
+  $("f_idPhoto").click();
+};
+$("f_idPhoto").onchange = async () => {
+  const f = $("f_idPhoto").files[0];
+  if (!f) return;
+  try { setAdminIdPhoto(await shrink(f)); }
+  catch (e) { alert(e.message); setAdminIdPhoto(null); }
+  $("f_idPhoto").value = "";
+};
 
 $("wf").onsubmit = async e => {
   e.preventDefault(); const btn=$("saveBtn"); btn.disabled=true;
   try {
     const id=$("f_id").value; const ref=id?doc(db,"workers",id):doc(collection(db,"workers"));
     const yrs=$("f_expYears").value;
+    // Require both photos when adding a new worker
+    if (!id) {
+      if (!adminPhotoData) { alert("Please capture the worker's profile photo."); btn.disabled=false; return; }
+      if (!adminIdPhotoData) { alert("Please capture / upload the National ID photo."); btn.disabled=false; return; }
+    }
     const publicData={
       name:$("f_name").value.trim(), age:Number($("f_age").value), gender:$("f_gender").value, skill:$("f_skill").value,
       location:$("f_location").value.trim(), experience:$("f_experience").value.trim(),
       experienceYears: yrs===""?null:Number(yrs), skillTags:$("f_tags").value.split(",").map(s=>s.trim()).filter(Boolean),
       paymentType:$("f_paymentType").value, pay:$("f_pay").value.trim()||"Negotiable",
-      hasNationalId:true, hasPoliceClearance:$("f_police").value==="yes"
+      hasNationalId:true, hasIdPhoto: !!(adminIdPhotoData || (id && true)), hasPoliceClearance:$("f_police").value==="yes"
     };
     if (adminPhotoData) publicData.photo=adminPhotoData;
     const privateData={ phone:$("f_phone").value.trim(), nationalId:$("f_nationalId").value.trim(), telegramUserId:$("f_tgid").value.trim(),
       guarantorName:$("f_guarantorName").value.trim(), guarantorPhone:$("f_guarantorPhone").value.trim() };
+    if (adminIdPhotoData) privateData.idPhoto = adminIdPhotoData;
     const b=writeBatch(db);
     if (id) b.update(ref,publicData);   // editing never changes verification or availability
     else b.set(ref,{...publicData, status:"approved", available:true, photo:publicData.photo||"", ratingAvg:0, ratingCount:0, ratingSum:0, ratingScore:RATING_PRIOR_MEAN, createdAt:serverTimestamp(), source:"admin"});
