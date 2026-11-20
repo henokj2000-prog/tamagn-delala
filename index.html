@@ -561,6 +561,12 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
       <input id="wr_name" maxlength="80">
       <label id="lblWrAge">Age *</label>
       <input id="wr_age" type="number" min="14" max="80">
+      <label id="lblWrGender">Gender *</label>
+      <select id="wr_gender">
+        <option value="">—</option>
+        <option value="F">Female</option>
+        <option value="M">Male</option>
+      </select>
       <label id="lblWrSkill">Skill *</label>
       <select id="wr_skill"></select>
       <label id="lblWrLoc">Location *</label>
@@ -746,9 +752,10 @@ const i18n = {
     empEditBtn: "✏️ Edit Profile",
     workerRegTitle: "Register as Worker",
     workerRegNote: "Fill the form. Admin will review and approve you.",
-    wrName: "Full Name *", wrAge: "Age *", wrSkill: "Skill *", wrLoc: "Location *",
+    wrName: "Full Name *", wrAge: "Age *", wrGender: "Gender *", wrSkill: "Skill *", wrLoc: "Location *",
     wrExp: "Experience *", wrPayType: "Payment Type *", wrPay: "Expected Pay (optional)",
     wrPlaceType: "Desired Placement Type *",
+    genderFemale: "Female", genderMale: "Male",
     placeLiveIn: "Live-in", placeFullTime: "Full-Time (Live-out)", placePartTime: "Part-Time / Shift",
     placeOnCall: "On-Call / Daily", placeFixed: "Fixed-Term Contract",
     tabBrowse: "Browse Workers", tabPostJob: "Post Job Request",
@@ -849,9 +856,10 @@ const i18n = {
     empEditBtn: "✏️ መገለጫ አርትዕ",
     workerRegTitle: "እንደ ሰራተኛ ይመዝገቡ",
     workerRegNote: "ቅጹን ይሙሉ። አስተዳዳሪው ከገመገመ በኋላ ይፀድቃል።",
-    wrName: "ሙሉ ስም *", wrAge: "ዕድሜ *", wrSkill: "ክህሎት *", wrLoc: "አካባቢ *",
+    wrName: "ሙሉ ስም *", wrAge: "ዕድሜ *", wrGender: "ጾታ *", wrSkill: "ክህሎት *", wrLoc: "አካባቢ *",
     wrExp: "ልምድ *", wrPayType: "የክፍያ አይነት *", wrPay: "የሚጠበቅ ክፍያ (አማራጭ)",
     wrPlaceType: "የሚፈለግ የቅጥር አይነት *",
+    genderFemale: "ሴት", genderMale: "ወንድ",
     placeLiveIn: "ከቤት ውስጥ (Live-in)", placeFullTime: "ሙሉ ጊዜ (ከቤት ውጭ)", placePartTime: "ከፊል ጊዜ / ሺፍት",
     placeOnCall: "በጥሪ / ዕለታዊ", placeFixed: "ጊዜያዊ ውል",
     tabBrowse: "ሰራተኞችን ይመልከቱ", tabPostJob: "የስራ ጥያቄ ይላኩ",
@@ -963,6 +971,12 @@ function applyLang() {
   $("workerRegNote").textContent = t("workerRegNote");
   $("lblWrName").textContent = t("wrName");
   $("lblWrAge").textContent = t("wrAge");
+  if ($("lblWrGender")) $("lblWrGender").textContent = t("wrGender");
+  if ($("wr_gender")) {
+    const gPrev = $("wr_gender").value;
+    $("wr_gender").innerHTML = `<option value="">—</option><option value="F">${t("genderFemale")}</option><option value="M">${t("genderMale")}</option>`;
+    if (gPrev) $("wr_gender").value = gPrev;
+  }
   $("lblWrSkill").textContent = t("wrSkill");
   $("lblWrLoc").textContent = t("wrLoc");
   $("lblWrExp").textContent = t("wrExp");
@@ -1444,6 +1458,7 @@ $("wr_photo").onchange = async () => {
 $("wrSubmitBtn").onclick = async () => {
   const name = $("wr_name").value.trim();
   const age = Number($("wr_age").value);
+  const gender = $("wr_gender") ? $("wr_gender").value : "";
   const skill = $("wr_skill").value;
   const location = $("wr_location").value.trim();
   const experience = $("wr_experience").value.trim();
@@ -1452,7 +1467,7 @@ $("wrSubmitBtn").onclick = async () => {
   const placementType = $("wr_placementType") ? $("wr_placementType").value : "";
   const nationalId = $("wr_nationalId").value.trim();
   const phone = $("wr_phone").value.trim();
-  if (!name||!age||!skill||!location||!experience||!nationalId||!phone||!placementType) {
+  if (!name||!age||!gender||!skill||!location||!experience||!nationalId||!phone||!placementType) {
     return alert(lang==="am"?"እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ":"Please fill all required fields");
   }
   if (!wrPhotoData) return alert(t("photoRequired"));
@@ -1464,7 +1479,7 @@ $("wrSubmitBtn").onclick = async () => {
     const ref = doc(collection(db, "workers"));
     const batch = writeBatch(db);
     batch.set(ref, {
-      name, age, skill, location, experience, paymentType, pay, placementType, photo,
+      name, age, gender, skill, location, experience, paymentType, pay, placementType, photo,
       hasNationalId: true, hasIdPhoto: true, hasPoliceClearance: $("wr_police").value==="yes",
       status: "pending", available: false, ratingAvg:0, ratingCount:0, ratingSum:0, ratingScore:RATING_PRIOR_MEAN,
       createdAt: serverTimestamp(), source: "self"
