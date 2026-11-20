@@ -226,6 +226,17 @@ main { max-width: 1180px; margin: 0 auto; padding: 0 14px 24px; }
   width: 100%; padding: 11px; border: none; border-radius: 11px;
   background: var(--btn); color: var(--btnfg); font-size: 15px; font-weight: 600; cursor: pointer;
 }
+.emp-tabs { display: flex; gap: 8px; margin: 8px 0 12px; }
+.emp-tabs .chip { flex: 1; text-align: center; }
+.job-card {
+  background: var(--card); border-radius: var(--radius); padding: 14px;
+  margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.job-card .jt { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.job-card .jm { font-size: 13px; color: var(--hint); margin: 2px 0; }
+.job-card .jp { font-weight: 600; color: var(--success); margin: 6px 0 10px; }
+.job-card .urgent { display: inline-block; background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+.w-banner { background: #e0f2fe; border: 1px solid #7dd3fc; color: #0c4a6e; border-radius: 12px; padding: 10px 14px; font-size: 13px; margin-bottom: 12px; }
 .state { text-align: center; padding: 40px 16px; color: var(--hint); }
 .state-icon { font-size: 40px; margin-bottom: 10px; opacity: 0.7; }
 .state h3 { font-size: 15px; color: var(--fg); margin-bottom: 4px; }
@@ -466,9 +477,51 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
     </div>
 
     <div id="empMain">
-      <div class="skills-wrap"><div class="skills" id="skillChips"></div></div>
-      <div id="list">
-        <div class="state"><div class="state-icon">⏳</div><h3 id="loadingText">Loading...</h3></div>
+      <div class="emp-tabs">
+        <button type="button" class="chip active" id="tabBrowse" data-etab="browse">Browse Workers</button>
+        <button type="button" class="chip" id="tabPostJob" data-etab="post">Post Job Request</button>
+      </div>
+      <div id="empBrowse">
+        <div class="skills-wrap"><div class="skills" id="skillChips"></div></div>
+        <div id="list">
+          <div class="state"><div class="state-icon">⏳</div><h3 id="loadingText">Loading...</h3></div>
+        </div>
+      </div>
+      <div id="empPostJob" class="hid">
+        <div class="form-card" id="jobPostFormCard">
+          <h3 style="margin-bottom:10px" id="jobPostTitle">Post a Job Request</h3>
+          <p class="who" id="jobPostNote">Admin will verify your request. Matching workers will then see it.</p>
+          <label id="lblJobTitle">Job title *</label>
+          <input id="job_title" maxlength="80" placeholder="e.g. Live-in house maid">
+          <label id="lblJobSkill">Required skill *</label>
+          <select id="job_skill"></select>
+          <label id="lblJobLoc">Location / City *</label>
+          <input id="job_location" maxlength="60">
+          <label id="lblJobPayType">Pay type *</label>
+          <select id="job_payType">
+            <option value="monthly">Monthly</option>
+            <option value="daily">Daily</option>
+            <option value="hourly">Hourly</option>
+          </select>
+          <label id="lblJobPay">Pay rate (ETB) *</label>
+          <input id="job_pay" type="number" min="0" step="1" placeholder="e.g. 5000">
+          <label id="lblJobNeed">Workers needed</label>
+          <input id="job_need" type="number" min="1" value="1">
+          <label id="lblJobUrg">Urgency</label>
+          <select id="job_urgency">
+            <option value="Normal">Normal</option>
+            <option value="Urgent">Urgent</option>
+          </select>
+          <label id="lblJobNotes">Notes (optional)</label>
+          <textarea id="job_notes" maxlength="300" placeholder="Shift times, live-in, etc."></textarea>
+          <button class="btn-primary" id="jobPostBtn" style="margin-top:8px">Submit Job Request</button>
+        </div>
+        <div id="jobPostSuccess" class="form-card hid" style="text-align:center">
+          <div style="font-size:40px;margin-bottom:8px">✅</div>
+          <h3 id="jobPostOkTitle">Job request submitted</h3>
+          <p class="who" id="jobPostOkText">Our team will verify it. Matching workers will see it after approval.</p>
+          <button class="btn-secondary" id="jobPostAgain" style="margin-top:12px">Post another</button>
+        </div>
       </div>
     </div>
   </section>
@@ -499,6 +552,14 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
       </select>
       <label id="lblWrPay">Expected Pay (optional)</label>
       <input id="wr_pay" maxlength="60">
+      <label id="lblWrPlaceType">Desired Placement Type *</label>
+      <select id="wr_placementType">
+        <option value="Live-in">Live-in</option>
+        <option value="Full-Time (Live-out)">Full-Time (Live-out)</option>
+        <option value="Part-Time / Shift">Part-Time / Shift</option>
+        <option value="On-Call / Daily">On-Call / Daily</option>
+        <option value="Fixed-Term Contract">Fixed-Term Contract</option>
+      </select>
       <div class="divider"></div>
       <label id="lblWrId">National ID Number *</label>
       <input id="wr_nationalId" maxlength="30">
@@ -533,6 +594,23 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
       <h3 id="wrSuccessTitle">Registration Submitted!</h3>
       <p class="who" id="wrSuccessText">Admin will review your profile. You will become visible after approval.</p>
       <button class="btn-secondary" id="wrBackHome" style="margin-top:12px">Back to Home</button>
+    </div>
+  </section>
+
+  <section id="vW" class="hid">
+    <button class="back-btn" id="backFromW">← <span id="backText3">Back</span></button>
+    <div id="wGate" class="form-card hid">
+      <h3 style="margin-bottom:10px" id="wGateTitle">Worker access</h3>
+      <p class="who" id="wGateNote">Open this page from your Telegram account used at registration, or register first.</p>
+      <button class="btn-primary" id="wGoRegister">Register as Worker</button>
+    </div>
+    <div id="wMain" class="hid">
+      <div class="w-banner" id="wHello"></div>
+      <h3 style="margin:4px 0 10px" id="wJobsTitle">Jobs matching your skill</h3>
+      <p class="who" id="wJobsSub">Only verified (published) job requests appear here.</p>
+      <div id="wJobList">
+        <div class="state"><div class="state-icon">⏳</div><h3>Loading...</h3></div>
+      </div>
     </div>
   </section>
 </main>
@@ -595,8 +673,8 @@ const i18n = {
     skillsTitle: "Our Services",
     btnEmployerTitle: "Find a Worker",
     btnEmployerDesc: "Hire a maid, chef, driver, plumber…",
-    btnWorkerTitle: "Register as Worker",
-    btnWorkerDesc: "Offer your skill and get hired",
+    btnWorkerTitle: "I am a Worker",
+    btnWorkerDesc: "Register or see matching jobs",
     btnAdminTitle: "Admin Panel",
     btnAdminDesc: "For manager only",
     back: "Back",
@@ -626,6 +704,27 @@ const i18n = {
     workerRegNote: "Fill the form. Admin will review and approve you.",
     wrName: "Full Name *", wrAge: "Age *", wrSkill: "Skill *", wrLoc: "Location *",
     wrExp: "Experience *", wrPayType: "Payment Type *", wrPay: "Expected Pay (optional)",
+    wrPlaceType: "Desired Placement Type *",
+    placeLiveIn: "Live-in", placeFullTime: "Full-Time (Live-out)", placePartTime: "Part-Time / Shift",
+    placeOnCall: "On-Call / Daily", placeFixed: "Fixed-Term Contract",
+    tabBrowse: "Browse Workers", tabPostJob: "Post Job Request",
+    jobPostTitle: "Post a Job Request",
+    jobPostNote: "Admin will verify your request. Matching workers will then see it.",
+    jobTitle: "Job title *", jobSkill: "Required skill *", jobLoc: "Location / City *",
+    jobPayType: "Pay type *", jobPay: "Pay rate (ETB) *", jobNeed: "Workers needed",
+    jobUrg: "Urgency", jobNotes: "Notes (optional)", jobSubmit: "Submit Job Request",
+    jobPostOkTitle: "Job request submitted",
+    jobPostOkText: "Our team will verify it. Matching workers will see it after approval.",
+    jobPostAgain: "Post another",
+    wGateTitle: "Worker access",
+    wGateNote: "Open this page from your Telegram account used at registration, or register first.",
+    wGoRegister: "Register as Worker",
+    wJobsTitle: "Jobs matching your skill",
+    wJobsSub: "Only verified (published) job requests appear here.",
+    wNoJobs: "No matching jobs right now",
+    wNoJobsSub: "Check again after admin publishes new requests",
+    wInterested: "I'm interested",
+    wPendingProfile: "Your profile is pending approval. You can browse jobs, but employers cannot hire you yet.",
     wrId: "National ID Number *", wrPhone: "Phone Number *", wrPhoto: "Passport-size Photo *",
     wrPhotoHint: "Take the photo with your camera (gallery upload is not allowed). Passport style: face centered, plain background, no hat or sunglasses.",
     camBtn: "📷 Take Photo", camRetake: "📷 Retake Photo", camAlt: "Use phone camera app", camSnap: "Capture", camCancel: "Cancel",
@@ -670,8 +769,8 @@ const i18n = {
     skillsTitle: "አገልግሎቶቻችን",
     btnEmployerTitle: "ሰራተኛ ፈልግ",
     btnEmployerDesc: "የቤት ሰራተኛ፣ ሼፍ፣ ሹፌር፣ ቧንቧ…",
-    btnWorkerTitle: "እንደ ሰራተኛ ይመዝገቡ",
-    btnWorkerDesc: "ክህሎትዎን ያቅርቡ እና ይቀጠሩ",
+    btnWorkerTitle: "ሰራተኛ ነኝ",
+    btnWorkerDesc: "ይመዝገቡ ወይም የሚመቹ ስራዎችን ይመልከቱ",
     btnAdminTitle: "የአስተዳዳሪ ገጽ",
     btnAdminDesc: "ለማኔጀር ብቻ",
     back: "ተመለስ",
@@ -701,6 +800,27 @@ const i18n = {
     workerRegNote: "ቅጹን ይሙሉ። አስተዳዳሪው ከገመገመ በኋላ ይፀድቃል።",
     wrName: "ሙሉ ስም *", wrAge: "ዕድሜ *", wrSkill: "ክህሎት *", wrLoc: "አካባቢ *",
     wrExp: "ልምድ *", wrPayType: "የክፍያ አይነት *", wrPay: "የሚጠበቅ ክፍያ (አማራጭ)",
+    wrPlaceType: "የሚፈለግ የቅጥር አይነት *",
+    placeLiveIn: "ከቤት ውስጥ (Live-in)", placeFullTime: "ሙሉ ጊዜ (ከቤት ውጭ)", placePartTime: "ከፊል ጊዜ / ሺፍት",
+    placeOnCall: "በጥሪ / ዕለታዊ", placeFixed: "ጊዜያዊ ውል",
+    tabBrowse: "ሰራተኞችን ይመልከቱ", tabPostJob: "የስራ ጥያቄ ይላኩ",
+    jobPostTitle: "የስራ ጥያቄ ይላኩ",
+    jobPostNote: "አስተዳዳሪው ያረጋግጣል። ከዚያ የሚመቹ ሰራተኞች ያዩታል።",
+    jobTitle: "የስራ ርዕስ *", jobSkill: "የሚፈለግ ክህሎት *", jobLoc: "አካባቢ / ከተማ *",
+    jobPayType: "የክፍያ አይነት *", jobPay: "ክፍያ (ብር) *", jobNeed: "የሚያስፈልጉ ሰራተኞች",
+    jobUrg: "አስቸኳይነት", jobNotes: "ማስታወሻ (አማራጭ)", jobSubmit: "የስራ ጥያቄ አስገባ",
+    jobPostOkTitle: "የስራ ጥያቄ ተልኳል",
+    jobPostOkText: "ቡድናችን ያረጋግጣል። ከተፈቀደ በኋላ የሚመቹ ሰራተኞች ያዩታል።",
+    jobPostAgain: "ሌላ ይላኩ",
+    wGateTitle: "የሰራተኛ መግቢያ",
+    wGateNote: "በምዝገባዎ የተጠቀሙበት ቴሌግራም ይክፈቱ፣ ወይም መጀመሪያ ይመዝገቡ።",
+    wGoRegister: "እንደ ሰራተኛ ይመዝገቡ",
+    wJobsTitle: "ከክህሎትዎ ጋር የሚመቹ ስራዎች",
+    wJobsSub: "የተረጋገጡ (የታተሙ) የስራ ጥያቄዎች ብቻ እዚህ ይታያሉ።",
+    wNoJobs: "በአሁኑ ጊዜ የሚመች ስራ የለም",
+    wNoJobsSub: "አዲስ ጥያቄዎች ከታተሙ በኋላ እንደገና ይመልከቱ",
+    wInterested: "ፍላጎት አለኝ",
+    wPendingProfile: "መገለጫዎ በመጠባበቅ ላይ ነው። ስራዎችን ማየት ይችላሉ፣ ግን አሰሪዎች እስካሁን ሊቀጥሩዎት አይችሉም።",
     wrId: "የመታወቂያ ቁጥር *", wrPhone: "ስልክ ቁጥር *", wrPhoto: "ፓስፖርት መጠን ፎቶ *",
     wrPhotoHint: "ፎቶውን በካሜራ ያንሱ (ከጋለሪ መጫን አይፈቀድም)። ፓስፖርት መሰል፤ ፊት መሃል፣ ንጹህ ጀርባ፣ ኮፍያ ወይም መነጽር የለም።",
     camBtn: "📷 ፎቶ አንሳ", camRetake: "📷 ፎቶ እንደገና አንሳ", camAlt: "የስልክ ካሜራ ተጠቀም", camSnap: "ፎቶ አንሳ", camCancel: "ሰርዝ",
@@ -786,6 +906,7 @@ function applyLang() {
   $("lblWrExp").textContent = t("wrExp");
   $("lblWrPayType").textContent = t("wrPayType");
   $("lblWrPay").textContent = t("wrPay");
+  if ($("lblWrPlaceType")) $("lblWrPlaceType").textContent = t("wrPlaceType");
   $("lblWrId").textContent = t("wrId");
   $("lblWrPhone").textContent = t("wrPhone");
   $("lblWrPhoto").textContent = t("wrPhoto");
@@ -802,6 +923,28 @@ function applyLang() {
   $("wrSuccessTitle").textContent = t("wrSuccessTitle");
   $("wrSuccessText").textContent = t("wrSuccessText");
   $("wrBackHome").textContent = t("wrBackHome");
+  if ($("tabBrowse")) $("tabBrowse").textContent = t("tabBrowse");
+  if ($("tabPostJob")) $("tabPostJob").textContent = t("tabPostJob");
+  if ($("jobPostTitle")) $("jobPostTitle").textContent = t("jobPostTitle");
+  if ($("jobPostNote")) $("jobPostNote").textContent = t("jobPostNote");
+  if ($("lblJobTitle")) $("lblJobTitle").textContent = t("jobTitle");
+  if ($("lblJobSkill")) $("lblJobSkill").textContent = t("jobSkill");
+  if ($("lblJobLoc")) $("lblJobLoc").textContent = t("jobLoc");
+  if ($("lblJobPayType")) $("lblJobPayType").textContent = t("jobPayType");
+  if ($("lblJobPay")) $("lblJobPay").textContent = t("jobPay");
+  if ($("lblJobNeed")) $("lblJobNeed").textContent = t("jobNeed");
+  if ($("lblJobUrg")) $("lblJobUrg").textContent = t("jobUrg");
+  if ($("lblJobNotes")) $("lblJobNotes").textContent = t("jobNotes");
+  if ($("jobPostBtn")) $("jobPostBtn").textContent = t("jobSubmit");
+  if ($("jobPostOkTitle")) $("jobPostOkTitle").textContent = t("jobPostOkTitle");
+  if ($("jobPostOkText")) $("jobPostOkText").textContent = t("jobPostOkText");
+  if ($("jobPostAgain")) $("jobPostAgain").textContent = t("jobPostAgain");
+  if ($("wGateTitle")) $("wGateTitle").textContent = t("wGateTitle");
+  if ($("wGateNote")) $("wGateNote").textContent = t("wGateNote");
+  if ($("wGoRegister")) $("wGoRegister").textContent = t("wGoRegister");
+  if ($("wJobsTitle")) $("wJobsTitle").textContent = t("wJobsTitle");
+  if ($("wJobsSub")) $("wJobsSub").textContent = t("wJobsSub");
+  if ($("backText3")) $("backText3").textContent = t("back");
 
   // payment type options
   const payOpts = [
@@ -815,6 +958,29 @@ function applyLang() {
     sel.innerHTML = payOpts.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
     sel.value = prev || "monthly";
   });
+  if ($("job_payType")) {
+    const prev = $("job_payType").value;
+    $("job_payType").innerHTML = payOpts.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
+    $("job_payType").value = prev || "monthly";
+  }
+  if ($("wr_placementType")) {
+    const placeOpts = [
+      ["Live-in", t("placeLiveIn")],
+      ["Full-Time (Live-out)", t("placeFullTime")],
+      ["Part-Time / Shift", t("placePartTime")],
+      ["On-Call / Daily", t("placeOnCall")],
+      ["Fixed-Term Contract", t("placeFixed")]
+    ];
+    const psel = $("wr_placementType");
+    const pprev = psel.value;
+    psel.innerHTML = placeOpts.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
+    psel.value = placeOpts.some(([v]) => v === pprev) ? pprev : "Live-in";
+  }
+  if ($("job_skill")) {
+    const prev = $("job_skill").value;
+    $("job_skill").innerHTML = SKILLS.map(s => `<option value="${esc(s.en)}">${lang==="am"?s.am:s.en}</option>`).join("");
+    if (prev) $("job_skill").value = prev;
+  }
   // police options
   $("wr_police").innerHTML = `<option value="no">${t("policeNo")}</option><option value="yes">${t("policeYes")}</option>`;
 
@@ -867,16 +1033,18 @@ $("langBtn").onclick = () => { lang = lang === "en" ? "am" : "en"; localStorage.
 function show(view) {
   document.body.classList.toggle("home", view === "Landing");
   window.scrollTo(0, 0);
-  ["Landing","E","R"].forEach(v => {
+  ["Landing","E","R","W"].forEach(v => {
     const el = $("v" + v);
     if (el) el.classList.toggle("hid", v !== view);
   });
 }
 $("btnEmployer").onclick = () => { show("E"); checkEmployer(); };
-$("btnWorker").onclick = () => show("R");
+$("btnWorker").onclick = () => { show("W"); openWorkerHub(); };
 $("backFromE").onclick = () => show("Landing");
 $("backFromR").onclick = () => show("Landing");
+$("backFromW").onclick = () => show("Landing");
 $("wrBackHome").onclick = () => show("Landing");
+$("wGoRegister").onclick = () => show("R");
 
 // Employer registration
 async function checkEmployer() {
@@ -1146,9 +1314,10 @@ $("wrSubmitBtn").onclick = async () => {
   const experience = $("wr_experience").value.trim();
   const paymentType = $("wr_paymentType").value;
   const pay = $("wr_pay").value.trim() || "Negotiable";
+  const placementType = $("wr_placementType") ? $("wr_placementType").value : "";
   const nationalId = $("wr_nationalId").value.trim();
   const phone = $("wr_phone").value.trim();
-  if (!name||!age||!skill||!location||!experience||!nationalId||!phone) {
+  if (!name||!age||!skill||!location||!experience||!nationalId||!phone||!placementType) {
     return alert(lang==="am"?"እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ":"Please fill all required fields");
   }
   if (!wrPhotoData) return alert(t("photoRequired"));
@@ -1160,13 +1329,14 @@ $("wrSubmitBtn").onclick = async () => {
     const ref = doc(collection(db, "workers"));
     const batch = writeBatch(db);
     batch.set(ref, {
-      name, age, skill, location, experience, paymentType, pay, photo,
+      name, age, skill, location, experience, paymentType, pay, placementType, photo,
       hasNationalId: true, hasIdPhoto: true, hasPoliceClearance: $("wr_police").value==="yes",
       status: "pending", available: false, ratingAvg:0, ratingCount:0,
       createdAt: serverTimestamp(), source: "self"
     });
     batch.set(doc(db, "workers_private", ref.id), {
       phone, nationalId, idPhoto,
+      telegramUserId: tgUser.id ? String(tgUser.id) : "",
       guarantorName: $("wr_guarantorName").value.trim(),
       guarantorPhone: $("wr_guarantorPhone").value.trim()
     });
@@ -1175,6 +1345,135 @@ $("wrSubmitBtn").onclick = async () => {
     $("wrFormCard").classList.add("hid");
   } catch (e) { console.error(e); alert("Failed: "+e.message); }
   btn.disabled = false; btn.textContent = t("wrSubmit");
+};
+
+// Employer tabs
+document.querySelectorAll("[data-etab]").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll("[data-etab]").forEach(b => b.classList.toggle("active", b === btn));
+    const tab = btn.dataset.etab;
+    $("empBrowse").classList.toggle("hid", tab !== "browse");
+    $("empPostJob").classList.toggle("hid", tab !== "post");
+  };
+});
+$("jobPostAgain").onclick = () => {
+  $("jobPostSuccess").classList.add("hid");
+  $("jobPostFormCard").classList.remove("hid");
+};
+$("jobPostBtn").onclick = async () => {
+  if (!currentEmployer || !currentEmployer.name || currentEmployer.name === "Guest") {
+    alert(lang==="am" ? "እባክዎ መጀመሪያ ይመዝገቡ" : "Please register first");
+    $("empRegisterGate").classList.remove("hid");
+    $("empMain").classList.add("hid");
+    return;
+  }
+  const title = $("job_title").value.trim();
+  const requiredSkill = $("job_skill").value;
+  const city = $("job_location").value.trim();
+  const payType = $("job_payType").value;
+  const payRate = Number($("job_pay").value);
+  const workersNeeded = Number($("job_need").value) || 1;
+  const urgency = $("job_urgency").value || "Normal";
+  const notes = $("job_notes").value.trim();
+  if (!title || !requiredSkill || !city || !(payRate > 0)) {
+    return alert(lang==="am"?"እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ":"Please fill all required fields");
+  }
+  const btn = $("jobPostBtn"); btn.disabled = true;
+  try {
+    await addDoc(collection(db, "job_orders"), {
+      title, requiredSkill, city, payType, payRate, workersNeeded, urgency, notes,
+      employerId: currentEmployer.id || String(tgUser.id || ""),
+      employerName: currentEmployer.name,
+      employerPhone: currentEmployer.phone || "",
+      employerTgId: Number(tgUser.id) || 0,
+      employerUsername: tgUser.username || currentEmployer.username || "",
+      status: "Pending Review",
+      source: "employer_app",
+      createdAt: serverTimestamp()
+    });
+    $("jobPostFormCard").classList.add("hid");
+    $("jobPostSuccess").classList.remove("hid");
+    $("job_title").value = ""; $("job_pay").value = ""; $("job_notes").value = "";
+  } catch (e) { alert("Error: " + e.message); }
+  btn.disabled = false;
+};
+
+let currentWorker = null;
+async function openWorkerHub() {
+  currentWorker = null;
+  $("wGate").classList.add("hid");
+  $("wMain").classList.add("hid");
+  if (!tgUser.id) { $("wGate").classList.remove("hid"); return; }
+  try {
+    const snap = await getDocs(query(collection(db, "workers"), limit(200)));
+    const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    let found = null;
+    for (const w of list) {
+      try {
+        const pr = await getDoc(doc(db, "workers_private", w.id));
+        if (pr.exists() && String(pr.data().telegramUserId || "") === String(tgUser.id)) {
+          found = { ...w, priv: pr.data() };
+          break;
+        }
+      } catch (_) {}
+    }
+    if (!found) { $("wGate").classList.remove("hid"); return; }
+    currentWorker = found;
+    $("wMain").classList.remove("hid");
+    const pending = found.status === "pending";
+    $("wHello").textContent = (lang==="am" ? "ሰላም " : "Hello ") + (found.name || "") +
+      (pending ? " — " + t("wPendingProfile") : "") +
+      " · " + skillLabel(found.skill);
+    await loadMatchingJobs(found);
+  } catch (e) {
+    console.error(e);
+    $("wGate").classList.remove("hid");
+  }
+}
+async function loadMatchingJobs(w) {
+  const box = $("wJobList");
+  box.innerHTML = `<div class="state"><div class="state-icon">⏳</div><h3>${t("loading")}</h3></div>`;
+  try {
+    let jobs = [];
+    try {
+      const snap = await getDocs(query(collection(db, "job_orders"), where("status", "in", ["Open", "Partially Filled"]), limit(50)));
+      jobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (_) {
+      const snap = await getDocs(query(collection(db, "job_orders"), where("status", "==", "Open"), limit(50)));
+      jobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    const skill = w.skill || "";
+    const tags = w.skillTags || [];
+    jobs = jobs.filter(j => j.requiredSkill === skill || tags.includes(j.requiredSkill));
+    if (!jobs.length) {
+      box.innerHTML = `<div class="state"><div class="state-icon">🔎</div><h3>${t("wNoJobs")}</h3><p>${t("wNoJobsSub")}</p></div>`;
+      return;
+    }
+    box.innerHTML = jobs.map(j => {
+      const pay = j.payRate != null ? `${j.payRate} ETB · ${t(j.payType || "monthly")}` : "";
+      return `<div class="job-card">
+        <div class="jt">${esc(j.title || j.requiredSkill)} ${j.urgency === "Urgent" ? `<span class="urgent">Urgent</span>` : ""}</div>
+        <div class="jm">🛠 ${esc(skillLabel(j.requiredSkill))}</div>
+        <div class="jm">📍 ${esc(j.city || "—")}</div>
+        <div class="jm">👔 ${esc(j.employerName || "")}</div>
+        <div class="jp">💰 ${esc(pay)}</div>
+        ${j.notes ? `<div class="jm">${esc(j.notes)}</div>` : ""}
+        <button class="btn-hire" data-interest="${esc(j.id)}">${t("wInterested")}</button>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    console.error(e);
+    box.innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Error</h3></div>`;
+  }
+}
+$("wJobList").onclick = e => {
+  const id = e.target && e.target.dataset && e.target.dataset.interest;
+  if (!id || !currentWorker) return;
+  const textMsg = lang === "am"
+    ? `ሰላም፣ ከታማኝ ደላላ ለስራ ጥያቄ (${id}) ፍላጎት አለኝ። ስሜ፦ ${currentWorker.name}፣ ክህሎት፦ ${currentWorker.skill}`
+    : `Hello, I am interested in job request (${id}) via Tamagn Delala. Name: ${currentWorker.name}, Skill: ${currentWorker.skill}`;
+  const url = `https://t.me/${MANAGER}?text=${encodeURIComponent(textMsg)}`;
+  if (inTelegram) tg.openTelegramLink(url); else window.open(url, "_blank");
 };
 
 applyLang();
