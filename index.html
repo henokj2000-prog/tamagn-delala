@@ -495,6 +495,14 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
           <input id="job_title" maxlength="80" placeholder="e.g. Live-in house maid">
           <label id="lblJobSkill">Required skill *</label>
           <select id="job_skill"></select>
+          <label id="lblJobPlaceType">Desired placement type *</label>
+          <select id="job_placementType">
+            <option value="Live-in">Live-in</option>
+            <option value="Full-Time (Live-out)">Full-Time (Live-out)</option>
+            <option value="Part-Time / Shift">Part-Time / Shift</option>
+            <option value="On-Call / Daily">On-Call / Daily</option>
+            <option value="Fixed-Term Contract">Fixed-Term Contract</option>
+          </select>
           <label id="lblJobLoc">Location / City *</label>
           <input id="job_location" maxlength="60">
           <label id="lblJobPayType">Pay type *</label>
@@ -710,7 +718,8 @@ const i18n = {
     tabBrowse: "Browse Workers", tabPostJob: "Post Job Request",
     jobPostTitle: "Post a Job Request",
     jobPostNote: "Admin will verify your request. Matching workers will then see it.",
-    jobTitle: "Job title *", jobSkill: "Required skill *", jobLoc: "Location / City *",
+    noRating: "New",
+    jobTitle: "Job title *", jobSkill: "Required skill *", jobPlaceType: "Desired placement type *", jobLoc: "Location / City *",
     jobPayType: "Pay type *", jobPay: "Pay rate (ETB) *", jobNeed: "Workers needed",
     jobUrg: "Urgency", jobNotes: "Notes (optional)", jobSubmit: "Submit Job Request",
     jobPostOkTitle: "Job request submitted",
@@ -806,7 +815,8 @@ const i18n = {
     tabBrowse: "ሰራተኞችን ይመልከቱ", tabPostJob: "የስራ ጥያቄ ይላኩ",
     jobPostTitle: "የስራ ጥያቄ ይላኩ",
     jobPostNote: "አስተዳዳሪው ያረጋግጣል። ከዚያ የሚመቹ ሰራተኞች ያዩታል።",
-    jobTitle: "የስራ ርዕስ *", jobSkill: "የሚፈለግ ክህሎት *", jobLoc: "አካባቢ / ከተማ *",
+    noRating: "አዲስ",
+    jobTitle: "የስራ ርዕስ *", jobSkill: "የሚፈለግ ክህሎት *", jobPlaceType: "የሚፈለግ የቅጥር አይነት *", jobLoc: "አካባቢ / ከተማ *",
     jobPayType: "የክፍያ አይነት *", jobPay: "ክፍያ (ብር) *", jobNeed: "የሚያስፈልጉ ሰራተኞች",
     jobUrg: "አስቸኳይነት", jobNotes: "ማስታወሻ (አማራጭ)", jobSubmit: "የስራ ጥያቄ አስገባ",
     jobPostOkTitle: "የስራ ጥያቄ ተልኳል",
@@ -929,6 +939,7 @@ function applyLang() {
   if ($("jobPostNote")) $("jobPostNote").textContent = t("jobPostNote");
   if ($("lblJobTitle")) $("lblJobTitle").textContent = t("jobTitle");
   if ($("lblJobSkill")) $("lblJobSkill").textContent = t("jobSkill");
+  if ($("lblJobPlaceType")) $("lblJobPlaceType").textContent = t("jobPlaceType");
   if ($("lblJobLoc")) $("lblJobLoc").textContent = t("jobLoc");
   if ($("lblJobPayType")) $("lblJobPayType").textContent = t("jobPayType");
   if ($("lblJobPay")) $("lblJobPay").textContent = t("jobPay");
@@ -963,7 +974,7 @@ function applyLang() {
     $("job_payType").innerHTML = payOpts.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
     $("job_payType").value = prev || "monthly";
   }
-  if ($("wr_placementType")) {
+  {
     const placeOpts = [
       ["Live-in", t("placeLiveIn")],
       ["Full-Time (Live-out)", t("placeFullTime")],
@@ -971,10 +982,13 @@ function applyLang() {
       ["On-Call / Daily", t("placeOnCall")],
       ["Fixed-Term Contract", t("placeFixed")]
     ];
-    const psel = $("wr_placementType");
-    const pprev = psel.value;
-    psel.innerHTML = placeOpts.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
-    psel.value = placeOpts.some(([v]) => v === pprev) ? pprev : "Live-in";
+    for (const id of ["wr_placementType", "job_placementType"]) {
+      const psel = $(id);
+      if (!psel) continue;
+      const pprev = psel.value;
+      psel.innerHTML = placeOpts.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
+      psel.value = placeOpts.some(([v]) => v === pprev) ? pprev : "Live-in";
+    }
   }
   if ($("job_skill")) {
     const prev = $("job_skill").value;
@@ -1090,7 +1104,14 @@ async function loadWorkers() {
   try {
     const snap = await getDocs(query(collection(db, "workers"), where("status","==","approved"), where("available","==",true), limit(100)));
     workers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    workers.sort((a,b) => ts(b.createdAt) - ts(a.createdAt));
+    // Best-ranked workers first (Bayesian score), then more reviews, then newest
+    workers.sort((a, b) => {
+      const d = ratingScoreOf(b) - ratingScoreOf(a);
+      if (Math.abs(d) > 0.001) return d;
+      const cn = (Number(b.ratingCount) || 0) - (Number(a.ratingCount) || 0);
+      if (cn) return cn;
+      return ts(b.createdAt) - ts(a.createdAt);
+    });
     renderWorkers();
   } catch (e) {
     console.error(e);
@@ -1098,10 +1119,28 @@ async function loadWorkers() {
   }
 }
 
+// Rating algorithm (same as admin): Bayesian average for fair ranking
+const RATING_PRIOR_MEAN = 3.5;
+const RATING_PRIOR_STRENGTH = 3;
+function ratingSumOf(w) {
+  if (w.ratingSum != null && w.ratingSum !== "") return Number(w.ratingSum) || 0;
+  const n = Number(w.ratingCount) || 0;
+  return n > 0 ? (Number(w.ratingAvg) || 0) * n : 0;
+}
+function ratingAvgOf(w) {
+  const n = Number(w.ratingCount) || 0;
+  if (n <= 0) return 0;
+  if (w.ratingAvg != null && w.ratingAvg !== "") return Number(w.ratingAvg) || 0;
+  return ratingSumOf(w) / n;
+}
+function ratingScoreOf(w) {
+  const n = Number(w.ratingCount) || 0;
+  return (RATING_PRIOR_STRENGTH * RATING_PRIOR_MEAN + ratingSumOf(w)) / (RATING_PRIOR_STRENGTH + n);
+}
 function starsHtml(avg, count) {
   if (!count) return "";
-  const full = Math.round(avg||0);
-  return `<div class="stars">${"★".repeat(full)}${"☆".repeat(5-full)} <span style="color:var(--hint);font-size:12px">(${count})</span></div>`;
+  const full = Math.max(0, Math.min(5, Math.round(Number(avg) || 0)));
+  return `<div class="stars">${"★".repeat(full)}${"☆".repeat(5 - full)} <span style="color:var(--hint);font-size:12px">(${count})</span></div>`;
 }
 
 function renderSkillChips() {
@@ -1131,13 +1170,18 @@ function renderWorkers() {
     const badges = [];
     if (w.hasNationalId) badges.push(`<span class="badge badge-id">✓ ${t("verifiedId")}</span>`);
     if (w.hasPoliceClearance) badges.push(`<span class="badge badge-police">🛡 ${t("policeClearance")}</span>`);
+    const ratingBlock = w.ratingCount
+      ? starsHtml(ratingAvgOf(w), w.ratingCount)
+      : `<div class="stars" style="color:var(--hint)">☆☆☆☆☆ <span style="font-size:12px">(${t("noRating")})</span></div>`;
+    const place = w.placementType ? `<div class="meta"><span>🏠 ${esc(w.placementType)}</span></div>` : "";
     return `<div class="card">${img}<div class="card-body">
       <div class="card-name">${esc(w.name)}</div>
       <div class="card-skill">${esc(skillLabel(w.skill))}</div>
       <div class="badges">${badges.join("")}</div>
-      ${starsHtml(w.ratingAvg, w.ratingCount)}
+      ${ratingBlock}
       <div class="meta"><span>🎂 ${t("age")} ${esc(w.age)}</span><span>📍 ${esc(w.location)}</span></div>
       <div class="meta"><span>💼 ${t("experience")}: ${esc(w.experience)}</span></div>
+      ${place}
       <div class="pay">💰 ${esc(w.pay || t("negotiable"))} · ${t(w.paymentType||"monthly")}</div>
       <button class="btn-hire" data-hire="${esc(w.id)}">${t("hire")}</button>
     </div></div>`;
@@ -1331,7 +1375,7 @@ $("wrSubmitBtn").onclick = async () => {
     batch.set(ref, {
       name, age, skill, location, experience, paymentType, pay, placementType, photo,
       hasNationalId: true, hasIdPhoto: true, hasPoliceClearance: $("wr_police").value==="yes",
-      status: "pending", available: false, ratingAvg:0, ratingCount:0,
+      status: "pending", available: false, ratingAvg:0, ratingCount:0, ratingSum:0, ratingScore:RATING_PRIOR_MEAN,
       createdAt: serverTimestamp(), source: "self"
     });
     batch.set(doc(db, "workers_private", ref.id), {
@@ -1369,19 +1413,20 @@ $("jobPostBtn").onclick = async () => {
   }
   const title = $("job_title").value.trim();
   const requiredSkill = $("job_skill").value;
+  const placementType = $("job_placementType") ? $("job_placementType").value : "";
   const city = $("job_location").value.trim();
   const payType = $("job_payType").value;
   const payRate = Number($("job_pay").value);
   const workersNeeded = Number($("job_need").value) || 1;
   const urgency = $("job_urgency").value || "Normal";
   const notes = $("job_notes").value.trim();
-  if (!title || !requiredSkill || !city || !(payRate > 0)) {
+  if (!title || !requiredSkill || !placementType || !city || !(payRate > 0)) {
     return alert(lang==="am"?"እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ":"Please fill all required fields");
   }
   const btn = $("jobPostBtn"); btn.disabled = true;
   try {
     await addDoc(collection(db, "job_orders"), {
-      title, requiredSkill, city, payType, payRate, workersNeeded, urgency, notes,
+      title, requiredSkill, placementType, city, payType, payRate, workersNeeded, urgency, notes,
       employerId: currentEmployer.id || String(tgUser.id || ""),
       employerName: currentEmployer.name,
       employerPhone: currentEmployer.phone || "",
@@ -1454,6 +1499,7 @@ async function loadMatchingJobs(w) {
       return `<div class="job-card">
         <div class="jt">${esc(j.title || j.requiredSkill)} ${j.urgency === "Urgent" ? `<span class="urgent">Urgent</span>` : ""}</div>
         <div class="jm">🛠 ${esc(skillLabel(j.requiredSkill))}</div>
+        ${j.placementType ? `<div class="jm">🏠 ${esc(j.placementType)}</div>` : ""}
         <div class="jm">📍 ${esc(j.city || "—")}</div>
         <div class="jm">👔 ${esc(j.employerName || "")}</div>
         <div class="jp">💰 ${esc(pay)}</div>
