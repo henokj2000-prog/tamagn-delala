@@ -591,9 +591,10 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
     <div class="logo-icon">TD</div>
     <div><h1>Tamagn Delala</h1><span>Manager panel</span></div>
   </div>
-  <div class="topbar-right hid" id="hdrUser">
-    <span class="who" id="who"></span>
-    <button class="btn-secondary" id="signOut">Sign out</button>
+  <div class="topbar-right" id="hdrUserBar">
+    <button class="btn-secondary" id="langBtn" type="button" style="margin:0">አማርኛ</button>
+    <span class="who hid" id="who"></span>
+    <button class="btn-secondary hid" id="signOut">Sign out</button>
   </div>
 </header>
 
@@ -925,6 +926,440 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ts = x => (x?.seconds) ? x.seconds : 0;
 const fmtDate = x => { const s = ts(x); return s ? new Date(s * 1000).toLocaleDateString() : ""; };
+
+// ========== Language (English / Amharic) ==========
+let lang = localStorage.getItem("td_admin_lang") || "en";
+const i18n = {
+  en: {
+    langBtn: "አማርኛ",
+    panelSub: "Manager panel",
+    signOut: "Sign out",
+    loginNote: "Sign in with the manager or staff Google account.",
+    signIn: "Sign in with Google",
+    installApp: "📲 Install as app",
+    iosHint: "To install on iPhone: tap the Share button, then \"Add to Home Screen\".",
+    tgNote: "This page does not work inside Telegram. Open it in Chrome or Safari.",
+    navDashboard: "Dashboard",
+    navEmployers: "Employers",
+    navWorkers: "Workers",
+    navMatches: "Job Matches",
+    navPlacements: "Placements",
+    navAgreements: "Agreements",
+    navPayroll: "Payroll",
+    navRequests: "Requests",
+    navSettings: "Settings",
+    titleDashboard: "Dashboard",
+    titleEmployers: "Employers Directory",
+    titleMatches: "Job Matches & Placements",
+    titlePlacements: "Placements & Handover",
+    titleAgreements: "Agreements",
+    titlePayroll: "Timesheets & Payroll",
+    titleRequests: "Hire Requests",
+    titleSettings: "Settings & Roles",
+    titleAddWorker: "➕ Add Worker",
+    titleEditWorker: "✏️ Edit Worker",
+    addEmployer: "+ Add Employer",
+    addWorker: "+ Add Worker",
+    addJob: "+ New Job Order",
+    addSheet: "+ New Timesheet",
+    approveAll: "✓ Approve All",
+    inviteStaff: "+ Invite Staff",
+    exportExcel: "⬇ Export Excel",
+    print: "🖨 Print",
+    viewAll: "View all",
+    allJobs: "All jobs",
+    panelActiveReqs: "📋 Active Hire Requests",
+    panelActiveReqsSub: "Requests from the Telegram app",
+    panelRatingDue: "⭐ Rating Follow-up Due",
+    panelRatingDueSub: "Ask the employer how the worker is doing (hire requests + placements by days stayed)",
+    panelQueue: "⏳ Verification & Onboarding Queue",
+    panelQueueSub: "New workers and employers awaiting review",
+    panelUrgent: "🚨 Urgent Unfilled Jobs",
+    panelUrgentSub: "Job orders marked urgent",
+    openJobReqs: "Open Job Requests",
+    openJobReqsSub: "Select a job to see matching workers",
+    recMatches: "Recommended Worker Matches",
+    recMatchesSub: "Verified and available workers, ranked by match score",
+    agencyRules: "Agency Rules & Commission Settings",
+    searchEmployers: "Search employers...",
+    searchWorkers: "Search name, ID, phone, role, employer...",
+    searchJobs: "Search jobs, employers, skills...",
+    searchPlacements: "Search worker, employer or job...",
+    searchAgreements: "Search worker, employer or skill...",
+    allStatuses: "All statuses",
+    anyUrgency: "Any urgency",
+    saveWorker: "Save Worker",
+    cancel: "Cancel",
+    saveRating: "Save Rating",
+    saveChanges: "Save Changes",
+    fullName: "Full name *",
+    age: "Age *",
+    gender: "Gender",
+    primarySkill: "Primary skill / role *",
+    otherSkills: "Other skills (comma separated)",
+    location: "Location *",
+    experience: "Experience *",
+    expYears: "Experience (years)",
+    paymentType: "Payment type *",
+    payOptional: "Pay (optional)",
+    placementType: "Desired placement type *",
+    nationalId: "Fayda / Kebele ID number *",
+    idPhoto: "National ID Photo *",
+    phone: "Phone *",
+    telegramId: "Telegram user ID (optional)",
+    police: "Police Clearance",
+    guarantorName: "Guarantor Name",
+    guarantorPhone: "Guarantor Phone",
+    profilePhoto: "Profile Photo *",
+    takePhoto: "📷 Take Photo",
+    retakePhoto: "📷 Retake Photo",
+    takeIdPhoto: "🪪 Take / Upload ID Photo",
+    retakeIdPhoto: "🪪 Retake ID Photo",
+    uploadId: "Upload ID image",
+    idPhotoHint: "Clear photo of the Fayda / Kebele ID (front).",
+    photoHint: "Take the photo with the camera (gallery upload is not allowed). Passport style: face centered, plain background.",
+    female: "Female",
+    male: "Male",
+    monthly: "Monthly",
+    hourly: "Hourly",
+    daily: "Daily",
+    yes: "Yes",
+    no: "No",
+    ratingFollowUpDays: "Rating follow-up after (days the worker has stayed)",
+    ratingFollowUpHint: "When an active placement reaches this many days, it appears under “Rating Follow-up Due” so you can ask the employer for a rating.",
+    requireId: "Require ID & verification before matching",
+    checkinReminders: "Shift check-in reminders (SMS / Telegram)",
+    commission: "Default commission %",
+    invoiceTerms: "Invoice terms",
+    nothingDue: "Nothing due 🎉",
+    noActiveReqs: "No active requests",
+    noUrgent: "No urgent jobs 🎉",
+    allCaughtUp: "All caught up ✅",
+    ask: "📩 Ask",
+    rate: "★ Rate",
+    markSent: "Mark Sent",
+    askRating: "📩 Ask Rating",
+    available: "Available",
+    placed: "Placed",
+    pending: "Pending",
+    rejected: "Rejected",
+    inactive: "Inactive",
+    verified: "Verified",
+    suspended: "Suspended",
+    open: "Open",
+    closed: "Closed",
+    onProcess: "On process",
+    onWork: "On work",
+    close: "Close",
+    edit: "Edit",
+    delete: "Delete",
+    view: "View",
+    approve: "Approve",
+    reject: "Reject",
+    call: "📞 Call",
+    telegram: "Telegram",
+    complete: "Complete",
+    cancelPl: "Cancel",
+    saveSettingsOk: "Settings saved.",
+    notAdmin: "Not admin"
+  },
+  am: {
+    langBtn: "English",
+    panelSub: "የማኔጀር ፓነል",
+    signOut: "ውጣ",
+    loginNote: "በማኔጀር ወይም የሰራተኛ ጎግል አካውንት ይግቡ።",
+    signIn: "በጎግል ይግቡ",
+    installApp: "📲 እንደ መተግበሪያ ጫን",
+    iosHint: "በአይፎን ለመጫን፡ Share ይጫኑ፣ ከዚያ \"Add to Home Screen\" ይምረጡ።",
+    tgNote: "ይህ ገጽ በቴሌግራም ውስጥ አይሰራም። በChrome ወይም Safari ይክፈቱ።",
+    navDashboard: "ዳሽቦርድ",
+    navEmployers: "አሰሪዎች",
+    navWorkers: "ሰራተኞች",
+    navMatches: "የስራ ማጣመር",
+    navPlacements: "ቅጥሮች",
+    navAgreements: "ስምምነቶች",
+    navPayroll: "ደመወዝ",
+    navRequests: "ጥያቄዎች",
+    navSettings: "ቅንብሮች",
+    titleDashboard: "ዳሽቦርድ",
+    titleEmployers: "የአሰሪዎች ዝርዝር",
+    titleMatches: "የስራ ማጣመር እና ቅጥር",
+    titlePlacements: "ቅጥር እና አስረከብ",
+    titleAgreements: "ስምምነቶች",
+    titlePayroll: "የሰዓት ሰሌዳ እና ደመወዝ",
+    titleRequests: "የቅጥር ጥያቄዎች",
+    titleSettings: "ቅንብሮች እና ሚናዎች",
+    titleAddWorker: "➕ ሰራተኛ ጨምር",
+    titleEditWorker: "✏️ ሰራተኛ አርትዕ",
+    addEmployer: "+ አሰሪ ጨምር",
+    addWorker: "+ ሰራተኛ ጨምር",
+    addJob: "+ አዲስ የስራ ትዕዛዝ",
+    addSheet: "+ አዲስ የሰዓት ሰሌዳ",
+    approveAll: "✓ ሁሉንም አጽድቅ",
+    inviteStaff: "+ ሰራተኛ ጋብዝ",
+    exportExcel: "⬇ Excel ላክ",
+    print: "🖨 አትም",
+    viewAll: "ሁሉንም ይመልከቱ",
+    allJobs: "ሁሉም ስራዎች",
+    panelActiveReqs: "📋 ንቁ የቅጥር ጥያቄዎች",
+    panelActiveReqsSub: "ከቴሌግራም መተግበሪያ የመጡ ጥያቄዎች",
+    panelRatingDue: "⭐ የደረጃ ጥያቄ የሚያስፈልግ",
+    panelRatingDueSub: "ሰራተኛው እንዴት እንደሚሰራ አሰሪውን ይጠይቁ (ጥያቄዎች + በቀናት ቆይታ ቅጥሮች)",
+    panelQueue: "⏳ የማረጋገጫ እና መግቢያ ወረፋ",
+    panelQueueSub: "አዲስ ሰራተኞች እና አሰሪዎች በመጠባበቅ ላይ",
+    panelUrgent: "🚨 አስቸኳይ ያልተሞሉ ስራዎች",
+    panelUrgentSub: "እንደ አስቸኳይ የተመዘገቡ የስራ ትዕዛዞች",
+    openJobReqs: "ክፍት የስራ ጥያቄዎች",
+    openJobReqsSub: "የሚመቹ ሰራተኞችን ለማየት ስራ ይምረጡ",
+    recMatches: "የሚመከሩ ሰራተኞች",
+    recMatchesSub: "የተረጋገጡ እና ነጻ ሰራተኞች በማጣመር ነጥብ",
+    agencyRules: "የኤጀንሲ ደንቦች እና ኮሚሽን",
+    searchEmployers: "አሰሪዎችን ፈልግ...",
+    searchWorkers: "ስም፣ መታወቂያ፣ ስልክ፣ ሚና፣ አሰሪ ፈልግ...",
+    searchJobs: "ስራ፣ አሰሪ፣ ክህሎት ፈልግ...",
+    searchPlacements: "ሰራተኛ፣ አሰሪ ወይም ስራ ፈልግ...",
+    searchAgreements: "ሰራተኛ፣ አሰሪ ወይም ክህሎት ፈልግ...",
+    allStatuses: "ሁሉም ሁኔታዎች",
+    anyUrgency: "ማንኛውም አስቸኳይነት",
+    saveWorker: "ሰራተኛ አስቀምጥ",
+    cancel: "ሰርዝ",
+    saveRating: "ደረጃ አስቀምጥ",
+    saveChanges: "ለውጦችን አስቀምጥ",
+    fullName: "ሙሉ ስም *",
+    age: "ዕድሜ *",
+    gender: "ጾታ",
+    primarySkill: "ዋና ክህሎት / ሚና *",
+    otherSkills: "ሌሎች ክህሎቶች (በኮማ የተለዩ)",
+    location: "አካባቢ *",
+    experience: "ልምድ *",
+    expYears: "ልምድ (ዓመታት)",
+    paymentType: "የክፍያ አይነት *",
+    payOptional: "ክፍያ (አማራጭ)",
+    placementType: "የሚፈለግ የቅጥር አይነት *",
+    nationalId: "የፋይዳ / ቀበሌ መታወቂያ ቁጥር *",
+    idPhoto: "የብሔራዊ መታወቂያ ፎቶ *",
+    phone: "ስልክ *",
+    telegramId: "የቴሌግራም መለያ (አማራጭ)",
+    police: "የፖሊስ ማረጋገጫ",
+    guarantorName: "የዋስ ስም",
+    guarantorPhone: "የዋስ ስልክ",
+    profilePhoto: "የመገለጫ ፎቶ *",
+    takePhoto: "📷 ፎቶ አንሳ",
+    retakePhoto: "📷 ፎቶ እንደገና አንሳ",
+    takeIdPhoto: "🪪 የመታወቂያ ፎቶ",
+    retakeIdPhoto: "🪪 መታወቂያ እንደገና",
+    uploadId: "የመታወቂያ ምስል ጫን",
+    idPhotoHint: "የፋይዳ / ቀበሌ መታወቂያ ፊት ግልጽ ፎቶ።",
+    photoHint: "ፎቶውን በካሜራ ያንሱ። ፓስፖርት መሰል፤ ፊት መሃል፣ ንጹህ ጀርባ።",
+    female: "ሴት",
+    male: "ወንድ",
+    monthly: "ወርሃዊ",
+    hourly: "በሰዓት",
+    daily: "ዕለታዊ",
+    yes: "አዎ",
+    no: "አይ",
+    ratingFollowUpDays: "የደረጃ ጥያቄ ከስንት ቀን ቆይታ በኋላ",
+    ratingFollowUpHint: "ንቁ ቅጥር ይህን ቀናት ሲደርስ በ«የደረጃ ጥያቄ የሚያስፈልግ» ስር ይታያል።",
+    requireId: "ከማጣመር በፊት መታወቂያ እና ማረጋገጫ ያስፈልጋል",
+    checkinReminders: "የስራ መግቢያ/መውጫ ማስታወሻ (SMS / ቴሌግራም)",
+    commission: "ነባሪ ኮሚሽን %",
+    invoiceTerms: "የክፍያ ውል",
+    nothingDue: "ምንም አልደረሰም 🎉",
+    noActiveReqs: "ንቁ ጥያቄ የለም",
+    noUrgent: "አስቸኳይ ስራ የለም 🎉",
+    allCaughtUp: "ሁሉም ተጠናቋል ✅",
+    ask: "📩 ጠይቅ",
+    rate: "★ ደረጃ",
+    markSent: "ተልኳል ምልክት",
+    askRating: "📩 ደረጃ ጠይቅ",
+    available: "ነጻ",
+    placed: "ተቀጥሯል",
+    pending: "በመጠባበቅ",
+    rejected: "ተቀባይነት አላገኘም",
+    inactive: "እንቅስቃሴ የለውም",
+    verified: "ተረጋግጧል",
+    suspended: "ታግዷል",
+    open: "ክፍት",
+    closed: "ተዘግቷል",
+    onProcess: "በሂደት ላይ",
+    onWork: "በሥራ ላይ",
+    close: "ዝጋ",
+    edit: "አርትዕ",
+    delete: "ሰርዝ",
+    view: "ተመልከት",
+    approve: "አጽድቅ",
+    reject: "አትቀበል",
+    call: "📞 ደውል",
+    telegram: "ቴሌግራም",
+    complete: "ጨርስ",
+    cancelPl: "ሰርዝ",
+    saveSettingsOk: "ቅንብሮች ተቀምጠዋል።",
+    notAdmin: "አስተዳዳሪ አይደሉም"
+  }
+};
+const t = key => (i18n[lang] && i18n[lang][key]) || (i18n.en[key]) || key;
+
+function applyAdminLang() {
+  if ($("langBtn")) $("langBtn").textContent = t("langBtn");
+  const sub = document.querySelector(".logo span");
+  if (sub) sub.textContent = t("panelSub");
+  if ($("signOut")) $("signOut").textContent = t("signOut");
+  if ($("loginNote")) $("loginNote").textContent = t("loginNote");
+  if ($("signIn")) $("signIn").textContent = t("signIn");
+  if ($("installBtn")) $("installBtn").textContent = t("installApp");
+  if ($("iosHint")) $("iosHint").textContent = t("iosHint");
+  if ($("tgNote")) $("tgNote").textContent = t("tgNote");
+
+  const navMap = {
+    dashboard: "navDashboard", employers: "navEmployers", workers: "navWorkers",
+    matches: "navMatches", placements: "navPlacements", agreements: "navAgreements",
+    timesheets: "navPayroll", requests: "navRequests", settings: "navSettings"
+  };
+  document.querySelectorAll(".nav-btn[data-view]").forEach(b => {
+    const key = navMap[b.dataset.view];
+    if (!key) return;
+    const label = b.querySelector("span:not(.ni):not(.nb)");
+    if (label) label.textContent = t(key);
+  });
+
+  const setH2 = (sel, key) => { const el = document.querySelector(sel); if (el) el.textContent = t(key); };
+  setH2("#v-dashboard .view-head h2", "titleDashboard");
+  setH2("#v-employers .view-head h2", "titleEmployers");
+  setH2("#v-matches .view-head h2", "titleMatches");
+  setH2("#v-placements .view-head h2", "titlePlacements");
+  setH2("#v-agreements .view-head h2", "titleAgreements");
+  setH2("#v-timesheets .view-head h2", "titlePayroll");
+  setH2("#v-requests .view-head h2", "titleRequests");
+  setH2("#v-settings .view-head h2", "titleSettings");
+
+  if ($("btnNewEmp")) $("btnNewEmp").textContent = t("addEmployer");
+  if ($("btnNewW")) $("btnNewW").textContent = t("addWorker");
+  if ($("btnNewJob")) $("btnNewJob").textContent = t("addJob");
+  if ($("btnNewSheet")) $("btnNewSheet").textContent = t("addSheet");
+  if ($("btnApproveAll")) $("btnApproveAll").textContent = t("approveAll");
+  document.querySelectorAll('[data-act="regExport"]').forEach(b => { b.textContent = t("exportExcel"); });
+  document.querySelectorAll('[data-act="regPrint"]').forEach(b => { b.textContent = t("print"); });
+  document.querySelectorAll('[data-act="staffInvite"]').forEach(b => { b.textContent = t("inviteStaff"); });
+  document.querySelectorAll('[data-act="saveSettings"]').forEach(b => { b.textContent = t("saveChanges"); });
+
+  // Dashboard panels
+  const panels = [
+    ["#v-dashboard .grid2:nth-of-type(1) .panel-card:nth-child(1) h3", "panelActiveReqs", "panelActiveReqsSub", "viewAll"],
+    ["#v-dashboard .grid2:nth-of-type(1) .panel-card:nth-child(2) h3", "panelRatingDue", "panelRatingDueSub", null],
+    ["#v-dashboard .grid2:nth-of-type(2) .panel-card:nth-child(1) h3", "panelQueue", "panelQueueSub", "viewAll"],
+    ["#v-dashboard .grid2:nth-of-type(2) .panel-card:nth-child(2) h3", "panelUrgent", "panelUrgentSub", "allJobs"]
+  ];
+  // Safer: query by structure
+  document.querySelectorAll("#v-dashboard .panel-card").forEach((card, i) => {
+    const keys = [
+      ["panelActiveReqs", "panelActiveReqsSub"],
+      ["panelRatingDue", "panelRatingDueSub"],
+      ["panelQueue", "panelQueueSub"],
+      ["panelUrgent", "panelUrgentSub"]
+    ][i];
+    if (!keys) return;
+    const h3 = card.querySelector("h3");
+    const sub = card.querySelector(".sub");
+    const link = h3 && h3.querySelector(".link-btn");
+    if (h3) {
+      const linkHtml = link ? ` <button class="link-btn" data-view="${link.dataset.view}">${t(i < 2 && i !== 1 ? (i === 0 ? "viewAll" : "viewAll") : (i === 3 ? "allJobs" : "viewAll"))}</button>` : "";
+      // rebuild carefully
+      const view = link ? link.dataset.view : null;
+      h3.innerHTML = t(keys[0]) + (view ? ` <button class="link-btn" data-view="${view}">${t(view === "matches" ? "allJobs" : "viewAll")}</button>` : "");
+    }
+    if (sub) sub.textContent = t(keys[1]);
+  });
+
+  const matchPanels = document.querySelectorAll("#v-matches .panel-card");
+  if (matchPanels[0]) {
+    const h = matchPanels[0].querySelector("h3"); if (h) h.textContent = t("openJobReqs");
+    const s = matchPanels[0].querySelector(".sub"); if (s) s.textContent = t("openJobReqsSub");
+  }
+  if (matchPanels[1]) {
+    const h = matchPanels[1].querySelector("h3"); if (h) h.textContent = t("recMatches");
+  }
+
+  if ($("eSearch")) $("eSearch").placeholder = t("searchEmployers");
+  if ($("wSearch")) $("wSearch").placeholder = t("searchWorkers");
+  if ($("jSearch")) $("jSearch").placeholder = t("searchJobs");
+  if ($("pSearch")) $("pSearch").placeholder = t("searchPlacements");
+  if ($("aSearch")) $("aSearch").placeholder = t("searchAgreements");
+
+  if ($("jStatus") && $("jStatus").options[0]) $("jStatus").options[0].text = t("allStatuses");
+  if ($("jUrg") && $("jUrg").options[0]) $("jUrg").options[0].text = t("anyUrgency");
+
+  if ($("saveBtn")) $("saveBtn").textContent = t("saveWorker");
+  if ($("cancelEdit")) $("cancelEdit").textContent = t("cancel");
+  if ($("saveRatingBtn")) $("saveRatingBtn").textContent = t("saveRating");
+  if ($("cancelRatingBtn")) $("cancelRatingBtn").textContent = t("cancel");
+
+  // Add-worker form labels (order-based on form)
+  const formLabels = {
+    f_name: "fullName", f_age: "age", f_gender: "gender", f_skill: "primarySkill", f_tags: "otherSkills",
+    f_location: "location", f_experience: "experience", f_expYears: "expYears", f_paymentType: "paymentType",
+    f_pay: "payOptional", f_placementType: "placementType", f_nationalId: "nationalId", f_phone: "phone",
+    f_tgid: "telegramId", f_police: "police", f_guarantorName: "guarantorName", f_guarantorPhone: "guarantorPhone"
+  };
+  Object.entries(formLabels).forEach(([id, key]) => {
+    const el = $(id);
+    if (!el) return;
+    const lab = el.previousElementSibling;
+    if (lab && lab.tagName === "LABEL") lab.textContent = t(key);
+  });
+  // Photo labels
+  const idPhotoLab = $("f_idPhotoBtn") && $("f_idPhotoBtn").previousElementSibling;
+  if (idPhotoLab && idPhotoLab.tagName === "LABEL") idPhotoLab.textContent = t("idPhoto");
+  const photoLab = $("f_photoBtn") && $("f_photoBtn").previousElementSibling;
+  if (photoLab && photoLab.tagName === "LABEL") photoLab.textContent = t("profilePhoto");
+  if ($("f_idPhotoBtn") && typeof adminIdPhotoData !== "undefined" && !adminIdPhotoData) $("f_idPhotoBtn").textContent = t("takeIdPhoto");
+  else if ($("f_idPhotoBtn") && typeof adminIdPhotoData === "undefined") $("f_idPhotoBtn").textContent = t("takeIdPhoto");
+  if ($("f_photoBtn") && typeof adminPhotoData !== "undefined" && !adminPhotoData) $("f_photoBtn").textContent = t("takePhoto");
+  else if ($("f_photoBtn") && typeof adminPhotoData === "undefined") $("f_photoBtn").textContent = t("takePhoto");
+  if ($("f_idPhotoAlt")) $("f_idPhotoAlt").textContent = t("uploadId");
+
+  // Settings labels
+  if ($("s_ratingDays")) {
+    const lab = $("s_ratingDays").previousElementSibling;
+    if (lab && lab.tagName === "LABEL") lab.textContent = t("ratingFollowUpDays");
+    const hint = $("s_ratingDays").nextElementSibling;
+    if (hint && hint.classList.contains("who")) hint.textContent = t("ratingFollowUpHint");
+  }
+
+  // Gender / payment options
+  if ($("f_gender")) {
+    const v = $("f_gender").value;
+    $("f_gender").innerHTML = `<option value="">—</option><option value="F">${t("female")}</option><option value="M">${t("male")}</option>`;
+    $("f_gender").value = v;
+  }
+  if ($("f_paymentType")) {
+    const v = $("f_paymentType").value;
+    $("f_paymentType").innerHTML = `<option value="monthly">${t("monthly")}</option><option value="hourly">${t("hourly")}</option><option value="daily">${t("daily")}</option>`;
+    $("f_paymentType").value = v || "monthly";
+  }
+  if ($("f_police")) {
+    const v = $("f_police").value;
+    $("f_police").innerHTML = `<option value="no">${t("no")}</option><option value="yes">${t("yes")}</option>`;
+    $("f_police").value = v || "no";
+  }
+
+  // Re-render dynamic lists if logged in
+  if (typeof me !== "undefined" && me && typeof renderAdmin === "function") {
+    try { renderAdmin(); } catch (_) {}
+  }
+}
+
+// Wire language toggle early
+document.addEventListener("DOMContentLoaded", () => {});
+setTimeout(() => {
+  if ($("langBtn")) {
+    $("langBtn").onclick = () => {
+      lang = lang === "en" ? "am" : "en";
+      localStorage.setItem("td_admin_lang", lang);
+      applyAdminLang();
+    };
+  }
+  applyAdminLang();
+}, 0);
 const round2 = n => Math.round((Number(n) || 0) * 100) / 100;
 const etb = n => "ETB " + round2(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
 const sid = (p, id) => "#" + p + "-" + String(id).slice(0, 5).toUpperCase();
@@ -1119,7 +1554,8 @@ onAuthStateChanged(auth, async user => {
     document.body.classList.remove("is-app");
     $("login").classList.remove("hid");
     $("panel").classList.add("hid");
-    $("hdrUser").classList.add("hid");
+    if ($("who")) $("who").classList.add("hid");
+    if ($("signOut")) $("signOut").classList.add("hid");
     return;
   }
   const email = (user.email || "").toLowerCase();
@@ -1127,16 +1563,18 @@ onAuthStateChanged(auth, async user => {
   else {
     let s = null;
     try { s = await getDoc(doc(db, "admin_users", email)); } catch (e) {}
-    if (!s || !s.exists() || s.data().status !== "Active") { alert("Not admin"); signOut(auth); return; }
+    if (!s || !s.exists() || s.data().status !== "Active") { alert(t("notAdmin")); signOut(auth); return; }
     me = { email, name: s.data().name || email, role: s.data().role };
   }
   $("who").textContent = me.email + " · " + me.role;
+  $("who").classList.remove("hid");
+  $("signOut").classList.remove("hid");
   $("login").classList.add("hid");
   $("panel").classList.remove("hid");
-  $("hdrUser").classList.remove("hid");
   document.body.classList.add("is-app");
   try { await loadAdmin(); } catch (err) { console.error(err); }
   showView(location.hash.slice(1) || "dashboard");
+  applyAdminLang();
 });
 
 // ---------- load ----------
@@ -1166,6 +1604,39 @@ async function loadAdmin() {
   employers = map(es).sort(byNew);
   jobs = map(js).sort(byNew);
   places = map(ps).sort(byNew);
+  // Sync: workers marked Placed / On Work via hire+agreement but missing a placements doc
+  // appear in the Placements list so the count matches the Workers directory.
+  {
+    const covered = new Set(places.filter(p => BUSY.includes(p.status) || p.status === "Active Placement").map(p => p.workerId).filter(Boolean));
+    const synthetic = allW.filter(w => {
+      const placed = !!(w.assignedEmployerId || w.assignedEmployerName || w.assigned_employer || w.work_status === "on_work");
+      return placed && w.id && !covered.has(w.id);
+    }).map(w => {
+      const empName = w.assignedEmployerName || w.assigned_employer || "—";
+      const linkedReq = reqs.find(r => r.workerId === w.id && ["on_work", "on_process"].includes(reqStatus(r)));
+      return {
+        id: "sync_" + w.id,
+        _synthetic: true,
+        workerId: w.id,
+        workerName: w.name,
+        employerId: w.assignedEmployerId || linkedReq?.employerId || null,
+        employerName: empName,
+        employerPhone: linkedReq?.employerPhone || "",
+        jobTitle: (linkedReq && (linkedReq.agreementData?.skill || linkedReq.workerSkill)) || w.skill || "Placement",
+        jobId: null,
+        payRate: linkedReq?.agreementData?.pay || w.pay || null,
+        payType: linkedReq?.agreementData?.payType || w.paymentType || "monthly",
+        status: "Active Placement",
+        commissionPaid: !!(linkedReq && linkedReq.paymentReceived),
+        handoverReceiptSigned: !!(linkedReq && linkedReq.agreementSigned),
+        officeHandoverCompletedAt: linkedReq?.agreementSignedAt || w.placedAt || w.createdAt || null,
+        createdAt: linkedReq?.agreementSignedAt || w.placedAt || w.createdAt || null,
+        requestId: linkedReq?.id || null,
+        source: "hire_request_sync"
+      };
+    });
+    if (synthetic.length) places = [...synthetic, ...places].sort(byNew);
+  }
   sheets = map(tss).sort(byNew);
   staff = map(ss);
   checkins = map(cs);
@@ -1206,9 +1677,9 @@ function isPlacementRatingDue(p) {
 }
 
 const dueBtnsPlacement = p =>
-  `<button class="btn-secondary btn-warning" data-askpl="${esc(p.id)}">📩 Ask</button>` +
-  `<button class="btn-secondary btn-success" data-ratepl="${esc(p.id)}" data-wid="${esc(p.workerId)}">★ Rate</button>` +
-  `<button class="btn-secondary" data-marksentpl="${esc(p.id)}">Mark Sent</button>`;
+  `<button class="btn-secondary btn-warning" data-askpl="${esc(p.id)}">${t("ask")}</button>` +
+  `<button class="btn-secondary btn-success" data-ratepl="${esc(p.id)}" data-wid="${esc(p.workerId)}">${t("rate")}</button>` +
+  `<button class="btn-secondary" data-marksentpl="${esc(p.id)}">${t("markSent")}</button>`;
 
 function showView(v) {
   if (!(ROLE_VIEWS[me.role] || []).includes(v)) v = "dashboard";
@@ -1267,7 +1738,7 @@ const urgBadge = j => j.urgency === "Urgent" ? bdg("bad", "Urgent") : "";
 // ================= buttons =================
 const A = (act, label, cls = "", extra = "") => `<button class="btn-secondary ${cls}" data-act="${act}" ${extra}>${label}</button>`;
 const approveBtns = w => can("verify") ? `<button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button><button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ Reject</button>` : "";
-const dueBtns = r => `<button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">📩 Ask</button><button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">★ Rate</button><button class="btn-secondary" data-marksent="${esc(r.id)}">Mark Sent</button>`;
+const dueBtns = r => `<button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">${t("ask")}</button><button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">${t("rate")}</button><button class="btn-secondary" data-marksent="${esc(r.id)}">${t("markSent")}</button>`;
 const reqBtns = r =>
   (!["on_process", "on_work"].includes(reqStatus(r)) ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : "") +
   (can("agree") ? A("openAgreement", hasAg(r) ? "📄 Agreement" : "📄 Prepare Agreement", "btn-info", `data-id="${esc(r.id)}"`) : "") +
@@ -1415,19 +1886,19 @@ function renderDash() {
     <div class="row-item">${avatar(o)}
       <div class="row-main"><b>${esc(o.name)}</b><span class="who">${t === "worker" ? "Worker · " + esc(o.skill) : "Employer · " + esc(o.industry || o.location || "")}</span></div>
       <div class="row-act">${t === "worker" ? approveBtns(o) : empVerBtns(o)}</div>
-    </div>`).join("") : `<div class="empty">All caught up ✅</div>`;
+    </div>`).join("") : `<div class="empty">${t("allCaughtUp")}</div>`;
 
   const urgent = openJobs.filter(j => j.urgency === "Urgent").slice(0, 6);
   $("dUrgent").innerHTML = urgent.length ? urgent.map(j => `
     <div class="row-item"><div class="row-main"><b>${esc(j.title)}</b><span class="who">${esc(j.employerName)} · Start ${esc(j.startDate || "—")} · ${filledCount(j.id)}/${esc(j.workersNeeded)}</span></div>
-      ${can("place") ? `<div class="row-act">${A("findMatch", "Find Match", "btn-info", `data-id="${esc(j.id)}"`)}</div>` : ""}</div>`).join("") : `<div class="empty">No urgent jobs 🎉</div>`;
+      ${can("place") ? `<div class="row-act">${A("findMatch", "Find Match", "btn-info", `data-id="${esc(j.id)}"`)}</div>` : ""}</div>`).join("") : `<div class="empty">${t("noUrgent")}</div>`;
 
   const act = reqs.filter(r => reqStatus(r) !== "closed").slice(0, 8);
   $("dReqs").innerHTML = act.length ? act.map(r => `
     <div class="row-item">${avatar(wm.get(r.workerId) || { name: r.workerName })}
       <div class="row-main"><b>${esc(r.workerName)}</b><span class="who">${esc(r.employerName)} · ${ago(ts(r.createdAt))}</span></div>${reqBadge(r)}
-      <div class="row-act">${r.employerPhone ? `<a class="btn-secondary btn-info" href="tel:${esc(r.employerPhone)}">📞 Call</a>` : ""}${r.employerUsername ? `<a class="btn-secondary btn-info" href="https://t.me/${esc(String(r.employerUsername).replace(/^@/, ""))}" target="_blank" rel="noopener">Telegram</a>` : ""}${reqStatus(r) === "open" ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : ""}<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button></div>
-    </div>`).join("") : `<div class="empty">No active requests</div>`;
+      <div class="row-act">${r.employerPhone ? `<a class="btn-secondary btn-info" href="tel:${esc(r.employerPhone)}">${t("call")}</a>` : ""}${r.employerUsername ? `<a class="btn-secondary btn-info" href="https://t.me/${esc(String(r.employerUsername).replace(/^@/, ""))}" target="_blank" rel="noopener">${t("telegram")}</a>` : ""}${reqStatus(r) === "open" ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">${t("onProcess")}</button>` : ""}<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">${t("close")}</button></div>
+    </div>`).join("") : `<div class="empty">${t("noActiveReqs")}</div>`;
 
   const dueItems = [
     ...dueReqs.map(r => ({
@@ -1448,7 +1919,7 @@ function renderDash() {
     })
   ].slice(0, 8);
   $("dDue").innerHTML = dueItems.length ? dueItems.map(x => `
-    <div class="row-item"><div class="row-main"><b>${esc(x.name)}</b><span class="who">${x.sub}</span></div><div class="row-act">${x.btns}</div></div>`).join("") : `<div class="empty">Nothing due 🎉</div>`;
+    <div class="row-item"><div class="row-main"><b>${esc(x.name)}</b><span class="who">${x.sub}</span></div><div class="row-act">${x.btns}</div></div>`).join("") : `<div class="empty">${t("nothingDue")}</div>`;
 }
 
 function renderEmployers() {
@@ -2088,11 +2559,41 @@ async function finalizeAgreement() {
     } catch (e) { console.warn("agreements write failed (check Firestore rules):", e); }
     if (workerId) {                                                                           // 3) worker → on work
       try {
-        const wp = { available: false, work_status: "on_work", availability_status: "On Work", assigned_employer: x.empName || null, assignedEmployerName: x.empName || "" };
+        const wp = { available: false, work_status: "on_work", availability_status: "On Work", assigned_employer: x.empName || null, assignedEmployerName: x.empName || "", placedAt: serverTimestamp() };
         if (employerId) wp.assignedEmployerId = employerId; if (agId) wp.latestAgreementId = agId;
         await updateDoc(doc(db, "workers", workerId), wp);
       } catch (e) { toast("Agreement saved, but the worker status update failed: " + e.message); }
     }
+    // 3b) Create / refresh a Placements record so it shows in the Placements list
+    try {
+      const existing = places.find(p => p.workerId === workerId && (BUSY.includes(p.status) || p.status === "Active Placement") && !p._synthetic);
+      const plData = {
+        workerId: workerId || null,
+        workerName: x.workerName || r.workerName || "",
+        employerId: employerId || null,
+        employerName: x.empName || r.employerName || "",
+        employerPhone: x.empPhone || r.employerPhone || "",
+        jobTitle: x.skill || r.workerSkill || "Placement",
+        jobId: null,
+        requestId: agReqId,
+        agreementId: agId || null,
+        payRate: x.pay || null,
+        payType: x.payType || "monthly",
+        status: "Active Placement",
+        commissionPaid: feeAmt > 0,
+        commissionAmount: feeAmt || null,
+        handoverReceiptSigned: true,
+        officeHandoverCompletedAt: serverTimestamp(),
+        source: "agreement",
+        updatedAt: serverTimestamp()
+      };
+      if (existing && existing.id && !String(existing.id).startsWith("sync_")) {
+        await updateDoc(doc(db, "placements", existing.id), plData);
+      } else {
+        plData.createdAt = serverTimestamp();
+        await setDoc(doc(collection(db, "placements")), plData);
+      }
+    } catch (e) { console.warn("placements write failed:", e); }
     if (employerId && agId) await updateDoc(doc(db, "employers", employerId), { latestAgreementId: agId }).catch(() => {});   // 4) employer link
     toast(agId ? "✅ ተፈርሟል · ተሰቅሏል · ሰራተኛ በሥራ ላይ — Agreement saved, worker is On Work" : "✅ Saved on the request · worker On Work (add a Firestore rule for /agreements to keep the archive)");
     $("agreementModal").classList.add("hid"); await loadAdmin();
@@ -2169,11 +2670,23 @@ const ACTIONS = {
     const p = plById(d.id); if (!p) return false;
     const n = sheets.filter(t => t.placementId === p.id).length;
     if (!confirm(`Delete the placement ${p.workerName} → ${p.jobTitle} (${p.employerName})?` + (p.status === "Active Placement" ? "\nThe worker will be released and set available again." : "") + (n ? `\n${n} linked timesheet(s) will be kept.` : "") + "\nThis cannot be undone.")) return false;
-    const b = writeBatch(db), w = wById(p.workerId);
-    b.delete(doc(db, "placements", p.id));
-    if (p.status === "Active Placement" && w && w.assignedEmployerId === p.employerId) b.update(doc(db, "workers", w.id), { assignedEmployerId: null, assignedEmployerName: "", available: true });
-    await b.commit();
-    if (FILL.includes(p.status)) await setJobFill(jById(p.jobId), filledCount(p.jobId) - 1);
+    const w = wById(p.workerId);
+    if (p._synthetic || String(p.id).startsWith("sync_")) {
+      // No real placements doc — only release the worker
+      if (w) await updateDoc(doc(db, "workers", w.id), {
+        assignedEmployerId: null, assignedEmployerName: "", assigned_employer: null,
+        available: true, work_status: "", availability_status: "", placedAt: null
+      });
+    } else {
+      const b = writeBatch(db);
+      b.delete(doc(db, "placements", p.id));
+      if (p.status === "Active Placement" && w) b.update(doc(db, "workers", w.id), {
+        assignedEmployerId: null, assignedEmployerName: "", assigned_employer: null,
+        available: true, work_status: "", availability_status: "", placedAt: null
+      });
+      await b.commit();
+      if (FILL.includes(p.status) && p.jobId) await setJobFill(jById(p.jobId), filledCount(p.jobId) - 1);
+    }
     toast("Placement deleted");
   },
   selJob(d) { selJobId = d.id; renderMatches(); return false; },
@@ -2285,15 +2798,34 @@ const ACTIONS = {
   },
   async completePl(d) {
     const p = plById(d.id); if (!p || !confirm(`Mark ${p.workerName}'s placement as completed and release the worker?`)) return false;
-    const b = writeBatch(db);
-    b.update(doc(db, "placements", p.id), { status: "Completed", completedAt: serverTimestamp() });
-    if (wById(p.workerId)) b.update(doc(db, "workers", p.workerId), { assignedEmployerId: null, assignedEmployerName: "", available: true });
-    await b.commit();
+    const release = { assignedEmployerId: null, assignedEmployerName: "", assigned_employer: null, available: true, work_status: "", availability_status: "", placedAt: null };
+    if (p._synthetic || String(p.id).startsWith("sync_")) {
+      if (wById(p.workerId)) await updateDoc(doc(db, "workers", p.workerId), release);
+      // Persist a completed placement so history remains
+      try {
+        await setDoc(doc(collection(db, "placements")), {
+          workerId: p.workerId, workerName: p.workerName, employerId: p.employerId, employerName: p.employerName,
+          jobTitle: p.jobTitle, requestId: p.requestId || null, status: "Completed", completedAt: serverTimestamp(),
+          createdAt: p.createdAt || serverTimestamp(), source: "hire_request_sync", handoverReceiptSigned: true
+        });
+      } catch (_) {}
+    } else {
+      const b = writeBatch(db);
+      b.update(doc(db, "placements", p.id), { status: "Completed", completedAt: serverTimestamp() });
+      if (wById(p.workerId)) b.update(doc(db, "workers", p.workerId), release);
+      await b.commit();
+    }
   },
   async cancelPl(d) {
     const p = plById(d.id); if (!p || !confirm("Cancel this placement?")) return false;
-    await updateDoc(doc(db, "placements", p.id), { status: "Cancelled", cancelledAt: serverTimestamp() });
-    await setJobFill(jById(p.jobId), filledCount(p.jobId) - 1);
+    const release = { assignedEmployerId: null, assignedEmployerName: "", assigned_employer: null, available: true, work_status: "", availability_status: "", placedAt: null };
+    if (p._synthetic || String(p.id).startsWith("sync_")) {
+      if (wById(p.workerId)) await updateDoc(doc(db, "workers", p.workerId), release);
+    } else {
+      await updateDoc(doc(db, "placements", p.id), { status: "Cancelled", cancelledAt: serverTimestamp() });
+      if (wById(p.workerId)) await updateDoc(doc(db, "workers", p.workerId), release).catch(() => {});
+      if (p.jobId) await setJobFill(jById(p.jobId), filledCount(p.jobId) - 1);
+    }
   },
   async remind(d) {
     const win = window.open("", "_blank"); const p = plById(d.id); if (!p) { if (win) win.close(); return false; }
@@ -2354,7 +2886,7 @@ const ACTIONS = {
       ratingFollowUpDays: ratingDays,
       updatedAt: serverTimestamp()
     }, { merge: true });
-    alert("Settings saved.");
+    alert(t("saveSettingsOk"));
   },
   staffInvite() { staffForm(null); return false; },
   staffEdit(d) { staffForm(staff.find(s => s.id === d.id)); return false; },
@@ -2514,12 +3046,12 @@ async function startEdit(id) {
   setAdminPhoto(null); setAdminIdPhoto(null);
   if (w.photo) { setAdminPhoto(w.photo); }
   if (priv.idPhoto) { setAdminIdPhoto(priv.idPhoto); }
-  $("formTitle").textContent = "✏️ Edit Worker";
+  $("formTitle").textContent = t("titleEditWorker");
   $("cancelEdit").classList.remove("hid"); showView("add");
 }
 function resetForm() {
   $("wf").reset(); setAdminPhoto(null); setAdminIdPhoto(null); $("f_id").value = "";
-  $("cancelEdit").classList.add("hid"); $("formTitle").textContent = "➕ Add Worker";
+  $("cancelEdit").classList.add("hid"); $("formTitle").textContent = t("titleAddWorker");
 }
 $("cancelEdit").onclick = () => { resetForm(); showView("workers"); };
 
