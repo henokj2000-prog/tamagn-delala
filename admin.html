@@ -710,6 +710,11 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
         <!-- Hire requests -->
         <div id="v-requests" class="view hid">
           <div class="view-head"><h2>Hire Requests</h2></div>
+          <div class="panel-card" style="margin-bottom:14px">
+            <h3>🙋 Worker Job Interests</h3>
+            <div class="sub">Workers who tapped “I'm interested” on a published job</div>
+            <div id="tbInterests"></div>
+          </div>
           <div class="chips" id="rChips"></div>
           <div class="toolbar"><input id="rSearch" type="search" placeholder="Search worker, employer or phone..."></div>
           <div id="tbReq"></div>
@@ -1447,7 +1452,7 @@ function ratingBlock(w, { showScore = false } = {}) {
 
 // ---------- state ----------
 let me = { email: "", name: "", role: R_SA };
-let allW = [], reqs = [], pending = [], employers = [], jobs = [], places = [], sheets = [], staff = [], checkins = [], ags = [];
+let allW = [], reqs = [], pending = [], employers = [], jobs = [], places = [], sheets = [], staff = [], checkins = [], ags = [], interests = [];
 let settings = { ...DEFAULTS }, loadErrors = [];
 let wFilter = "all", rFilter = "all", eFilter = "all", pFilter = "all", tFilter = "all", aFilter = "all", tPeriod = "all", selJobId = null;
 let ratingRequestId = null, ratingWorkerId = null, ratingPlacementId = null;
@@ -1582,7 +1587,7 @@ async function loadAdmin() {
   loadErrors = [];
   const safe = (p, name) => p.catch(() => { loadErrors.push(name); return { docs: [] }; });
   const col = n => getDocs(collection(db, n));
-  const [rs, ws, es, js, ps, tss, ss, cs, st, agr, pvs] = await Promise.all([
+  const [rs, ws, es, js, ps, tss, ss, cs, st, agr, pvs, jis] = await Promise.all([
     safe(getDocs(query(collection(db, "requests"), orderBy("createdAt", "desc"), limit(80))), "requests"),
     safe(col("workers"), "workers"),
     safe(col("employers"), "employers"),
@@ -1593,12 +1598,26 @@ async function loadAdmin() {
     getDocs(query(collection(db, "checkins"), orderBy("at", "desc"), limit(20))).catch(() => ({ docs: [] })),   // optional, written by the bot
     getDoc(doc(db, "agency_settings", "main")).catch(() => { loadErrors.push("agency_settings"); return null; }),
     safe(col("agreements"), "agreements"),
-    getDocs(collection(db, "workers_private")).catch(() => ({ docs: [] }))                 // phone, ID no., guarantor (for the register)
+    getDocs(collection(db, "workers_private")).catch(() => ({ docs: [] })),                 // phone, ID no., guarantor (for the register)
+    safe(getDocs(query(collection(db, "job_interests"), orderBy("createdAt", "desc"), limit(80))).catch(() => getDocs(collection(db, "job_interests"))), "job_interests")
   ]);
   privs = {}; pvs.docs.forEach(d => { privs[d.id] = d.data(); });
   const map = s => s.docs.map(d => ({ id: d.id, ...d.data() }));
   const byNew = (a, b) => ts(b.createdAt) - ts(a.createdAt);
   reqs = map(rs);
+  // Job interests from dedicated collection + interest-only hire requests (fallback path)
+  const fromCol = map(jis).map(x => ({ ...x, _src: "job_interests" }));
+  const fromReq = map(rs).filter(r => r.interestOnly || r.source === "worker_interest" || r.type === "job_interest")
+    .map(r => ({
+      id: r.id, _src: "requests", jobId: r.jobId || null, jobTitle: r.jobTitle || "",
+      workerId: r.workerId, workerName: r.workerName, skill: r.skill || "", phone: r.employerPhone || "",
+      telegramUserId: r.telegramUserId || "", employerName: r.employerName || "",
+      status: r.status === "closed" ? "done" : (r.status || "new"), createdAt: r.createdAt
+    }));
+  const seen = new Set(fromCol.map(i => `${i.workerId}_${i.jobId}_${ts(i.createdAt)}`));
+  interests = [...fromCol, ...fromReq.filter(i => !seen.has(`${i.workerId}_${i.jobId}_${ts(i.createdAt)}`))].sort(byNew);
+  // Hide pure interest rows from the normal hire-request list (they appear under Interests)
+  reqs = reqs.filter(r => !(r.interestOnly || r.source === "worker_interest" || r.type === "job_interest"));
   allW = map(ws).sort(byNew);
   pending = allW.filter(w => w.status === "pending");
   employers = map(es).sort(byNew);
@@ -1812,7 +1831,7 @@ function renderNav() {
   setBadge("nbW", pending.length);
   setBadge("nbPl", places.filter(p => p.status === "Pending Employer Review").length);
   setBadge("nbTs", sheets.filter(s => s.approvalStatus === "Pending").length);
-  setBadge("nbReq", reqs.filter(r => reqStatus(r) === "open").length);
+  setBadge("nbReq", reqs.filter(r => reqStatus(r) === "open").length + interests.filter(i => i.status !== "done" && i.status !== "closed").length);
   $("nbDash").classList.add("hid");
 }
 
@@ -1893,12 +1912,20 @@ function renderDash() {
     <div class="row-item"><div class="row-main"><b>${esc(j.title)}</b><span class="who">${esc(j.employerName)} · Start ${esc(j.startDate || "—")} · ${filledCount(j.id)}/${esc(j.workersNeeded)}</span></div>
       ${can("place") ? `<div class="row-act">${A("findMatch", "Find Match", "btn-info", `data-id="${esc(j.id)}"`)}</div>` : ""}</div>`).join("") : `<div class="empty">${t("noUrgent")}</div>`;
 
-  const act = reqs.filter(r => reqStatus(r) !== "closed").slice(0, 8);
-  $("dReqs").innerHTML = act.length ? act.map(r => `
+  const act = reqs.filter(r => reqStatus(r) !== "closed").slice(0, 6);
+  const newInterests = interests.filter(i => i.status !== "done" && i.status !== "closed").slice(0, 4);
+  const interestRows = newInterests.map(i => `
+    <div class="row-item">${avatar(wm.get(i.workerId) || { name: i.workerName })}
+      <div class="row-main"><b>${esc(i.workerName)}</b><span class="who">🙋 Interest · ${esc(i.jobTitle || i.skill || "")} · ${ago(ts(i.createdAt))}</span></div>
+      ${bdg("info", "Interest")}
+      <div class="row-act"><button class="btn-secondary btn-info" data-view="requests">View</button></div>
+    </div>`).join("");
+  const reqRows = act.map(r => `
     <div class="row-item">${avatar(wm.get(r.workerId) || { name: r.workerName })}
       <div class="row-main"><b>${esc(r.workerName)}</b><span class="who">${esc(r.employerName)} · ${ago(ts(r.createdAt))}</span></div>${reqBadge(r)}
       <div class="row-act">${r.employerPhone ? `<a class="btn-secondary btn-info" href="tel:${esc(r.employerPhone)}">${t("call")}</a>` : ""}${r.employerUsername ? `<a class="btn-secondary btn-info" href="https://t.me/${esc(String(r.employerUsername).replace(/^@/, ""))}" target="_blank" rel="noopener">${t("telegram")}</a>` : ""}${reqStatus(r) === "open" ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">${t("onProcess")}</button>` : ""}<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">${t("close")}</button></div>
-    </div>`).join("") : `<div class="empty">${t("noActiveReqs")}</div>`;
+    </div>`).join("");
+  $("dReqs").innerHTML = (interestRows + reqRows) || `<div class="empty">${t("noActiveReqs")}</div>`;
 
   const dueItems = [
     ...dueReqs.map(r => ({
@@ -2209,8 +2236,50 @@ function renderSheets() {
 
 function renderRequests() {
   const wm = new Map(allW.map(w => [w.id, w]));
+  // Job interests (from worker "I'm interested")
+  if ($("tbInterests")) {
+    const openI = interests.filter(i => i.status !== "done" && i.status !== "closed");
+    $("tbInterests").innerHTML = interests.length ? table(
+      ["Worker", "Skill / Job", "Employer / Job", "Phone", "When", "Status", "Actions"],
+      interests.slice(0, 60).map(i => {
+        const w = wm.get(i.workerId) || { name: i.workerName };
+        const job = i.jobId ? jobs.find(j => j.id === i.jobId) : null;
+        const jobLabel = i.jobTitle || job?.title || job?.requiredSkill || i.skill || "—";
+        const empLabel = i.employerName || job?.employerName || "—";
+        const phone = i.phone || (privs[i.workerId] && privs[i.workerId].phone) || "";
+        const st = (i.status === "done" || i.status === "closed") ? bdg("ok", "Done") : bdg("info", "New");
+        const acts = [];
+        if (i.workerId) acts.push(A("viewWorker", "View worker", "", `data-id="${esc(i.workerId)}"`));
+        if (i.jobId) acts.push(A("findMatch", "Open job", "btn-info", `data-id="${esc(i.jobId)}"`));
+        if (phone) acts.push(`<a class="btn-secondary btn-info" href="tel:${esc(phone)}">📞 Call</a>`);
+        if (i.telegramUserId) acts.push(`<a class="btn-secondary btn-info" href="tg://user?id=${esc(i.telegramUserId)}" target="_blank" rel="noopener">Telegram</a>`);
+        if (i.status !== "done" && i.status !== "closed") {
+          acts.push(`<button class="btn-secondary btn-success" data-interest-done="${esc(i.id)}" data-src="${esc(i._src || "job_interests")}">✓ Done</button>`);
+        }
+        acts.push(`<button class="btn-secondary btn-danger" data-interest-del="${esc(i.id)}" data-src="${esc(i._src || "job_interests")}">Delete</button>`);
+        return `<tr>
+          <td class="c-id"><div class="cell-id">${avatar(w)}<div><b>${esc(i.workerName || w.name || "—")}</b><div class="who">${esc(i.skill || w.skill || "")}</div></div></div></td>
+          <td data-l="Job">${esc(jobLabel)}</td>
+          <td data-l="Employer">${esc(empLabel)}</td>
+          <td data-l="Phone">${esc(phone || "—")}</td>
+          <td data-l="When">${fmtDate(i.createdAt) || ago(ts(i.createdAt))}</td>
+          <td data-l="Status">${st}</td>
+          <td class="c-act"><div class="acts">${acts.join("")}</div></td>
+        </tr>`;
+      }),
+      "No job interests yet — workers who tap “I'm interested” appear here."
+    ) : `<div class="empty">No job interests yet — workers who tap “I'm interested” appear here.</div>`;
+  }
+
   const cnt = f => reqs.filter(f).length;
-  $("rChips").innerHTML = chipsHtml([["all", "All", reqs.length], ["open", "Open", cnt(r => reqStatus(r) === "open")], ["on_process", "On process", cnt(r => reqStatus(r) === "on_process")], ["on_work", "On work", cnt(r => reqStatus(r) === "on_work")], ["closed", "Closed", cnt(r => reqStatus(r) === "closed")], ["unpaid", "Unpaid", cnt(r => !r.paymentReceived)]], "fr", rFilter);
+  $("rChips").innerHTML = chipsHtml([
+    ["all", "All", reqs.length],
+    ["open", "Open", cnt(r => reqStatus(r) === "open")],
+    ["on_process", "On process", cnt(r => reqStatus(r) === "on_process")],
+    ["on_work", "On work", cnt(r => reqStatus(r) === "on_work")],
+    ["closed", "Closed", cnt(r => reqStatus(r) === "closed")],
+    ["unpaid", "Unpaid", cnt(r => !r.paymentReceived)]
+  ], "fr", rFilter);
   let rows = reqs.filter(r => rFilter === "all" || (rFilter === "unpaid" ? !r.paymentReceived : reqStatus(r) === rFilter));
   const q = needle("rSearch"); if (q) rows = rows.filter(r => hay(r.workerName, r.employerName, r.employerPhone, r.employerUsername).includes(q));
   $("tbReq").innerHTML = table(["Worker", "Employer", "Requested", "Status", "Payment", "Actions"], rows.map(r => `
@@ -2219,7 +2288,7 @@ function renderRequests() {
       <td data-l="Employer"><div>${tgLink(r.employerUsername, r.employerName || "")}<div class="who" style="margin:0">${esc(r.employerPhone || "")}</div></div></td>
       <td data-l="Requested">${fmtDate(r.createdAt)}</td><td data-l="Status">${reqBadge(r)}</td><td data-l="Payment">${payBadge(r)}</td>
       <td class="c-act"><div class="acts">${reqBtns(r)}</div></td>
-    </tr>`), "No requests match");
+    </tr>`), "No hire requests match");
 }
 
 function renderSettings() {
@@ -2924,6 +2993,23 @@ async function onAction(e) {
       $("ratingModal").classList.remove("hid"); return;
     }
     else if (d.marksent) await updateDoc(doc(db,"requests",d.marksent),{followUpSent:true});
+    else if (d.interestDone) {
+      const src = d.src || "job_interests";
+      try {
+        if (src === "requests") await updateDoc(doc(db, "requests", d.interestDone), { status: "closed" });
+        else await updateDoc(doc(db, "job_interests", d.interestDone), { status: "done", doneAt: serverTimestamp() });
+        toast("Interest marked done");
+      } catch (err) { alert(err.message); return; }
+    }
+    else if (d.interestDel) {
+      const src = d.src || "job_interests";
+      if (!confirm("Delete this job interest?")) return;
+      try {
+        if (src === "requests") await deleteDoc(doc(db, "requests", d.interestDel));
+        else await deleteDoc(doc(db, "job_interests", d.interestDel));
+        toast("Interest deleted");
+      } catch (err) { alert(err.message); return; }
+    }
     else if (d.askpl) {
       const p = plById(d.askpl); if (!p) return;
       const e = eById(p.employerId) || {};
