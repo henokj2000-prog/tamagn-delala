@@ -1262,10 +1262,239 @@ const i18n = {
     all: "ሁሉም",
     unpaid: "ያልተከፈለ",
     interest: "ፍላጎት",
-    noMatch: "ምንም አልተገኘም"
+    noMatch: "ምንም አልተገኘም",
+    // Phrase map: English UI string → Amharic (used by tt())
+    _map: {
+      "Pending Approvals": "በመጠባበቅ ላይ ያሉ ማጽደቂያዎች",
+      "Active Hire Requests": "ንቁ የቅጥር ጥያቄዎች",
+      "Ratings Due": "የደረጃ ጥያቄ የሚያስፈልግ",
+      "Worker Payouts Due": "የሰራተኛ ክፍያ የሚያስፈልግ",
+      "Open Job Orders": "ክፍት የስራ ትዕዛዞች",
+      "Active Placements": "ንቁ ቅጥሮች",
+      "Revenue This Month": "የዚህ ወር ገቢ",
+      "Workers · Employers": "ሰራተኞች · አሰሪዎች",
+      "Approved timesheets": "ጸድቀው የሰዓት ሰሌዳዎች",
+      "this week": "በዚህ ሳምንት",
+      "workers": "ሰራተኞች",
+      "employers": "አሰሪዎች",
+      "urgent": "አስቸኳይ",
+      "awaiting review": "ክለሳ በመጠባበቅ",
+      "approved": "ጸድቋል",
+      "verified": "ተረጋግጧል",
+      "Today": "ዛሬ",
+      "Week": "ሳምንት",
+      "YTD": "ከዓመቱ መጀመሪያ",
+      "After": "ከ",
+      "days": "ቀናት",
+      "placements": "ቅጥሮች",
+      "Total Employers": "ጠቅላላ አሰሪዎች",
+      "Verified Partners": "የተረጋገጡ አጋሮች",
+      "Pending Verification": "ማረጋገጫ በመጠባበቅ",
+      "Active Job Orders": "ንቁ የስራ ትዕዛዞች",
+      "All": "ሁሉም",
+      "Verified": "ተረጋግጧል",
+      "Pending": "በመጠባበቅ",
+      "Suspended": "ታግዷል",
+      "Company": "ኩባንያ",
+      "Industry": "ኢንዱስትሪ",
+      "Active Jobs": "ንቁ ስራዎች",
+      "Placed Workers": "የተቀጠሩ ሰራተኞች",
+      "Verification": "ማረጋገጫ",
+      "Billing": "ክፍያ ሁኔታ",
+      "Actions": "እርምጃዎች",
+      "View": "ተመልከት",
+      "Suspend": "አግድ",
+      "Edit": "አርትዕ",
+      "Delete": "ሰርዝ",
+      "Activate": "አንቃ",
+      "Not Started": "አልተጀመረም",
+      "Current": "አሁን",
+      "Overdue": "ያለፈ ጊዜ",
+      "All industries": "ሁሉም ኢንዱስትሪዎች",
+      "Available": "ነጻ",
+      "Placed": "ተቀጥሯል",
+      "Rejected": "ተቀባይነት አላገኘም",
+      "Inactive": "እንቅስቃሴ የለውም",
+      "Full Name": "ሙሉ ስም",
+      "Gender & Age": "ጾታ እና ዕድሜ",
+      "National / Kebele ID No.": "ብሔራዊ / ቀበሌ መታወቂያ",
+      "Worker Phone & Address": "ስልክ እና አድራሻ",
+      "Job Role / Skill": "ሚና / ክህሎት",
+      "Placement Type": "የቅጥር አይነት",
+      "Assigned Employer / Site": "የተመደበ አሰሪ / ቦታ",
+      "Start Date": "የመጀመሪያ ቀን",
+      "End / Exit Date": "የመጨረሻ ቀን",
+      "Agreed Rate / Salary (ETB)": "ተስማምቶ የደመወዝ (ብር)",
+      "Agency Fee Status": "የኤጀንሲ ክፍያ ሁኔታ",
+      "Guarantor Name & Phone": "የዋስ ስም እና ስልክ",
+      "Vetting & Medical Status": "ማረጋገጫ እና ጤና ሁኔታ",
+      "Rating": "ደረጃ",
+      "Current Status": "አሁን ያለ ሁኔታ",
+      "Remarks": "ማስታወሻ",
+      "Worker ID": "የሰራተኛ መለያ",
+      "All roles": "ሁሉም ሚናዎች",
+      "All placement types": "ሁሉም የቅጥር አይነቶች",
+      "All fee statuses": "ሁሉም የክፍያ ሁኔታዎች",
+      "All current statuses": "ሁሉም የአሁን ሁኔታዎች",
+      "Open": "ክፍት",
+      "Closed": "ተዘግቷል",
+      "On process": "በሂደት ላይ",
+      "On work": "በሥራ ላይ",
+      "Paid": "ተከፍሏል",
+      "Unpaid": "ያልተከፈለ",
+      "On Process": "በሂደት ላይ",
+      "Close": "ዝጋ",
+      "Mark Paid": "ተከፍሏል ምልክት",
+      "Show Phone": "ስልክ አሳይ",
+      "Prepare Agreement": "ስምምነት አዘጋጅ",
+      "Agreement": "ስምምነት",
+      "Pending Review": "ክለሳ በመጠባበቅ",
+      "Partially Filled": "በከፊል ተሞልቷል",
+      "Filled": "ተሞልቷል",
+      "Pending Job Requests": "በመጠባበቅ ያሉ የስራ ጥያቄዎች",
+      "Suggested Matches": "የሚመከሩ ማጣመሮች",
+      "Awaiting verification": "ማረጋገጫ በመጠባበቅ",
+      "Verified + available": "ተረጋግጧል + ነጻ",
+      "Assign Worker": "ሰራተኛ መድብ",
+      "Match": "ማጣመር",
+      "No rating": "ደረጃ የለም",
+      "Awaiting OTP": "OTP በመጠባበቅ",
+      "Ready for Handover": "ለማስረከብ ዝግጁ",
+      "Completed": "ተጠናቋል",
+      "Cancelled": "ተሰርዟል",
+      "OTP Verified": "OTP ተረጋግጧል",
+      "Pending Employer Review": "የአሰሪ ክለሳ በመጠባበቅ",
+      "Active Placement": "ንቁ ቅጥር",
+      "Worker → Job": "ሰራተኛ → ስራ",
+      "Employer": "አሰሪ",
+      "Status": "ሁኔታ",
+      "Employer OTP": "የአሰሪ OTP",
+      "Worker OTP": "የሰራተኛ OTP",
+      "Commission": "ኮሚሽን",
+      "Handover": "አስረከብ",
+      "Contract": "ውል",
+      "Timesheet": "የሰዓት ሰሌዳ",
+      "Remind": "አስታውስ",
+      "Complete": "ጨርስ",
+      "Ask Rating": "ደረጃ ጠይቅ",
+      "Rate": "ደረጃ ስጥ",
+      "Total Agreements": "ጠቅላላ ስምምነቶች",
+      "Signed": "ተፈርሟል",
+      "Signed File Stored": "የተፈረመ ፋይል ተቀምጧል",
+      "Service Fees": "የአገልግሎት ክፍያ",
+      "Finalized": "ተጠናቋል",
+      "Signed agreements": "የተፈረሙ ስምምነቶች",
+      "Draft": "ረቂቅ",
+      "Worker → Employer": "ሰራተኛ → አሰሪ",
+      "Skill": "ክህሎት",
+      "Pay": "ክፍያ",
+      "Service Fee": "የአገልግሎት ክፍያ",
+      "Date": "ቀን",
+      "Signed file": "የተፈረመ ፋይል",
+      "Total Logged": "ጠቅላላ የተመዘገበ",
+      "Pending Approval": "ማጽደቅ በመጠባበቅ",
+      "Employer Invoices Due": "የአሰሪ ደረሰኝ የሚያስፈልግ",
+      "Commission Earned": "የተገኘ ኮሚሽን",
+      "Timesheets": "የሰዓት ሰሌዳዎች",
+      "Approved, not paid": "ጸድቋል፣ አልተከፈለም",
+      "Paid timesheets": "የተከፈሉ የሰዓት ሰሌዳዎች",
+      "All time": "ሁሉም ጊዜ",
+      "This week": "በዚህ ሳምንት",
+      "This month": "በዚህ ወር",
+      "Disputed": "ተከራክሯል",
+      "Approved": "ጸድቋል",
+      "No timesheets match": "ምንም የሰዓት ሰሌዳ አልተገኘም",
+      "Active Admin Staff": "ንቁ የአስተዳደር ሰራተኞች",
+      "Default Commission": "ነባሪ ኮሚሽን",
+      "ID Verification": "የመታወቂያ ማረጋገጫ",
+      "Invoice Terms": "የክፍያ ውል",
+      "Required": "አስፈላጊ",
+      "Off": "ጠፍቷል",
+      "Staff Member": "ሰራተኛ",
+      "Role": "ሚና",
+      "Permissions Scope": "የመዳረሻ ወሰን",
+      "Active": "ንቁ",
+      "Owner": "ባለቤት",
+      "Deactivate": "አቦዝን",
+      "Approve": "አጽድቅ",
+      "Reject": "አትቀበል",
+      "Worker": "ሰራተኛ",
+      "Employer": "አሰሪ",
+      "ID Verified": "መታወቂያ ተረጋግጧል",
+      "Urgent": "አስቸኳይ",
+      "Normal": "መደበኛ",
+      "Any urgency": "ማንኛውም አስቸኳይነት",
+      "All statuses": "ሁሉም ሁኔታዎች",
+      "Search employers...": "አሰሪዎችን ፈልግ...",
+      "Search name, ID, phone, role, employer...": "ስም፣ መታወቂያ፣ ስልክ፣ ሚና፣ አሰሪ ፈልግ...",
+      "Search jobs, employers, skills...": "ስራ፣ አሰሪ፣ ክህሎት ፈልግ...",
+      "Search worker, employer or job...": "ሰራተኛ፣ አሰሪ ወይም ስራ ፈልግ...",
+      "Search worker, employer or skill...": "ሰራተኛ፣ አሰሪ ወይም ክህሎት ፈልግ...",
+      "Search worker, employer or phone...": "ሰራተኛ፣ አሰሪ ወይም ስልክ ፈልግ...",
+      "Search timesheets, workers or employers...": "የሰዓት ሰሌዳ፣ ሰራተኛ ወይም አሰሪ ፈልግ...",
+      "New Job Order": "አዲስ የስራ ትዕዛዝ",
+      "Edit": "አርትዕ",
+      "Close": "ዝጋ",
+      "Delete": "ሰርዝ",
+      "Find Match": "ማጣመር ፈልግ",
+      "OTP Verified": "OTP ተረጋግጧል",
+      "Suggested": "የተጠቆመ",
+      "file stored": "ፋይል ተቀምጧል",
+      "No requests match": "ምንም ጥያቄ አልተገኘም",
+      "No hire requests match": "ምንም የቅጥር ጥያቄ አልተገኘም",
+      "Full System, Payroll & Settings": "ሙሉ ስርዓት፣ ደመወዝ እና ቅንብሮች",
+      "Workers, Employers, Job Matches": "ሰራተኞች፣ አሰሪዎች፣ የስራ ማጣመር",
+      "Timesheets, Invoices & Payouts": "የሰዓት ሰሌዳ፣ ደረሰኝ እና ክፍያ",
+      "Approve/Reject Workers & Employers": "ሰራተኞችን እና አሰሪዎችን አጽድቅ/አትቀበል",
+      "Agency Rules & Commission Settings": "የኤጀንሲ ደንቦች እና ኮሚሽን",
+      "Default Agency Commission / Markup (%)": "ነባሪ የኤጀንሲ ኮሚሽን (%)",
+      "Invoice Payment Terms": "የክፍያ ውል",
+      "Require ID & verification before matching": "ከማጣመር በፊት መታወቂያ እና ማረጋገጫ ያስፈልጋል",
+      "Shift check-in reminders (SMS / Telegram)": "የስራ መግቢያ ማስታወሻ (SMS / ቴሌግራም)",
+      "Net 7 Days": "በ7 ቀናት",
+      "Net 15 Days": "በ15 ቀናት",
+      "Net 30 Days": "በ30 ቀናት",
+      "Due on Handover": "በማስረከብ ጊዜ",
+      "Save Changes": "ለውጦችን አስቀምጥ",
+      "Invite Staff": "ሰራተኛ ጋብዝ",
+      "Staff Roles & Access Control": "የሰራተኛ ሚናዎች እና መዳረሻ",
+      "Save Rating": "ደረጃ አስቀምጥ",
+      "Cancel": "ሰርዝ",
+      "Stars (1-5)": "ኮከቦች (1-5)",
+      "Comment / Recommendation": "አስተያየት / ምክር",
+      "Call": "ደውል",
+      "Telegram": "ቴሌግራም",
+      "Worker": "ሰራተኛ",
+      "Open Job Requests": "ክፍት የስራ ጥያቄዎች",
+      "Recommended Worker Matches": "የሚመከሩ ሰራተኞች",
+      "Select a job to see matching workers": "የሚመቹ ሰራተኞችን ለማየት ስራ ይምረጡ",
+      "Verified and available workers, ranked by match score": "የተረጋገጡ እና ነጻ ሰራተኞች በማጣመር ነጥብ",
+      "Pending Employer Review": "የአሰሪ ክለሳ በመጠባበቅ",
+      "OTP Verified": "OTP ተረጋግጧል",
+      "Active Placement": "ንቁ ቅጥር",
+      "Completed": "ተጠናቋል",
+      "Cancelled": "ተሰርዟል",
+      "Approve All": "ሁሉንም አጽድቅ",
+      "New Timesheet": "አዲስ የሰዓት ሰሌዳ",
+      "Add Employer": "አሰሪ ጨምር",
+      "Add Worker": "ሰራተኛ ጨምር",
+      "Export Excel": "Excel ላክ",
+      "Print": "አትም",
+      "ID Verified": "መታወቂያ ተረጋግጧል",
+      "No rating": "ደረጃ የለም",
+      "Match": "ማጣመር",
+      "Assign Worker": "ሰራተኛ መድብ"
+    }
   }
 };
 const t = key => (i18n[lang] && i18n[lang][key]) || (i18n.en[key]) || key;
+/** Translate a fixed English UI phrase (status, column, action). Falls back to English. */
+function tt(en) {
+  if (en == null || en === "") return "";
+  const s = String(en);
+  if (lang === "en") return s;
+  return (i18n.am && i18n.am._map && i18n.am._map[s]) || s;
+}
 
 function applyAdminLang() {
   if ($("langBtn")) $("langBtn").textContent = t("langBtn");
@@ -1414,6 +1643,13 @@ function applyAdminLang() {
     $("f_police").value = v || "no";
   }
 
+  if (typeof fillWorkerFilters === "function") {
+    try { fillWorkerFilters(); } catch (_) {}
+  }
+  if ($("eInd") && $("eInd").options[0]) $("eInd").options[0].text = tt("All industries");
+  if ($("jStatus") && $("jStatus").options[0]) $("jStatus").options[0].text = tt("All statuses");
+  if ($("jUrg") && $("jUrg").options[0]) $("jUrg").options[0].text = tt("Any urgency");
+
   // Re-render dynamic lists if logged in
   if (typeof me !== "undefined" && me && typeof renderAdmin === "function") {
     try { renderAdmin(); } catch (_) {}
@@ -1452,7 +1688,7 @@ const table = (heads, rows, empty) => rows.length
   ? `<div class="tbl-wrap"><table class="tbl"><thead><tr>${heads.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`
   : `<div class="tbl-wrap"><div class="tbl-empty">${empty}</div></div>`;
 const chipsHtml = (list, attr, cur) => list.map(([k, label, n]) => `<button class="chip${cur === k ? " active" : ""}" data-${attr}="${k}">${label} (${n})</button>`).join("");
-const kpiHtml = list => list.map(([l, v, c, s]) => `<div class="kpi ${c || ""}" role="button" tabindex="0"><div class="k-l">${l}</div><div class="k-v">${v}</div><div class="k-s">${s || ""}</div></div>`).join("");
+const kpiHtml = list => list.map(([l, v, c, s, key]) => `<div class="kpi ${c || ""}" role="button" tabindex="0" data-kpi="${esc(key || l)}"><div class="k-l">${tt(l)}</div><div class="k-v">${v}</div><div class="k-s">${s || ""}</div></div>`).join("");
 const unitWord = t => t === "hourly" ? "hours" : t === "daily" ? "days" : "months";
 const rateWord = t => t === "hourly" ? "hr" : t === "daily" ? "day" : "month";
 
@@ -1899,32 +2135,32 @@ function candidates(job) {
 
 // ================= badges =================
 const reqStatus = r => r.status || "open";
-const reqBadge = r => reqStatus(r) === "closed" ? bdg("ok", "Closed") : reqStatus(r) === "on_work" ? bdg("ok", "On work") : reqStatus(r) === "on_process" ? bdg("warn", "On process") : bdg("info", "Open");
-const payBadge = r => r.paymentReceived ? bdg("ok", "Paid") : bdg("mute", "Unpaid");
-const availBadge = w => { const a = wAvail(w); return bdg({ Available: "ok", Placed: "info", Pending: "warn", Rejected: "bad", Inactive: "mute" }[a], a); };
-const verBadge = w => w.status === "approved" ? bdg("ok", "Verified") : w.status === "rejected" ? bdg("bad", "Rejected") : bdg("warn", "Pending");
-const empVerBadge = e => ({ verified: bdg("ok", "Verified"), suspended: bdg("bad", "Suspended"), pending: bdg("warn", "Pending") })[eVer(e)];
-const billBadge = e => { const b = e.billingStatus || "Not Started"; return bdg({ Current: "ok", Pending: "warn", Overdue: "bad", Suspended: "bad", "Not Started": "mute" }[b] || "mute", b); };
-const jobBadge = j => bdg({ "Pending Review": "warn", Open: "info", "Partially Filled": "warn", Filled: "ok", Closed: "mute" }[j.status] || "mute", j.status || "Open");
-const plBadge = p => bdg({ Suggested: "mute", "Pending Employer Review": "warn", "OTP Verified": "info", "Active Placement": "ok", Completed: "mute", Cancelled: "bad" }[p.status] || "mute", p.status);
-const sheetBadge = s => bdg({ Pending: "warn", Approved: "info", Paid: "ok", Disputed: "bad" }[s.approvalStatus] || "mute", s.approvalStatus);
-const urgBadge = j => j.urgency === "Urgent" ? bdg("bad", "Urgent") : "";
+const reqBadge = r => reqStatus(r) === "closed" ? bdg("ok", tt("Closed")) : reqStatus(r) === "on_work" ? bdg("ok", tt("On work")) : reqStatus(r) === "on_process" ? bdg("warn", tt("On process")) : bdg("info", tt("Open"));
+const payBadge = r => r.paymentReceived ? bdg("ok", tt("Paid")) : bdg("mute", tt("Unpaid"));
+const availBadge = w => { const a = wAvail(w); return bdg({ Available: "ok", Placed: "info", Pending: "warn", Rejected: "bad", Inactive: "mute" }[a], tt(a)); };
+const verBadge = w => w.status === "approved" ? bdg("ok", tt("Verified")) : w.status === "rejected" ? bdg("bad", tt("Rejected")) : bdg("warn", tt("Pending"));
+const empVerBadge = e => ({ verified: bdg("ok", tt("Verified")), suspended: bdg("bad", tt("Suspended")), pending: bdg("warn", tt("Pending")) })[eVer(e)];
+const billBadge = e => { const b = e.billingStatus || "Not Started"; return bdg({ Current: "ok", Pending: "warn", Overdue: "bad", Suspended: "bad", "Not Started": "mute" }[b] || "mute", tt(b)); };
+const jobBadge = j => bdg({ "Pending Review": "warn", Open: "info", "Partially Filled": "warn", Filled: "ok", Closed: "mute" }[j.status] || "mute", tt(j.status || "Open"));
+const plBadge = p => bdg({ Suggested: "mute", "Pending Employer Review": "warn", "OTP Verified": "info", "Active Placement": "ok", Completed: "mute", Cancelled: "bad" }[p.status] || "mute", tt(p.status));
+const sheetBadge = s => bdg({ Pending: "warn", Approved: "info", Paid: "ok", Disputed: "bad" }[s.approvalStatus] || "mute", tt(s.approvalStatus));
+const urgBadge = j => j.urgency === "Urgent" ? bdg("bad", tt("Urgent")) : "";
 
 // ================= buttons =================
 const A = (act, label, cls = "", extra = "") => `<button class="btn-secondary ${cls}" data-act="${act}" ${extra}>${label}</button>`;
-const approveBtns = w => can("verify") ? `<button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ Approve</button><button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ Reject</button>` : "";
+const approveBtns = w => can("verify") ? `<button class="btn-secondary btn-success" data-approve="${esc(w.id)}">✓ ${tt("Approve")}</button><button class="btn-secondary btn-danger" data-reject="${esc(w.id)}">✗ ${tt("Reject")}</button>` : "";
 const dueBtns = r => `<button class="btn-secondary btn-warning" data-ask="${esc(r.id)}">${t("ask")}</button><button class="btn-secondary btn-success" data-rate="${esc(r.id)}" data-wid="${esc(r.workerId)}">${t("rate")}</button><button class="btn-secondary" data-marksent="${esc(r.id)}">${t("markSent")}</button>`;
 const reqBtns = r =>
-  (!["on_process", "on_work"].includes(reqStatus(r)) ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : "") +
-  (can("agree") ? A("openAgreement", hasAg(r) ? "📄 Agreement" : "📄 Prepare Agreement", "btn-info", `data-id="${esc(r.id)}"`) : "") +
-  (reqStatus(r) !== "closed" ? `<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button>` : "") +
-  (!r.paymentReceived ? `<button class="btn-secondary" data-pay="${esc(r.id)}">Mark Paid</button>` : "") +
-  `<button class="btn-secondary" data-showphone="${esc(r.workerId)}">Show Phone</button>` +
-  `<button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">Delete</button>`;
+  (!["on_process", "on_work"].includes(reqStatus(r)) ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">${tt("On Process")}</button>` : "") +
+  (can("agree") ? A("openAgreement", hasAg(r) ? "📄 " + tt("Agreement") : "📄 " + tt("Prepare Agreement"), "btn-info", `data-id="${esc(r.id)}"`) : "") +
+  (reqStatus(r) !== "closed" ? `<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">${tt("Close")}</button>` : "") +
+  (!r.paymentReceived ? `<button class="btn-secondary" data-pay="${esc(r.id)}">${tt("Mark Paid")}</button>` : "") +
+  `<button class="btn-secondary" data-showphone="${esc(r.workerId)}">${tt("Show Phone")}</button>` +
+  `<button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">${tt("Delete")}</button>`;
 const empVerBtns = e => !can("verify") ? "" : eVer(e) === "pending"
-  ? A("empVerify", "✓ Approve", "btn-success", `data-id="${esc(e.id)}"`) + A("empSuspend", "✗ Reject", "btn-danger", `data-id="${esc(e.id)}"`)
-  : eVer(e) === "verified" ? A("empSuspend", "Suspend", "btn-danger", `data-id="${esc(e.id)}"`)
-  : A("empVerify", "Reinstate", "btn-success", `data-id="${esc(e.id)}"`);
+  ? A("empVerify", "✓ " + tt("Approve"), "btn-success", `data-id="${esc(e.id)}"`) + A("empSuspend", "✗ " + tt("Reject"), "btn-danger", `data-id="${esc(e.id)}"`)
+  : eVer(e) === "verified" ? A("empSuspend", tt("Suspend"), "btn-danger", `data-id="${esc(e.id)}"`)
+  : A("empVerify", tt("Activate"), "btn-success", `data-id="${esc(e.id)}"`);
 
 // ================= chart =================
 function weekly(times) { const WK = 8, now = Date.now() / 1000, out = Array(WK).fill(0); times.forEach(s => { if (!s) return; const i = Math.floor((now - s) / 604800); if (i >= 0 && i < WK) out[WK - 1 - i]++; }); return out; }
@@ -1956,7 +2192,7 @@ const KPI_MAP = {
 };
 function kpiSpec(k) {
   const map = KPI_MAP[(k.parentElement || {}).id]; if (!map) return null;
-  const label = ((k.querySelector(".k-l") || {}).textContent || "").trim();
+  const label = (k.dataset.kpi || ((k.querySelector(".k-l") || {}).textContent || "")).trim();
   return (map[label] || map._).join("|");
 }
 function kpiGo(spec) {
@@ -2046,14 +2282,14 @@ function renderDash() {
   const wm = new Map(allW.map(w => [w.id, w]));
 
   $("kpis").innerHTML = kpiHtml([
-    ["Pending Approvals", pending.length + pe.length, (pending.length + pe.length) ? "alert" : "", `${pending.length} workers · ${pe.length} employers`],
-    ["Active Hire Requests", reqs.filter(r => reqStatus(r) !== "closed").length, reqs.filter(r => reqStatus(r) !== "closed").length ? "alert" : "", `${reqsWeek} this week`],
-    ["Ratings Due", dueTotal, dueTotal ? "alert" : "", `After ${settings.ratingFollowUpDays || 7} days · ${duePlaces.length} placements`],
-    ["Worker Payouts Due", etb(payouts), payouts ? "alert" : "", "Approved timesheets"],
-    ["Open Job Orders", openJobs.length, "", `${openJobs.filter(j => j.urgency === "Urgent").length} urgent`],
-    ["Active Placements", active.length, "", `${places.filter(p => p.status === "Pending Employer Review").length} awaiting review`],
-    ["Revenue This Month", etb(revMonth), "", `Today ${etb(revToday)} · Week ${etb(revWeek)} · YTD ${etb(revYtd)}`],
-    ["Workers · Employers", `${workersTotal} · ${employersTotal}`, "", `${workersApproved} approved · ${employersVerified} verified`]
+    ["Pending Approvals", pending.length + pe.length, (pending.length + pe.length) ? "alert" : "", `${pending.length} ${tt("workers")} · ${pe.length} ${tt("employers")}`, "Pending Approvals"],
+    ["Active Hire Requests", reqs.filter(r => reqStatus(r) !== "closed").length, reqs.filter(r => reqStatus(r) !== "closed").length ? "alert" : "", `${reqsWeek} ${tt("this week")}`, "Active Hire Requests"],
+    ["Ratings Due", dueTotal, dueTotal ? "alert" : "", `${tt("After")} ${settings.ratingFollowUpDays || 7} ${tt("days")} · ${duePlaces.length} ${tt("placements")}`, "Ratings Due"],
+    ["Worker Payouts Due", etb(payouts), payouts ? "alert" : "", tt("Approved timesheets"), "Worker Payouts Due"],
+    ["Open Job Orders", openJobs.length, "", `${openJobs.filter(j => j.urgency === "Urgent").length} ${tt("urgent")}`, "Open Job Orders"],
+    ["Active Placements", active.length, "", `${places.filter(p => p.status === "Pending Employer Review").length} ${tt("awaiting review")}`, "Active Placements"],
+    ["Revenue This Month", etb(revMonth), "", `${tt("Today")} ${etb(revToday)} · ${tt("Week")} ${etb(revWeek)} · ${tt("YTD")} ${etb(revYtd)}`, "Revenue This Month"],
+    ["Workers · Employers", `${workersTotal} · ${employersTotal}`, "", `${workersApproved} ${tt("approved")} · ${employersVerified} ${tt("verified")}`, "Workers · Employers"]
   ]);
 
   const queue = [...pending.map(w => ({ t: "worker", o: w })), ...pe.map(e => ({ t: "employer", o: e }))].slice(0, 6);
@@ -2108,25 +2344,26 @@ function renderDash() {
 function renderEmployers() {
   const cnt = f => employers.filter(f).length;
   $("eKpis").innerHTML = kpiHtml([
-    ["Total Employers", employers.length], ["Verified Partners", cnt(e => eVer(e) === "verified")],
-    ["Pending Verification", cnt(e => eVer(e) === "pending"), cnt(e => eVer(e) === "pending") ? "alert" : ""],
-    ["Active Job Orders", jobs.filter(j => ["Open", "Partially Filled"].includes(j.status)).length]
+    ["Total Employers", employers.length, "", "", "Total Employers"],
+    ["Verified Partners", cnt(e => eVer(e) === "verified"), "", "", "Verified Partners"],
+    ["Pending Verification", cnt(e => eVer(e) === "pending"), cnt(e => eVer(e) === "pending") ? "alert" : "", "", "Pending Verification"],
+    ["Active Job Orders", jobs.filter(j => ["Open", "Partially Filled"].includes(j.status)).length, "", "", "Active Job Orders"]
   ]);
-  $("eChips").innerHTML = chipsHtml([["all", "All", employers.length], ["verified", "Verified", cnt(e => eVer(e) === "verified")], ["pending", "Pending", cnt(e => eVer(e) === "pending")], ["suspended", "Suspended", cnt(e => eVer(e) === "suspended")]], "fe", eFilter);
+  $("eChips").innerHTML = chipsHtml([["all", tt("All"), employers.length], ["verified", tt("Verified"), cnt(e => eVer(e) === "verified")], ["pending", tt("Pending"), cnt(e => eVer(e) === "pending")], ["suspended", tt("Suspended"), cnt(e => eVer(e) === "suspended")]], "fe", eFilter);
   let rows = employers.filter(e => eFilter === "all" || eVer(e) === eFilter);
   const q = needle("eSearch"), ind = $("eInd").value;
   if (ind) rows = rows.filter(e => e.industry === ind);
   if (q) rows = rows.filter(e => hay(e.name, e.email, e.phone, e.location, e.username, e.industry, e.tin).includes(q));
-  $("tbEmp").innerHTML = table(["Company", "Industry", "Active Jobs", "Placed Workers", "Verification", "Billing", "Actions"], rows.map(e => {
+  $("tbEmp").innerHTML = table([tt("Company"), tt("Industry"), tt("Active Jobs"), tt("Placed Workers"), tt("Verification"), tt("Billing"), tt("Actions")], rows.map(e => {
     const aj = jobs.filter(j => j.employerId === e.id && ["Open", "Partially Filled"].includes(j.status)).length;
     const pw = places.filter(p => p.employerId === e.id && p.status === "Active Placement").length;
     return `<tr>
       <td class="c-id"><div class="cell-id">${avatar(e)}<div><b>${esc(e.name)}</b><div class="who">${esc(e.email || e.phone || "")}${e.username ? " · @" + esc(String(e.username).replace(/^@/, "")) : ""}</div></div></div></td>
-      <td data-l="Industry">${esc(e.industry || "—")}</td><td data-l="Active Jobs">${aj}</td><td data-l="Placed Workers">${pw}</td>
-      <td data-l="Verification">${empVerBadge(e)}</td><td data-l="Billing">${billBadge(e)}</td>
-      <td class="c-act"><div class="acts">${A("viewEmp", "View", "", `data-id="${esc(e.id)}"`)}${empVerBtns(e)}${can("manage") ? A("editEmp", "Edit", "", `data-id="${esc(e.id)}"`) + `<button class="btn-secondary btn-danger" data-de="${esc(e.id)}">Delete</button>` : ""}</div></td>
+      <td data-l="${esc(tt("Industry"))}">${esc(e.industry || "—")}</td><td data-l="${esc(tt("Active Jobs"))}">${aj}</td><td data-l="${esc(tt("Placed Workers"))}">${pw}</td>
+      <td data-l="${esc(tt("Verification"))}">${empVerBadge(e)}</td><td data-l="${esc(tt("Billing"))}">${billBadge(e)}</td>
+      <td class="c-act"><div class="acts">${A("viewEmp", tt("View"), "", `data-id="${esc(e.id)}"`)}${empVerBtns(e)}${can("manage") ? A("editEmp", tt("Edit"), "", `data-id="${esc(e.id)}"`) + `<button class="btn-secondary btn-danger" data-de="${esc(e.id)}">${tt("Delete")}</button>` : ""}</div></td>
     </tr>`;
-  }), "No employers match");
+  }), tt("noMatch"));
 }
 
 // ================= Workers Directory = Worker Placement Register =================
@@ -2136,16 +2373,23 @@ const ROLE_FROM_APP = Object.fromEntries(Object.entries(ROLE_TO_APP).map(([k, v]
 const REG_TYPES = ["Live-in", "Full-Time (Live-out)", "Part-Time / Shift", "On-Call / Daily", "Fixed-Term Contract"];
 const REG_FEES = ["Paid", "Pending", "Invoiced", "Partial", "Waived"];
 const REG_STATS = ["Available", "Placed", "Pending", "Inactive", "Rejected"];
-const REG_COLS = [   // [header, width px]
-  ["S/N", 44], ["Worker ID", 89], ["Full Name\n(እና የአባት ስም)", 173], ["Gender & Age", 96], ["National / Kebele ID No.", 131], ["Worker Phone & Address", 180],
+const REG_COLS_EN = [   // [header, width px]
+  ["S/N", 44], ["Worker ID", 89], ["Full Name", 173], ["Gender & Age", 96], ["National / Kebele ID No.", 131], ["Worker Phone & Address", 180],
   ["Job Role / Skill", 145], ["Placement Type", 145], ["Assigned Employer / Site", 187], ["Start Date", 110], ["End / Exit Date", 110], ["Agreed Rate / Salary (ETB)", 131],
-  ["Agency Fee Status", 117], ["Guarantor Name & Phone\n(ዋስ)", 187], ["Vetting & Medical Status", 173], ["Rating", 90], ["Current Status", 130], ["Remarks", 201]
+  ["Agency Fee Status", 117], ["Guarantor Name & Phone", 187], ["Vetting & Medical Status", 173], ["Rating", 90], ["Current Status", 130], ["Remarks", 201]
 ];
+function regCols() {
+  return REG_COLS_EN.map(([h, w]) => [tt(h), w]);
+}
 const _extra = SKILLS.map(x => x.en).filter(x => !ROLE_FROM_APP[x]);
-$("wSkill").innerHTML = '<option value="">All roles</option>' + [...REG_ROLES, ..._extra].map(x => `<option>${esc(x)}</option>`).join("");
-$("wType").innerHTML = '<option value="">All placement types</option>' + REG_TYPES.map(x => `<option>${esc(x)}</option>`).join("");
-$("wFee").innerHTML = '<option value="">All fee statuses</option>' + REG_FEES.map(x => `<option>${esc(x)}</option>`).join("");
-$("wStat").innerHTML = '<option value="">All current statuses</option>' + REG_STATS.map(x => `<option>${esc(x)}</option>`).join("");
+function fillWorkerFilters() {
+  if (!$("wSkill")) return;
+  $("wSkill").innerHTML = `<option value="">${tt("All roles")}</option>` + [...REG_ROLES, ..._extra].map(x => `<option>${esc(x)}</option>`).join("");
+  $("wType").innerHTML = `<option value="">${tt("All placement types")}</option>` + REG_TYPES.map(x => `<option>${esc(x)}</option>`).join("");
+  $("wFee").innerHTML = `<option value="">${tt("All fee statuses")}</option>` + REG_FEES.map(x => `<option>${esc(x)}</option>`).join("");
+  $("wStat").innerHTML = `<option value="">${tt("All current statuses")}</option>` + REG_STATS.map(x => `<option>${esc(x)}</option>`).join("");
+}
+fillWorkerFilters();
 let privs = {}, privTried = new Set();
 let regEditId = null;
 
@@ -2209,7 +2453,8 @@ function renderWorkers(keepFocus) {
     }
     return h;
   };
-  const head = REG_COLS.map(([h], i) => `<th class="${i < 3 ? "stick s" + i : ""}">${esc(h)}</th>`).join("") + `<th style="width:150px">Actions</th>`;
+  const RC = regCols();
+  const head = RC.map(([h], i) => `<th class="${i < 3 ? "stick s" + i : ""}">${esc(h)}</th>`).join("") + `<th style="width:150px">${esc(tt("Actions"))}</th>`;
   const body = rows.map(({ w, rid }, i) => { const pr = privs[w.id] || {}; return `<tr${regEditId === w.id ? ' style="outline:2px solid #0284c7;outline-offset:-2px"' : ""}>
     <td class="sn stick s0">${i + 1}</td>
     <td class="ctr stick s1"><b>${esc(rid)}</b></td>
@@ -2232,7 +2477,7 @@ function renderWorkers(keepFocus) {
     <td class="act">${acts(w)}</td></tr>`; }).join("");
   const keep = (() => { const a = document.activeElement; return keepFocus === true && a && a.dataset && a.dataset.f ? { f: a.dataset.f, id: a.dataset.id } : null; })();
   const hint = canEdit ? (regEditId ? " · editing row — changes save automatically · tap ✓ when done" : " · click ✏️ to edit a row") : "";
-  $("tbWorkers").innerHTML = `<div class="reg-wrap"><table class="reg"><colgroup>${REG_COLS.map(([, wd]) => `<col style="width:${wd}px">`).join("")}<col style="width:150px"></colgroup><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="19" class="reg-empty">No workers match</td></tr>`}</tbody></table></div><div class="reg-count">${rows.length} of ${allW.length} workers${hint}</div>`;
+  $("tbWorkers").innerHTML = `<div class="reg-wrap"><table class="reg"><colgroup>${RC.map(([, wd]) => `<col style="width:${wd}px">`).join("")}<col style="width:150px"></colgroup><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="19" class="reg-empty">${esc(tt("noMatch"))}</td></tr>`}</tbody></table></div><div class="reg-count">${rows.length} / ${allW.length}</div>`;
   if (keep) { const el = document.querySelector(`#tbWorkers [data-f="${keep.f}"][data-id="${keep.id}"]`); if (el) el.focus(); }
   fillPrivs();
 }
@@ -2282,9 +2527,10 @@ function renderMatches() {
   const openJobs = jobs.filter(j => ["Open", "Partially Filled"].includes(j.status));
   const pendingJobs = jobs.filter(j => j.status === "Pending Review");
   $("mKpis").innerHTML = kpiHtml([
-    ["Open Job Orders", openJobs.length], ["Pending Job Requests", pendingJobs.length, pendingJobs.length ? "alert" : "", "Awaiting verification"],
-    ["Suggested Matches", openJobs.reduce((a, j) => a + candidates(j).length, 0), "", "Verified + available"],
-    ["Active Placements", places.filter(p => p.status === "Active Placement").length]
+    ["Open Job Orders", openJobs.length, "", "", "Open Job Orders"],
+    ["Pending Job Requests", pendingJobs.length, pendingJobs.length ? "alert" : "", tt("Awaiting verification"), "Pending Job Requests"],
+    ["Suggested Matches", openJobs.reduce((a, j) => a + candidates(j).length, 0), "", tt("Verified + available"), "Suggested Matches"],
+    ["Active Placements", places.filter(p => p.status === "Active Placement").length, "", "", "Active Placements"]
   ]);
   const q = needle("jSearch"), st = $("jStatus").value, ur = $("jUrg").value;
   const list = jobs.filter(j => (!st || j.status === st) && (!ur || j.urgency === ur) && (!q || hay(j.title, j.employerName, j.requiredSkill, j.city).includes(q)));
@@ -2294,27 +2540,39 @@ function renderMatches() {
       <div class="t">${esc(j.title)} — ${esc(j.employerName)}</div>
       <div class="m">${etb(j.payRate)}/${rateWord(j.payType)} · ${esc(j.city || "—")}${j.placementType ? " · " + esc(j.placementType) : ""} · Start ${esc(j.startDate || "—")}</div>
       <div>${jobBadge(j)} ${urgBadge(j)} ${bdg("mute", filledCount(j.id) + "/" + (j.workersNeeded || 1) + " workers")}</div>
-      ${can("place") ? `<div class="acts">${A("editJob", "Edit", "", `data-id="${esc(j.id)}"`)}${j.status === "Pending Review" ? A("approveJob", "Approve & Publish", "btn-success", `data-id="${esc(j.id)}"`) : ""}${j.status === "Closed" ? A("reopenJob", "Reopen", "btn-info", `data-id="${esc(j.id)}"`) : (j.status !== "Pending Review" ? A("closeJob", "Close", "", `data-id="${esc(j.id)}"`) : "")}<button class="btn-secondary btn-danger" data-act="delJob" data-id="${esc(j.id)}">Delete</button></div>` : ""}
-    </div>`).join("") : `<div class="empty">No job orders yet. Create one with “+ New Job Order”.</div>`;
+      ${can("place") ? `<div class="acts">${A("editJob", tt("Edit"), "", `data-id="${esc(j.id)}"`)}${j.status === "Pending Review" ? A("approveJob", tt("Approve"), "btn-success", `data-id="${esc(j.id)}"`) : ""}${j.status === "Closed" ? A("reopenJob", tt("Open"), "btn-info", `data-id="${esc(j.id)}"`) : (j.status !== "Pending Review" ? A("closeJob", tt("Close"), "", `data-id="${esc(j.id)}"`) : "")}<button class="btn-secondary btn-danger" data-act="delJob" data-id="${esc(j.id)}">${tt("Delete")}</button></div>` : ""}
+    </div>`).join("") : `<div class="empty">${tt("noMatch")}</div>`;
 
   const job = jById(selJobId);
-  if (!job) { $("candSub").textContent = "Select a job order"; $("cList").innerHTML = `<div class="empty">No job selected</div>`; return; }
+  if (!job) { $("candSub").textContent = tt("openJobReqsSub"); $("cList").innerHTML = `<div class="empty">${tt("noMatch")}</div>`; return; }
   const full = filledCount(job.id) >= Number(job.workersNeeded || 1) || job.status === "Closed";
   const cands = candidates(job);
-  $("candSub").textContent = `${job.title} · ${job.employerName} — ${cands.length} candidate(s)${settings.requireIdVerification ? " (verified only)" : ""}`;
+  $("candSub").textContent = `${job.title} · ${job.employerName} — ${cands.length}`;
   $("cList").innerHTML = cands.length ? cands.slice(0, 20).map(({ w, s }) => `
     <div class="cand">${avatar(w)}
       <div class="row-main"><b>${esc(w.name)} <span class="mini" style="display:inline">${sid("W", w.id)}</span></b><span class="who">${esc(w.skill)} · ${w.experienceYears != null ? esc(w.experienceYears) + " yrs" : esc(w.experience)} · ${esc(w.location)}${w.placementType ? " · " + esc(w.placementType) : ""}</span>
-        <div style="margin-top:4px">${verBadge(w)} ${bdg("ok", "Available")} ${w.ratingCount ? starsHtml(ratingAvgOf(w), w.ratingCount) : bdg("mute", "No rating")}</div></div>
-      <span class="score ${s >= 90 ? "hi" : s >= 75 ? "mid" : "lo"}">${s}% Match</span>
-      ${can("place") && !full ? A("assign", "Assign Worker", "btn-info", `data-job="${esc(job.id)}" data-w="${esc(w.id)}" data-s="${s}"`) : ""}
-    </div>`).join("") : `<div class="empty">No available ${settings.requireIdVerification ? "verified " : ""}workers match “${esc(job.requiredSkill)}”.</div>`;
+        <div style="margin-top:4px">${verBadge(w)} ${bdg("ok", tt("Available"))} ${w.ratingCount ? starsHtml(ratingAvgOf(w), w.ratingCount) : bdg("mute", tt("No rating"))}</div></div>
+      <span class="score ${s >= 90 ? "hi" : s >= 75 ? "mid" : "lo"}">${s}% ${tt("Match")}</span>
+      ${can("place") && !full ? A("assign", tt("Assign Worker"), "btn-info", `data-job="${esc(job.id)}" data-w="${esc(w.id)}" data-s="${s}"`) : ""}
+    </div>`).join("") : `<div class="empty">${tt("noMatch")}</div>`;
 }
 
 function renderPlacements() {
   const cnt = s => places.filter(p => p.status === s).length;
-  $("pKpis").innerHTML = kpiHtml([["Awaiting OTP", cnt("Pending Employer Review")], ["Ready for Handover", cnt("OTP Verified")], ["Active Placements", cnt("Active Placement")], ["Completed", cnt("Completed")]]);
-  $("pChips").innerHTML = chipsHtml([["all", "All", places.length], ["Pending Employer Review", "Pending review", cnt("Pending Employer Review")], ["OTP Verified", "OTP verified", cnt("OTP Verified")], ["Active Placement", "Active", cnt("Active Placement")], ["Completed", "Completed", cnt("Completed")], ["Cancelled", "Cancelled", cnt("Cancelled")]], "fp", pFilter);
+  $("pKpis").innerHTML = kpiHtml([
+    ["Awaiting OTP", cnt("Pending Employer Review"), "", "", "Awaiting OTP"],
+    ["Ready for Handover", cnt("OTP Verified"), "", "", "Ready for Handover"],
+    ["Active Placements", cnt("Active Placement"), "", "", "Active Placements"],
+    ["Completed", cnt("Completed"), "", "", "Completed"]
+  ]);
+  $("pChips").innerHTML = chipsHtml([
+    ["all", tt("All"), places.length],
+    ["Pending Employer Review", tt("Pending"), cnt("Pending Employer Review")],
+    ["OTP Verified", tt("OTP Verified"), cnt("OTP Verified")],
+    ["Active Placement", tt("Active"), cnt("Active Placement")],
+    ["Completed", tt("Completed"), cnt("Completed")],
+    ["Cancelled", tt("Cancelled"), cnt("Cancelled")]
+  ], "fp", pFilter);
   let rows = places.filter(p => pFilter === "all" || p.status === pFilter);
   const q = needle("pSearch"); if (q) rows = rows.filter(p => hay(p.workerName, p.employerName, p.jobTitle).includes(q));
   const otp = (p, who) => p[who + "OtpVerifiedAt"] ? bdg("ok", "✓ " + fmtDate(p[who + "OtpVerifiedAt"])) : p[who + "Otp"] ? bdg("warn", "Sent") : bdg("mute", "—");
@@ -2325,37 +2583,36 @@ function renderPlacements() {
       if (p[who + "OtpVerifiedAt"]) continue; const L = who === "employer" ? "Employer" : "Worker", x = `${id} data-who="${who}"`;
       h += p[who + "Otp"] ? A("otpSend", "Resend " + L + " OTP", "", x) + A("otpVerify", "Verify " + L + " OTP", "btn-info", x) : A("otpSend", "Send " + L + " OTP", "btn-info", x);
     }
-    if (p.status !== "Cancelled") h += A("contract", "📄 Contract", "", id);
-    if (p.status === "OTP Verified") h += p.commissionPaid ? A("handover", "✍️ Sign Handover", "btn-success", id) : A("commission", "💰 Record Commission", "btn-warning", id);
+    if (p.status !== "Cancelled") h += A("contract", "📄 " + tt("Contract"), "", id);
+    if (p.status === "OTP Verified") h += p.commissionPaid ? A("handover", "✍️ " + tt("Handover"), "btn-success", id) : A("commission", "💰 " + tt("Commission"), "btn-warning", id);
     if (p.status === "Active Placement") {
-      h += (can("payroll") ? A("newSheet", "+ Timesheet", "btn-info", id) : "") + (settings.checkinReminders ? A("remind", "🔔 Remind", "", id) : "") + A("completePl", "Complete", "btn-success", id);
-      // Rating follow-up based on days stayed
+      h += (can("payroll") ? A("newSheet", "+ " + tt("Timesheet"), "btn-info", id) : "") + (settings.checkinReminders ? A("remind", "🔔 " + tt("Remind"), "", id) : "") + A("completePl", tt("Complete"), "btn-success", id);
       if (!p.rating && !p.ratedAt) {
         const days = placementDaysStayed(p);
         const need = Number(settings.ratingFollowUpDays) || 7;
         if (days >= need || !p.ratingFollowUpSent) {
-          h += `<button class="btn-secondary btn-warning" data-askpl="${esc(p.id)}">📩 Ask Rating</button>`;
-          h += `<button class="btn-secondary btn-success" data-ratepl="${esc(p.id)}" data-wid="${esc(p.workerId)}">★ Rate</button>`;
-          if (p.ratingFollowUpSent) h += `<span class="mini">${days}d stayed</span>`;
+          h += `<button class="btn-secondary btn-warning" data-askpl="${esc(p.id)}">📩 ${tt("Ask Rating")}</button>`;
+          h += `<button class="btn-secondary btn-success" data-ratepl="${esc(p.id)}" data-wid="${esc(p.workerId)}">★ ${tt("Rate")}</button>`;
+          if (p.ratingFollowUpSent) h += `<span class="mini">${days}d</span>`;
         }
       } else if (p.rating) {
         h += bdg("ok", p.rating + "★");
       }
     }
-    if (["Pending Employer Review", "OTP Verified"].includes(p.status)) h += A("cancelPl", "Cancel", "btn-danger", id);
-    h += A("delPlacement", "Delete", "btn-danger", id);
+    if (["Pending Employer Review", "OTP Verified"].includes(p.status)) h += A("cancelPl", tt("Cancel"), "btn-danger", id);
+    h += A("delPlacement", tt("Delete"), "btn-danger", id);
     return h;
   };
-  $("tbPl").innerHTML = table(["Worker → Job", "Employer", "Match", "Status", "Employer OTP", "Worker OTP", "Commission", "Handover", "Actions"], rows.map(p => `
+  $("tbPl").innerHTML = table([tt("Worker → Job"), tt("Employer"), tt("Match"), tt("Status"), tt("Employer OTP"), tt("Worker OTP"), tt("Commission"), tt("Handover"), tt("Actions")], rows.map(p => `
     <tr>
       <td class="c-id"><b>${esc(p.workerName)}</b><div class="who" style="margin:0">${esc(p.jobTitle)} · ${sid("M", p.id)}</div></td>
-      <td data-l="Employer">${esc(p.employerName)}</td>
-      <td data-l="Match">${p.matchScore != null ? p.matchScore + "%" : "—"}</td>
-      <td data-l="Status">${plBadge(p)}</td><td data-l="Employer OTP">${otp(p, "employer")}</td><td data-l="Worker OTP">${otp(p, "worker")}</td>
-      <td data-l="Commission">${p.commissionPaid ? bdg("ok", etb(p.commissionAmount)) : bdg("mute", "Unpaid")}</td>
-      <td data-l="Handover">${p.handoverReceiptSigned ? bdg("ok", "✓ " + fmtDate(p.officeHandoverCompletedAt)) : bdg("mute", "—")}</td>
+      <td data-l="${esc(tt("Employer"))}">${esc(p.employerName)}</td>
+      <td data-l="${esc(tt("Match"))}">${p.matchScore != null ? p.matchScore + "%" : "—"}</td>
+      <td data-l="${esc(tt("Status"))}">${plBadge(p)}</td><td data-l="${esc(tt("Employer OTP"))}">${otp(p, "employer")}</td><td data-l="${esc(tt("Worker OTP"))}">${otp(p, "worker")}</td>
+      <td data-l="${esc(tt("Commission"))}">${p.commissionPaid ? bdg("ok", etb(p.commissionAmount)) : bdg("mute", tt("Unpaid"))}</td>
+      <td data-l="${esc(tt("Handover"))}">${p.handoverReceiptSigned ? bdg("ok", "✓ " + fmtDate(p.officeHandoverCompletedAt)) : bdg("mute", "—")}</td>
       <td class="c-act"><div class="acts">${acts(p)}</div></td>
-    </tr>`), "No placements yet. Assign a worker from the Job Matches screen.");
+    </tr>`), tt("noMatch"));
 }
 
 function renderSheets() {
@@ -2364,19 +2621,19 @@ function renderSheets() {
   const hrs = sum(base.filter(s => s.unitType === "hours"), "units"), days = sum(base.filter(s => s.unitType === "days"), "units"), mon = sum(base.filter(s => s.unitType === "months"), "units");
   const appr = base.filter(s => s.approvalStatus === "Approved");
   $("tKpis").innerHTML = kpiHtml([
-    ["Total Logged", [hrs && hrs + " hrs", days && days + " days", mon && mon + " mo"].filter(Boolean).join(" · ") || "0", "", `${base.length} timesheets`],
-    ["Pending Approval", cnt("Pending"), cnt("Pending") ? "alert" : "", "Timesheets"],
-    ["Worker Payouts Due", etb(sum(appr, "workerPay")), "", "Approved, not paid"],
-    ["Employer Invoices Due", etb(sum(appr, "employerBill")), "", settings.invoiceTerms],
-    ["Commission Earned", etb(sum(base.filter(s => s.approvalStatus === "Paid"), "commission")), "", "Paid timesheets"]
+    ["Total Logged", [hrs && hrs + " hrs", days && days + " days", mon && mon + " mo"].filter(Boolean).join(" · ") || "0", "", `${base.length} ${tt("Timesheets")}`, "Total Logged"],
+    ["Pending Approval", cnt("Pending"), cnt("Pending") ? "alert" : "", tt("Timesheets"), "Pending Approval"],
+    ["Worker Payouts Due", etb(sum(appr, "workerPay")), "", tt("Approved, not paid"), "Worker Payouts Due"],
+    ["Employer Invoices Due", etb(sum(appr, "employerBill")), "", tt(settings.invoiceTerms || ""), "Employer Invoices Due"],
+    ["Commission Earned", etb(sum(base.filter(s => s.approvalStatus === "Paid"), "commission")), "", tt("Paid timesheets"), "Commission Earned"]
   ]);
-  $("tChips").innerHTML = chipsHtml([["all", "All", base.length], ["Pending", "Pending approval", cnt("Pending")], ["Approved", "Approved", cnt("Approved")], ["Paid", "Paid", cnt("Paid")], ["Disputed", "Disputed", cnt("Disputed")]], "ft", tFilter);
+  $("tChips").innerHTML = chipsHtml([["all", tt("All"), base.length], ["Pending", tt("Pending"), cnt("Pending")], ["Approved", tt("Approved"), cnt("Approved")], ["Paid", tt("Paid"), cnt("Paid")], ["Disputed", tt("Disputed"), cnt("Disputed")]], "ft", tFilter);
   let rows = base.filter(s => tFilter === "all" || s.approvalStatus === tFilter);
   const q = needle("tSearch"); if (q) rows = rows.filter(s => hay(s.workerName, s.employerName, s.jobTitle).includes(q));
   const acts = s => { if (!can("payroll")) return ""; const x = `data-id="${esc(s.id)}"`; const st = s.approvalStatus;
-    return (st === "Pending" || st === "Disputed" ? A("sheetApprove", "Approve", "btn-success", x) : "") + (st === "Approved" ? A("sheetPay", "Mark Paid", "btn-info", x) : "") +
-      (st === "Pending" || st === "Approved" ? A("sheetDispute", "Dispute", "btn-warning", x) : "") + (st !== "Paid" ? A("sheetDelete", "Delete", "btn-danger", x) : ""); };
-  $("tbTs").innerHTML = table(["Worker", "Employer", "Period", "Logged", "Worker Pay", "Employer Bill", "Commission", "Status", "Actions"], rows.map(s => `
+    return (st === "Pending" || st === "Disputed" ? A("sheetApprove", tt("Approve"), "btn-success", x) : "") + (st === "Approved" ? A("sheetPay", tt("Mark Paid"), "btn-info", x) : "") +
+      (st === "Pending" || st === "Approved" ? A("sheetDispute", tt("Disputed"), "btn-warning", x) : "") + (st !== "Paid" ? A("sheetDelete", tt("Delete"), "btn-danger", x) : ""); };
+  $("tbTs").innerHTML = table([tt("Worker"), tt("Employer"), tt("Date"), tt("Total Logged"), tt("Worker"), tt("Employer"), tt("Commission"), tt("Status"), tt("Actions")], rows.map(s => `
     <tr>
       <td class="c-id"><b>${esc(s.workerName)}</b><div class="who" style="margin:0">${esc(s.jobTitle || "")}</div></td>
       <td data-l="Employer">${esc(s.employerName)}</td>
@@ -2448,7 +2705,12 @@ function renderRequests() {
 
 function renderSettings() {
   const active = staff.filter(s => s.status === "Active").length + 1;
-  $("sKpis").innerHTML = kpiHtml([["Active Admin Staff", active], ["Default Commission", settings.defaultCommissionPct + "%"], ["ID Verification", settings.requireIdVerification ? "Required" : "Off"], ["Invoice Terms", settings.invoiceTerms]]);
+  $("sKpis").innerHTML = kpiHtml([
+    ["Active Admin Staff", active, "", "", "Active Admin Staff"],
+    ["Default Commission", settings.defaultCommissionPct + "%", "", "", "Default Commission"],
+    ["ID Verification", settings.requireIdVerification ? tt("Required") : tt("Off"), "", "", "ID Verification"],
+    ["Invoice Terms", tt(settings.invoiceTerms || "Net 15 Days"), "", "", "Invoice Terms"]
+  ]);
   const owner = `<tr><td class="c-id"><div class="cell-id"><div class="av">${esc(initials("Owner"))}</div><div><b>${esc(ADMIN_EMAIL)}</b><div class="who">Owner</div></div></div></td><td data-l="Role">${bdg("info", R_SA)}</td><td data-l="Scope">${esc(ROLE_SCOPE[R_SA])}</td><td data-l="Status">${bdg("ok", "Active")}</td><td class="c-act"></td></tr>`;
   $("tbStaff").innerHTML = table(["Staff Member", "Role", "Permissions Scope", "Status", "Actions"], [owner, ...staff.map(s => `
     <tr><td class="c-id"><div class="cell-id"><div class="av">${esc(initials(s.name))}</div><div><b>${esc(s.name)}</b><div class="who">${esc(s.email || s.id)}</div></div></div></td>
@@ -2639,7 +2901,12 @@ function agListHtml(list, empty) {
 function renderAgreements() {
   const cnt = f => ags.filter(f).length;
   const fees = ags.filter(agSigned).reduce((t, a) => t + Number(a.serviceFee || 0), 0);
-  $("agKpis").innerHTML = kpiHtml([["Total Agreements", ags.length], ["Signed", cnt(agSigned), "", "Finalized"], ["Signed File Stored", cnt(agHasFile)], ["Service Fees", etb(fees), "", "Signed agreements"]]);
+  $("agKpis").innerHTML = kpiHtml([
+    ["Total Agreements", ags.length, "", "", "Total Agreements"],
+    ["Signed", cnt(agSigned), "", tt("Finalized"), "Signed"],
+    ["Signed File Stored", cnt(agHasFile), "", "", "Signed File Stored"],
+    ["Service Fees", etb(fees), "", tt("Signed agreements"), "Service Fees"]
+  ]);
   $("agChips").innerHTML = chipsHtml([["all", "All", ags.length], ["signed", "Signed", cnt(agSigned)], ["draft", "Draft", cnt(a => !agSigned(a))]], "fa", aFilter);
   let rows = ags.filter(a => aFilter === "all" || (aFilter === "signed") === agSigned(a));
   const q = needle("aSearch"); if (q) rows = rows.filter(a => hay(a.workerName, a.employerName, a.skill, a.employerPhone).includes(q));
@@ -2874,7 +3141,7 @@ $("agSignedFile").onchange = e => {
 const ACTIONS = {
   regExport() {
     const rows = regRows(), cell = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
-    const head = REG_COLS.map(([h]) => cell(h.replace(/\n/g, " "))).join(",");
+    const head = REG_COLS_EN.map(([h]) => cell(h.replace(/\n/g, " "))).join(",");
     const lines = rows.map(({ w, rid }, i) => { const pr = privs[w.id] || {}; return [i + 1, rid, w.name, rGA(w), pr.nationalId, rPhone(w), rRole(w), w.placementType, rSite(w), dmy(w.startDate), dmy(w.endDate), rRate(w), w.feeStatus, rGuar(w), rVet(w), (w.ratingCount ? (ratingAvgOf(w) + " avg / rank " + ratingScoreOf(w).toFixed(2) + " (" + w.ratingCount + ")") : ""), rStat(w), w.remarks].map(cell).join(","); });
     const blob = new Blob(["\ufeff" + [head, ...lines].join("\r\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "Tamagn_Delala_Worker_Register_" + new Date().toISOString().slice(0, 10) + ".csv";
