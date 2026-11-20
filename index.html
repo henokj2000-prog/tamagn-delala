@@ -200,6 +200,53 @@ main { max-width: 1180px; margin: 0 auto; padding: 0 14px 24px; }
 .skills-wrap { margin: 6px 0 12px; overflow-x: auto; scrollbar-width: none; }
 .skills-wrap::-webkit-scrollbar { display: none; }
 .skills { display: flex; gap: 8px; width: max-content; }
+.skill-chip {
+  border: 1.5px solid var(--line, #cbd5e1);
+  background: #f8fafc;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #0f172a;
+  font-weight: 600;
+}
+.skill-chip.on {
+  background: var(--btn, #0ea5e9);
+  border-color: var(--btn, #0284c7);
+  color: #fff;
+}
+.share-box {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(6px);
+}
+.share-title {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.share-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.share-btn {
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.share-btn:active { transform: scale(0.97); background: rgba(255,255,255,0.22); }
 .chip {
   padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border);
   background: var(--card); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
@@ -444,6 +491,18 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
               <div class="desc" id="btnWorkerDesc">Offer your skill and get hired</div>
             </div>
           </button>
+
+          <div class="share-box" id="shareBox">
+            <div class="share-title" id="shareTitle">Share Tamagn Delala</div>
+            <div class="share-btns">
+              <button type="button" class="share-btn" data-share="telegram" title="Telegram">✈️ Telegram</button>
+              <button type="button" class="share-btn" data-share="whatsapp" title="WhatsApp">💬 WhatsApp</button>
+              <button type="button" class="share-btn" data-share="facebook" title="Facebook">📘 Facebook</button>
+              <button type="button" class="share-btn" data-share="tiktok" title="TikTok">🎵 TikTok</button>
+              <button type="button" class="share-btn" data-share="sms" title="SMS">📱 SMS</button>
+              <button type="button" class="share-btn" data-share="copy" title="Copy link">🔗 Copy link</button>
+            </div>
+          </div>
         </div>
 
         <!-- skills kept in DOM for any JS that references them, but hidden by CSS -->
@@ -567,12 +626,15 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
         <option value="F">Female</option>
         <option value="M">Male</option>
       </select>
-      <label id="lblWrSkill">Skill *</label>
-      <select id="wr_skill"></select>
+      <label id="lblWrSkill">Skills * (select all that apply)</label>
+      <div id="wr_skills" class="chips" style="margin-bottom:10px;flex-wrap:wrap;gap:6px"></div>
+      <p class="who" id="wrSkillsHint" style="margin:-4px 0 10px">Tap every skill you can do. The first one is your primary skill.</p>
       <label id="lblWrLoc">Location *</label>
       <input id="wr_location" maxlength="60">
-      <label id="lblWrExp">Experience *</label>
-      <input id="wr_experience" maxlength="120">
+      <label id="lblWrExpYears">Experience (years) *</label>
+      <input id="wr_expYears" type="number" min="0" max="60" step="0.5" placeholder="e.g. 3">
+      <label id="lblWrExp">Experience details *</label>
+      <input id="wr_experience" maxlength="160" placeholder="e.g. 3 years house maid, 1 year cooking">
       <label id="lblWrPayType">Payment Type *</label>
       <select id="wr_paymentType">
         <option value="monthly">Monthly</option>
@@ -679,10 +741,117 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, orderBy, limit, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, orderBy, limit, serverTimestamp, Timestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const MANAGER = "TamagnDelalaETBot";
 const ADMIN_PHONE = "09xxxxxxxx";
+
+function appShareUrl() {
+  // Prefer current page URL (works for Telegram Mini App / hosted page)
+  try {
+    const u = new URL(window.location.href);
+    u.hash = "";
+    u.search = "";
+    return u.toString().replace(/\/$/, "") || window.location.href;
+  } catch (_) {
+    return window.location.href;
+  }
+}
+function shareMessage() {
+  return t("shareText") + "\n" + appShareUrl();
+}
+async function copyShareLink() {
+  const text = shareMessage();
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (_) {}
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+function openShareUrl(url) {
+  try {
+    if (tg && typeof tg.openLink === "function") {
+      tg.openLink(url, { try_instant_view: false });
+      return true;
+    }
+  } catch (_) {}
+  try {
+    window.open(url, "_blank");
+    return true;
+  } catch (_) {}
+  window.location.href = url;
+  return true;
+}
+async function doShare(channel) {
+  const url = appShareUrl();
+  const text = t("shareText");
+  const full = shareMessage();
+  if (channel === "telegram") {
+    openShareUrl("https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(text));
+    return;
+  }
+  if (channel === "whatsapp") {
+    openShareUrl("https://wa.me/?text=" + encodeURIComponent(full));
+    return;
+  }
+  if (channel === "facebook") {
+    openShareUrl("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url) + "&quote=" + encodeURIComponent(text));
+    return;
+  }
+  if (channel === "sms") {
+    // iOS uses &body=, Android often uses ?body=
+    const body = encodeURIComponent(t("shareSms") + url);
+    const smsUrl = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? ("sms:&body=" + body) : ("sms:?body=" + body);
+    window.location.href = smsUrl;
+    return;
+  }
+  if (channel === "tiktok") {
+    // TikTok has no public web share endpoint for arbitrary links — copy + hint
+    await copyShareLink();
+    if (tg && typeof tg.showAlert === "function") tg.showAlert(t("shareTikTokHint"));
+    else alert(t("shareTikTokHint"));
+    try {
+      if (tg && typeof tg.openLink === "function") tg.openLink("https://www.tiktok.com/", { try_instant_view: false });
+      else window.open("https://www.tiktok.com/", "_blank");
+    } catch (_) {}
+    return;
+  }
+  if (channel === "copy") {
+    const ok = await copyShareLink();
+    if (tg && typeof tg.showAlert === "function") tg.showAlert(ok ? t("shareCopied") : t("shareFail"));
+    else alert(ok ? t("shareCopied") : t("shareFail"));
+    return;
+  }
+  // Native share sheet when available
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "Tamagn Delala", text, url });
+      return;
+    } catch (_) {}
+  }
+  await copyShareLink();
+  alert(t("shareCopied"));
+}
+document.addEventListener("click", e => {
+  const btn = e.target && e.target.closest && e.target.closest("[data-share]");
+  if (!btn) return;
+  e.preventDefault();
+  doShare(btn.dataset.share);
+});
 
 const firebaseConfig = {
   apiKey: "AIzaSyDOzRzt9k35kokQOD1rEIpkIVPjNyd0Q3c",
@@ -718,6 +887,12 @@ const i18n = {
     landingTitle: "Find · Hire · Work",
     landingSub: "Trusted workers for your home & business",
     skillsTitle: "Our Services",
+    shareTitle: "Share Tamagn Delala",
+    shareText: "Find trusted workers or get hired with Tamagn Delala — ታማኝ ደላላ",
+    shareCopied: "Link copied! You can paste it on TikTok or anywhere.",
+    shareTikTokHint: "Link copied. Open TikTok and paste it in your post or bio.",
+    shareSms: "Find trusted workers or get hired: ",
+    shareFail: "Could not open share. Link copied instead.",
     btnEmployerTitle: "Find a Worker",
     btnEmployerDesc: "Hire a maid, chef, driver, plumber…",
     btnWorkerTitle: "I am a Worker",
@@ -752,10 +927,13 @@ const i18n = {
     empEditBtn: "✏️ Edit Profile",
     workerRegTitle: "Register as Worker",
     workerRegNote: "Fill the form. Admin will review and approve you.",
-    wrName: "Full Name *", wrAge: "Age *", wrGender: "Gender *", wrSkill: "Skill *", wrLoc: "Location *",
-    wrExp: "Experience *", wrPayType: "Payment Type *", wrPay: "Expected Pay (optional)",
+    wrName: "Full Name *", wrAge: "Age *", wrGender: "Gender *", wrSkill: "Skills * (select all that apply)", wrLoc: "Location *",
+    wrExpYears: "Experience (years) *", wrExp: "Experience details *", wrPayType: "Payment Type *", wrPay: "Expected Pay (optional)",
     wrPlaceType: "Desired Placement Type *",
+    wrSkillsHint: "Tap every skill you can do. The first one is your primary skill.",
     genderFemale: "Female", genderMale: "Male",
+    skillRequired: "Please select at least one skill",
+    expYearsRequired: "Please enter years of experience",
     placeLiveIn: "Live-in", placeFullTime: "Full-Time (Live-out)", placePartTime: "Part-Time / Shift",
     placeOnCall: "On-Call / Daily", placeFixed: "Fixed-Term Contract",
     tabBrowse: "Browse Workers", tabPostJob: "Post Job Request",
@@ -822,6 +1000,12 @@ const i18n = {
     landingTitle: "ፈልግ · ቅጠር · ሥራ",
     landingSub: "ለቤትዎና ንግድዎ የታመኑ ሰራተኞች",
     skillsTitle: "አገልግሎቶቻችን",
+    shareTitle: "ታማኝ ደላላን ያጋሩ",
+    shareText: "በታማኝ ደላላ የታመኑ ሰራተኞችን ያግኙ ወይም ስራ ያግኙ — Tamagn Delala",
+    shareCopied: "ሊንኩ ተቀድቷል! በቲክቶክ ወይም በሌላ ቦታ መለጠፍ ይችላሉ።",
+    shareTikTokHint: "ሊንኩ ተቀድቷል። ቲክቶክን ይክፈቱ እና በልጥፍዎ ወይም በባዮ ላይ ይለጥፉ።",
+    shareSms: "የታመኑ ሰራተኞችን ያግኙ ወይም ስራ ያግኙ: ",
+    shareFail: "ማጋራት አልተቻለም። ሊንኩ ተቀድቷል።",
     btnEmployerTitle: "ሰራተኛ ፈልግ",
     btnEmployerDesc: "የቤት ሰራተኛ፣ ሼፍ፣ ሹፌር፣ ቧንቧ…",
     btnWorkerTitle: "ሰራተኛ ነኝ",
@@ -856,10 +1040,13 @@ const i18n = {
     empEditBtn: "✏️ መገለጫ አርትዕ",
     workerRegTitle: "እንደ ሰራተኛ ይመዝገቡ",
     workerRegNote: "ቅጹን ይሙሉ። አስተዳዳሪው ከገመገመ በኋላ ይፀድቃል።",
-    wrName: "ሙሉ ስም *", wrAge: "ዕድሜ *", wrGender: "ጾታ *", wrSkill: "ክህሎት *", wrLoc: "አካባቢ *",
-    wrExp: "ልምድ *", wrPayType: "የክፍያ አይነት *", wrPay: "የሚጠበቅ ክፍያ (አማራጭ)",
+    wrName: "ሙሉ ስም *", wrAge: "ዕድሜ *", wrGender: "ጾታ *", wrSkill: "ክህሎቶች * (ሁሉንም ይምረጡ)", wrLoc: "አካባቢ *",
+    wrExpYears: "ልምድ (ዓመታት) *", wrExp: "የልምድ ዝርዝር *", wrPayType: "የክፍያ አይነት *", wrPay: "የሚጠበቅ ክፍያ (አማራጭ)",
     wrPlaceType: "የሚፈለግ የቅጥር አይነት *",
+    wrSkillsHint: "ሁሉንም ክህሎቶችዎን ይንኩ። የመጀመሪያው ዋና ክህሎትዎ ነው።",
     genderFemale: "ሴት", genderMale: "ወንድ",
+    skillRequired: "እባክዎ ቢያንስ አንድ ክህሎት ይምረጡ",
+    expYearsRequired: "እባክዎ የልምድ ዓመታት ያስገቡ",
     placeLiveIn: "ከቤት ውስጥ (Live-in)", placeFullTime: "ሙሉ ጊዜ (ከቤት ውጭ)", placePartTime: "ከፊል ጊዜ / ሺፍት",
     placeOnCall: "በጥሪ / ዕለታዊ", placeFixed: "ጊዜያዊ ውል",
     tabBrowse: "ሰራተኞችን ይመልከቱ", tabPostJob: "የስራ ጥያቄ ይላኩ",
@@ -947,6 +1134,7 @@ function applyLang() {
   $("landingTitle").textContent = t("landingTitle");
   $("landingSub").textContent = t("landingSub");
   if ($("skillsTitle")) $("skillsTitle").textContent = t("skillsTitle");
+  if ($("shareTitle")) $("shareTitle").textContent = t("shareTitle");
   $("btnEmployerTitle").textContent = t("btnEmployerTitle");
   $("btnEmployerDesc").textContent = t("btnEmployerDesc");
   $("btnWorkerTitle").textContent = t("btnWorkerTitle");
@@ -978,7 +1166,9 @@ function applyLang() {
     if (gPrev) $("wr_gender").value = gPrev;
   }
   $("lblWrSkill").textContent = t("wrSkill");
+  if ($("wrSkillsHint")) $("wrSkillsHint").textContent = t("wrSkillsHint");
   $("lblWrLoc").textContent = t("wrLoc");
+  if ($("lblWrExpYears")) $("lblWrExpYears").textContent = t("wrExpYears");
   $("lblWrExp").textContent = t("wrExp");
   $("lblWrPayType").textContent = t("wrPayType");
   $("lblWrPay").textContent = t("wrPay");
@@ -1083,14 +1273,33 @@ function applyLang() {
 
 
 
-  // skill dropdowns
-  const opts = SKILLS.map(s => `<option value="${esc(s.en)}">${lang==="am"?s.am:s.en}</option>`).join("");
-  $("wr_skill").innerHTML = opts;
-
+  // Multi-skill chips for worker registration (preserve selection)
+  renderWrSkillChips();
 
   renderSkillChips();
   renderHeroSkills();
   renderWorkers();
+}
+
+function getSelectedWrSkills() {
+  return [...document.querySelectorAll("#wr_skills .skill-chip.on")].map(c => c.dataset.skill).filter(Boolean);
+}
+function renderWrSkillChips() {
+  const box = $("wr_skills");
+  if (!box) return;
+  const prev = new Set(getSelectedWrSkills());
+  box.innerHTML = SKILLS.map(s => {
+    const on = prev.has(s.en) ? " on" : "";
+    return `<button type="button" class="skill-chip${on}" data-skill="${esc(s.en)}">${lang==="am"?s.am:s.en}</button>`;
+  }).join("");
+}
+// Toggle multi-skill selection
+if ($("wr_skills")) {
+  $("wr_skills").onclick = e => {
+    const chip = e.target.closest(".skill-chip");
+    if (!chip) return;
+    chip.classList.toggle("on");
+  };
 }
 
 function renderHeroSkills() {
@@ -1459,17 +1668,23 @@ $("wrSubmitBtn").onclick = async () => {
   const name = $("wr_name").value.trim();
   const age = Number($("wr_age").value);
   const gender = $("wr_gender") ? $("wr_gender").value : "";
-  const skill = $("wr_skill").value;
+  const selectedSkills = getSelectedWrSkills();
+  const skill = selectedSkills[0] || "";
+  const skillTags = selectedSkills.slice(1);
   const location = $("wr_location").value.trim();
   const experience = $("wr_experience").value.trim();
+  const expYearsRaw = $("wr_expYears") ? $("wr_expYears").value : "";
+  const experienceYears = expYearsRaw === "" ? null : Number(expYearsRaw);
   const paymentType = $("wr_paymentType").value;
   const pay = $("wr_pay").value.trim() || "Negotiable";
   const placementType = $("wr_placementType") ? $("wr_placementType").value : "";
   const nationalId = $("wr_nationalId").value.trim();
   const phone = $("wr_phone").value.trim();
-  if (!name||!age||!gender||!skill||!location||!experience||!nationalId||!phone||!placementType) {
+  if (!name||!age||!gender||!location||!experience||!nationalId||!phone||!placementType) {
     return alert(lang==="am"?"እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ":"Please fill all required fields");
   }
+  if (!selectedSkills.length) return alert(t("skillRequired"));
+  if (experienceYears == null || isNaN(experienceYears) || experienceYears < 0) return alert(t("expYearsRequired"));
   if (!wrPhotoData) return alert(t("photoRequired"));
   if (!wrIdPhotoData) return alert(t("idPhotoRequired"));
   const btn = $("wrSubmitBtn"); btn.disabled = true; btn.textContent = "...";
@@ -1479,7 +1694,7 @@ $("wrSubmitBtn").onclick = async () => {
     const ref = doc(collection(db, "workers"));
     const batch = writeBatch(db);
     batch.set(ref, {
-      name, age, gender, skill, location, experience, paymentType, pay, placementType, photo,
+      name, age, gender, skill, skillTags, location, experience, experienceYears, paymentType, pay, placementType, photo,
       hasNationalId: true, hasIdPhoto: true, hasPoliceClearance: $("wr_police").value==="yes",
       status: "pending", available: false, ratingAvg:0, ratingCount:0, ratingSum:0, ratingScore:RATING_PRIOR_MEAN,
       createdAt: serverTimestamp(), source: "self"
@@ -1581,46 +1796,54 @@ async function openWorkerHub() {
     $("wGate").classList.remove("hid");
   }
 }
+let jobsUnsub = null;
+function renderWorkerJobs(w, allJobs) {
+  const box = $("wJobList");
+  if (!box || !w) return;
+  const skill = w.skill || "";
+  const tags = w.skillTags || [];
+  let jobs = (allJobs || []).filter(j => ["Open", "Partially Filled"].includes(j.status)
+    && (j.requiredSkill === skill || tags.includes(j.requiredSkill)));
+  if (!jobs.length) {
+    box.innerHTML = `<div class="state"><div class="state-icon">🔎</div><h3>${t("wNoJobs")}</h3><p>${t("wNoJobsSub")}</p></div>`;
+    return;
+  }
+  const now = Date.now();
+  jobs.sort((a, b) => ts(b.createdAt) - ts(a.createdAt));
+  box.innerHTML = jobs.map(j => {
+    const pay = j.payRate != null ? `${j.payRate} ETB · ${t(j.payType || "monthly")}` : "";
+    const created = j.createdAt ? (j.createdAt.toDate ? j.createdAt.toDate().getTime() : ts(j.createdAt) * 1000) : 0;
+    const isNew = created && (now - created) < 7 * 86400000;
+    return `<div class="job-card" style="${isNew ? "border:2px solid #0284c7;background:#f0f9ff" : ""}">
+      <div class="jt">${esc(j.title || j.requiredSkill)} ${j.urgency === "Urgent" ? `<span class="urgent">Urgent</span>` : ""} ${isNew ? `<span class="urgent" style="background:#dbeafe;color:#1e40af">NEW</span>` : ""}</div>
+      <div class="jm">🛠 ${esc(skillLabel(j.requiredSkill))}</div>
+      ${j.placementType ? `<div class="jm">🏠 ${esc(j.placementType)}</div>` : ""}
+      <div class="jm">📍 ${esc(j.city || "—")}</div>
+      <div class="jm">👔 ${esc(j.employerName || "")}</div>
+      <div class="jp">💰 ${esc(pay)}</div>
+      ${j.notes ? `<div class="jm">${esc(j.notes)}</div>` : ""}
+      <button type="button" class="btn-hire" data-interest="${esc(j.id)}">${t("wInterested")}</button>
+    </div>`;
+  }).join("");
+}
 async function loadMatchingJobs(w) {
   const box = $("wJobList");
   box.innerHTML = `<div class="state"><div class="state-icon">⏳</div><h3>${t("loading")}</h3></div>`;
-  try {
-    let jobs = [];
+  if (jobsUnsub) { try { jobsUnsub(); } catch (_) {} jobsUnsub = null; }
+  const q = query(collection(db, "job_orders"), where("status", "in", ["Open", "Partially Filled"]), limit(50));
+  jobsUnsub = onSnapshot(q, snap => {
+    const jobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderWorkerJobs(w, jobs);
+  }, async err => {
+    console.error(err);
+    // Fallback one-shot if composite query fails
     try {
-      const snap = await getDocs(query(collection(db, "job_orders"), where("status", "in", ["Open", "Partially Filled"]), limit(50)));
-      jobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch (_) {
       const snap = await getDocs(query(collection(db, "job_orders"), where("status", "==", "Open"), limit(50)));
-      jobs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderWorkerJobs(w, snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    } catch (e2) {
+      box.innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Error</h3></div>`;
     }
-    const skill = w.skill || "";
-    const tags = w.skillTags || [];
-    jobs = jobs.filter(j => j.requiredSkill === skill || tags.includes(j.requiredSkill));
-    if (!jobs.length) {
-      box.innerHTML = `<div class="state"><div class="state-icon">🔎</div><h3>${t("wNoJobs")}</h3><p>${t("wNoJobsSub")}</p></div>`;
-      return;
-    }
-    const now = Date.now();
-    jobs.sort((a, b) => ts(b.createdAt) - ts(a.createdAt));
-    box.innerHTML = jobs.map(j => {
-      const pay = j.payRate != null ? `${j.payRate} ETB · ${t(j.payType || "monthly")}` : "";
-      const created = j.createdAt ? (j.createdAt.toDate ? j.createdAt.toDate().getTime() : ts(j.createdAt) * 1000) : 0;
-      const isNew = created && (now - created) < 7 * 86400000;
-      return `<div class="job-card" style="${isNew ? "border:2px solid #0284c7;background:#f0f9ff" : ""}">
-        <div class="jt">${esc(j.title || j.requiredSkill)} ${j.urgency === "Urgent" ? `<span class="urgent">Urgent</span>` : ""} ${isNew ? `<span class="urgent" style="background:#dbeafe;color:#1e40af">NEW</span>` : ""}</div>
-        <div class="jm">🛠 ${esc(skillLabel(j.requiredSkill))}</div>
-        ${j.placementType ? `<div class="jm">🏠 ${esc(j.placementType)}</div>` : ""}
-        <div class="jm">📍 ${esc(j.city || "—")}</div>
-        <div class="jm">👔 ${esc(j.employerName || "")}</div>
-        <div class="jp">💰 ${esc(pay)}</div>
-        ${j.notes ? `<div class="jm">${esc(j.notes)}</div>` : ""}
-        <button type="button" class="btn-hire" data-interest="${esc(j.id)}">${t("wInterested")}</button>
-      </div>`;
-    }).join("");
-  } catch (e) {
-    console.error(e);
-    box.innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Error</h3></div>`;
-  }
+  });
 }
 
 function tgAlert(msg) {
