@@ -464,7 +464,7 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 @media (max-width: 1000px) { .split { grid-template-columns: 1fr; } }
 @media (max-width: 819px) {
   .side { overflow-x: auto; justify-content: flex-start; }
-  .nav-btn { flex: 0 0 auto; min-width: 74px; }
+  .nav-btn { flex: 0 0 auto; width: auto; min-width: 74px; }
   .nav-sep { display: none; }
 }
 /* ===== merged additions: agreements, toast ===== */
@@ -487,6 +487,15 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 .ag-actions .btn-secondary { margin: 0; padding: 10px 14px; font-size: 14px; }
 .ag-actions .btn-primary { width: auto; flex: 1 1 200px; }
 @media (max-width: 600px) { .ag-grid { grid-template-columns: 1fr; } }
+/* ===== fill the whole screen: no empty space ===== */
+@media (min-width: 820px) {
+  #v-dashboard:not(.hid) { display: flex; flex-direction: column; min-height: 100%; }
+  #v-dashboard .grid2:last-child { flex: 1 1 auto; margin-bottom: 0; }
+  #v-dashboard .grid2:last-child .panel-card { display: flex; flex-direction: column; }
+  .side { gap: 6px; }
+  .nav-btn { flex: 1 1 0; min-height: 44px; max-height: 84px; }
+  .side::after { content: "ታማኝ ደላላ"; margin-top: auto; text-align: center; padding: 10px; font-size: 13px; font-weight: 700; color: #7dd3fc; opacity: 0.8; }
+}
 </style>
 </head>
 <body>
@@ -532,16 +541,16 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
           <div class="view-head"><h2>Dashboard</h2></div>
           <div class="kpis" id="kpis"></div>
           <div class="grid2">
+            <div class="panel-card"><h3>📋 Active Hire Requests <button class="link-btn" data-view="requests">View all</button></h3><div class="sub">Requests from the Telegram app</div><div id="dReqs"></div></div>
+            <div class="panel-card"><h3>⭐ Rating Follow-up Due</h3><div class="sub">Ask the employer how the worker is doing</div><div id="dDue"></div></div>
+          </div>
+          <div class="grid2">
             <div class="panel-card"><h3>⏳ Verification &amp; Onboarding Queue <button class="link-btn" data-view="workers">View all</button></h3><div class="sub">New workers and employers awaiting review</div><div id="dQueue"></div></div>
             <div class="panel-card"><h3>🚨 Urgent Unfilled Jobs <button class="link-btn" data-view="matches">All jobs</button></h3><div class="sub">Job orders marked urgent</div><div id="dUrgent"></div></div>
           </div>
           <div class="grid2">
             <div class="panel-card chart"><h3>Job orders vs placements</h3><div class="sub">Last 8 weeks</div><div id="dChart"></div></div>
             <div class="panel-card"><h3>🕒 Live Check-In &amp; Activity</h3><div class="sub">Latest events</div><div id="dFeed"></div></div>
-          </div>
-          <div class="grid2">
-            <div class="panel-card"><h3>📋 Active Hire Requests <button class="link-btn" data-view="requests">View all</button></h3><div class="sub">Requests from the Telegram app</div><div id="dReqs"></div></div>
-            <div class="panel-card"><h3>⭐ Rating Follow-up Due</h3><div class="sub">Ask the employer how the worker is doing</div><div id="dDue"></div></div>
           </div>
         </div>
 
@@ -1156,17 +1165,14 @@ function renderDash() {
   const due = reqs.filter(isDue), wm = new Map(allW.map(w => [w.id, w]));
 
   $("kpis").innerHTML = kpiHtml([
-    ["Total Employers", employersTotal, "", `${employersVerified} verified · ${pe.length} pending`],
-    ["Total Workers", workersTotal, "", `${workersApproved} approved · ${pending.length} pending`],
-    ["Active Placements", active.length, "", `${places.filter(p => p.status === "Pending Employer Review").length} awaiting review`],
-    ["Open Job Orders", openJobs.length, "", `${openJobs.filter(j => j.urgency === "Urgent").length} urgent`],
-    ["Revenue Today", etb(revToday), "", `${placesToday} placements · ${reqsToday} hire requests`],
-    ["Revenue This Week", etb(revWeek), "", `${placesWeek} placements · ${reqsWeek} hire requests`],
-    ["Revenue This Month", etb(revMonth), "", `${placesMonth} placements · ${reqsMonth} hire requests`],
-    ["Revenue YTD", etb(revYtd), "", `${placesYtd} placements · ${reqsYtd} hire requests · Year to date`],
-    ["Worker Payouts Due", etb(payouts), payouts ? "alert" : "", "Approved timesheets"],
+    ["Pending Approvals", pending.length + pe.length, (pending.length + pe.length) ? "alert" : "", `${pending.length} workers · ${pe.length} employers`],
+    ["Active Hire Requests", reqs.filter(r => reqStatus(r) !== "closed").length, reqs.filter(r => reqStatus(r) !== "closed").length ? "alert" : "", `${reqsWeek} this week`],
     ["Ratings Due", due.length, due.length ? "alert" : "", "Follow-ups to send"],
-    ["Pending Approvals", pending.length + pe.length, (pending.length + pe.length) ? "alert" : "", `${pending.length} workers · ${pe.length} employers`]
+    ["Worker Payouts Due", etb(payouts), payouts ? "alert" : "", "Approved timesheets"],
+    ["Open Job Orders", openJobs.length, "", `${openJobs.filter(j => j.urgency === "Urgent").length} urgent`],
+    ["Active Placements", active.length, "", `${places.filter(p => p.status === "Pending Employer Review").length} awaiting review`],
+    ["Revenue This Month", etb(revMonth), "", `Today ${etb(revToday)} · Week ${etb(revWeek)} · YTD ${etb(revYtd)}`],
+    ["Workers · Employers", `${workersTotal} · ${employersTotal}`, "", `${workersApproved} approved · ${employersVerified} verified`]
   ]);
 
   const queue = [...pending.map(w => ({ t: "worker", o: w })), ...pe.map(e => ({ t: "employer", o: e }))].slice(0, 3);
@@ -1200,7 +1206,7 @@ function renderDash() {
   $("dReqs").innerHTML = act.length ? act.map(r => `
     <div class="row-item">${avatar(wm.get(r.workerId) || { name: r.workerName })}
       <div class="row-main"><b>${esc(r.workerName)}</b><span class="who">${esc(r.employerName)} · ${ago(ts(r.createdAt))}</span></div>${reqBadge(r)}
-      <div class="row-act">${reqStatus(r) === "open" ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : ""}<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button></div>
+      <div class="row-act">${r.employerPhone ? `<a class="btn-secondary btn-info" href="tel:${esc(r.employerPhone)}">📞 Call</a>` : ""}${r.employerUsername ? `<a class="btn-secondary btn-info" href="https://t.me/${esc(String(r.employerUsername).replace(/^@/, ""))}" target="_blank" rel="noopener">Telegram</a>` : ""}${reqStatus(r) === "open" ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : ""}<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button></div>
     </div>`).join("") : `<div class="empty">No active requests</div>`;
 
   $("dDue").innerHTML = due.length ? due.slice(0, 5).map(r => `
