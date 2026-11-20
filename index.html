@@ -477,6 +477,21 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
     </div>
 
     <div id="empMain">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <div class="who" id="empHello" style="margin:0"></div>
+        <button type="button" class="btn-secondary" id="empEditBtn" style="margin:0">✏️ Edit Profile</button>
+      </div>
+      <div id="empEditForm" class="form-card hid">
+        <h3 style="margin-bottom:10px" id="empEditTitle">Edit Profile</h3>
+        <label id="lblEmpEditName">Full Name *</label>
+        <input id="emp_edit_name" maxlength="80">
+        <label id="lblEmpEditPhone">Phone Number *</label>
+        <input id="emp_edit_phone" maxlength="20">
+        <label id="lblEmpEditLoc">Location / City *</label>
+        <input id="emp_edit_location" maxlength="60">
+        <button class="btn-primary" id="empUpdateBtn">Save Changes</button>
+        <button class="btn-secondary" id="empEditCancel" style="width:100%;margin-top:8px">Cancel</button>
+      </div>
       <div class="emp-tabs">
         <button type="button" class="chip active" id="tabBrowse" data-etab="browse">Browse Workers</button>
         <button type="button" class="chip" id="tabPostJob" data-etab="post">Post Job Request</button>
@@ -614,8 +629,26 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
     </div>
     <div id="wMain" class="hid">
       <div class="w-banner" id="wHello"></div>
+      <div style="margin-bottom:12px">
+        <button type="button" class="btn-secondary" id="wEditBtn" style="margin:0">✏️ Edit Profile</button>
+      </div>
+      <div id="wEditForm" class="form-card hid">
+        <h3 style="margin-bottom:10px" id="wEditTitle">Edit Profile</h3>
+        <label id="lblWEditName">Full Name *</label>
+        <input id="w_edit_name" maxlength="80">
+        <label id="lblWEditPhone">Phone Number *</label>
+        <input id="w_edit_phone" maxlength="20">
+        <label id="lblWEditLoc">Location *</label>
+        <input id="w_edit_location" maxlength="60">
+        <label id="lblWEditExp">Experience *</label>
+        <input id="w_edit_experience" maxlength="120">
+        <label id="lblWEditPay">Expected Pay (optional)</label>
+        <input id="w_edit_pay" maxlength="60">
+        <button class="btn-primary" id="wUpdateBtn">Save Changes</button>
+        <button class="btn-secondary" id="wEditCancel" style="width:100%;margin-top:8px">Cancel</button>
+      </div>
       <h3 style="margin:4px 0 10px" id="wJobsTitle">Jobs matching your skill</h3>
-      <p class="who" id="wJobsSub">Only verified (published) job requests appear here.</p>
+      <p class="who" id="wJobsSub">Only verified (published) job requests appear here. New matching jobs are shown below.</p>
       <div id="wJobList">
         <div class="state"><div class="state-icon">⏳</div><h3>Loading...</h3></div>
       </div>
@@ -682,7 +715,7 @@ const i18n = {
     btnEmployerTitle: "Find a Worker",
     btnEmployerDesc: "Hire a maid, chef, driver, plumber…",
     btnWorkerTitle: "I am a Worker",
-    btnWorkerDesc: "Register or see matching jobs",
+    btnWorkerDesc: "Register or view matching jobs",
     btnAdminTitle: "Admin Panel",
     btnAdminDesc: "For manager only",
     back: "Back",
@@ -708,6 +741,9 @@ const i18n = {
     empPhone: "Phone Number *",
     empLoc: "Location / City *",
     empSave: "Save & Continue",
+    empEditTitle: "Edit Profile",
+    empUpdate: "Save Changes",
+    empEditBtn: "✏️ Edit Profile",
     workerRegTitle: "Register as Worker",
     workerRegNote: "Fill the form. Admin will review and approve you.",
     wrName: "Full Name *", wrAge: "Age *", wrSkill: "Skill *", wrLoc: "Location *",
@@ -728,8 +764,11 @@ const i18n = {
     wGateTitle: "Worker access",
     wGateNote: "Open this page from your Telegram account used at registration, or register first.",
     wGoRegister: "Register as Worker",
+    wEditTitle: "Edit Profile",
+    wEditBtn: "✏️ Edit Profile",
+    wUpdate: "Save Changes",
     wJobsTitle: "Jobs matching your skill",
-    wJobsSub: "Only verified (published) job requests appear here.",
+    wJobsSub: "Only verified (published) job requests appear here. New matching jobs are shown below.",
     wNoJobs: "No matching jobs right now",
     wNoJobsSub: "Check again after admin publishes new requests",
     wInterested: "I'm interested",
@@ -805,6 +844,9 @@ const i18n = {
     empPhone: "ስልክ ቁጥር *",
     empLoc: "አካባቢ / ከተማ *",
     empSave: "አስቀምጥ እና ቀጥል",
+    empEditTitle: "መገለጫ አርትዕ",
+    empUpdate: "ለውጦችን አስቀምጥ",
+    empEditBtn: "✏️ መገለጫ አርትዕ",
     workerRegTitle: "እንደ ሰራተኛ ይመዝገቡ",
     workerRegNote: "ቅጹን ይሙሉ። አስተዳዳሪው ከገመገመ በኋላ ይፀድቃል።",
     wrName: "ሙሉ ስም *", wrAge: "ዕድሜ *", wrSkill: "ክህሎት *", wrLoc: "አካባቢ *",
@@ -825,8 +867,11 @@ const i18n = {
     wGateTitle: "የሰራተኛ መግቢያ",
     wGateNote: "በምዝገባዎ የተጠቀሙበት ቴሌግራም ይክፈቱ፣ ወይም መጀመሪያ ይመዝገቡ።",
     wGoRegister: "እንደ ሰራተኛ ይመዝገቡ",
+    wEditTitle: "መገለጫ አርትዕ",
+    wEditBtn: "✏️ መገለጫ አርትዕ",
+    wUpdate: "ለውጦችን አስቀምጥ",
     wJobsTitle: "ከክህሎትዎ ጋር የሚመቹ ስራዎች",
-    wJobsSub: "የተረጋገጡ (የታተሙ) የስራ ጥያቄዎች ብቻ እዚህ ይታያሉ።",
+    wJobsSub: "የተረጋገጡ (የታተሙ) የስራ ጥያቄዎች ብቻ እዚህ ይታያሉ። አዲስ የሚመቹ ስራዎች ከዚህ በታች ይታያሉ።",
     wNoJobs: "በአሁኑ ጊዜ የሚመች ስራ የለም",
     wNoJobsSub: "አዲስ ጥያቄዎች ከታተሙ በኋላ እንደገና ይመልከቱ",
     wInterested: "ፍላጎት አለኝ",
@@ -906,6 +951,13 @@ function applyLang() {
   $("lblEmpPhone").textContent = t("empPhone");
   $("lblEmpLoc").textContent = t("empLoc");
   $("empSaveBtn").textContent = t("empSave");
+  if ($("empEditTitle")) $("empEditTitle").textContent = t("empEditTitle");
+  if ($("empEditBtn")) $("empEditBtn").textContent = t("empEditBtn");
+  if ($("empUpdateBtn")) $("empUpdateBtn").textContent = t("empUpdate");
+  if ($("lblEmpEditName")) $("lblEmpEditName").textContent = t("empName");
+  if ($("lblEmpEditPhone")) $("lblEmpEditPhone").textContent = t("empPhone");
+  if ($("lblEmpEditLoc")) $("lblEmpEditLoc").textContent = t("empLoc");
+  if ($("empEditCancel")) $("empEditCancel").textContent = t("cancel");
 
   $("workerRegTitle").textContent = t("workerRegTitle");
   $("workerRegNote").textContent = t("workerRegNote");
@@ -953,6 +1005,15 @@ function applyLang() {
   if ($("wGateTitle")) $("wGateTitle").textContent = t("wGateTitle");
   if ($("wGateNote")) $("wGateNote").textContent = t("wGateNote");
   if ($("wGoRegister")) $("wGoRegister").textContent = t("wGoRegister");
+  if ($("wEditTitle")) $("wEditTitle").textContent = t("wEditTitle");
+  if ($("wEditBtn")) $("wEditBtn").textContent = t("wEditBtn");
+  if ($("wUpdateBtn")) $("wUpdateBtn").textContent = t("wUpdate");
+  if ($("wEditCancel")) $("wEditCancel").textContent = t("cancel");
+  if ($("lblWEditName")) $("lblWEditName").textContent = t("wrName");
+  if ($("lblWEditPhone")) $("lblWEditPhone").textContent = t("wrPhone");
+  if ($("lblWEditLoc")) $("lblWEditLoc").textContent = t("wrLoc");
+  if ($("lblWEditExp")) $("lblWEditExp").textContent = t("wrExp");
+  if ($("lblWEditPay")) $("lblWEditPay").textContent = t("wrPay");
   if ($("wJobsTitle")) $("wJobsTitle").textContent = t("wJobsTitle");
   if ($("wJobsSub")) $("wJobsSub").textContent = t("wJobsSub");
   if ($("backText3")) $("backText3").textContent = t("back");
@@ -1066,6 +1127,8 @@ async function checkEmployer() {
     currentEmployer = { name: "Guest", phone: "", location: "" };
     $("empRegisterGate").classList.add("hid");
     $("empMain").classList.remove("hid");
+    if ($("empHello")) $("empHello").textContent = "";
+    if ($("empEditBtn")) $("empEditBtn").classList.add("hid");
     return;
   }
   try {
@@ -1074,6 +1137,9 @@ async function checkEmployer() {
       currentEmployer = { id: snap.id, ...snap.data() };
       $("empRegisterGate").classList.add("hid");
       $("empMain").classList.remove("hid");
+      if ($("empHello")) $("empHello").textContent = (lang==="am" ? "ሰላም " : "Hello ") + (currentEmployer.name || "");
+      if ($("empEditBtn")) $("empEditBtn").classList.remove("hid");
+      if ($("empEditForm")) $("empEditForm").classList.add("hid");
     } else {
       $("empRegisterGate").classList.remove("hid");
       $("empMain").classList.add("hid");
@@ -1092,9 +1158,34 @@ $("empSaveBtn").onclick = async () => {
   try {
     const data = { name, phone, location, tgId: Number(tgUser.id)||0, username: tgUser.username||"", createdAt: serverTimestamp() };
     await setDoc(doc(db, "employers", String(tgUser.id || Date.now())), data);
-    currentEmployer = data;
+    currentEmployer = { id: String(tgUser.id || Date.now()), ...data };
     $("empRegisterGate").classList.add("hid");
     $("empMain").classList.remove("hid");
+    if ($("empHello")) $("empHello").textContent = (lang==="am" ? "ሰላም " : "Hello ") + name;
+    if ($("empEditBtn")) $("empEditBtn").classList.remove("hid");
+  } catch (e) { alert("Error: " + e.message); }
+};
+
+// Employer profile edit
+if ($("empEditBtn")) $("empEditBtn").onclick = () => {
+  if (!currentEmployer || !currentEmployer.id) return;
+  $("emp_edit_name").value = currentEmployer.name || "";
+  $("emp_edit_phone").value = currentEmployer.phone || "";
+  $("emp_edit_location").value = currentEmployer.location || "";
+  $("empEditForm").classList.remove("hid");
+};
+if ($("empEditCancel")) $("empEditCancel").onclick = () => $("empEditForm").classList.add("hid");
+if ($("empUpdateBtn")) $("empUpdateBtn").onclick = async () => {
+  const name = $("emp_edit_name").value.trim();
+  const phone = $("emp_edit_phone").value.trim();
+  const location = $("emp_edit_location").value.trim();
+  if (!name || !phone || !location) return alert(lang==="am"?"እባክዎ ሁሉንም ይሙሉ":"Please fill all fields");
+  try {
+    await updateDoc(doc(db, "employers", currentEmployer.id), { name, phone, location });
+    currentEmployer = { ...currentEmployer, name, phone, location };
+    if ($("empHello")) $("empHello").textContent = (lang==="am" ? "ሰላም " : "Hello ") + name;
+    $("empEditForm").classList.add("hid");
+    alert(lang==="am" ? "መገለጫ ተዘምኗል" : "Profile updated");
   } catch (e) { alert("Error: " + e.message); }
 };
 
@@ -1494,10 +1585,14 @@ async function loadMatchingJobs(w) {
       box.innerHTML = `<div class="state"><div class="state-icon">🔎</div><h3>${t("wNoJobs")}</h3><p>${t("wNoJobsSub")}</p></div>`;
       return;
     }
+    const now = Date.now();
+    jobs.sort((a, b) => ts(b.createdAt) - ts(a.createdAt));
     box.innerHTML = jobs.map(j => {
       const pay = j.payRate != null ? `${j.payRate} ETB · ${t(j.payType || "monthly")}` : "";
-      return `<div class="job-card">
-        <div class="jt">${esc(j.title || j.requiredSkill)} ${j.urgency === "Urgent" ? `<span class="urgent">Urgent</span>` : ""}</div>
+      const created = j.createdAt ? (j.createdAt.toDate ? j.createdAt.toDate().getTime() : ts(j.createdAt) * 1000) : 0;
+      const isNew = created && (now - created) < 7 * 86400000;
+      return `<div class="job-card" style="${isNew ? "border:2px solid #0284c7;background:#f0f9ff" : ""}">
+        <div class="jt">${esc(j.title || j.requiredSkill)} ${j.urgency === "Urgent" ? `<span class="urgent">Urgent</span>` : ""} ${isNew ? `<span class="urgent" style="background:#dbeafe;color:#1e40af">NEW</span>` : ""}</div>
         <div class="jm">🛠 ${esc(skillLabel(j.requiredSkill))}</div>
         ${j.placementType ? `<div class="jm">🏠 ${esc(j.placementType)}</div>` : ""}
         <div class="jm">📍 ${esc(j.city || "—")}</div>
@@ -1520,6 +1615,40 @@ $("wJobList").onclick = e => {
     : `Hello, I am interested in job request (${id}) via Tamagn Delala. Name: ${currentWorker.name}, Skill: ${currentWorker.skill}`;
   const url = `https://t.me/${MANAGER}?text=${encodeURIComponent(textMsg)}`;
   if (inTelegram) tg.openTelegramLink(url); else window.open(url, "_blank");
+};
+
+// Worker profile edit
+if ($("wEditBtn")) $("wEditBtn").onclick = () => {
+  if (!currentWorker) return;
+  $("w_edit_name").value = currentWorker.name || "";
+  $("w_edit_phone").value = (currentWorker.priv && currentWorker.priv.phone) || "";
+  $("w_edit_location").value = currentWorker.location || "";
+  $("w_edit_experience").value = currentWorker.experience || "";
+  $("w_edit_pay").value = currentWorker.pay || "";
+  $("wEditForm").classList.remove("hid");
+};
+if ($("wEditCancel")) $("wEditCancel").onclick = () => $("wEditForm").classList.add("hid");
+if ($("wUpdateBtn")) $("wUpdateBtn").onclick = async () => {
+  if (!currentWorker) return;
+  const name = $("w_edit_name").value.trim();
+  const phone = $("w_edit_phone").value.trim();
+  const location = $("w_edit_location").value.trim();
+  const experience = $("w_edit_experience").value.trim();
+  const pay = $("w_edit_pay").value.trim() || "Negotiable";
+  if (!name || !phone || !location || !experience) return alert(lang==="am"?"እባክዎ ሁሉንም አስፈላጊ መስኮች ይሙሉ":"Please fill all required fields");
+  try {
+    const batch = writeBatch(db);
+    batch.update(doc(db, "workers", currentWorker.id), { name, location, experience, pay });
+    batch.set(doc(db, "workers_private", currentWorker.id), { phone }, { merge: true });
+    await batch.commit();
+    currentWorker = { ...currentWorker, name, location, experience, pay, priv: { ...(currentWorker.priv || {}), phone } };
+    const pending = currentWorker.status === "pending";
+    $("wHello").textContent = (lang==="am" ? "ሰላም " : "Hello ") + name +
+      (pending ? " — " + t("wPendingProfile") : "") +
+      " · " + skillLabel(currentWorker.skill);
+    $("wEditForm").classList.add("hid");
+    alert(lang==="am" ? "መገለጫ ተዘምኗል" : "Profile updated");
+  } catch (e) { alert("Error: " + e.message); }
 };
 
 applyLang();
