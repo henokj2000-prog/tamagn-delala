@@ -3184,7 +3184,8 @@ async function onAction(e) {
       $("ratingModal").classList.remove("hid"); return;
     }
     else if (d.marksentpl) {
-      await updateDoc(doc(db, "placements", d.marksentpl), { ratingFollowUpSent: true, ratingFollowUpSentAt: serverTimestamp() });
+      await savePlacementRatingFields(d.marksentpl, { ratingFollowUpSent: true, ratingFollowUpSentAt: serverTimestamp() });
+      toast("Marked as sent");
     }
     else if (d.status) {
       await updateDoc(doc(db,"requests",d.status),{status:d.val});
@@ -3239,6 +3240,37 @@ window.addEventListener("hashchange", () => { if (me) showView(location.hash.sli
 $("infoModal").onclick = onAction;
 
 // ================= rating =================
+/** Write rating onto a placement. Synthetic (sync_*) rows are not in Firestore — create a real doc first. */
+async function savePlacementRatingFields(placementId, fields) {
+  if (!placementId) return null;
+  if (String(placementId).startsWith("sync_") || (plById(placementId) || {})._synthetic) {
+    const p = plById(placementId) || {};
+    const ref = doc(collection(db, "placements"));
+    await setDoc(ref, {
+      workerId: p.workerId || ratingWorkerId || null,
+      workerName: p.workerName || "",
+      employerId: p.employerId || null,
+      employerName: p.employerName || "",
+      employerPhone: p.employerPhone || "",
+      jobTitle: p.jobTitle || "",
+      jobId: p.jobId || null,
+      requestId: p.requestId || null,
+      payRate: p.payRate ?? null,
+      payType: p.payType || "monthly",
+      status: p.status || "Active Placement",
+      commissionPaid: !!p.commissionPaid,
+      handoverReceiptSigned: !!p.handoverReceiptSigned,
+      officeHandoverCompletedAt: p.officeHandoverCompletedAt || null,
+      createdAt: p.createdAt || serverTimestamp(),
+      source: p.source || "hire_request_sync",
+      ...fields
+    });
+    return ref.id;
+  }
+  await updateDoc(doc(db, "placements", placementId), fields);
+  return placementId;
+}
+
 $("saveRatingBtn").onclick = async () => {
   if (!ratingWorkerId || (!ratingRequestId && !ratingPlacementId)) return;
   const stars = Number($("ratingStars").value), comment = $("ratingComment").value.trim();
@@ -3250,7 +3282,7 @@ $("saveRatingBtn").onclick = async () => {
       });
     }
     if (ratingPlacementId) {
-      await updateDoc(doc(db, "placements", ratingPlacementId), {
+      await savePlacementRatingFields(ratingPlacementId, {
         rating: stars, ratingComment: comment, ratingFollowUpSent: true, ratedAt: serverTimestamp()
       });
     }
@@ -3265,7 +3297,7 @@ $("saveRatingBtn").onclick = async () => {
     $("ratingModal").classList.add("hid");
     ratingRequestId = null; ratingPlacementId = null; ratingWorkerId = null;
     toast(`Saved ${stars}★ — rank score updated`);
-    await loadAdmin();
+    // Realtime listeners will refresh; no need to restart listeners
   } catch (e) { alert(e.message); }
 };
 $("cancelRatingBtn").onclick = () => {
