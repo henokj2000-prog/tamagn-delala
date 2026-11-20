@@ -629,7 +629,7 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
           <div class="kpis" id="kpis"></div>
           <div class="grid2">
             <div class="panel-card"><h3>📋 Active Hire Requests <button class="link-btn" data-view="requests">View all</button></h3><div class="sub">Requests from the Telegram app</div><div id="dReqs"></div></div>
-            <div class="panel-card"><h3>⭐ Rating Follow-up Due</h3><div class="sub">Ask the employer how the worker is doing</div><div id="dDue"></div></div>
+            <div class="panel-card"><h3>⭐ Rating Follow-up Due</h3><div class="sub">Ask the employer how the worker is doing (hire requests + placements by days stayed)</div><div id="dDue"></div></div>
           </div>
           <div class="grid2">
             <div class="panel-card"><h3>⏳ Verification &amp; Onboarding Queue <button class="link-btn" data-view="workers">View all</button></h3><div class="sub">New workers and employers awaiting review</div><div id="dQueue"></div></div>
@@ -728,6 +728,9 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
             <select id="s_terms"><option>Net 7 Days</option><option>Net 15 Days</option><option>Net 30 Days</option><option>Due on Handover</option></select>
             <label class="switch"><input type="checkbox" id="s_verify"><span></span>Require ID &amp; verification before matching</label>
             <label class="switch"><input type="checkbox" id="s_remind"><span></span>Shift check-in reminders (SMS / Telegram)</label>
+            <label>Rating follow-up after (days the worker has stayed)</label>
+            <input id="s_ratingDays" type="number" min="1" max="90" step="1" placeholder="7">
+            <p class="who" style="margin-top:-6px;margin-bottom:12px">When an active placement reaches this many days, it appears under “Rating Follow-up Due” so you can ask the employer for a rating.</p>
             <button class="btn-primary" data-act="saveSettings">Save Changes</button>
           </div>
         </div>
@@ -748,6 +751,14 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
             <label>Payment type *</label>
             <select id="f_paymentType"><option value="monthly">Monthly</option><option value="hourly">Hourly</option><option value="daily">Daily</option></select>
             <label>Pay (optional)</label><input id="f_pay" maxlength="60">
+            <label>Desired placement type *</label>
+            <select id="f_placementType" required>
+              <option value="Live-in">Live-in</option>
+              <option value="Full-Time (Live-out)">Full-Time (Live-out)</option>
+              <option value="Part-Time / Shift">Part-Time / Shift</option>
+              <option value="On-Call / Daily">On-Call / Daily</option>
+              <option value="Fixed-Term Contract">Fixed-Term Contract</option>
+            </select>
             <label>Fayda / Kebele ID number *</label><input id="f_nationalId" required maxlength="30">
             <label>National ID Photo *</label>
             <button type="button" class="btn-secondary" id="f_idPhotoBtn" style="margin:0 0 10px">🪪 Take / Upload ID Photo</button>
@@ -896,7 +907,7 @@ const ROLE_VIEWS = {
   [R_PO]: ["dashboard", "timesheets"],
   [R_VS]: ["dashboard", "employers", "workers"]
 };
-const DEFAULTS = { defaultCommissionPct: 18, requireIdVerification: true, checkinReminders: true, invoiceTerms: "Net 15 Days" };
+const DEFAULTS = { defaultCommissionPct: 18, requireIdVerification: true, checkinReminders: true, invoiceTerms: "Net 15 Days", ratingFollowUpDays: 7 };
 const BUSY = ["Pending Employer Review", "OTP Verified", "Active Placement"];           // worker is tied up
 const FILL = [...BUSY, "Completed"];                                                    // counts toward "workers needed"
 
@@ -1004,7 +1015,7 @@ let me = { email: "", name: "", role: R_SA };
 let allW = [], reqs = [], pending = [], employers = [], jobs = [], places = [], sheets = [], staff = [], checkins = [], ags = [];
 let settings = { ...DEFAULTS }, loadErrors = [];
 let wFilter = "all", rFilter = "all", eFilter = "all", pFilter = "all", tFilter = "all", aFilter = "all", tPeriod = "all", selJobId = null;
-let ratingRequestId = null, ratingWorkerId = null;
+let ratingRequestId = null, ratingWorkerId = null, ratingPlacementId = null;
 
 const can = a => PERMS[a].includes(me.role);
 const wById = id => allW.find(w => w.id === id);
@@ -1176,6 +1187,28 @@ function isDue(r) {
   const d = r.followUpAt.toDate ? r.followUpAt.toDate() : new Date(ts(r.followUpAt) * 1000);
   return d <= new Date();
 }
+
+/** Days a placement has been active (from handover or created date). */
+function placementDaysStayed(p) {
+  const start = p.officeHandoverCompletedAt || p.placedAt || p.createdAt;
+  if (!start) return 0;
+  const t = start.toDate ? start.toDate().getTime() : ts(start) * 1000;
+  if (!t) return 0;
+  return Math.floor((Date.now() - t) / 86400000);
+}
+
+/** Active placements past the rating follow-up threshold that still need a rating request. */
+function isPlacementRatingDue(p) {
+  if (!p || p.status !== "Active Placement") return false;
+  if (p.ratingFollowUpSent || p.rating || p.ratedAt) return false;
+  const need = Number(settings.ratingFollowUpDays) || DEFAULTS.ratingFollowUpDays || 7;
+  return placementDaysStayed(p) >= need;
+}
+
+const dueBtnsPlacement = p =>
+  `<button class="btn-secondary btn-warning" data-askpl="${esc(p.id)}">📩 Ask</button>` +
+  `<button class="btn-secondary btn-success" data-ratepl="${esc(p.id)}" data-wid="${esc(p.workerId)}">★ Rate</button>` +
+  `<button class="btn-secondary" data-marksentpl="${esc(p.id)}">Mark Sent</button>`;
 
 function showView(v) {
   if (!(ROLE_VIEWS[me.role] || []).includes(v)) v = "dashboard";
@@ -1361,12 +1394,15 @@ function renderDash() {
   const employersTotal = employers.length;
   const employersVerified = employers.filter(e => eVer(e) === "verified").length;
   const payouts = sheets.filter(s => s.approvalStatus === "Approved").reduce((a, s) => a + Number(s.workerPay || 0), 0);
-  const due = reqs.filter(isDue), wm = new Map(allW.map(w => [w.id, w]));
+  const dueReqs = reqs.filter(isDue);
+  const duePlaces = places.filter(isPlacementRatingDue);
+  const dueTotal = dueReqs.length + duePlaces.length;
+  const wm = new Map(allW.map(w => [w.id, w]));
 
   $("kpis").innerHTML = kpiHtml([
     ["Pending Approvals", pending.length + pe.length, (pending.length + pe.length) ? "alert" : "", `${pending.length} workers · ${pe.length} employers`],
     ["Active Hire Requests", reqs.filter(r => reqStatus(r) !== "closed").length, reqs.filter(r => reqStatus(r) !== "closed").length ? "alert" : "", `${reqsWeek} this week`],
-    ["Ratings Due", due.length, due.length ? "alert" : "", "Follow-ups to send"],
+    ["Ratings Due", dueTotal, dueTotal ? "alert" : "", `After ${settings.ratingFollowUpDays || 7} days · ${duePlaces.length} placements`],
     ["Worker Payouts Due", etb(payouts), payouts ? "alert" : "", "Approved timesheets"],
     ["Open Job Orders", openJobs.length, "", `${openJobs.filter(j => j.urgency === "Urgent").length} urgent`],
     ["Active Placements", active.length, "", `${places.filter(p => p.status === "Pending Employer Review").length} awaiting review`],
@@ -1393,8 +1429,26 @@ function renderDash() {
       <div class="row-act">${r.employerPhone ? `<a class="btn-secondary btn-info" href="tel:${esc(r.employerPhone)}">📞 Call</a>` : ""}${r.employerUsername ? `<a class="btn-secondary btn-info" href="https://t.me/${esc(String(r.employerUsername).replace(/^@/, ""))}" target="_blank" rel="noopener">Telegram</a>` : ""}${reqStatus(r) === "open" ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">On Process</button>` : ""}<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">Close</button></div>
     </div>`).join("") : `<div class="empty">No active requests</div>`;
 
-  $("dDue").innerHTML = due.length ? due.slice(0, 5).map(r => `
-    <div class="row-item"><div class="row-main"><b>${esc(r.workerName)}</b><span class="who">${tgLink(r.employerUsername, r.employerName || "")} · ${esc(r.employerPhone || "")}</span></div><div class="row-act">${dueBtns(r)}</div></div>`).join("") : `<div class="empty">Nothing due 🎉</div>`;
+  const dueItems = [
+    ...dueReqs.map(r => ({
+      kind: "req",
+      name: r.workerName,
+      sub: `${tgLink(r.employerUsername, r.employerName || "")} · ${esc(r.employerPhone || "")}`,
+      btns: dueBtns(r)
+    })),
+    ...duePlaces.map(p => {
+      const days = placementDaysStayed(p);
+      const e = eById(p.employerId) || {};
+      return {
+        kind: "pl",
+        name: p.workerName,
+        sub: `${esc(p.employerName)} · ${days} day${days === 1 ? "" : "s"} stayed · ${esc(p.jobTitle || "")}`,
+        btns: dueBtnsPlacement(p)
+      };
+    })
+  ].slice(0, 8);
+  $("dDue").innerHTML = dueItems.length ? dueItems.map(x => `
+    <div class="row-item"><div class="row-main"><b>${esc(x.name)}</b><span class="who">${x.sub}</span></div><div class="row-act">${x.btns}</div></div>`).join("") : `<div class="empty">Nothing due 🎉</div>`;
 }
 
 function renderEmployers() {
@@ -1619,7 +1673,21 @@ function renderPlacements() {
     }
     if (p.status !== "Cancelled") h += A("contract", "📄 Contract", "", id);
     if (p.status === "OTP Verified") h += p.commissionPaid ? A("handover", "✍️ Sign Handover", "btn-success", id) : A("commission", "💰 Record Commission", "btn-warning", id);
-    if (p.status === "Active Placement") h += (can("payroll") ? A("newSheet", "+ Timesheet", "btn-info", id) : "") + (settings.checkinReminders ? A("remind", "🔔 Remind", "", id) : "") + A("completePl", "Complete", "btn-success", id);
+    if (p.status === "Active Placement") {
+      h += (can("payroll") ? A("newSheet", "+ Timesheet", "btn-info", id) : "") + (settings.checkinReminders ? A("remind", "🔔 Remind", "", id) : "") + A("completePl", "Complete", "btn-success", id);
+      // Rating follow-up based on days stayed
+      if (!p.rating && !p.ratedAt) {
+        const days = placementDaysStayed(p);
+        const need = Number(settings.ratingFollowUpDays) || 7;
+        if (days >= need || !p.ratingFollowUpSent) {
+          h += `<button class="btn-secondary btn-warning" data-askpl="${esc(p.id)}">📩 Ask Rating</button>`;
+          h += `<button class="btn-secondary btn-success" data-ratepl="${esc(p.id)}" data-wid="${esc(p.workerId)}">★ Rate</button>`;
+          if (p.ratingFollowUpSent) h += `<span class="mini">${days}d stayed</span>`;
+        }
+      } else if (p.rating) {
+        h += bdg("ok", p.rating + "★");
+      }
+    }
     if (["Pending Employer Review", "OTP Verified"].includes(p.status)) h += A("cancelPl", "Cancel", "btn-danger", id);
     h += A("delPlacement", "Delete", "btn-danger", id);
     return h;
@@ -1694,6 +1762,7 @@ function renderSettings() {
       <td class="c-act"><div class="acts">${A("staffEdit", "Edit", "", `data-id="${esc(s.id)}"`)}${A("staffToggle", s.status === "Active" ? "Deactivate" : "Activate", "", `data-id="${esc(s.id)}"`)}${A("staffDelete", "Delete", "btn-danger", `data-id="${esc(s.id)}"`)}</div></td></tr>`)], "");
   $("s_commission").value = settings.defaultCommissionPct; $("s_terms").value = settings.invoiceTerms;
   $("s_verify").checked = !!settings.requireIdVerification; $("s_remind").checked = !!settings.checkinReminders;
+  if ($("s_ratingDays")) $("s_ratingDays").value = settings.ratingFollowUpDays ?? DEFAULTS.ratingFollowUpDays;
   document.querySelectorAll("#v-settings [data-act='saveSettings'], #v-settings [data-act='staffInvite']").forEach(b => b.classList.toggle("hid", !can("settings")));
 }
 
@@ -2275,7 +2344,16 @@ const ACTIONS = {
   async saveSettings() {
     if (!can("settings")) return false;
     const pct = Number($("s_commission").value); if (!(pct >= 0 && pct <= 100)) { alert("Commission must be between 0 and 100."); return false; }
-    await setDoc(doc(db, "agency_settings", "main"), { defaultCommissionPct: pct, invoiceTerms: $("s_terms").value, requireIdVerification: $("s_verify").checked, checkinReminders: $("s_remind").checked, updatedAt: serverTimestamp() }, { merge: true });
+    const ratingDays = Number($("s_ratingDays")?.value);
+    if (!(ratingDays >= 1 && ratingDays <= 90)) { alert("Rating follow-up days must be between 1 and 90."); return false; }
+    await setDoc(doc(db, "agency_settings", "main"), {
+      defaultCommissionPct: pct,
+      invoiceTerms: $("s_terms").value,
+      requireIdVerification: $("s_verify").checked,
+      checkinReminders: $("s_remind").checked,
+      ratingFollowUpDays: ratingDays,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
     alert("Settings saved.");
   },
   staffInvite() { staffForm(null); return false; },
@@ -2303,17 +2381,38 @@ async function onAction(e) {
     else if (d.reject) { if(!confirm("Reject?"))return; await updateDoc(doc(db,"workers",d.reject),{status:"rejected",available:false}); }
     else if (d.ask) {
       const r = reqs.find(x=>x.id===d.ask); if(!r)return;
-      const msg = `ሰላም ${r.employerName}\n\nከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።\n\nእባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ።`;
+      const msg = `Hello ${r.employerName}\n\nFrom Tamagn Delala: please rate the worker you hired (${r.workerName}).\n\nReply with 1–5 stars and a short comment.\n\nሰላም ${r.employerName}\nከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።\nእባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ።`;
       const url = r.employerUsername ? `https://t.me/${r.employerUsername}?text=${encodeURIComponent(msg)}` : `tg://user?id=${r.employerTgId}`;
       window.open(url,"_blank"); return;
     }
     else if (d.rate) {
-      ratingRequestId=d.rate; ratingWorkerId=d.wid;
+      ratingRequestId=d.rate; ratingWorkerId=d.wid; ratingPlacementId=null;
       const r=reqs.find(x=>x.id===d.rate);
       $("ratingWorkerName").textContent=(r?.workerName||"")+" ← "+(r?.employerName||"");
       $("ratingModal").classList.remove("hid"); return;
     }
     else if (d.marksent) await updateDoc(doc(db,"requests",d.marksent),{followUpSent:true});
+    else if (d.askpl) {
+      const p = plById(d.askpl); if (!p) return;
+      const e = eById(p.employerId) || {};
+      const days = placementDaysStayed(p);
+      const msg = `Hello ${p.employerName}\n\nFrom Tamagn Delala: ${p.workerName} has been with you for about ${days} day(s) (${p.jobTitle}).\nPlease rate the worker 1–5 stars and add a short comment.\n\nሰላም ${p.employerName}\n${p.workerName} ከእርስዎ ጋር ለ${days} ቀን(ናት) ሰርቷል። እባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ።`;
+      const username = e.username || p.employerUsername;
+      const tgId = e.tgId || e.telegramId || p.employerTgId;
+      const url = username ? `https://t.me/${String(username).replace(/^@/, "")}?text=${encodeURIComponent(msg)}` : (tgId ? `tg://user?id=${tgId}` : null);
+      if (url) window.open(url, "_blank");
+      else prompt("No Telegram on file. Copy and send this message manually:", msg);
+      return;
+    }
+    else if (d.ratepl) {
+      ratingRequestId = null; ratingPlacementId = d.ratepl; ratingWorkerId = d.wid;
+      const p = plById(d.ratepl);
+      $("ratingWorkerName").textContent = (p?.workerName || "") + " ← " + (p?.employerName || "") + (p ? ` · ${placementDaysStayed(p)} days` : "");
+      $("ratingModal").classList.remove("hid"); return;
+    }
+    else if (d.marksentpl) {
+      await updateDoc(doc(db, "placements", d.marksentpl), { ratingFollowUpSent: true, ratingFollowUpSentAt: serverTimestamp() });
+    }
     else if (d.status) {
       await updateDoc(doc(db,"requests",d.status),{status:d.val});
       if (d.val === "on_process") {                       // hire accepted: hide the worker from employers and open the agreement
@@ -2368,13 +2467,20 @@ $("infoModal").onclick = onAction;
 
 // ================= rating =================
 $("saveRatingBtn").onclick = async () => {
-  if (!ratingRequestId || !ratingWorkerId) return;
+  if (!ratingWorkerId || (!ratingRequestId && !ratingPlacementId)) return;
   const stars = Number($("ratingStars").value), comment = $("ratingComment").value.trim();
   if (!(stars >= 1 && stars <= 5)) { alert("Choose a rating from 1 to 5 stars."); return; }
   try {
-    await updateDoc(doc(db, "requests", ratingRequestId), {
-      rating: stars, ratingComment: comment, followUpSent: true, ratedAt: serverTimestamp()
-    });
+    if (ratingRequestId) {
+      await updateDoc(doc(db, "requests", ratingRequestId), {
+        rating: stars, ratingComment: comment, followUpSent: true, ratedAt: serverTimestamp()
+      });
+    }
+    if (ratingPlacementId) {
+      await updateDoc(doc(db, "placements", ratingPlacementId), {
+        rating: stars, ratingComment: comment, ratingFollowUpSent: true, ratedAt: serverTimestamp()
+      });
+    }
     const wRef = doc(db, "workers", ratingWorkerId);
     const wSnap = await getDoc(wRef);
     if (wSnap.exists()) {
@@ -2384,11 +2490,15 @@ $("saveRatingBtn").onclick = async () => {
       if (local) Object.assign(local, patch);
     }
     $("ratingModal").classList.add("hid");
+    ratingRequestId = null; ratingPlacementId = null; ratingWorkerId = null;
     toast(`Saved ${stars}★ — rank score updated`);
     await loadAdmin();
   } catch (e) { alert(e.message); }
 };
-$("cancelRatingBtn").onclick = () => $("ratingModal").classList.add("hid");
+$("cancelRatingBtn").onclick = () => {
+  $("ratingModal").classList.add("hid");
+  ratingRequestId = null; ratingPlacementId = null; ratingWorkerId = null;
+};
 
 // ================= worker add / edit form =================
 async function startEdit(id) {
@@ -2397,6 +2507,7 @@ async function startEdit(id) {
   $("f_skill").value=w.skill||""; $("f_location").value=w.location||""; $("f_experience").value=w.experience||"";
   $("f_expYears").value=w.experienceYears ?? ""; $("f_tags").value=(w.skillTags||[]).join(", ");
   $("f_paymentType").value=w.paymentType||"monthly"; $("f_pay").value=w.pay||"";
+  if ($("f_placementType")) $("f_placementType").value = w.placementType || "Live-in";
   $("f_nationalId").value=priv.nationalId||""; $("f_phone").value=priv.phone||""; $("f_tgid").value=priv.telegramUserId||"";
   $("f_police").value=w.hasPoliceClearance?"yes":"no";
   $("f_guarantorName").value=priv.guarantorName||""; $("f_guarantorPhone").value=priv.guarantorPhone||"";
@@ -2476,6 +2587,7 @@ $("wf").onsubmit = async e => {
       location:$("f_location").value.trim(), experience:$("f_experience").value.trim(),
       experienceYears: yrs===""?null:Number(yrs), skillTags:$("f_tags").value.split(",").map(s=>s.trim()).filter(Boolean),
       paymentType:$("f_paymentType").value, pay:$("f_pay").value.trim()||"Negotiable",
+      placementType: $("f_placementType") ? $("f_placementType").value : "",
       hasNationalId:true, hasIdPhoto: !!(adminIdPhotoData || (id && true)), hasPoliceClearance:$("f_police").value==="yes"
     };
     if (adminPhotoData) publicData.photo=adminPhotoData;
