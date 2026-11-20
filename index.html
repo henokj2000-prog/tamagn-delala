@@ -1822,7 +1822,11 @@ function renderWorkerJobs(w, allJobs) {
       <div class="jm">👔 ${esc(j.employerName || "")}</div>
       <div class="jp">💰 ${esc(pay)}</div>
       ${j.notes ? `<div class="jm">${esc(j.notes)}</div>` : ""}
-      <button type="button" class="btn-hire" data-interest="${esc(j.id)}">${t("wInterested")}</button>
+      ${(() => {
+        const already = currentWorker && hasLocalInterest(currentWorker.id, j.id);
+        const label = already ? (lang === "am" ? "✓ ተልኳል" : "✓ Sent") : t("wInterested");
+        return `<button type="button" class="btn-hire" data-interest="${esc(j.id)}" ${already ? "disabled" : ""}>${label}</button>`;
+      })()}
     </div>`;
   }).join("");
 }
@@ -1861,6 +1865,20 @@ function tgHaptic(type) {
   } catch (_) {}
 }
 
+function interestKey(workerId, jobId) {
+  return "td_interest_" + workerId + "_" + jobId;
+}
+function hasLocalInterest(workerId, jobId) {
+  try { return localStorage.getItem(interestKey(workerId, jobId)) === "1"; } catch (_) { return false; }
+}
+function markLocalInterest(workerId, jobId) {
+  try { localStorage.setItem(interestKey(workerId, jobId), "1"); } catch (_) {}
+}
+function interestDocId(workerId, jobId) {
+  // One document per worker+job — prevents duplicates in Firestore
+  return String(workerId) + "_" + String(jobId);
+}
+
 async function expressJobInterest(jobId, btn) {
   if (!jobId) return;
   if (!currentWorker) {
@@ -1868,11 +1886,25 @@ async function expressJobInterest(jobId, btn) {
     return;
   }
   if (btn && btn.dataset.busy === "1") return;
+
+  // Already recorded once for this job
+  if (hasLocalInterest(currentWorker.id, jobId)) {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = lang === "am" ? "✓ ተልኳል" : "✓ Already sent";
+    }
+    tgAlert(lang === "am"
+      ? "ለዚህ ስራ ቀድሞ ፍላጎት ልከዋል። አንድ ጊዜ ብቻ ይመዘገባል።"
+      : "You already sent interest for this job. It is recorded only once.");
+    return;
+  }
+
   if (btn) { btn.dataset.busy = "1"; btn.disabled = true; }
   const prevLabel = btn ? btn.textContent : "";
   if (btn) btn.textContent = lang === "am" ? "በመላክ ላይ..." : "Sending...";
 
   const phone = (currentWorker.priv && currentWorker.priv.phone) || "";
+  const docId = interestDocId(currentWorker.id, jobId);
   const payload = {
     jobId,
     workerId: currentWorker.id,
@@ -1885,7 +1917,7 @@ async function expressJobInterest(jobId, btn) {
     status: "new",
     type: "job_interest",
     source: "worker_app",
-    createdAt: serverTimestamp()
+    updatedAt: serverTimestamp()
   };
   // Enrich from loaded job card data if possible
   try {
@@ -1899,38 +1931,63 @@ async function expressJobInterest(jobId, btn) {
   } catch (_) {}
 
   let saved = false;
+  let already = false;
   let saveErr = null;
-  // 1) Preferred collection
+
+  // 1) Preferred: one doc per worker+job (setDoc — no duplicates)
   try {
-    await addDoc(collection(db, "job_interests"), payload);
-    saved = true;
+    const iref = doc(db, "job_interests", docId);
+    let exists = false;
+    try {
+      const prev = await getDoc(iref);
+      exists = prev.exists();
+    } catch (_) {}
+    if (exists) {
+      already = true;
+      saved = true;
+    } else {
+      await setDoc(iref, { ...payload, createdAt: serverTimestamp() }, { merge: true });
+      saved = true;
+    }
   } catch (err) {
     saveErr = err;
     console.error("job_interests failed", err);
   }
-  // 2) Fallback: requests (create is allowed in your rules)
+
+  // 2) Fallback: fixed-id request so retries don't create multiples
   if (!saved) {
     try {
-      await addDoc(collection(db, "requests"), {
-        workerId: currentWorker.id,
-        workerName: currentWorker.name || "",
-        paymentType: currentWorker.paymentType || "monthly",
-        employerTgId: 0,
-        employerName: payload.employerName || "Job interest",
-        employerPhone: "",
-        employerUsername: "",
-        employerLocation: "",
-        jobId,
-        jobTitle: payload.jobTitle || "",
-        interestOnly: true,
-        status: "open",
-        paymentReceived: false,
-        followUpSent: false,
-        rating: null,
-        createdAt: serverTimestamp(),
-        source: "worker_interest"
-      });
-      saved = true;
+      const rref = doc(db, "requests", "interest_" + docId);
+      let exists = false;
+      try {
+        const prev = await getDoc(rref);
+        exists = prev.exists();
+      } catch (_) {}
+      if (exists) {
+        already = true;
+        saved = true;
+      } else {
+        await setDoc(rref, {
+          workerId: currentWorker.id,
+          workerName: currentWorker.name || "",
+          paymentType: currentWorker.paymentType || "monthly",
+          employerTgId: 0,
+          employerName: payload.employerName || "Job interest",
+          employerPhone: "",
+          employerUsername: "",
+          employerLocation: "",
+          jobId,
+          jobTitle: payload.jobTitle || "",
+          interestOnly: true,
+          status: "open",
+          paymentReceived: false,
+          followUpSent: false,
+          rating: null,
+          createdAt: serverTimestamp(),
+          source: "worker_interest"
+        }, { merge: true });
+        saved = true;
+      }
     } catch (err2) {
       saveErr = err2;
       console.error("requests interest fallback failed", err2);
@@ -1938,11 +1995,16 @@ async function expressJobInterest(jobId, btn) {
   }
 
   if (saved) {
+    markLocalInterest(currentWorker.id, jobId);
     tgHaptic("success");
-    if (btn) btn.textContent = lang === "am" ? "✓ ተልኳል" : "✓ Sent";
-    const okMsg = lang === "am"
-      ? "ፍላጎትዎ ተመዝግቧል። ቡድናችን በቅርቡ ያገኝዎታል።"
-      : "Your interest was recorded. Our team will contact you soon.";
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = lang === "am" ? "✓ ተልኳል" : "✓ Sent";
+      btn.dataset.busy = "1";
+    }
+    const okMsg = already
+      ? (lang === "am" ? "ለዚህ ስራ ቀድሞ ፍላጎት ልከዋል። አንድ ጊዜ ብቻ ይመዘገባል።" : "You already sent interest for this job. It is recorded only once.")
+      : (lang === "am" ? "ፍላጎትዎ ተመዝግቧል። ቡድናችን በቅርቡ ያገኝዎታል።" : "Your interest was recorded. Our team will contact you soon.");
     tgAlert(okMsg);
 
     // Optional: open manager chat (may no-op inside same-bot Mini App — that's OK)
@@ -1976,12 +2038,17 @@ async function expressJobInterest(jobId, btn) {
   }
 
   setTimeout(() => {
-    if (btn) {
+    if (!btn) return;
+    if (saved || hasLocalInterest(currentWorker.id, jobId)) {
+      btn.disabled = true;
+      btn.dataset.busy = "1";
+      btn.textContent = lang === "am" ? "✓ ተልኳል" : "✓ Sent";
+    } else {
       btn.disabled = false;
       btn.dataset.busy = "0";
       btn.textContent = prevLabel;
     }
-  }, 3000);
+  }, 2000);
 }
 
 $("wJobList").addEventListener("click", e => {
