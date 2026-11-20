@@ -563,7 +563,7 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 .reg td.act button.ok { color: #166534; border-color: #86efac; } .reg td.act button.no { color: #b91c1c; border-color: #fca5a5; }
 .reg-count { font-size: 12px; color: #718096; margin: 6px 2px 0; }
 .reg-empty { text-align: center; color: #718096; padding: 30px 12px; }
-@media (max-width: 900px) { .reg-info { grid-template-columns: minmax(110px, 150px) minmax(0, 1fr); } .reg-wrap { max-height: none; } .reg .s1, .reg .s2 { position: static; box-shadow: none; } .reg .s0 { position: static; } .reg th { position: static; } }
+@media (max-width: 900px) { .reg-info { grid-template-columns: minmax(110px, 150px) minmax(0, 1fr); } .reg .s1, .reg .s2 { position: static; box-shadow: none; } .reg .s0 { position: static; } .reg th { position: static; } }
 @media print {
   body * { visibility: hidden; }
   #v-workers, #v-workers * { visibility: visible; }
@@ -573,6 +573,16 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
   .reg { font-size: 9px; width: 100%; }
   @page { size: A3 landscape; margin: 10mm; }
 }
+
+/* register fills the window: no empty space below */
+@media (min-width: 820px) {
+  #v-workers:not(.hid) { display: flex; flex-direction: column; flex: 1 1 auto; height: 100%; min-height: 0; }
+  #v-workers #tbWorkers { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  #v-workers .reg-wrap { flex: 1 1 auto; min-height: 0; max-height: none; }
+  .reg-bar, .reg-filters { flex: none; }
+  .reg-count { flex: none; }
+}
+@media (max-width: 819px) { .reg-wrap { max-height: calc(100dvh - 250px); min-height: 240px; } }
 </style>
 </head>
 <body>
@@ -638,18 +648,6 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 
         <!-- Workers -->
         <div id="v-workers" class="view hid">
-          <div class="reg-title"><div class="reg-t1">TAMAGN DELALA – WORKER PLACEMENT &amp; DISPATCH REGISTER</div><div class="reg-t2">Employment, Domestic, Hospitality &amp; Skilled Trade Staffing Agency | Addis Ababa, Ethiopia</div></div>
-          <div class="reg-info" id="regInfo">
-            <div class="ri-l">Agency Name:</div><div class="ri-v"><input data-ri="agency" placeholder="Tamagn Delala Employment &amp; Staffing Agency"></div>
-            <div class="ri-l">Client / Employer Name:</div><div class="ri-v"><input data-ri="client" placeholder="[Enter Company, Hotel, Restaurant, or Household Name]"></div>
-            <div class="ri-l">Agreement / Ref No.:</div><div class="ri-v"><input data-ri="ref" placeholder="[Ref #]"></div>
-            <div class="ri-l">Agency License / TIN:</div><div class="ri-v"><input data-ri="license" placeholder="[Insert License / TIN No.]"></div>
-            <div class="ri-l">Client Sub-City / Woreda:</div><div class="ri-v"><input data-ri="sub" placeholder="[e.g., Bole Sub-City, Woreda 03]"></div>
-            <div class="ri-l">Period Covered:</div><div class="ri-v"><input data-ri="period" placeholder="[Month / Year]"></div>
-            <div class="ri-l">Agency Office &amp; Phone:</div><div class="ri-v"><input data-ri="office" placeholder="[Bole, Addis Ababa | +251-9XX-XXXXXX]"></div>
-            <div class="ri-l">Client Contact &amp; Phone:</div><div class="ri-v"><input data-ri="contact" placeholder="[Contact Person &amp; Phone]"></div>
-            <div class="ri-l">Last Updated:</div><div class="ri-v"><input id="riUpdated" readonly></div>
-          </div>
           <div class="reg-bar">
             <div class="chips" id="wChips"></div>
             <div class="reg-tools">
@@ -1074,7 +1072,7 @@ async function loadAdmin() {
   loadErrors = [];
   const safe = (p, name) => p.catch(() => { loadErrors.push(name); return { docs: [] }; });
   const col = n => getDocs(collection(db, n));
-  const [rs, ws, es, js, ps, tss, ss, cs, st, agr, pvs, rgi] = await Promise.all([
+  const [rs, ws, es, js, ps, tss, ss, cs, st, agr, pvs] = await Promise.all([
     safe(getDocs(query(collection(db, "requests"), orderBy("createdAt", "desc"), limit(80))), "requests"),
     safe(col("workers"), "workers"),
     safe(col("employers"), "employers"),
@@ -1085,11 +1083,9 @@ async function loadAdmin() {
     getDocs(query(collection(db, "checkins"), orderBy("at", "desc"), limit(20))).catch(() => ({ docs: [] })),   // optional, written by the bot
     getDoc(doc(db, "agency_settings", "main")).catch(() => { loadErrors.push("agency_settings"); return null; }),
     safe(col("agreements"), "agreements"),
-    getDocs(collection(db, "workers_private")).catch(() => ({ docs: [] })),                 // phone, ID no., guarantor (for the register)
-    getDoc(doc(db, "agency_settings", "register")).catch(() => null)
+    getDocs(collection(db, "workers_private")).catch(() => ({ docs: [] }))                 // phone, ID no., guarantor (for the register)
   ]);
   privs = {}; pvs.docs.forEach(d => { privs[d.id] = d.data(); });
-  if (rgi && rgi.exists && rgi.exists()) { regInfo = { ...regInfo, ...rgi.data() }; try { localStorage.setItem("td_reg_info", JSON.stringify(regInfo)); } catch (_) {} }
   const map = s => s.docs.map(d => ({ id: d.id, ...d.data() }));
   const byNew = (a, b) => ts(b.createdAt) - ts(a.createdAt);
   reqs = map(rs);
@@ -1368,8 +1364,7 @@ $("wSkill").innerHTML = '<option value="">All roles</option>' + [...REG_ROLES, .
 $("wType").innerHTML = '<option value="">All placement types</option>' + REG_TYPES.map(x => `<option>${esc(x)}</option>`).join("");
 $("wFee").innerHTML = '<option value="">All fee statuses</option>' + REG_FEES.map(x => `<option>${esc(x)}</option>`).join("");
 $("wStat").innerHTML = '<option value="">All current statuses</option>' + REG_STATS.map(x => `<option>${esc(x)}</option>`).join("");
-let privs = {}, privTried = new Set(), regInfo = {};
-try { regInfo = JSON.parse(localStorage.getItem("td_reg_info") || "{}"); } catch (_) {}
+let privs = {}, privTried = new Set();
 
 const rRole = w => ROLE_FROM_APP[w.skill] || w.skill || "";
 const rSite = w => w.siteName != null ? w.siteName : (w.assignedEmployerName || "");
@@ -1409,10 +1404,6 @@ function regRows() {
 function renderWorkers(keepFocus) {
   const cnt = f => allW.filter(f).length, av = w => wAvail(w) === "Available";
   $("wChips").innerHTML = chipsHtml([["all", "All", allW.length], ["Available", "Available", cnt(av)], ["Placed", "Placed", cnt(w => wAvail(w) === "Placed")], ["Pending", "Pending", pending.length], ["Inactive", "Inactive", cnt(w => wAvail(w) === "Inactive")], ["Rejected", "Rejected", cnt(w => w.status === "rejected")]], "fw", wFilter);
-  // header block (editable, remembered)
-  document.querySelectorAll("#regInfo [data-ri]").forEach(i => { if (document.activeElement !== i) i.value = regInfo[i.dataset.ri] ?? (i.dataset.ri === "agency" ? "Tamagn Delala Employment & Staffing Agency" : ""); });
-  const d = new Date(); $("riUpdated").value = String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
-
   const edit = can("manage"), dis = edit ? "" : " disabled";
   const rows = regRows();
   const inp = (f, id, v, cls = "", type = "text", ph = "") => `<input class="rc ${cls}" data-f="${f}" data-id="${esc(id)}" type="${type}" value="${esc(v)}"${ph ? ` placeholder="${ph}"` : ""}${dis}>`;
@@ -1480,13 +1471,6 @@ async function regSave(el) {
 $("tbWorkers").addEventListener("change", e => { if (e.target.matches("[data-f]")) regSave(e.target); });
 $("tbWorkers").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches("input.rc")) { e.preventDefault(); e.target.blur(); } });
 
-// ---- register header block (Agency / Client details) ----
-$("regInfo").addEventListener("change", async e => {
-  const i = e.target.closest("[data-ri]"); if (!i) return;
-  regInfo[i.dataset.ri] = i.value.trim();
-  try { localStorage.setItem("td_reg_info", JSON.stringify(regInfo)); } catch (_) {}
-  try { await setDoc(doc(db, "agency_settings", "register"), regInfo, { merge: true }); } catch (_) {}
-});
 
 function renderMatches() {
   const openJobs = jobs.filter(j => ["Open", "Partially Filled"].includes(j.status));
