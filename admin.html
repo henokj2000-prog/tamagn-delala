@@ -669,7 +669,7 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
           <div class="kpis" id="mKpis"></div>
           <div class="toolbar">
             <input id="jSearch" type="search" placeholder="Search jobs, employers, skills...">
-            <select id="jStatus"><option value="">All statuses</option><option>Open</option><option>Partially Filled</option><option>Filled</option><option>Closed</option></select>
+            <select id="jStatus"><option value="">All statuses</option><option>Pending Review</option><option>Open</option><option>Partially Filled</option><option>Filled</option><option>Closed</option></select>
             <select id="jUrg"><option value="">Any urgency</option><option>Normal</option><option>Urgent</option></select>
           </div>
           <div class="split">
@@ -1152,7 +1152,7 @@ const availBadge = w => { const a = wAvail(w); return bdg({ Available: "ok", Pla
 const verBadge = w => w.status === "approved" ? bdg("ok", "Verified") : w.status === "rejected" ? bdg("bad", "Rejected") : bdg("warn", "Pending");
 const empVerBadge = e => ({ verified: bdg("ok", "Verified"), suspended: bdg("bad", "Suspended"), pending: bdg("warn", "Pending") })[eVer(e)];
 const billBadge = e => { const b = e.billingStatus || "Not Started"; return bdg({ Current: "ok", Pending: "warn", Overdue: "bad", Suspended: "bad", "Not Started": "mute" }[b] || "mute", b); };
-const jobBadge = j => bdg({ Open: "info", "Partially Filled": "warn", Filled: "ok", Closed: "mute" }[j.status] || "mute", j.status || "Open");
+const jobBadge = j => bdg({ "Pending Review": "warn", Open: "info", "Partially Filled": "warn", Filled: "ok", Closed: "mute" }[j.status] || "mute", j.status || "Open");
 const plBadge = p => bdg({ Suggested: "mute", "Pending Employer Review": "warn", "OTP Verified": "info", "Active Placement": "ok", Completed: "mute", Cancelled: "bad" }[p.status] || "mute", p.status);
 const sheetBadge = s => bdg({ Pending: "warn", Approved: "info", Paid: "ok", Disputed: "bad" }[s.approvalStatus] || "mute", s.approvalStatus);
 const urgBadge = j => j.urgency === "Urgent" ? bdg("bad", "Urgent") : "";
@@ -1353,7 +1353,7 @@ const ROLE_TO_APP = { "Maid / Housekeeper": "House Maid", "Nanny / Caregiver": "
 const ROLE_FROM_APP = Object.fromEntries(Object.entries(ROLE_TO_APP).map(([k, v]) => [v, k]));
 const REG_TYPES = ["Live-in", "Full-Time (Live-out)", "Part-Time / Shift", "On-Call / Daily", "Fixed-Term Contract"];
 const REG_FEES = ["Paid", "Pending", "Invoiced", "Partial", "Waived"];
-const REG_STATS = ["Active", "Pending Onboarding", "On Leave", "Completed", "Replaced", "Terminated"];
+const REG_STATS = ["Available", "Placed", "Pending", "Inactive", "Rejected"];
 const REG_COLS = [   // [header, width px]
   ["S/N", 44], ["Worker ID", 89], ["Full Name\n(እና የአባት ስም)", 173], ["Gender & Age", 96], ["National / Kebele ID No.", 131], ["Worker Phone & Address", 180],
   ["Job Role / Skill", 145], ["Placement Type", 145], ["Assigned Employer / Site", 187], ["Start Date", 110], ["End / Exit Date", 110], ["Agreed Rate / Salary (ETB)", 131],
@@ -1365,10 +1365,11 @@ $("wType").innerHTML = '<option value="">All placement types</option>' + REG_TYP
 $("wFee").innerHTML = '<option value="">All fee statuses</option>' + REG_FEES.map(x => `<option>${esc(x)}</option>`).join("");
 $("wStat").innerHTML = '<option value="">All current statuses</option>' + REG_STATS.map(x => `<option>${esc(x)}</option>`).join("");
 let privs = {}, privTried = new Set();
+let regEditId = null;
 
 const rRole = w => ROLE_FROM_APP[w.skill] || w.skill || "";
 const rSite = w => w.siteName != null ? w.siteName : (w.assignedEmployerName || "");
-const rStat = w => w.regStatus != null ? w.regStatus : (w.status === "pending" ? "Pending Onboarding" : rSite(w) ? "Active" : "");
+const rStat = w => wAvail(w);
 const rVet = w => w.vettingStatus != null ? w.vettingStatus : (w.status === "approved" ? "ID Verified" + (w.hasPoliceClearance ? " + Police Clearance" : "") : "");
 const rRate = w => { if (w.agreedRate != null && w.agreedRate !== "") return Number(w.agreedRate); const n = parseFloat(String(w.pay || "").replace(/[^\d.]/g, "")); return isNaN(n) ? "" : n; };
 const rGA = w => (w.gender ? w.gender + " / " : "") + (w.age || "");
@@ -1404,17 +1405,30 @@ function regRows() {
 function renderWorkers(keepFocus) {
   const cnt = f => allW.filter(f).length, av = w => wAvail(w) === "Available";
   $("wChips").innerHTML = chipsHtml([["all", "All", allW.length], ["Available", "Available", cnt(av)], ["Placed", "Placed", cnt(w => wAvail(w) === "Placed")], ["Pending", "Pending", pending.length], ["Inactive", "Inactive", cnt(w => wAvail(w) === "Inactive")], ["Rejected", "Rejected", cnt(w => w.status === "rejected")]], "fw", wFilter);
-  const edit = can("manage"), dis = edit ? "" : " disabled";
+  const canEdit = can("manage");
   const rows = regRows();
-  const inp = (f, id, v, cls = "", type = "text", ph = "") => `<input class="rc ${cls}" data-f="${f}" data-id="${esc(id)}" type="${type}" value="${esc(v)}"${ph ? ` placeholder="${ph}"` : ""}${dis}>`;
-  const sel = (f, id, list, v, cls = "mid") => `<select class="rc ${cls}" data-f="${f}" data-id="${esc(id)}"${dis}><option value=""></option>${(list.includes(v) || !v ? list : [...list, v]).map(o => `<option${o === v ? " selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
-  const acts = w => `<button title="View" data-act="viewWorker" data-id="${esc(w.id)}">👁</button>` +
-    (w.status === "pending" ? (can("verify") ? `<button class="ok" title="Approve" data-approve="${esc(w.id)}">✓</button><button class="no" title="Reject" data-reject="${esc(w.id)}">✗</button>` : "")
-      : w.status === "rejected" ? (can("verify") ? `<button class="ok" title="Approve" data-approve="${esc(w.id)}">✓</button>` : "")
-      : (edit && !w.assignedEmployerId ? `<button title="${w.available ? "Set Inactive" : "Set Available"}" data-tg="${esc(w.id)}">${w.available ? "⏸" : "▶"}</button>` : "")) +
-    (edit ? `<button title="Edit full profile" data-ed="${esc(w.id)}">✏️</button><button class="no" title="Delete" data-dw="${esc(w.id)}">🗑</button>` : "");
+  const inp = (f, id, v, cls = "", type = "text", ph = "") => {
+    const dis = (canEdit && regEditId === id) ? "" : " disabled";
+    return `<input class="rc ${cls}" data-f="${f}" data-id="${esc(id)}" type="${type}" value="${esc(v)}"${ph ? ` placeholder="${ph}"` : ""}${dis}>`;
+  };
+  const sel = (f, id, list, v, cls = "mid") => {
+    const dis = (canEdit && regEditId === id) ? "" : " disabled";
+    return `<select class="rc ${cls}" data-f="${f}" data-id="${esc(id)}"${dis}><option value=""></option>${(list.includes(v) || !v ? list : [...list, v]).map(o => `<option${o === v ? " selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
+  };
+  const acts = w => {
+    let h = `<button title="View" data-act="viewWorker" data-id="${esc(w.id)}">👁</button>`;
+    if (w.status === "pending" && can("verify")) h += `<button class="ok" title="Approve" data-approve="${esc(w.id)}">✓</button><button class="no" title="Reject" data-reject="${esc(w.id)}">✗</button>`;
+    else if (w.status === "rejected" && can("verify")) h += `<button class="ok" title="Approve" data-approve="${esc(w.id)}">✓</button>`;
+    if (canEdit) {
+      const editing = regEditId === w.id;
+      h += `<button title="${editing ? "Done editing" : "Edit row"}" data-regedit="${esc(w.id)}">${editing ? "✓" : "✏️"}</button>`;
+      h += `<button title="Edit full profile" data-ed="${esc(w.id)}">📝</button>`;
+      h += `<button class="no" title="Delete" data-dw="${esc(w.id)}">🗑</button>`;
+    }
+    return h;
+  };
   const head = REG_COLS.map(([h], i) => `<th class="${i < 3 ? "stick s" + i : ""}">${esc(h)}</th>`).join("") + `<th style="width:150px">Actions</th>`;
-  const body = rows.map(({ w, rid }, i) => { const pr = privs[w.id] || {}; return `<tr>
+  const body = rows.map(({ w, rid }, i) => { const pr = privs[w.id] || {}; return `<tr${regEditId === w.id ? ' style="outline:2px solid #0284c7;outline-offset:-2px"' : ""}>
     <td class="sn stick s0">${i + 1}</td>
     <td class="ctr stick s1"><b>${esc(rid)}</b></td>
     <td class="stick s2">${inp("name", w.id, w.name || "")}</td>
@@ -1434,7 +1448,8 @@ function renderWorkers(keepFocus) {
     <td>${inp("remarks", w.id, w.remarks || "")}</td>
     <td class="act">${acts(w)}</td></tr>`; }).join("");
   const keep = (() => { const a = document.activeElement; return keepFocus === true && a && a.dataset && a.dataset.f ? { f: a.dataset.f, id: a.dataset.id } : null; })();
-  $("tbWorkers").innerHTML = `<div class="reg-wrap"><table class="reg"><colgroup>${REG_COLS.map(([, wd]) => `<col style="width:${wd}px">`).join("")}<col style="width:150px"></colgroup><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="18" class="reg-empty">No workers match</td></tr>`}</tbody></table></div><div class="reg-count">${rows.length} of ${allW.length} workers${edit ? " · click any cell to edit — changes save automatically" : ""}</div>`;
+  const hint = canEdit ? (regEditId ? " · editing row — changes save automatically · tap ✓ when done" : " · click ✏️ to edit a row") : "";
+  $("tbWorkers").innerHTML = `<div class="reg-wrap"><table class="reg"><colgroup>${REG_COLS.map(([, wd]) => `<col style="width:${wd}px">`).join("")}<col style="width:150px"></colgroup><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="18" class="reg-empty">No workers match</td></tr>`}</tbody></table></div><div class="reg-count">${rows.length} of ${allW.length} workers${hint}</div>`;
   if (keep) { const el = document.querySelector(`#tbWorkers [data-f="${keep.f}"][data-id="${keep.id}"]`); if (el) el.focus(); }
   fillPrivs();
 }
@@ -1457,7 +1472,14 @@ async function regSave(el) {
   else if (f === "fee") wu.feeStatus = v;
   else if (f === "guar") { const m = v.match(/^(.*?)\s*(?:\((.*)\))?\s*$/); pu.guarantorName = (m[1] || "").trim(); pu.guarantorPhone = (m[2] || "").trim(); }
   else if (f === "vet") wu.vettingStatus = v;
-  else if (f === "rstat") wu.regStatus = v;
+  else if (f === "rstat") {
+    if (v === "Available") Object.assign(wu, { status: "approved", available: true, work_status: "", availability_status: "", assignedEmployerName: "", assigned_employer: null, assignedEmployerId: null, regStatus: v });
+    else if (v === "Placed") Object.assign(wu, { status: "approved", available: false, work_status: "on_work", availability_status: "On Work", regStatus: v });
+    else if (v === "Pending") Object.assign(wu, { status: "pending", available: false, work_status: "", availability_status: "", regStatus: v });
+    else if (v === "Inactive") Object.assign(wu, { status: "approved", available: false, work_status: "", availability_status: "", assignedEmployerName: "", assigned_employer: null, assignedEmployerId: null, regStatus: v });
+    else if (v === "Rejected") Object.assign(wu, { status: "rejected", available: false, work_status: "", availability_status: "", regStatus: v });
+    else wu.regStatus = v;
+  }
   else if (f === "remarks") wu.remarks = v;
   else return;
   el.classList.remove("saved");
@@ -1466,6 +1488,7 @@ async function regSave(el) {
     if (Object.keys(pu).length) { await setDoc(doc(db, "workers_private", id), pu, { merge: true }); privs[id] = { ...(privs[id] || {}), ...pu }; }
     if (f === "ga") el.value = rGA(w);
     toast("Saved");
+    if (f === "rstat") renderWorkers(true);
   } catch (err) { alert("Could not save: " + err.message); }
 }
 $("tbWorkers").addEventListener("change", e => { if (e.target.matches("[data-f]")) regSave(e.target); });
@@ -1474,9 +1497,10 @@ $("tbWorkers").addEventListener("keydown", e => { if (e.key === "Enter" && e.tar
 
 function renderMatches() {
   const openJobs = jobs.filter(j => ["Open", "Partially Filled"].includes(j.status));
+  const pendingJobs = jobs.filter(j => j.status === "Pending Review");
   $("mKpis").innerHTML = kpiHtml([
-    ["Open Job Orders", openJobs.length], ["Suggested Matches", openJobs.reduce((a, j) => a + candidates(j).length, 0), "", "Verified + available"],
-    ["Pending Employer Review", places.filter(p => p.status === "Pending Employer Review").length, "", "Awaiting OTP"],
+    ["Open Job Orders", openJobs.length], ["Pending Job Requests", pendingJobs.length, pendingJobs.length ? "alert" : "", "Awaiting verification"],
+    ["Suggested Matches", openJobs.reduce((a, j) => a + candidates(j).length, 0), "", "Verified + available"],
     ["Active Placements", places.filter(p => p.status === "Active Placement").length]
   ]);
   const q = needle("jSearch"), st = $("jStatus").value, ur = $("jUrg").value;
@@ -1487,7 +1511,7 @@ function renderMatches() {
       <div class="t">${esc(j.title)} — ${esc(j.employerName)}</div>
       <div class="m">${etb(j.payRate)}/${rateWord(j.payType)} · ${esc(j.city || "—")} · Start ${esc(j.startDate || "—")}</div>
       <div>${jobBadge(j)} ${urgBadge(j)} ${bdg("mute", filledCount(j.id) + "/" + (j.workersNeeded || 1) + " workers")}</div>
-      ${can("place") ? `<div class="acts">${A("editJob", "Edit", "", `data-id="${esc(j.id)}"`)}${j.status === "Closed" ? A("reopenJob", "Reopen", "btn-info", `data-id="${esc(j.id)}"`) : A("closeJob", "Close", "", `data-id="${esc(j.id)}"`)}<button class="btn-secondary btn-danger" data-act="delJob" data-id="${esc(j.id)}">Delete</button></div>` : ""}
+      ${can("place") ? `<div class="acts">${A("editJob", "Edit", "", `data-id="${esc(j.id)}"`)}${j.status === "Pending Review" ? A("approveJob", "Approve & Publish", "btn-success", `data-id="${esc(j.id)}"`) : ""}${j.status === "Closed" ? A("reopenJob", "Reopen", "btn-info", `data-id="${esc(j.id)}"`) : (j.status !== "Pending Review" ? A("closeJob", "Close", "", `data-id="${esc(j.id)}"`) : "")}<button class="btn-secondary btn-danger" data-act="delJob" data-id="${esc(j.id)}">Delete</button></div>` : ""}
     </div>`).join("") : `<div class="empty">No job orders yet. Create one with “+ New Job Order”.</div>`;
 
   const job = jById(selJobId);
@@ -1691,7 +1715,7 @@ function jobForm(j) {
     { k: "payRate", label: "Worker pay rate (ETB)", type: "number", min: 0, step: "0.01", req: 1 },
     { k: "urgency", label: "Urgency", type: "select", opts: ["Normal", "Urgent"] }
   ];
-  if (j) fields.push({ k: "status", label: "Status", type: "select", opts: ["Open", "Partially Filled", "Filled", "Closed"] });
+  if (j) fields.push({ k: "status", label: "Status", type: "select", opts: ["Pending Review", "Open", "Partially Filled", "Filled", "Closed"] });
   openForm({
     title: j ? "Edit Job Order" : "New Job Order", fields, values: j || { workersNeeded: 1, payType: "monthly", urgency: "Normal" },
     onSave: async v => {
@@ -2046,6 +2070,7 @@ const ACTIONS = {
   // --- job orders ---
   newJob() { jobForm(null); return false; },
   editJob(d) { jobForm(jById(d.id)); return false; },
+  async approveJob(d) { await updateDoc(doc(db, "job_orders", d.id), { status: "Open", verifiedAt: serverTimestamp(), verifiedBy: me?.email || me?.uid || "admin" }); toast("Job published — matching workers can see it"); },
   async closeJob(d) { await updateDoc(doc(db, "job_orders", d.id), { status: "Closed" }); },
   async reopenJob(d) { const j = jById(d.id); await updateDoc(doc(db, "job_orders", d.id), { status: "Open" }); await setJobFill({ ...j, status: "Open" }, filledCount(d.id)); },
   async delJob(d) { if (!confirm("Delete this job order? Its placements stay in the Placements list.")) return false; await deleteDoc(doc(db, "job_orders", d.id)); },
@@ -2244,7 +2269,11 @@ async function onAction(e) {
       if(!confirm(`Delete ${w?w.name:"this worker"} permanently?`+(live?`\nThis worker has ${live} live placement(s).`:"")+"\nTheir private details (phone, ID, guarantor) are removed too. This cannot be undone."))return;
       const b=writeBatch(db); b.delete(doc(db,"workers",d.dw)); b.delete(doc(db,"workers_private",d.dw)); await b.commit(); toast("Worker deleted");
     }
-    else if (d.ed) { $("infoModal").classList.add("hid"); return startEdit(d.ed); }
+    else if (d.regedit) {
+      regEditId = regEditId === d.regedit ? null : d.regedit;
+      return renderWorkers(true);
+    }
+    else if (d.ed) { $("infoModal").classList.add("hid"); regEditId = null; return startEdit(d.ed); }
     else return;
     $("infoModal").classList.add("hid");
     await loadAdmin();
