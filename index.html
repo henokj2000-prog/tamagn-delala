@@ -150,6 +150,31 @@ main { max-width: 1180px; margin: 0 auto; padding: 0 14px 24px; }
 .role-btn.employer { border-left: 5px solid #0284c7; }
 .role-btn.worker { border-left: 5px solid #059669; }
 
+/* Cover ad: badge + benefit points */
+.hero-badge {
+  align-self: center;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; margin-bottom: 10px;
+  border-radius: 999px;
+  background: rgba(125, 211, 252, 0.16);
+  border: 1px solid rgba(125, 211, 252, 0.45);
+  color: #bae6fd; font-size: 12px; font-weight: 700; letter-spacing: .2px;
+}
+.hero-left h2 .accent { color: #fbbf24; }
+.hero-points { display: grid; gap: 8px; margin: 0 0 16px; }
+.hero-point {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 12px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.18);
+  font-size: 13.5px; font-weight: 600; line-height: 1.35;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.35);
+}
+.hero-point b { color: #fbbf24; }
+.hero-point .pi { font-size: 20px; flex: 0 0 auto; }
+@media (max-height: 640px) { .hero-points { display: none; } }
+@media (min-width: 640px) { .hero-badge { align-self: flex-start; } }
+
 /* Hide the old skills grid on the landing – the poster already shows the services */
 /* services list is shown on the landing screen (styles at end of file) */
 
@@ -473,8 +498,13 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
       <div class="hero-bg"></div>
       <div class="hero-content">
         <div class="hero-left">
+          <div class="hero-badge" id="heroBadge">📱 Tamagn Delala · ታማኝ ደላላ</div>
           <h2 id="landingTitle">Find · Hire · Work</h2>
           <p id="landingSub">Trusted workers for your home &amp; business</p>
+          <div class="hero-points">
+            <div class="hero-point"><span class="pi">👷</span><span id="heroPoint1">Looking for work? Get hired.</span></div>
+            <div class="hero-point"><span class="pi">🏠</span><span id="heroPoint2">Need a worker? Find one.</span></div>
+          </div>
 
           <button class="role-btn employer" id="btnEmployer" type="button">
             <div class="icon">🔍</div>
@@ -566,7 +596,7 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
           <h3 style="margin-bottom:10px" id="jobPostTitle">Post a Job Request</h3>
           <p class="who" id="jobPostNote">Admin will verify your request. Matching workers will then see it.</p>
           <label id="lblJobTitle">Job title *</label>
-          <input id="job_title" maxlength="80" placeholder="ለምሳሌ፦ ተመላላሽ ሠራተኛ">
+          <input id="job_title" maxlength="80" placeholder="e.g. Live-in house maid">
           <label id="lblJobSkill">Required skill *</label>
           <select id="job_skill"></select>
           <label id="lblJobPlaceType">Desired placement type *</label>
@@ -586,7 +616,7 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
             <option value="hourly">Hourly</option>
           </select>
           <label id="lblJobPay">Pay rate (ETB) *</label>
-          <input id="job_pay" type="number" min="0" step="1" placeholder="ለምሳሌ፦ 5000">
+          <input id="job_pay" type="number" min="0" step="1" placeholder="e.g. 5000">
           <label id="lblJobNeed">Workers needed</label>
           <input id="job_need" type="number" min="1" value="1">
           <label id="lblJobUrg">Urgency</label>
@@ -595,7 +625,7 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
             <option value="Urgent">Urgent</option>
           </select>
           <label id="lblJobNotes">Notes (optional)</label>
-          <textarea id="job_notes" maxlength="300" placeholder="ሌላ ማብራሪያ..."></textarea>
+          <textarea id="job_notes" maxlength="300" placeholder="Shift times, live-in, etc."></textarea>
           <button class="btn-primary" id="jobPostBtn" style="margin-top:8px">Submit Job Request</button>
         </div>
         <div id="jobPostSuccess" class="form-card hid" style="text-align:center">
@@ -877,8 +907,11 @@ const SKILLS = [
 const i18n = {
   en: {
     tagline: "Trusted Workers",
-    landingTitle: "Find · Hire · Work",
-    landingSub: "Trusted workers for your home & business",
+    heroBadge: "📱 Right from your phone",
+    landingTitle: "No more running around for a broker!",
+    landingSub: "Job seeker or employer — connect in minutes, right from your phone.",
+    heroPoint1: "<b>Looking for work?</b> Register once and get hired.",
+    heroPoint2: "<b>Need a worker?</b> Find a trusted worker.",
     skillsTitle: "Our Services",
     shareTitle: "Share Tamagn Delala",
     shareText: "Find trusted workers or get hired with Tamagn Delala — ታማኝ ደላላ",
@@ -990,8 +1023,11 @@ const i18n = {
   },
   am: {
     tagline: "ታማኝ ሰራተኞች",
-    landingTitle: "ፈልግ · ቅጠር · ሥራ",
-    landingSub: "ለቤትዎና ንግድዎ የታመኑ ሰራተኞች",
+    heroBadge: "📱 በስልክዎ ብቻ",
+    landingTitle: "ደላላ ፍለጋ መዞር ቀረ!",
+    landingSub: "ስራ ፈላጊም ሆኑ አሰሪ — በስልክዎ ብቻ በቀላሉ ይገናኙ።",
+    heroPoint1: "<b>ስራ ፈላጊ ነዎት?</b> አንድ ጊዜ ይመዝገቡ፤ ስራ ያገኛሉ።",
+    heroPoint2: "<b>ሰራተኛ ይፈልጋሉ?</b> የታመነ ሰራተኛ ያገኛሉ።",
     skillsTitle: "አገልግሎቶቻችን",
     shareTitle: "ታማኝ ደላላን ያጋሩ",
     shareText: "በታማኝ ደላላ የታመኑ ሰራተኞችን ያግኙ ወይም ስራ ያግኙ — Tamagn Delala",
@@ -1040,8 +1076,8 @@ const i18n = {
     genderFemale: "ሴት", genderMale: "ወንድ",
     skillRequired: "እባክዎ ቢያንስ አንድ ክህሎት ይምረጡ",
     expYearsRequired: "እባክዎ የልምድ ዓመታት ያስገቡ",
-    placeLiveIn: "አብሮ ነዋሪ", placeFullTime: "ሙሉ ጊዜ (ከቤት ውጭ)", placePartTime: "ከፊል ጊዜ / ሺፍት",
-    placeOnCall: "በጥሪ / ዕለታዊ / ተመላላሽ", placeFixed: "ጊዜያዊ ውል",
+    placeLiveIn: "ከቤት ውስጥ (Live-in)", placeFullTime: "ሙሉ ጊዜ (ከቤት ውጭ)", placePartTime: "ከፊል ጊዜ / ሺፍት",
+    placeOnCall: "በጥሪ / ዕለታዊ", placeFixed: "ጊዜያዊ ውል",
     tabBrowse: "ሰራተኞችን ይመልከቱ", tabPostJob: "የስራ ጥያቄ ይላኩ",
     jobPostTitle: "የስራ ጥያቄ ይላኩ",
     jobPostNote: "አስተዳዳሪው ያረጋግጣል። ከዚያ የሚመቹ ሰራተኞች ያዩታል።",
@@ -1056,7 +1092,7 @@ const i18n = {
     wGateNote: "በምዝገባዎ የተጠቀሙበት ቴሌግራም ይክፈቱ፣ ወይም መጀመሪያ ይመዝገቡ።",
     wGoRegister: "እንደ ሰራተኛ ይመዝገቡ",
     wEditTitle: "መገለጫ አርትዕ",
-    wEditBtn: "✏️ መገለጫ ማስተካከያ",
+    wEditBtn: "✏️ መገለጫ አርትዕ",
     wUpdate: "ለውጦችን አስቀምጥ",
     wJobsTitle: "ከክህሎትዎ ጋር የሚመቹ ስራዎች",
     wJobsSub: "የተረጋገጡ (የታተሙ) የስራ ጥያቄዎች ብቻ እዚህ ይታያሉ። አዲስ የሚመቹ ስራዎች ከዚህ በታች ይታያሉ።",
@@ -1126,6 +1162,9 @@ function applyLang() {
   $("langBtn").textContent = t("langBtn");
   $("landingTitle").textContent = t("landingTitle");
   $("landingSub").textContent = t("landingSub");
+  if ($("heroBadge")) $("heroBadge").textContent = t("heroBadge");
+  if ($("heroPoint1")) $("heroPoint1").innerHTML = t("heroPoint1");
+  if ($("heroPoint2")) $("heroPoint2").innerHTML = t("heroPoint2");
   if ($("skillsTitle")) $("skillsTitle").textContent = t("skillsTitle");
   if ($("shareTitle")) $("shareTitle").textContent = t("shareTitle");
   $("btnEmployerTitle").textContent = t("btnEmployerTitle");
