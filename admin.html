@@ -592,6 +592,7 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
     <div><h1>Tamagn Delala</h1><span>Manager panel</span></div>
   </div>
   <div class="topbar-right" id="hdrUserBar">
+    <span class="who" id="liveDot" style="color:#16a34a;font-weight:700;font-size:12px">● Live</span>
     <button class="btn-secondary" id="langBtn" type="button" style="margin:0">አማርኛ</button>
     <span class="who hid" id="who"></span>
     <button class="btn-secondary hid" id="signOut">Sign out</button>
@@ -711,8 +712,8 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
         <div id="v-requests" class="view hid">
           <div class="view-head"><h2>Hire Requests</h2></div>
           <div class="panel-card" style="margin-bottom:14px">
-            <h3>🙋 Worker Job Interests</h3>
-            <div class="sub">Workers who tapped “I'm interested” on a published job</div>
+            <h3 id="lblInterestsTitle">🙋 Worker Job Interests</h3>
+            <div class="sub" id="lblInterestsSub">Workers who tapped “I'm interested” on a published job</div>
             <div id="tbInterests"></div>
           </div>
           <div class="chips" id="rChips"></div>
@@ -750,10 +751,12 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
             <label>Age *</label><input id="f_age" type="number" min="14" max="80" required>
             <label>Gender</label><select id="f_gender"><option value="">—</option><option value="F">Female</option><option value="M">Male</option></select>
             <label>Primary skill / role *</label><select id="f_skill" required></select>
-            <label>Other skills (comma separated)</label><input id="f_tags" maxlength="120" placeholder="e.g. Cooking, Cleaning">
+            <label>Additional skills (select all that apply)</label>
+            <div id="f_skillTags" class="chips" style="margin:0 0 12px;flex-wrap:wrap;gap:6px"></div>
+            <input type="hidden" id="f_tags">
             <label>Location *</label><input id="f_location" required maxlength="60">
-            <label>Experience *</label><input id="f_experience" required maxlength="120">
-            <label>Experience (years)</label><input id="f_expYears" type="number" min="0" max="60" step="0.5">
+            <label>Experience details *</label><input id="f_experience" required maxlength="160" placeholder="e.g. 3 years house maid, 1 year cooking">
+            <label>Experience (years) *</label><input id="f_expYears" type="number" min="0" max="60" step="0.5" required placeholder="e.g. 3">
             <label>Payment type *</label>
             <select id="f_paymentType"><option value="monthly">Monthly</option><option value="hourly">Hourly</option><option value="daily">Daily</option></select>
             <label>Pay (optional)</label><input id="f_pay" maxlength="60">
@@ -878,7 +881,7 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, writeBatch, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, writeBatch, query, orderBy, limit, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const ADMIN_EMAIL = "henokj2000@gmail.com";   // owner = Super Admin. Other staff are listed in the admin_users collection.
@@ -1066,7 +1069,37 @@ const i18n = {
     complete: "Complete",
     cancelPl: "Cancel",
     saveSettingsOk: "Settings saved.",
-    notAdmin: "Not admin"
+    notAdmin: "Not admin",
+    workerJobInterests: "🙋 Worker Job Interests",
+    workerJobInterestsSub: "Workers who tapped “I'm interested” on a published job",
+    noInterests: "No job interests yet — workers who tap “I'm interested” appear here.",
+    hireRequests: "Hire Requests",
+    staffRoles: "Staff Roles & Access Control",
+    liveSync: "Live",
+    liveSyncOn: "● Live updates on",
+    statusOpen: "Open",
+    statusClosed: "Closed",
+    statusPending: "Pending",
+    statusApproved: "Approved",
+    statusActive: "Active",
+    statusDone: "Done",
+    statusNew: "New",
+    viewWorker: "View worker",
+    openJob: "Open job",
+    markDone: "✓ Done",
+    colWorker: "Worker",
+    colEmployer: "Employer",
+    colJob: "Job",
+    colPhone: "Phone",
+    colWhen: "When",
+    colStatus: "Status",
+    colActions: "Actions",
+    colRequested: "Requested",
+    colPayment: "Payment",
+    all: "All",
+    unpaid: "Unpaid",
+    interest: "Interest",
+    noMatch: "No matches"
   },
   am: {
     langBtn: "English",
@@ -1199,7 +1232,37 @@ const i18n = {
     complete: "ጨርስ",
     cancelPl: "ሰርዝ",
     saveSettingsOk: "ቅንብሮች ተቀምጠዋል።",
-    notAdmin: "አስተዳዳሪ አይደሉም"
+    notAdmin: "አስተዳዳሪ አይደሉም",
+    workerJobInterests: "🙋 የሰራተኛ የስራ ፍላጎቶች",
+    workerJobInterestsSub: "በታተመ ስራ ላይ «ፍላጎት አለኝ» የጫኑ ሰራተኞች",
+    noInterests: "እስካሁን ፍላጎት የለም — ሰራተኞች «ፍላጎት አለኝ» ሲጫኑ እዚህ ይታያሉ።",
+    hireRequests: "የቅጥር ጥያቄዎች",
+    staffRoles: "የሰራተኛ ሚናዎች እና መዳረሻ",
+    liveSync: "ቀጥታ",
+    liveSyncOn: "● ቀጥታ ዝማኔ ንቁ",
+    statusOpen: "ክፍት",
+    statusClosed: "ተዘግቷል",
+    statusPending: "በመጠባበቅ",
+    statusApproved: "ጸድቋል",
+    statusActive: "ንቁ",
+    statusDone: "ተጠናቋል",
+    statusNew: "አዲስ",
+    viewWorker: "ሰራተኛ ተመልከት",
+    openJob: "ስራ ክፈት",
+    markDone: "✓ ተጠናቋል",
+    colWorker: "ሰራተኛ",
+    colEmployer: "አሰሪ",
+    colJob: "ስራ",
+    colPhone: "ስልክ",
+    colWhen: "ጊዜ",
+    colStatus: "ሁኔታ",
+    colActions: "እርምጃዎች",
+    colRequested: "የተጠየቀ",
+    colPayment: "ክፍያ",
+    all: "ሁሉም",
+    unpaid: "ያልተከፈለ",
+    interest: "ፍላጎት",
+    noMatch: "ምንም አልተገኘም"
   }
 };
 const t = key => (i18n[lang] && i18n[lang][key]) || (i18n.en[key]) || key;
@@ -1236,6 +1299,10 @@ function applyAdminLang() {
   setH2("#v-timesheets .view-head h2", "titlePayroll");
   setH2("#v-requests .view-head h2", "titleRequests");
   setH2("#v-settings .view-head h2", "titleSettings");
+  if ($("lblInterestsTitle")) $("lblInterestsTitle").textContent = t("workerJobInterests");
+  if ($("lblInterestsSub")) $("lblInterestsSub").textContent = t("workerJobInterestsSub");
+  const liveEl = $("liveDot");
+  if (liveEl) liveEl.textContent = t("liveSyncOn");
 
   if ($("btnNewEmp")) $("btnNewEmp").textContent = t("addEmployer");
   if ($("btnNewW")) $("btnNewW").textContent = t("addWorker");
@@ -1467,6 +1534,48 @@ const filledCount = jid => places.filter(p => p.jobId === jid && FILL.includes(p
 const wAvail = w => w.status === "pending" ? "Pending" : w.status === "rejected" ? "Rejected" : (w.assignedEmployerId || w.assignedEmployerName || w.work_status === "on_work") ? "Placed" : w.available ? "Available" : "Inactive";
 
 $("f_skill").innerHTML = SKILLS.map(s => `<option value="${esc(s.en)}">${s.en}</option>`).join("");
+
+function syncFTagsFromChips() {
+  const primary = $("f_skill") ? $("f_skill").value : "";
+  const tags = [...document.querySelectorAll("#f_skillTags .skill-chip.on")]
+    .map(c => c.dataset.skill)
+    .filter(s => s && s !== primary);
+  if ($("f_tags")) $("f_tags").value = tags.join(", ");
+  return tags;
+}
+function renderAdminSkillTags(selected) {
+  const box = $("f_skillTags");
+  if (!box) return;
+  const set = new Set(selected || []);
+  const primary = $("f_skill") ? $("f_skill").value : "";
+  box.innerHTML = SKILLS.map(s => {
+    if (s.en === primary) return ""; // primary is separate
+    const on = set.has(s.en) ? " on" : "";
+    return `<button type="button" class="skill-chip${on}" data-skill="${esc(s.en)}">${esc(s.en)}</button>`;
+  }).join("");
+  syncFTagsFromChips();
+}
+if ($("f_skillTags")) {
+  $("f_skillTags").onclick = e => {
+    const chip = e.target.closest(".skill-chip");
+    if (!chip) return;
+    chip.classList.toggle("on");
+    syncFTagsFromChips();
+  };
+}
+if ($("f_skill")) $("f_skill").addEventListener("change", () => {
+  const cur = ($("f_tags").value || "").split(",").map(s => s.trim()).filter(Boolean);
+  renderAdminSkillTags(cur);
+});
+renderAdminSkillTags([]);
+
+// minimal chip style if missing
+if (!document.getElementById("skillChipStyle")) {
+  const st = document.createElement("style");
+  st.id = "skillChipStyle";
+  st.textContent = `.skill-chip{border:1px solid #cbd5e1;background:#f8fafc;border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;color:#0f172a}.skill-chip.on{background:#0ea5e9;border-color:#0284c7;color:#fff;font-weight:700}`;
+  document.head.appendChild(st);
+}
 $("eInd").innerHTML = '<option value="">All industries</option>' + INDUSTRIES.map(s => `<option>${s}</option>`).join("");
 
 // ---- Live camera capture (passport 7:9 frame). Gallery picking is not offered. ----
@@ -1582,32 +1691,30 @@ onAuthStateChanged(auth, async user => {
   applyAdminLang();
 });
 
-// ---------- load ----------
-async function loadAdmin() {
-  loadErrors = [];
-  const safe = (p, name) => p.catch(() => { loadErrors.push(name); return { docs: [] }; });
-  const col = n => getDocs(collection(db, n));
-  const [rs, ws, es, js, ps, tss, ss, cs, st, agr, pvs, jis] = await Promise.all([
-    safe(getDocs(query(collection(db, "requests"), orderBy("createdAt", "desc"), limit(80))), "requests"),
-    safe(col("workers"), "workers"),
-    safe(col("employers"), "employers"),
-    safe(col("job_orders"), "job_orders"),
-    safe(col("placements"), "placements"),
-    safe(col("timesheets"), "timesheets"),
-    me.role === R_SA ? safe(col("admin_users"), "admin_users") : Promise.resolve({ docs: [] }),
-    getDocs(query(collection(db, "checkins"), orderBy("at", "desc"), limit(20))).catch(() => ({ docs: [] })),   // optional, written by the bot
-    getDoc(doc(db, "agency_settings", "main")).catch(() => { loadErrors.push("agency_settings"); return null; }),
-    safe(col("agreements"), "agreements"),
-    getDocs(collection(db, "workers_private")).catch(() => ({ docs: [] })),                 // phone, ID no., guarantor (for the register)
-    safe(getDocs(query(collection(db, "job_interests"), orderBy("createdAt", "desc"), limit(80))).catch(() => getDocs(collection(db, "job_interests"))), "job_interests")
-  ]);
-  privs = {}; pvs.docs.forEach(d => { privs[d.id] = d.data(); });
-  const map = s => s.docs.map(d => ({ id: d.id, ...d.data() }));
-  const byNew = (a, b) => ts(b.createdAt) - ts(a.createdAt);
-  reqs = map(rs);
-  // Job interests from dedicated collection + interest-only hire requests (fallback path)
-  const fromCol = map(jis).map(x => ({ ...x, _src: "job_interests" }));
-  const fromReq = map(rs).filter(r => r.interestOnly || r.source === "worker_interest" || r.type === "job_interest")
+// ---------- load (live sync across all devices) ----------
+let unsubs = [];
+let rebuildTimer = null;
+const raw = {
+  reqs: [], workers: [], employers: [], jobs: [], places: [], timesheets: [],
+  staff: [], checkins: [], agreements: [], privs: {}, interests: [], settingsDoc: null
+};
+
+function byNew(a, b) { return ts(b.createdAt) - ts(a.createdAt); }
+
+function rebuildFromRaw() {
+  const byNewLocal = byNew;
+  allW = [...raw.workers].sort(byNewLocal);
+  pending = allW.filter(w => w.status === "pending");
+  employers = [...raw.employers].sort(byNewLocal);
+  jobs = [...raw.jobs].sort(byNewLocal);
+  sheets = [...raw.timesheets].sort(byNewLocal);
+  staff = [...raw.staff];
+  checkins = [...raw.checkins];
+  privs = { ...raw.privs };
+
+  // Interests: job_interests + interest-only requests
+  const fromCol = raw.interests.map(x => ({ ...x, _src: "job_interests" }));
+  const fromReq = raw.reqs.filter(r => r.interestOnly || r.source === "worker_interest" || r.type === "job_interest")
     .map(r => ({
       id: r.id, _src: "requests", jobId: r.jobId || null, jobTitle: r.jobTitle || "",
       workerId: r.workerId, workerName: r.workerName, skill: r.skill || "", phone: r.employerPhone || "",
@@ -1615,18 +1722,13 @@ async function loadAdmin() {
       status: r.status === "closed" ? "done" : (r.status || "new"), createdAt: r.createdAt
     }));
   const seen = new Set(fromCol.map(i => `${i.workerId}_${i.jobId}_${ts(i.createdAt)}`));
-  interests = [...fromCol, ...fromReq.filter(i => !seen.has(`${i.workerId}_${i.jobId}_${ts(i.createdAt)}`))].sort(byNew);
-  // Hide pure interest rows from the normal hire-request list (they appear under Interests)
-  reqs = reqs.filter(r => !(r.interestOnly || r.source === "worker_interest" || r.type === "job_interest"));
-  allW = map(ws).sort(byNew);
-  pending = allW.filter(w => w.status === "pending");
-  employers = map(es).sort(byNew);
-  jobs = map(js).sort(byNew);
-  places = map(ps).sort(byNew);
-  // Sync: workers marked Placed / On Work via hire+agreement but missing a placements doc
-  // appear in the Placements list so the count matches the Workers directory.
+  interests = [...fromCol, ...fromReq.filter(i => !seen.has(`${i.workerId}_${i.jobId}_${ts(i.createdAt)}`))].sort(byNewLocal);
+
+  reqs = raw.reqs.filter(r => !(r.interestOnly || r.source === "worker_interest" || r.type === "job_interest"));
+
+  let placesList = [...raw.places].sort(byNewLocal);
   {
-    const covered = new Set(places.filter(p => BUSY.includes(p.status) || p.status === "Active Placement").map(p => p.workerId).filter(Boolean));
+    const covered = new Set(placesList.filter(p => BUSY.includes(p.status) || p.status === "Active Placement").map(p => p.workerId).filter(Boolean));
     const synthetic = allW.filter(w => {
       const placed = !!(w.assignedEmployerId || w.assignedEmployerName || w.assigned_employer || w.work_status === "on_work");
       return placed && w.id && !covered.has(w.id);
@@ -1634,41 +1736,95 @@ async function loadAdmin() {
       const empName = w.assignedEmployerName || w.assigned_employer || "—";
       const linkedReq = reqs.find(r => r.workerId === w.id && ["on_work", "on_process"].includes(reqStatus(r)));
       return {
-        id: "sync_" + w.id,
-        _synthetic: true,
-        workerId: w.id,
-        workerName: w.name,
-        employerId: w.assignedEmployerId || linkedReq?.employerId || null,
-        employerName: empName,
+        id: "sync_" + w.id, _synthetic: true, workerId: w.id, workerName: w.name,
+        employerId: w.assignedEmployerId || linkedReq?.employerId || null, employerName: empName,
         employerPhone: linkedReq?.employerPhone || "",
         jobTitle: (linkedReq && (linkedReq.agreementData?.skill || linkedReq.workerSkill)) || w.skill || "Placement",
-        jobId: null,
-        payRate: linkedReq?.agreementData?.pay || w.pay || null,
+        jobId: null, payRate: linkedReq?.agreementData?.pay || w.pay || null,
         payType: linkedReq?.agreementData?.payType || w.paymentType || "monthly",
-        status: "Active Placement",
-        commissionPaid: !!(linkedReq && linkedReq.paymentReceived),
+        status: "Active Placement", commissionPaid: !!(linkedReq && linkedReq.paymentReceived),
         handoverReceiptSigned: !!(linkedReq && linkedReq.agreementSigned),
         officeHandoverCompletedAt: linkedReq?.agreementSignedAt || w.placedAt || w.createdAt || null,
         createdAt: linkedReq?.agreementSignedAt || w.placedAt || w.createdAt || null,
-        requestId: linkedReq?.id || null,
-        source: "hire_request_sync"
+        requestId: linkedReq?.id || null, source: "hire_request_sync"
       };
     });
-    if (synthetic.length) places = [...synthetic, ...places].sort(byNew);
+    if (synthetic.length) placesList = [...synthetic, ...placesList].sort(byNewLocal);
   }
-  sheets = map(tss).sort(byNew);
-  staff = map(ss);
-  checkins = map(cs);
-  // agreements: the archive collection plus older ones that only live on the hire request
-  const dbAgs = map(agr), have = new Set(dbAgs.map(a => a.requestId).filter(Boolean));
-  const legacy = reqs.filter(r => hasAg(r) && !have.has(r.id)).map(r => { const d = r.agreementData || {}; return {
-    id: "req_" + r.id, requestId: r.id, _fromRequest: true, workerId: r.workerId || null, employerId: r.employerId || null,
-    workerName: d.workerName || r.workerName, employerName: d.empName || r.employerName, employerPhone: d.empPhone || r.employerPhone,
-    skill: d.skill || r.workerSkill, pay: d.pay, payType: d.payType, serviceFee: r.serviceFee, agreementData: r.agreementData,
-    signedAgreementUrl: r.signedAgreementUrl, status: r.agreementSigned ? "signed" : "draft", agreementSignedAt: r.agreementSignedAt, createdAt: r.createdAt }; });
+  places = placesList;
+
+  const dbAgs = [...raw.agreements], have = new Set(dbAgs.map(a => a.requestId).filter(Boolean));
+  const legacy = reqs.filter(r => hasAg(r) && !have.has(r.id)).map(r => {
+    const d = r.agreementData || {};
+    return {
+      id: "req_" + r.id, requestId: r.id, _fromRequest: true, workerId: r.workerId || null, employerId: r.employerId || null,
+      workerName: d.workerName || r.workerName, employerName: d.empName || r.employerName, employerPhone: d.empPhone || r.employerPhone,
+      skill: d.skill || r.workerSkill, pay: d.pay, payType: d.payType, serviceFee: r.serviceFee, agreementData: r.agreementData,
+      signedAgreementUrl: r.signedAgreementUrl, status: r.agreementSigned ? "signed" : "draft",
+      agreementSignedAt: r.agreementSignedAt, createdAt: r.createdAt
+    };
+  });
   ags = [...dbAgs, ...legacy].sort((a, b) => agTime(b) - agTime(a));
-  settings = { ...DEFAULTS, ...((st && st.exists && st.exists()) ? st.data() : {}) };
+  settings = { ...DEFAULTS, ...(raw.settingsDoc || {}) };
+
   renderAdmin();
+}
+
+function scheduleRebuild() {
+  clearTimeout(rebuildTimer);
+  rebuildTimer = setTimeout(rebuildFromRaw, 40);
+}
+
+function listenCol(qOrRef, key, name) {
+  const unsub = onSnapshot(qOrRef, snap => {
+    loadErrors = loadErrors.filter(x => x !== name);
+    raw[key] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    scheduleRebuild();
+  }, err => {
+    console.error(name, err);
+    if (!loadErrors.includes(name)) loadErrors.push(name);
+    scheduleRebuild();
+  });
+  unsubs.push(unsub);
+}
+
+async function loadAdmin() {
+  // Tear down previous listeners (e.g. re-login)
+  unsubs.forEach(u => { try { u(); } catch (_) {} });
+  unsubs = [];
+  loadErrors = [];
+
+  listenCol(query(collection(db, "requests"), orderBy("createdAt", "desc"), limit(100)), "reqs", "requests");
+  listenCol(collection(db, "workers"), "workers", "workers");
+  listenCol(collection(db, "employers"), "employers", "employers");
+  listenCol(collection(db, "job_orders"), "jobs", "job_orders");
+  listenCol(collection(db, "placements"), "places", "placements");
+  listenCol(collection(db, "timesheets"), "timesheets", "timesheets");
+  listenCol(collection(db, "agreements"), "agreements", "agreements");
+  listenCol(collection(db, "job_interests"), "interests", "job_interests");
+  unsubs.push(onSnapshot(collection(db, "workers_private"), snap => {
+    loadErrors = loadErrors.filter(x => x !== "workers_private");
+    const p = {};
+    snap.docs.forEach(d => { p[d.id] = d.data(); });
+    raw.privs = p;
+    scheduleRebuild();
+  }, err => {
+    console.error("workers_private", err);
+    if (!loadErrors.includes("workers_private")) loadErrors.push("workers_private");
+  }));
+
+  if (me.role === R_SA) listenCol(collection(db, "admin_users"), "staff", "admin_users");
+  else raw.staff = [];
+
+  unsubs.push(onSnapshot(query(collection(db, "checkins"), orderBy("at", "desc"), limit(20)), snap => {
+    raw.checkins = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    scheduleRebuild();
+  }, () => { raw.checkins = []; }));
+
+  unsubs.push(onSnapshot(doc(db, "agency_settings", "main"), snap => {
+    raw.settingsDoc = snap.exists() ? snap.data() : {};
+    scheduleRebuild();
+  }, () => { raw.settingsDoc = {}; }));
 }
 
 function isDue(r) {
@@ -2238,57 +2394,56 @@ function renderRequests() {
   const wm = new Map(allW.map(w => [w.id, w]));
   // Job interests (from worker "I'm interested")
   if ($("tbInterests")) {
-    const openI = interests.filter(i => i.status !== "done" && i.status !== "closed");
     $("tbInterests").innerHTML = interests.length ? table(
-      ["Worker", "Skill / Job", "Employer / Job", "Phone", "When", "Status", "Actions"],
+      [t("colWorker"), t("colJob"), t("colEmployer"), t("colPhone"), t("colWhen"), t("colStatus"), t("colActions")],
       interests.slice(0, 60).map(i => {
         const w = wm.get(i.workerId) || { name: i.workerName };
         const job = i.jobId ? jobs.find(j => j.id === i.jobId) : null;
         const jobLabel = i.jobTitle || job?.title || job?.requiredSkill || i.skill || "—";
         const empLabel = i.employerName || job?.employerName || "—";
         const phone = i.phone || (privs[i.workerId] && privs[i.workerId].phone) || "";
-        const st = (i.status === "done" || i.status === "closed") ? bdg("ok", "Done") : bdg("info", "New");
+        const st = (i.status === "done" || i.status === "closed") ? bdg("ok", t("statusDone")) : bdg("info", t("statusNew"));
         const acts = [];
-        if (i.workerId) acts.push(A("viewWorker", "View worker", "", `data-id="${esc(i.workerId)}"`));
-        if (i.jobId) acts.push(A("findMatch", "Open job", "btn-info", `data-id="${esc(i.jobId)}"`));
-        if (phone) acts.push(`<a class="btn-secondary btn-info" href="tel:${esc(phone)}">📞 Call</a>`);
-        if (i.telegramUserId) acts.push(`<a class="btn-secondary btn-info" href="tg://user?id=${esc(i.telegramUserId)}" target="_blank" rel="noopener">Telegram</a>`);
+        if (i.workerId) acts.push(A("viewWorker", t("viewWorker"), "", `data-id="${esc(i.workerId)}"`));
+        if (i.jobId) acts.push(A("findMatch", t("openJob"), "btn-info", `data-id="${esc(i.jobId)}"`));
+        if (phone) acts.push(`<a class="btn-secondary btn-info" href="tel:${esc(phone)}">${t("call")}</a>`);
+        if (i.telegramUserId) acts.push(`<a class="btn-secondary btn-info" href="tg://user?id=${esc(i.telegramUserId)}" target="_blank" rel="noopener">${t("telegram")}</a>`);
         if (i.status !== "done" && i.status !== "closed") {
-          acts.push(`<button class="btn-secondary btn-success" data-interest-done="${esc(i.id)}" data-src="${esc(i._src || "job_interests")}">✓ Done</button>`);
+          acts.push(`<button class="btn-secondary btn-success" data-interest-done="${esc(i.id)}" data-src="${esc(i._src || "job_interests")}">${t("markDone")}</button>`);
         }
-        acts.push(`<button class="btn-secondary btn-danger" data-interest-del="${esc(i.id)}" data-src="${esc(i._src || "job_interests")}">Delete</button>`);
+        acts.push(`<button class="btn-secondary btn-danger" data-interest-del="${esc(i.id)}" data-src="${esc(i._src || "job_interests")}">${t("delete")}</button>`);
         return `<tr>
           <td class="c-id"><div class="cell-id">${avatar(w)}<div><b>${esc(i.workerName || w.name || "—")}</b><div class="who">${esc(i.skill || w.skill || "")}</div></div></div></td>
-          <td data-l="Job">${esc(jobLabel)}</td>
-          <td data-l="Employer">${esc(empLabel)}</td>
-          <td data-l="Phone">${esc(phone || "—")}</td>
-          <td data-l="When">${fmtDate(i.createdAt) || ago(ts(i.createdAt))}</td>
-          <td data-l="Status">${st}</td>
+          <td data-l="${esc(t("colJob"))}">${esc(jobLabel)}</td>
+          <td data-l="${esc(t("colEmployer"))}">${esc(empLabel)}</td>
+          <td data-l="${esc(t("colPhone"))}">${esc(phone || "—")}</td>
+          <td data-l="${esc(t("colWhen"))}">${fmtDate(i.createdAt) || ago(ts(i.createdAt))}</td>
+          <td data-l="${esc(t("colStatus"))}">${st}</td>
           <td class="c-act"><div class="acts">${acts.join("")}</div></td>
         </tr>`;
       }),
-      "No job interests yet — workers who tap “I'm interested” appear here."
-    ) : `<div class="empty">No job interests yet — workers who tap “I'm interested” appear here.</div>`;
+      t("noInterests")
+    ) : `<div class="empty">${t("noInterests")}</div>`;
   }
 
   const cnt = f => reqs.filter(f).length;
   $("rChips").innerHTML = chipsHtml([
-    ["all", "All", reqs.length],
-    ["open", "Open", cnt(r => reqStatus(r) === "open")],
-    ["on_process", "On process", cnt(r => reqStatus(r) === "on_process")],
-    ["on_work", "On work", cnt(r => reqStatus(r) === "on_work")],
-    ["closed", "Closed", cnt(r => reqStatus(r) === "closed")],
-    ["unpaid", "Unpaid", cnt(r => !r.paymentReceived)]
+    ["all", t("all"), reqs.length],
+    ["open", t("statusOpen"), cnt(r => reqStatus(r) === "open")],
+    ["on_process", t("onProcess"), cnt(r => reqStatus(r) === "on_process")],
+    ["on_work", t("onWork"), cnt(r => reqStatus(r) === "on_work")],
+    ["closed", t("statusClosed"), cnt(r => reqStatus(r) === "closed")],
+    ["unpaid", t("unpaid"), cnt(r => !r.paymentReceived)]
   ], "fr", rFilter);
   let rows = reqs.filter(r => rFilter === "all" || (rFilter === "unpaid" ? !r.paymentReceived : reqStatus(r) === rFilter));
   const q = needle("rSearch"); if (q) rows = rows.filter(r => hay(r.workerName, r.employerName, r.employerPhone, r.employerUsername).includes(q));
-  $("tbReq").innerHTML = table(["Worker", "Employer", "Requested", "Status", "Payment", "Actions"], rows.map(r => `
+  $("tbReq").innerHTML = table([t("colWorker"), t("colEmployer"), t("colRequested"), t("colStatus"), t("colPayment"), t("colActions")], rows.map(r => `
     <tr>
       <td class="c-id"><div class="cell-id">${avatar(wm.get(r.workerId) || { name: r.workerName })}<div><b>${esc(r.workerName)}</b></div></div></td>
-      <td data-l="Employer"><div>${tgLink(r.employerUsername, r.employerName || "")}<div class="who" style="margin:0">${esc(r.employerPhone || "")}</div></div></td>
-      <td data-l="Requested">${fmtDate(r.createdAt)}</td><td data-l="Status">${reqBadge(r)}</td><td data-l="Payment">${payBadge(r)}</td>
+      <td data-l="${esc(t("colEmployer"))}"><div>${tgLink(r.employerUsername, r.employerName || "")}<div class="who" style="margin:0">${esc(r.employerPhone || "")}</div></div></td>
+      <td data-l="${esc(t("colRequested"))}">${fmtDate(r.createdAt)}</td><td data-l="${esc(t("colStatus"))}">${reqBadge(r)}</td><td data-l="${esc(t("colPayment"))}">${payBadge(r)}</td>
       <td class="c-act"><div class="acts">${reqBtns(r)}</div></td>
-    </tr>`), "No hire requests match");
+    </tr>`), t("noMatch"));
 }
 
 function renderSettings() {
@@ -3124,6 +3279,7 @@ async function startEdit(id) {
   $("f_id").value=id; $("f_name").value=w.name||""; $("f_age").value=w.age||""; $("f_gender").value=w.gender||"";
   $("f_skill").value=w.skill||""; $("f_location").value=w.location||""; $("f_experience").value=w.experience||"";
   $("f_expYears").value=w.experienceYears ?? ""; $("f_tags").value=(w.skillTags||[]).join(", ");
+  renderAdminSkillTags(w.skillTags || []);
   $("f_paymentType").value=w.paymentType||"monthly"; $("f_pay").value=w.pay||"";
   if ($("f_placementType")) $("f_placementType").value = w.placementType || "Live-in";
   $("f_nationalId").value=priv.nationalId||""; $("f_phone").value=priv.phone||""; $("f_tgid").value=priv.telegramUserId||"";
@@ -3138,6 +3294,7 @@ async function startEdit(id) {
 function resetForm() {
   $("wf").reset(); setAdminPhoto(null); setAdminIdPhoto(null); $("f_id").value = "";
   $("cancelEdit").classList.add("hid"); $("formTitle").textContent = t("titleAddWorker");
+  renderAdminSkillTags([]);
 }
 $("cancelEdit").onclick = () => { resetForm(); showView("workers"); };
 
@@ -3195,6 +3352,10 @@ $("wf").onsubmit = async e => {
   try {
     const id=$("f_id").value; const ref=id?doc(db,"workers",id):doc(collection(db,"workers"));
     const yrs=$("f_expYears").value;
+    if (yrs==="" || isNaN(Number(yrs)) || Number(yrs) < 0) {
+      alert(lang === "am" ? "እባክዎ የልምድ ዓመታት ያስገቡ" : "Please enter years of experience");
+      btn.disabled=false; return;
+    }
     // Require both photos when adding a new worker
     if (!id) {
       if (!adminPhotoData) { alert("Please capture the worker's profile photo."); btn.disabled=false; return; }
@@ -3203,7 +3364,7 @@ $("wf").onsubmit = async e => {
     const publicData={
       name:$("f_name").value.trim(), age:Number($("f_age").value), gender:$("f_gender").value, skill:$("f_skill").value,
       location:$("f_location").value.trim(), experience:$("f_experience").value.trim(),
-      experienceYears: yrs===""?null:Number(yrs), skillTags:$("f_tags").value.split(",").map(s=>s.trim()).filter(Boolean),
+      experienceYears: yrs===""?null:Number(yrs), skillTags: syncFTagsFromChips(),
       paymentType:$("f_paymentType").value, pay:$("f_pay").value.trim()||"Negotiable",
       placementType: $("f_placementType") ? $("f_placementType").value : "",
       hasNationalId:true, hasIdPhoto: !!(adminIdPhotoData || (id && true)), hasPoliceClearance:$("f_police").value==="yes"
