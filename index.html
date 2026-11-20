@@ -1614,7 +1614,7 @@ async function loadMatchingJobs(w) {
         <div class="jm">👔 ${esc(j.employerName || "")}</div>
         <div class="jp">💰 ${esc(pay)}</div>
         ${j.notes ? `<div class="jm">${esc(j.notes)}</div>` : ""}
-        <button class="btn-hire" data-interest="${esc(j.id)}">${t("wInterested")}</button>
+        <button type="button" class="btn-hire" data-interest="${esc(j.id)}">${t("wInterested")}</button>
       </div>`;
     }).join("");
   } catch (e) {
@@ -1622,67 +1622,159 @@ async function loadMatchingJobs(w) {
     box.innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Error</h3></div>`;
   }
 }
-$("wJobList").onclick = async e => {
-  const btn = e.target && e.target.closest && e.target.closest("[data-interest]");
-  const id = btn && btn.dataset ? btn.dataset.interest : null;
-  if (!id || !currentWorker) return;
-  if (btn.disabled) return;
-  btn.disabled = true;
-  const prevLabel = btn.textContent;
-  btn.textContent = lang === "am" ? "በመላክ ላይ..." : "Sending...";
-  const textMsg = lang === "am"
-    ? `ሰላም፣ ከታማኝ ደላላ ለስራ ጥያቄ (${id}) ፍላጎት አለኝ። ስሜ፦ ${currentWorker.name}፣ ክህሎት፦ ${currentWorker.skill}፣ ስልክ፦ ${(currentWorker.priv && currentWorker.priv.phone) || ""}`
-    : `Hello, I am interested in job request (${id}) via Tamagn Delala. Name: ${currentWorker.name}, Skill: ${currentWorker.skill}, Phone: ${(currentWorker.priv && currentWorker.priv.phone) || ""}`;
+
+function tgAlert(msg) {
   try {
-    // Record interest in Firestore so admin can see it even if Telegram link fails
-    await addDoc(collection(db, "job_interests"), {
-      jobId: id,
-      workerId: currentWorker.id,
-      workerName: currentWorker.name || "",
-      skill: currentWorker.skill || "",
-      phone: (currentWorker.priv && currentWorker.priv.phone) || "",
-      telegramUserId: tgUser.id ? String(tgUser.id) : "",
-      status: "new",
-      createdAt: serverTimestamp()
-    });
-  } catch (err) {
-    console.error("job_interests write failed", err);
-  }
-  const url = `https://t.me/${MANAGER}?text=${encodeURIComponent(textMsg)}`;
-  let opened = false;
+    if (tg && typeof tg.showAlert === "function") { tg.showAlert(msg); return; }
+  } catch (_) {}
+  alert(msg);
+}
+function tgHaptic(type) {
   try {
-    if (tg && typeof tg.openTelegramLink === "function") {
-      tg.openTelegramLink(url);
-      opened = true;
-    } else if (tg && typeof tg.openLink === "function") {
-      tg.openLink(url, { try_instant_view: false });
-      opened = true;
+    if (tg && tg.HapticFeedback) {
+      if (type === "success" && tg.HapticFeedback.notificationOccurred) tg.HapticFeedback.notificationOccurred("success");
+      else if (tg.HapticFeedback.impactOccurred) tg.HapticFeedback.impactOccurred("medium");
     }
-  } catch (err) {
-    console.error("Telegram open failed", err);
+  } catch (_) {}
+}
+
+async function expressJobInterest(jobId, btn) {
+  if (!jobId) return;
+  if (!currentWorker) {
+    tgAlert(lang === "am" ? "እባክዎ መጀመሪያ እንደ ሰራተኛ ይመዝገቡ ወይም በቴሌግራም ይክፈቱ።" : "Please register as a worker first, or open this page from your Telegram account.");
+    return;
   }
-  if (!opened) {
+  if (btn && btn.dataset.busy === "1") return;
+  if (btn) { btn.dataset.busy = "1"; btn.disabled = true; }
+  const prevLabel = btn ? btn.textContent : "";
+  if (btn) btn.textContent = lang === "am" ? "በመላክ ላይ..." : "Sending...";
+
+  const phone = (currentWorker.priv && currentWorker.priv.phone) || "";
+  const payload = {
+    jobId,
+    workerId: currentWorker.id,
+    workerName: currentWorker.name || "",
+    skill: currentWorker.skill || "",
+    phone,
+    telegramUserId: tgUser.id ? String(tgUser.id) : "",
+    employerName: "",
+    jobTitle: "",
+    status: "new",
+    type: "job_interest",
+    source: "worker_app",
+    createdAt: serverTimestamp()
+  };
+  // Enrich from loaded job card data if possible
+  try {
+    const jobSnap = await getDoc(doc(db, "job_orders", jobId));
+    if (jobSnap.exists()) {
+      const j = jobSnap.data();
+      payload.employerName = j.employerName || "";
+      payload.jobTitle = j.title || j.requiredSkill || "";
+      payload.requiredSkill = j.requiredSkill || "";
+    }
+  } catch (_) {}
+
+  let saved = false;
+  let saveErr = null;
+  // 1) Preferred collection
+  try {
+    await addDoc(collection(db, "job_interests"), payload);
+    saved = true;
+  } catch (err) {
+    saveErr = err;
+    console.error("job_interests failed", err);
+  }
+  // 2) Fallback: requests (create is allowed in your rules)
+  if (!saved) {
     try {
-      const w = window.open(url, "_blank");
-      if (!w) {
-        // Last resort: navigate in same window or copy message
-        if (confirm((lang === "am" ? "ቴሌግራም መክፈት አልተቻለም። መልእክቱን ለመቅዳት OK ይጫኑ።" : "Could not open Telegram. OK to copy the message.") + "\n\n" + textMsg)) {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(textMsg).catch(() => {});
-          }
-          window.location.href = url;
-        }
-      }
+      await addDoc(collection(db, "requests"), {
+        workerId: currentWorker.id,
+        workerName: currentWorker.name || "",
+        paymentType: currentWorker.paymentType || "monthly",
+        employerTgId: 0,
+        employerName: payload.employerName || "Job interest",
+        employerPhone: "",
+        employerUsername: "",
+        employerLocation: "",
+        jobId,
+        jobTitle: payload.jobTitle || "",
+        interestOnly: true,
+        status: "open",
+        paymentReceived: false,
+        followUpSent: false,
+        rating: null,
+        createdAt: serverTimestamp(),
+        source: "worker_interest"
+      });
+      saved = true;
+    } catch (err2) {
+      saveErr = err2;
+      console.error("requests interest fallback failed", err2);
+    }
+  }
+
+  if (saved) {
+    tgHaptic("success");
+    if (btn) btn.textContent = lang === "am" ? "✓ ተልኳል" : "✓ Sent";
+    const okMsg = lang === "am"
+      ? "ፍላጎትዎ ተመዝግቧል። ቡድናችን በቅርቡ ያገኝዎታል።"
+      : "Your interest was recorded. Our team will contact you soon.";
+    tgAlert(okMsg);
+
+    // Optional: open manager chat (may no-op inside same-bot Mini App — that's OK)
+    const textMsg = lang === "am"
+      ? `ሰላም፣ ከታማኝ ደላላ ለስራ ጥያቄ ፍላጎት አለኝ።\nስራ፦ ${payload.jobTitle || jobId}\nስሜ፦ ${currentWorker.name}\nክህሎት፦ ${currentWorker.skill}\nስልክ፦ ${phone}`
+      : `Hello, I am interested in a job via Tamagn Delala.\nJob: ${payload.jobTitle || jobId}\nName: ${currentWorker.name}\nSkill: ${currentWorker.skill}\nPhone: ${phone}`;
+    const url = "https://t.me/" + MANAGER + "?text=" + encodeURIComponent(textMsg);
+    setTimeout(() => {
+      try {
+        if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(url);
+        else if (tg && typeof tg.openLink === "function") tg.openLink(url, { try_instant_view: false });
+      } catch (_) {}
+    }, 400);
+  } else {
+    tgHaptic("error");
+    const errMsg = lang === "am"
+      ? "ፍላጎት ማስቀመጥ አልተቻለም። እንደገና ይሞክሩ ወይም አድሚንን በቀጥታ ያግኙ።"
+      : "Could not save your interest. Please try again or message the admin directly.";
+    tgAlert(errMsg + (saveErr && saveErr.code ? "\n(" + saveErr.code + ")" : ""));
+    // Still offer to message admin
+    const textMsg = lang === "am"
+      ? `ሰላም፣ ከታማኝ ደላላ ለስራ ፍላጎት አለኝ። ስሜ፦ ${currentWorker.name}`
+      : `Hello, I am interested in a job via Tamagn Delala. Name: ${currentWorker.name}`;
+    const url = "https://t.me/" + MANAGER + "?text=" + encodeURIComponent(textMsg);
+    try {
+      if (tg && typeof tg.openTelegramLink === "function") tg.openTelegramLink(url);
+      else window.location.href = url;
     } catch (_) {
       window.location.href = url;
     }
   }
-  btn.textContent = lang === "am" ? "✓ ተልኳል" : "✓ Sent";
+
   setTimeout(() => {
-    btn.disabled = false;
-    btn.textContent = prevLabel;
-  }, 2500);
-};
+    if (btn) {
+      btn.disabled = false;
+      btn.dataset.busy = "0";
+      btn.textContent = prevLabel;
+    }
+  }, 3000);
+}
+
+$("wJobList").addEventListener("click", e => {
+  const btn = e.target && e.target.closest && e.target.closest("[data-interest]");
+  if (!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  expressJobInterest(btn.dataset.interest, btn);
+});
+// Some Telegram WebViews are more reliable with touchend
+$("wJobList").addEventListener("touchend", e => {
+  const btn = e.target && e.target.closest && e.target.closest("[data-interest]");
+  if (!btn) return;
+  // Let click handler run too on most devices; only force if no click follows
+  // Avoid double-fire by using busy flag inside expressJobInterest
+}, { passive: true });
 
 // Worker profile edit
 if ($("wEditBtn")) $("wEditBtn").onclick = () => {
