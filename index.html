@@ -1622,14 +1622,66 @@ async function loadMatchingJobs(w) {
     box.innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Error</h3></div>`;
   }
 }
-$("wJobList").onclick = e => {
-  const id = e.target && e.target.dataset && e.target.dataset.interest;
+$("wJobList").onclick = async e => {
+  const btn = e.target && e.target.closest && e.target.closest("[data-interest]");
+  const id = btn && btn.dataset ? btn.dataset.interest : null;
   if (!id || !currentWorker) return;
+  if (btn.disabled) return;
+  btn.disabled = true;
+  const prevLabel = btn.textContent;
+  btn.textContent = lang === "am" ? "በመላክ ላይ..." : "Sending...";
   const textMsg = lang === "am"
-    ? `ሰላም፣ ከታማኝ ደላላ ለስራ ጥያቄ (${id}) ፍላጎት አለኝ። ስሜ፦ ${currentWorker.name}፣ ክህሎት፦ ${currentWorker.skill}`
-    : `Hello, I am interested in job request (${id}) via Tamagn Delala. Name: ${currentWorker.name}, Skill: ${currentWorker.skill}`;
+    ? `ሰላም፣ ከታማኝ ደላላ ለስራ ጥያቄ (${id}) ፍላጎት አለኝ። ስሜ፦ ${currentWorker.name}፣ ክህሎት፦ ${currentWorker.skill}፣ ስልክ፦ ${(currentWorker.priv && currentWorker.priv.phone) || ""}`
+    : `Hello, I am interested in job request (${id}) via Tamagn Delala. Name: ${currentWorker.name}, Skill: ${currentWorker.skill}, Phone: ${(currentWorker.priv && currentWorker.priv.phone) || ""}`;
+  try {
+    // Record interest in Firestore so admin can see it even if Telegram link fails
+    await addDoc(collection(db, "job_interests"), {
+      jobId: id,
+      workerId: currentWorker.id,
+      workerName: currentWorker.name || "",
+      skill: currentWorker.skill || "",
+      phone: (currentWorker.priv && currentWorker.priv.phone) || "",
+      telegramUserId: tgUser.id ? String(tgUser.id) : "",
+      status: "new",
+      createdAt: serverTimestamp()
+    });
+  } catch (err) {
+    console.error("job_interests write failed", err);
+  }
   const url = `https://t.me/${MANAGER}?text=${encodeURIComponent(textMsg)}`;
-  if (inTelegram) tg.openTelegramLink(url); else window.open(url, "_blank");
+  let opened = false;
+  try {
+    if (tg && typeof tg.openTelegramLink === "function") {
+      tg.openTelegramLink(url);
+      opened = true;
+    } else if (tg && typeof tg.openLink === "function") {
+      tg.openLink(url, { try_instant_view: false });
+      opened = true;
+    }
+  } catch (err) {
+    console.error("Telegram open failed", err);
+  }
+  if (!opened) {
+    try {
+      const w = window.open(url, "_blank");
+      if (!w) {
+        // Last resort: navigate in same window or copy message
+        if (confirm((lang === "am" ? "ቴሌግራም መክፈት አልተቻለም። መልእክቱን ለመቅዳት OK ይጫኑ።" : "Could not open Telegram. OK to copy the message.") + "\n\n" + textMsg)) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(textMsg).catch(() => {});
+          }
+          window.location.href = url;
+        }
+      }
+    } catch (_) {
+      window.location.href = url;
+    }
+  }
+  btn.textContent = lang === "am" ? "✓ ተልኳል" : "✓ Sent";
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = prevLabel;
+  }, 2500);
 };
 
 // Worker profile edit
