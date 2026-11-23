@@ -382,18 +382,36 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 
 @media (max-width: 1000px) { .grid2 { grid-template-columns: 1fr; } }
 @media (max-width: 819px) {
-  body { overflow: auto; }
-  .wrap { height: auto; min-height: calc(100vh - 56px); min-height: calc(100dvh - 56px); }
-  .shell {
-    grid-template-columns: 1fr;
-    height: auto;
+  /* Allow the whole page to scroll on phones (body.is-app locks overflow on desktop shell) */
+  body,
+  body.is-app {
+    height: auto !important;
+    min-height: 100%;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  #panel:not(.hid) {
+    height: auto !important;
+    min-height: calc(100dvh - 56px);
+    display: block !important;
+  }
+  .wrap {
+    height: auto !important;
     min-height: calc(100vh - 56px);
     min-height: calc(100dvh - 56px);
   }
+  .shell {
+    grid-template-columns: 1fr;
+    height: auto !important;
+    min-height: 0;
+    display: block !important;
+  }
   .content {
-    height: auto;
-    overflow: visible;
-    padding: 12px 12px calc(88px + env(safe-area-inset-bottom, 0px));
+    height: auto !important;
+    overflow: visible !important;
+    /* Extra space so last cards are not hidden under the bottom nav */
+    padding: 12px 12px calc(110px + env(safe-area-inset-bottom, 0px)) !important;
   }
   .side {
     position: fixed; left: 0; right: 0; bottom: 0; top: auto;
@@ -2923,7 +2941,8 @@ function renderAgreements() {
 }
 
 function isDomesticSkill(skill) {
-  const DOMESTIC = ["House Maid","Babysitter","Cook / Chef","Gardener","Security Guard","Driver","Cleaner","Laundry Worker","Nanny"];
+  // Driver is treated as business employment (Labour Proclamation), not family-only domestic
+  const DOMESTIC = ["House Maid","Babysitter","Cook / Chef","Gardener","Security Guard","Cleaner","Laundry Worker","Nanny"];
   return DOMESTIC.includes(String(skill || "").trim());
 }
 
@@ -3044,6 +3063,40 @@ const JOB_DUTIES = {
   ]
 };
 
+const SKILL_AM = {
+  "House Maid": "የቤት ሰራተኛ",
+  "Babysitter": "ህጻናት አሳዳጊ",
+  "Cook / Chef": "ምግብ አብሳይ",
+  "Gardener": "አትክልተኛ",
+  "Security Guard": "ጠባቂ",
+  "Plumber": "የቧንቧ ሰራተኛ",
+  "Electrician": "ኤሌክትሪሺያን",
+  "Construction Worker": "የግንባታ ሰራተኛ",
+  "Daily Laborer": "ዕለታዊ ሰራተኛ",
+  "Driver": "ሹፌር",
+  "Cleaner": "ጽዳት ሰራተኛ",
+  "Laundry Worker": "የልብስ ማጠቢያ",
+  "Waiter / Waitress": "አስተናጋጅ",
+  "Office Assistant": "የቢሮ ረዳት",
+  "Nanny": "ሞግዚት",
+  "Other": "ሌላ"
+};
+
+function skillAm(skill) {
+  const s = String(skill || "").trim();
+  return SKILL_AM[s] || s || "—";
+}
+
+function payTypeAm(pt) {
+  const m = {
+    "monthly": "ወርሃዊ", "ወርሃዊ": "ወርሃዊ",
+    "daily": "ዕለታዊ", "ዕለታዊ": "ዕለታዊ",
+    "hourly": "በሰዓት", "በሰዓት": "በሰዓት",
+    "weekly": "ሳምንታዊ", "ሳምንታዊ": "ሳምንታዊ"
+  };
+  return m[String(pt || "").trim()] || (pt || "በስምምነት");
+}
+
 function getDutiesHtml(skill) {
   const list = JOB_DUTIES[skill] || JOB_DUTIES["Other"];
   return list.map((d, i) => `${i + 1}. ${esc(d)}`).join("<br>");
@@ -3100,7 +3153,7 @@ function buildAmharicAgreementHtml(x) {
     <hr style="border:none;border-top:1px solid #e2e8f0;margin:14px 0">
     <p><b>አንቀጽ ፩ — ሰራተኛ (Worker)</b><br>
       ሙሉ ስም፡ <b>${esc(workerName)}</b><br>
-      ክህሎት / የሥራ ዓይነት፡ <b>${esc(skill)}</b><br>
+      ክህሎት / የሥራ ዓይነት፡ <b>${esc(skillAm(skill))}</b><br>
       ስልክ፡ <b>${esc(workerPhone)}</b><br>
       ብሔራዊ መታወቂያ ቁጥር፡ <b>${esc(nationalId)}</b></p>
     <p><b>አንቀጽ ፪ — አሰሪ (Employer)</b><br>
@@ -3112,13 +3165,13 @@ function buildAmharicAgreementHtml(x) {
       ስልክ፡ <b>${esc(gPhone)}</b><br>
       ዋሱ የሰራተኛውን ማንነት እና ታማኝነት ያረጋግጣል።</p>
     <p><b>አንቀጽ ፬ — ደመወዝ እና ክፍያ (Wages)</b><br>
-      የተስማሙበት ደመወዝ፡ <b>${esc(pay)}</b> ብር (${esc(payType)})<br>
+      የተስማሙበት ደመወዝ፡ <b>${esc(pay)}</b> ብር (${esc(payTypeAm(payType))})<br>
       ${feeLine}<br>
       የኤጀንሲ ኮሚሽን መጠን፡ <b>${esc(commission)}%</b> (በቢሮ ፖሊሲ መሠረት)።</p>
     ${trialBlock}
     ${hoursBlock}
     ${leaveBlock}
-    <p><b>አንቀጽ — የሥራ ግዴታዎች / Job duties (${esc(skill)})</b><br>${duties}</p>
+    <p><b>አንቀጽ — የሥራ ግዴታዎች (${esc(skillAm(skill))})</b><br>${duties}</p>
     <p><b>የአሰሪ ግዴታዎች / Employer obligations</b><br>${obligationsEmp}</p>
     <p><b>የሰራተኛ ግዴታዎች / Worker obligations</b><br>${obligationsWrk}</p>
     ${termBlock}
