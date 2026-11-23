@@ -938,7 +938,7 @@ const i18n = {
     callAdmin: "Call Admin now",
     messageAdmin: "Message Admin on Telegram",
     close: "Close",
-    confirmHire: "Send hire request for this worker?",
+    confirmHire: "Send hire request? The agency will prepare a proper employment agreement based on the job type (Ethiopian law).",
     langBtn: "አማርኛ",
     verifiedId: "ID Verified",
     policeClearance: "Police Clearance",
@@ -1054,7 +1054,7 @@ const i18n = {
     callAdmin: "አሁን አድሚንን ይደውሉ",
     messageAdmin: "አድሚንን በቴሌግራም ያግኙ",
     close: "ዝጋ",
-    confirmHire: "የቅጥር ጥያቄ መላክ ይፈልጋሉ?",
+    confirmHire: "የቅጥር ጥያቄ መላክ ይፈልጋሉ? ኤጀንሲው በሥራ ዓይነቱ መሠረት ትክክለኛ የሥራ ውል (በኢትዮጵያ ህግ) ያዘጋጃል።",
     langBtn: "English",
     verifiedId: "መታወቂያ አረጋግጧል",
     policeClearance: "የፖሊስ ማረጋገጫ",
@@ -1570,8 +1570,8 @@ async function hire(id) {
 
 function showDone(w) {
   const text = lang==="am"
-    ? `ሰላም፣ ከታማኝ ደላላ ${w.name} መቅጠር እፈልጋለሁ። ስሜ፦ ${currentEmployer.name}፣ ስልክ፦ ${currentEmployer.phone}`
-    : `Hello, I want to hire ${w.name} from Tamagn Delala. My name: ${currentEmployer.name}, Phone: ${currentEmployer.phone}`;
+    ? `ሰላም፣ ከታማኝ ደላላ ${w.name} (${w.skill||""}) መቅጠር እፈልጋለሁ። ስሜ፦ ${currentEmployer.name}፣ ስልክ፦ ${currentEmployer.phone}። እባክዎ በሥራ ዓይነቱ መሠረት የሥራ ውል ያዘጋጁ።`
+    : `Hello, I want to hire ${w.name} (${w.skill||""}) from Tamagn Delala. My name: ${currentEmployer.name}, Phone: ${currentEmployer.phone}. Please prepare the employment agreement according to the job type.`;
   $("doneBtn").onclick = () => {
     const url = `https://t.me/${MANAGER}?text=${encodeURIComponent(text)}`;
     if (inTelegram) tg.openTelegramLink(url); else window.open(url,"_blank");
