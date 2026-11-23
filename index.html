@@ -532,6 +532,7 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
               <button type="button" class="share-btn" data-share="tiktok" title="TikTok">🎵 TikTok</button>
               <button type="button" class="share-btn" data-share="sms" title="SMS">📱 SMS</button>
               <button type="button" class="share-btn" data-share="copy" title="Copy link">🔗 Copy link</button>
+              <button type="button" class="share-btn" data-share="more" title="More apps">⋯ More</button>
             </div>
           </div>
         </div>
@@ -778,14 +779,30 @@ const MANAGER = "TamagnDelalaETBot";
 const ADMIN_PHONE = "09xxxxxxxx";
 
 function appShareUrl() {
-  // Always share the Telegram bot — never GitHub or the raw web page URL
-  return "https://t.me/TamagnDelalaETBot/app";
+  // Universal Telegram link — works inside & outside Telegram on modern clients.
+  // Opens the bot's Main Mini App. (Avoid t.me/Bot/app — many clients reject it.)
+  return "https://t.me/TamagnDelalaETBot?startapp";
 }
-function shareMessage() {
-  return t("shareText") + "\n" + appShareUrl();
+/** Plain bot profile — always opens in Telegram even on very old clients. */
+function appBotUrl() {
+  return "https://t.me/TamagnDelalaETBot";
 }
-async function copyShareLink() {
-  const text = shareMessage();
+/** Best link for a given channel. */
+function shareUrlFor(channel) {
+  // Facebook's crawler/share dialog is unreliable with ?startapp — use bot profile
+  if (channel === "facebook") return appBotUrl();
+  // Everything else: startapp so recipients land in the Mini App when possible
+  return appShareUrl();
+}
+function shareMessage(channel) {
+  const url = shareUrlFor(channel || "copy");
+  const line = t("shareText");
+  // Tip so people open the link in Telegram (required for Mini App)
+  const tip = t("shareOpenTip");
+  return line + "\n" + url + (tip ? "\n" + tip : "");
+}
+async function copyShareLink(channel) {
+  const text = shareMessage(channel || "copy");
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(text);
@@ -795,18 +812,28 @@ async function copyShareLink() {
   try {
     const ta = document.createElement("textarea");
     ta.value = text;
+    ta.setAttribute("readonly", "");
     ta.style.position = "fixed";
     ta.style.left = "-9999px";
     document.body.appendChild(ta);
     ta.select();
-    document.execCommand("copy");
+    ta.setSelectionRange(0, ta.value.length);
+    const ok = document.execCommand("copy");
     document.body.removeChild(ta);
-    return true;
+    return !!ok;
   } catch (_) {
     return false;
   }
 }
 function openShareUrl(url) {
+  const isTg = /^https?:\/\/t\.me\//i.test(String(url || ""));
+  try {
+    // t.me links must use openTelegramLink inside the Mini App
+    if (isTg && tg && typeof tg.openTelegramLink === "function") {
+      tg.openTelegramLink(url);
+      return true;
+    }
+  } catch (_) {}
   try {
     if (tg && typeof tg.openLink === "function") {
       tg.openLink(url, { try_instant_view: false });
@@ -814,61 +841,96 @@ function openShareUrl(url) {
     }
   } catch (_) {}
   try {
-    window.open(url, "_blank");
+    window.open(url, "_blank", "noopener,noreferrer");
     return true;
   } catch (_) {}
-  window.location.href = url;
-  return true;
+  try { window.location.href = url; return true; } catch (_) {}
+  return false;
+}
+function notifyShare(msg) {
+  try {
+    if (tg && typeof tg.showAlert === "function") { tg.showAlert(msg); return; }
+  } catch (_) {}
+  alert(msg);
 }
 async function doShare(channel) {
-  const url = appShareUrl();
+  const url = shareUrlFor(channel);
   const text = t("shareText");
-  const full = shareMessage();
+  const full = shareMessage(channel);
+
   if (channel === "telegram") {
-    openShareUrl("https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(text));
+    // Official Telegram share sheet (recipient gets text + link inside Telegram)
+    const share = "https://t.me/share/url?url=" + encodeURIComponent(url) + "&text=" + encodeURIComponent(text);
+    if (!openShareUrl(share)) {
+      await copyShareLink("telegram");
+      notifyShare(t("shareCopied"));
+    }
     return;
   }
+
   if (channel === "whatsapp") {
-    openShareUrl("https://wa.me/?text=" + encodeURIComponent(full));
+    // Works on mobile app + web.wa.me
+    const wa = "https://wa.me/?text=" + encodeURIComponent(full);
+    if (!openShareUrl(wa)) {
+      await copyShareLink("whatsapp");
+      notifyShare(t("shareCopied"));
+    }
     return;
   }
+
   if (channel === "facebook") {
-    openShareUrl("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url) + "&quote=" + encodeURIComponent(text));
+    // Facebook share dialog — use bot URL (more reliable than ?startapp)
+    const fb = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url) + "&quote=" + encodeURIComponent(text);
+    if (!openShareUrl(fb)) {
+      await copyShareLink("facebook");
+      notifyShare(t("shareCopied"));
+    }
     return;
   }
+
   if (channel === "sms") {
-    // iOS uses &body=, Android often uses ?body=
-    const body = encodeURIComponent(t("shareSms") + url);
-    const smsUrl = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? ("sms:&body=" + body) : ("sms:?body=" + body);
-    window.location.href = smsUrl;
+    const body = encodeURIComponent(full);
+    const smsUrl = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+      ? ("sms:&body=" + body)
+      : ("sms:?body=" + body);
+    try { window.location.href = smsUrl; }
+    catch (_) {
+      await copyShareLink("sms");
+      notifyShare(t("shareCopied"));
+    }
     return;
   }
+
   if (channel === "tiktok") {
-    // TikTok has no public web share endpoint for arbitrary links — copy + hint
-    await copyShareLink();
-    if (tg && typeof tg.showAlert === "function") tg.showAlert(t("shareTikTokHint"));
-    else alert(t("shareTikTokHint"));
+    // No public web share API for arbitrary links — copy then open TikTok
+    const ok = await copyShareLink("tiktok");
+    notifyShare(ok ? t("shareTikTokHint") : t("shareFail"));
     try {
       if (tg && typeof tg.openLink === "function") tg.openLink("https://www.tiktok.com/", { try_instant_view: false });
-      else window.open("https://www.tiktok.com/", "_blank");
+      else window.open("https://www.tiktok.com/", "_blank", "noopener,noreferrer");
     } catch (_) {}
     return;
   }
+
   if (channel === "copy") {
-    const ok = await copyShareLink();
-    if (tg && typeof tg.showAlert === "function") tg.showAlert(ok ? t("shareCopied") : t("shareFail"));
-    else alert(ok ? t("shareCopied") : t("shareFail"));
+    const ok = await copyShareLink("copy");
+    notifyShare(ok ? t("shareCopied") : t("shareFail"));
     return;
   }
-  // Native share sheet when available
+
+  // Native OS share sheet (Android/iOS) — covers any app the user picks
   if (navigator.share) {
     try {
-      await navigator.share({ title: "Tamagn Delala", text, url });
+      await navigator.share({ title: "Tamagn Delala · ታማኝ ደላላ", text: text, url: url });
       return;
-    } catch (_) {}
+    } catch (err) {
+      // User cancelled or share failed — fall through to copy
+      if (err && err.name === "AbortError") return;
+    }
   }
-  await copyShareLink();
-  alert(t("shareCopied"));
+
+  const ok = await copyShareLink("copy");
+  notifyShare(ok ? t("shareCopied") : t("shareFail"));
 }
 document.addEventListener("click", e => {
   const btn = e.target && e.target.closest && e.target.closest("[data-share]");
@@ -916,10 +978,11 @@ const i18n = {
     skillsTitle: "Our Services",
     shareTitle: "Share Tamagn Delala",
     shareText: "Find trusted workers or get hired with Tamagn Delala — ታማኝ ደላላ",
-    shareCopied: "Link copied! You can paste it on TikTok or anywhere.",
-    shareTikTokHint: "Link copied. Open TikTok and paste it in your post or bio.",
+    shareCopied: "Link copied! Paste it in WhatsApp, Telegram, SMS, Facebook, TikTok, or anywhere.",
+    shareTikTokHint: "Link copied. Open TikTok → New post or Edit profile → paste the link.",
     shareSms: "Find trusted workers or get hired: ",
-    shareFail: "Could not open share. Link copied instead.",
+    shareFail: "Could not open share. Link copied — paste it manually.",
+    shareOpenTip: "Open this link in Telegram to use the app.",
     btnEmployerTitle: "Find a Worker",
     btnEmployerDesc: "Need a worker? Find a trusted one.",
     btnWorkerTitle: "I am a Worker",
@@ -1032,10 +1095,11 @@ const i18n = {
     skillsTitle: "አገልግሎቶቻችን",
     shareTitle: "ታማኝ ደላላን ያጋሩ",
     shareText: "በታማኝ ደላላ የታመኑ ሰራተኞችን ያግኙ ወይም ስራ ያግኙ — Tamagn Delala",
-    shareCopied: "ሊንኩ ተቀድቷል! በቲክቶክ ወይም በሌላ ቦታ መለጠፍ ይችላሉ።",
-    shareTikTokHint: "ሊንኩ ተቀድቷል። ቲክቶክን ይክፈቱ እና በልጥፍዎ ወይም በባዮ ላይ ይለጥፉ።",
+    shareCopied: "ሊንኩ ተቀድቷል! በዋትስአፕ፣ ቴሌግራም፣ SMS፣ ፌስቡክ፣ ቲክቶክ ወይም በሌላ ቦታ ይለጥፉ።",
+    shareTikTokHint: "ሊንኩ ተቀድቷል። ቲክቶክ → አዲስ ልጥፍ ወይም መገለጫ አርትዕ → ሊንኩን ይለጥፉ።",
     shareSms: "የታመኑ ሰራተኞችን ያግኙ ወይም ስራ ያግኙ: ",
-    shareFail: "ማጋራት አልተቻለም። ሊንኩ ተቀድቷል።",
+    shareFail: "ማጋራት አልተቻለም። ሊንኩ ተቀድቷል — እራስዎ ይለጥፉ።",
+    shareOpenTip: "መተግበሪያውን ለመክፈት ይህን ሊንክ በቴሌግራም ውስጥ ይክፈቱ።",
     btnEmployerTitle: "ሰራተኛ ፈልግ",
     btnEmployerDesc: "ሰራተኛ ይፈልጋሉ? የታመነ ሰራተኛ ያገኛሉ።",
     btnWorkerTitle: "ሰራተኛ ነኝ",
