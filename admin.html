@@ -2922,25 +2922,208 @@ function renderAgreements() {
     </tr>`), "No agreements yet. Move a hire request to “On Process” to prepare one.");
 }
 
+function isDomesticSkill(skill) {
+  const DOMESTIC = ["House Maid","Babysitter","Cook / Chef","Gardener","Security Guard","Driver","Cleaner","Laundry Worker","Nanny"];
+  return DOMESTIC.includes(String(skill || "").trim());
+}
+
+const JOB_DUTIES = {
+  "House Maid": [
+    "ቤቱን፣ ክፍሎችን፣ መታጠቢያ እና ኩሽና በየቀኑ ማጽዳት",
+    "ልብስ ማጠብ፣ ማድረቅ፣ ማረጋገጥ እና ማስቀመጥ",
+    "የኩሽና እቃዎችን ማጠብ እና ማደራጀት",
+    "አልጋ መስራት እና የአልጋ ልብስ መቀየር",
+    "ቆሻሻ ማስወገድ እና የንጽህና ሁኔታ መጠበቅ",
+    "ቀላል የምግብ ዝግጅት ካለ በስምምነት መርዳት",
+    "የቤት እቃዎች ጉዳት ወይም እጥረት ካለ ለአሰሪው ማሳወቅ"
+  ],
+  "Babysitter": [
+    "ህጻናቱን በተስማሙበት ሰዓት መጠበቅ እና መንከባከብ",
+    "የህጻናቱን ደህንነት፣ ንጽህና እና ጤንነት ማረጋገጥ",
+    "ቀላል ምግብ ማዘጋጀት እና መመገብ",
+    "የህጻናቱን ዕድሜ የሚመጥን ጨዋታ እና ትምህርት ማቅረብ",
+    "የእንቅልፍ እና የእረፍት ሰዓት ማስተካከል",
+    "ማንኛውም የጤንነት ወይም የባህሪ ለውጥ ለአሰሪው ወዲያውኑ ማሳወቅ"
+  ],
+  "Cook / Chef": [
+    "በአሰሪው ፍላጎት መሠረት ምግብ ማቀድ እና ማብሰል",
+    "የኩሽና ንጽህና እና የምግብ ደህንነት መጠበቅ",
+    "የምግብ ክምችት መቆጣጠር እና ብክነት መከላከል",
+    "በተስማሙበት ሰዓት ምግብ ማቅረብ",
+    "ልዩ የአመጋገብ ፍላጎት (ሃይማኖታዊ፣ ጤናማ) ማክበር",
+    "የኩሽና መሣሪያዎች ችግር ካለ ማሳወቅ"
+  ],
+  "Gardener": [
+    "የአትክልት እና የአረንጓዴ ቦታዎችን ማጠጣት፣ ማረም እና መንከባከብ",
+    "የአትክልት መሣሪያዎችን ንጹህ እና በጥሩ ሁኔታ ማቆየት",
+    "ቆሻሻ ማስወገድ እና የውጭ ቦታን ንጹህ ማድረግ",
+    "የእጽዋት በሽታ ወይም ችግር ካለ ማሳወቅ",
+    "በአሰሪው መመሪያ መሠረት ተጨማሪ የአትክልት ሥራዎችን ማከናወን"
+  ],
+  "Security Guard": [
+    "ቦታውን፣ ንብረትን እና ሰዎችን መጠበቅ",
+    "የመግቢያ/መውጫ ቁጥጥር ማድረግ",
+    "በተስማሙበት ጊዜ የክልል ዙሪያ ማድረግ",
+    "ያልተፈቀደ መግባት፣ ስርቆት ወይም ችግር መከላከል",
+    "የአደጋ ጊዜ ምላሽ መስጠት እና ማሳወቅ",
+    "በሥራ ሰዓት ሙሉ ትኩረት እና ሙያዊ አቋም መያዝ"
+  ],
+  "Plumber": [
+    "የውሃ አቅርቦት፣ የፍሳሽ እና የንጽህና ስርዓቶችን መጫን እና መጠገን",
+    "የቧንቧ ችግሮችን መመርመር እና መፍታት",
+    "የደህንነት እና የጥራት ደረጃዎችን ማክበር",
+    "ከትልቅ ወጪ በፊት የአሰሪውን ፈቃድ ማግኘት",
+    "ሥራውን ካጠናቀቀ በኋላ ቦታውን ንጹህ ማድረግ"
+  ],
+  "Electrician": [
+    "የኤሌክትሪክ ሽቦ፣ መብራት እና መሣሪያዎችን መጫን እና መጠገን",
+    "የኤሌክትሪክ ችግሮችን በደህንነት መመርመር",
+    "የኤሌክትሪክ ደህንነት ህጎችን ማክበር",
+    "ከትልቅ ወጪ በፊት ፈቃድ ማግኘት",
+    "አደገኛ ሁኔታ ካገኘ ወዲያውኑ ማሳወቅ"
+  ],
+  "Construction Worker": [
+    "በጣቢያ ተቆጣጣሪው መመሪያ መሠረት የግንባታ ሥራ ማከናወን",
+    "የግንባታ ቁሳቁሶችን በደህንነት ማንቀሳቀስ",
+    "የግል መከላከያ መሣሪያዎችን መጠቀም",
+    "የደህንነት ህጎችን ማክበር",
+    "አደጋ ወይም አደገኛ ሁኔታ ወዲያውኑ ማሳወቅ"
+  ],
+  "Daily Laborer": [
+    "በቀን ወይም በአጭር ጊዜ የተሰጡ የእጅ ሥራዎችን ማከናወን",
+    "የአሰሪውን ወይም የተቆጣጣሪውን መመሪያ ማክበር",
+    "መሣሪያዎችን በጥንቃቄ መጠቀም",
+    "መሰረታዊ የደህንነት ጥንቃቄዎችን ማክበር"
+  ],
+  "Driver": [
+    "ተሽከርካሪውን በደህንነት እና በትራፊክ ህግ መንዳት",
+    "አሰሪውን ወይም የቤተሰብ አባላትን ማጓጓዝ",
+    "ተሽከርካሪውን ንጹህ ማድረግ እና መሰረታዊ ሁኔታ መመልከት",
+    "ማንኛውም ችግር ወይም አደጋ ወዲያውኑ ማሳወቅ",
+    "ትክክለኛ የመንጃ ፈቃድ መያዝ",
+    "ያለ ፈቃድ ለግል አገልግሎት አለመጠቀም"
+  ],
+  "Cleaner": [
+    "ወለል፣ ገጽታዎች፣ መታጠቢያ እና ኩሽና ማጽዳት",
+    "ቆሻሻ ማስወገድ",
+    "የጽዳት ቁሳቁሶችን በደህንነት መጠቀም",
+    "ጉዳት ወይም ችግር ማሳወቅ",
+    "ከፍተኛ የንጽህና ደረጃ መጠበቅ"
+  ],
+  "Laundry Worker": [
+    "ልብስ መደርደር፣ ማጠብ፣ ማድረቅ እና ማረጋገጥ",
+    "የተለያዩ ጨርቆችን በትክክለኛ መንገድ ማከም",
+    "የልብስ ማጠቢያ ቦታን ንጹህ ማድረግ",
+    "የተበላሹ ወይም የጠፉ እቃዎችን ማሳወቅ"
+  ],
+  "Waiter / Waitress": [
+    "ትዕዛዝ መቀበል እና ምግብ/መጠጥ በአክብሮት ማቅረብ",
+    "ጠረጴዛ ማዘጋጀት እና ማጽዳት",
+    "የአገልግሎት ቦታ ንጽህና መጠበቅ",
+    "የደንበኛ ጥያቄዎችን በአክብሮት መመለስ",
+    "የምግብ ደህንነት እና ንጽህና ህጎችን ማክበር"
+  ],
+  "Office Assistant": [
+    "አጠቃላይ የቢሮ እና የአስተዳደር ሥራዎችን ማከናወን",
+    "ስልክ መመለስ፣ መልእክት መቀበል እና እንግዶችን መቀበል",
+    "ፋይል፣ ኮፒ እና መሰረታዊ የውሂብ ሥራ ማከናወን",
+    "የቢሮ አቅርቦቶችን መቆጣጠር",
+    "የቢሮ ሰነዶችን ሚስጥራዊነት መጠበቅ"
+  ],
+  "Nanny": [
+    "ህጻናቱን በሙሉ ጊዜ ወይም በከፊል ጊዜ መንከባከብ",
+    "የህጻናቱን አካላዊ ደህንነት፣ ስሜታዊ ደህንነት፣ ንጽህና እና አመጋገብ ማረጋገጥ",
+    "ዕድሜ የሚመጥን ምግብ ማዘጋጀት እና መመገብ",
+    "ትምህርታዊ እና መዝናኛ እንቅስቃሴዎች ማደራጀት",
+    "ህጻናቱን ወደ ትምህርት ቤት ወይም ቀጠሮ ማጀብ (ካለ)",
+    "ከወላጆች ጋር ስለ ህጻኑ ሁኔታ በመደበኛነት መገናኘት",
+    "ህጻናቱን ብቻቸውን አለመተው እና አካላዊ/ቃላዊ ጥቃት አለመጠቀም"
+  ],
+  "Other": [
+    "በአሰሪው እና በሰራተኛው በጽሁፍ የተስማሙባቸውን ልዩ ሥራዎች ማከናወን"
+  ]
+};
+
+function getDutiesHtml(skill) {
+  const list = JOB_DUTIES[skill] || JOB_DUTIES["Other"];
+  return list.map((d, i) => `${i + 1}. ${esc(d)}`).join("<br>");
+}
+
 function buildAmharicAgreementHtml(x) {
   const { ref, today, workerName, skill, workerPhone, nationalId, empName, empPhone, empLoc, gName, gPhone, pay, payType, serviceFee, commission, extraTerms } = x;
+  const domestic = isDomesticSkill(skill);
   const feeLine = serviceFee ? `የአገልግሎት ክፍያ (Service fee): <b>${esc(String(serviceFee))} ብር</b> ለ ታማኝ ደላላ ተከፍሏል/ይከፈላል።` : `የአገልግሎት ክፍያ፡ በኤጀንሲው ደንብ (${esc(commission)}%) ወይም በተስማሙት መጠን።`;
-  const extra = extraTerms ? `<p><b>ተጨማሪ ውሎች</b><br>${esc(extraTerms).replace(/\n/g, "<br>")}</p>` : "";
+  const extra = extraTerms ? `<p><b>ተጨማሪ ውሎች / Additional terms</b><br>${esc(extraTerms).replace(/\n/g, "<br>")}</p>` : "";
+  const duties = getDutiesHtml(skill);
+
+  let lawBlock, titleAm, titleEn, trialBlock, hoursBlock, leaveBlock, termBlock, obligationsEmp, obligationsWrk;
+
+  if (domestic) {
+    titleAm = "የቤት ውስጥ / የግል አገልግሎት የሥራ ውል";
+    titleEn = "Domestic / Personal Service Employment Agreement";
+    lawBlock = `
+      <p style="text-align:justify"><b>የሕግ መሠረት / Legal basis:</b> ይህ ስምምነት <b>የግል አገልግሎት ውል</b> ነው። በኢትዮጵያ የፍትሐብሔር ህግ (Civil Code 1960) አንቀጽ 2512 እና የሚቀጥሉት እንዲሁም የቤት ሰራተኞች ልዩ ድንጋጌዎች (አንቀጽ 2599–2604) ይመራል። 
+      የአሠሪና ሠራተኛ ጉዳይ አዋጅ ቁጥር 1156/2019 አንቀጽ 3(2)(መ) መሠረት የግል አገልግሎት ውሎች ከአዋጁ ውጭ ናቸው።</p>`;
+    trialBlock = `<p><b>የሙከራ ጊዜ / Trial period:</b> በፍትሐብሔር ህግ አንቀጽ 2599 መሠረት የመጀመሪያዎቹ <b>2 ሳምንታት</b> የሙከራ ጊዜ ናቸው (በጽሁፍ ካልተስማሙ በስተቀር)። በዚህ ጊዜ ማንኛውም ወገን ያለ ማስታወቂያ እና ካሳ ውሉን ማቋረጥ ይችላል።</p>`;
+    hoursBlock = `<p><b>የሥራ ሰዓት እና እረፍት:</b> የሥራ ሰዓት በአሰሪው እና በሰራተኛው በስምምነት ይወሰናል። ሰራተኛው በሳምንት ቢያንስ አንድ ሙሉ የእረፍት ቀን ይኖረዋል። ሰራተኛው ከአሰሪው ጋር የሚኖር ከሆነ አሰሪው ለጤንነት፣ ምግብ፣ መኖሪያ እና የሞራል ደህንነት ምክንያታዊ ጥንቃቄ ያደርጋል (አንቀጽ 2601)።</p>`;
+    leaveBlock = "";
+    termBlock = `<p><b>የውል መቋረጥ:</b> ማንኛውም ወገን ምክንያታዊ ማስታወቂያ በመስጠት ውሉን ማቋረጥ ይችላል። ለከባድ ጥፋት ወዲያውኑ ማቋረጥ ይቻላል። በመቋረጥ ጊዜ ያልተከፈለ ደመወዝ ወዲያውኑ ይከፈላል።</p>`;
+    obligationsEmp = `፩. የተስማሙበትን ሥራ መስጠት እና ደመወዝ በጊዜው መክፈል።<br>፪. የሰራተኛውን ክብር፣ ግላዊነት እና አካላዊ ደህንነት ማክበር።<br>፫. ደህንነቱ የተጠበቀ የሥራ አካባቢ ማቅረብ።<br>፬. ሰራተኛው ከቤተሰቡ ጋር የሚኖር እና ታመመ ከሆነ በፍትሐብሔር ህግ አንቀጽ 2602 መሠረት አስፈላጊ እንክብካቤ ማድረግ።<br>፭. ማንኛውም አካላዊ፣ ጾታዊ ወይም ስሜታዊ ጥቃት አለመፈጸም።`;
+    obligationsWrk = `፩. የተስማሙበትን ሥራ በታማኝነት እና በጥንቃቄ ማከናወን።<br>፪. የአሰሪውን ምክንያታዊ መመሪያዎች ማክበር።<br>፫. የአሰሪውን ንብረት፣ ህጻናት ወይም ቤተሰብ በጥንቃቄ መጠበቅ።<br>፬. የአሰሪውን የግል ሕይወት ሚስጥራዊነት መጠበቅ።<br>፭. ያልተፈቀደ ሰው ወደ ቤቱ አለማስገባት።`;
+  } else {
+    titleAm = "የሥራ ውል (በአሠሪና ሠራተኛ ጉዳይ አዋጅ ቁጥር 1156/2019)";
+    titleEn = "Employment Contract under Labour Proclamation No. 1156/2019";
+    lawBlock = `
+      <p style="text-align:justify"><b>የሕግ መሠረት / Legal basis:</b> ይህ ስምምነት በ <b>የአሠሪና ሠራተኛ ጉዳይ አዋጅ ቁጥር 1156/2019</b> (Labour Proclamation) መሠረት የተደረገ የሥራ ውል ነው። አንቀጽ 4፣ 5 እና 6 የውሉን አባላት እና ቅርጽ ይገልጻሉ። ከአዋጁ ያነሰ ጥቅም የሚያስገኝ ውል ከዚያ በላይ ባለው ክፍል ልክ አይደለም።</p>`;
+    trialBlock = `<p><b>የሙከራ ጊዜ / Probation:</b> ሰራተኛው ከመጀመሪያው የሥራ ቀን ጀምሮ ከፍተኛው <b>60 የሥራ ቀናት</b> የሙከራ ጊዜ ይኖረዋል (አንቀጽ 11)። ይህ በጽሁፍ መስማማት አለበት። በሙከራ ጊዜ ማንኛውም ወገን ያለ ማስታወቂያ እና ያለ ካሳ ማቋረጥ ይችላል።</p>`;
+    hoursBlock = `<p><b>የሥራ ሰዓት:</b> መደበኛ የሥራ ሰዓት በቀን ከ <b>8 ሰዓት</b> ወይም በሳምንት ከ <b>48 ሰዓት</b> አይበልጥም (አንቀጽ 61)። የትርፍ ሰዓት በአዋጁ በተወሰኑ ሁኔታዎች ብቻ ይፈቀዳል እና ተመጣጣኝ ክፍያ አለው። ሰራተኛው በሳምንት ቢያንስ 24 ተከታታይ ሰዓታት የእረፍት ይኖረዋል።</p>`;
+    leaveBlock = `<p><b>ዕረፍት:</b> ከአንድ ዓመት ቀጣይ ሥራ በኋላ ቢያንስ <b>16 የሥራ ቀናት</b> የዓመታዊ ዕረፍት። የህመም ዕረፍት፣ የእርግዝና ዕረፍት (120 ቀናት ሙሉ ክፍያ) እና ሌሎች ልዩ ዕረፍቶች በአዋጁ መሠረት ይሰጣሉ።</p>`;
+    termBlock = `<p><b>የውል መቋረጥ:</b> ውሉ የሚቋረጠው በአዋጁ፣ በጋራ ስምምነት ወይም በወገኖቹ ስምምነት ብቻ ነው (አንቀጽ 23)። የማስታወቂያ ጊዜ፣ የመቋረጥ ካሳ እና ሌሎች ውጤቶች በአዋጁ ይመራሉ።</p>`;
+    obligationsEmp = `፩. በውሉ መሠረት ሥራ መስጠት እና ደመወዝ በጊዜው መክፈል።<br>፪. የሰራተኛውን የሰው ክብር ማክበር፤ ጾታዊ ትንኮሳ እና አካላዊ ጥቃት መከላከል።<br>፫. ደህንነቱ የተጠበቀ የሥራ አካባቢ እና አስፈላጊ መከላከያ መሣሪያዎች ማቅረብ።<br>፬. በጾታ፣ ብሔር፣ ሃይማኖት፣ ፖለቲካዊ እምነት፣ ኤችአይቪ ወይም አካል ጉዳተኝነት ላይ መድሎ አለማድረግ።`;
+    obligationsWrk = `፩. ሥራውን በግል፣ በታማኝነት እና በአሰሪው ህጋዊ መመሪያ መሠረት ማከናወን።<br>፪. የደህንነት ህጎችን ማክበር እና የአሰሪውን ንብረት መጠበቅ።<br>፫. የአሰሪውን ሚስጥራዊ መረጃ አለመግለጽ።`;
+  }
+
+  const typeBadge = domestic
+    ? `<div style="display:inline-block;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;margin-top:6px">የግል / ቤት ውስጥ አገልግሎት · Civil Code 1960</div>`
+    : `<div style="display:inline-block;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;margin-top:6px">የሥራ ውል · Labour Proclamation 1156/2019</div>`;
+
   return `
     <div style="text-align:center;margin-bottom:14px">
-      <div style="font-size:16px;font-weight:800">ታማኝ ደላላ</div>
-      <div style="font-size:13px;color:#475569;margin-top:2px">የሥራ አቀማመጥ እና የቅጥር ስምምነት</div>
-      <div style="font-size:12px;color:#64748b;margin-top:6px">ቀን፡ ${esc(today)} · ማጣቀሻ፡ ${esc(ref)}</div>
+      <div style="font-size:16px;font-weight:800">ታማኝ ደላላ · Tamagn Delala</div>
+      <div style="font-size:14px;font-weight:700;margin-top:4px">${titleAm}</div>
+      <div style="font-size:12px;color:#475569;margin-top:2px">${titleEn}</div>
+      ${typeBadge}
+      <div style="font-size:12px;color:#64748b;margin-top:8px">ቀን፡ ${esc(today)} · ማጣቀሻ / Ref፡ ${esc(ref)}</div>
     </div>
-    <p style="text-align:justify">ይህ ስምምነት በ <b>ታማኝ ደላላ</b> የሥራ አቀማመጥ ኤጀንሲ አማካይነት በአሰሪው እና በሰራተኛው መካከል የተደረገ የቅጥር ስምምነት ነው። ሁሉም ወገኖች ከዚህ በታች የተገለጹትን ውሎች ተረድተው ተቀብለዋል።</p>
+    <p style="text-align:justify">ይህ ስምምነት በ <b>ታማኝ ደላላ</b> የሥራ አቀማመጥ ኤጀንሲ አማካይነት በአሰሪው እና በሰራተኛው መካከል የተደረገ ነው። ሁሉም ወገኖች ከዚህ በታች የተገለጹትን ውሎች ተረድተው ተቀብለዋል።</p>
+    ${lawBlock}
     <hr style="border:none;border-top:1px solid #e2e8f0;margin:14px 0">
-    <p><b>አንቀጽ ፩ — ሰራተኛ (Worker)</b><br>ሙሉ ስም፡ <b>${esc(workerName)}</b><br>ክህሎት / የሥራ ዓይነት፡ <b>${esc(skill)}</b><br>ስልክ፡ <b>${esc(workerPhone)}</b><br>ብሔራዊ መታወቂያ ቁጥር፡ <b>${esc(nationalId)}</b></p>
-    <p><b>አንቀጽ ፪ — አሰሪ (Employer)</b><br>ስም / ተቋም፡ <b>${esc(empName)}</b><br>ስልክ፡ <b>${esc(empPhone)}</b><br>የሥራ ቦታ / አድራሻ፡ <b>${esc(empLoc)}</b></p>
-    <p><b>አንቀጽ ፫ — ዋስ (Guarantor)</b><br>ስም፡ <b>${esc(gName)}</b><br>ስልክ፡ <b>${esc(gPhone)}</b><br>ዋሱ የሰራተኛውን ማንነት እና ታማኝነት ያረጋግጣል።</p>
-    <p><b>አንቀጽ ፬ — ደመወዝ እና ክፍያ</b><br>የተስማሙበት ደመወዝ፡ <b>${esc(pay)}</b> ብር (${esc(payType)})<br>${feeLine}<br>የኤጀንሲ ኮሚሽን መጠን፡ <b>${esc(commission)}%</b> (በቢሮ ፖሊሲ መሠረት)።</p>
-    <p><b>አንቀጽ ፭ — የሥራ ግዴታዎች</b><br>፩. ሰራተኛው በ <b>${esc(skill)}</b> ላይ የተመሠረተ ሥራ በአሰሪው ቦታ በታማኝነት ያከናውናል።<br>፪. ሰራተኛው በታማኝ ደላላ በኩል ተቀምጧል፤ ሁኔታው «በሥራ ላይ» እስኪዘጋ ድረስ በሂደት ላይ ነው።<br>፫. አሰሪው የተስማሙበትን ደመወዝ እና የአገልግሎት ክፍያ በጊዜው ይከፍላል።<br>፬. ማንኛውም ወገን ስምምነቱን ለመሻር ከፈለገ በአግባቡ ማሳወቅ አለበት።</p>
+    <p><b>አንቀጽ ፩ — ሰራተኛ (Worker)</b><br>
+      ሙሉ ስም፡ <b>${esc(workerName)}</b><br>
+      ክህሎት / የሥራ ዓይነት፡ <b>${esc(skill)}</b><br>
+      ስልክ፡ <b>${esc(workerPhone)}</b><br>
+      ብሔራዊ መታወቂያ ቁጥር፡ <b>${esc(nationalId)}</b></p>
+    <p><b>አንቀጽ ፪ — አሰሪ (Employer)</b><br>
+      ስም / ተቋም፡ <b>${esc(empName)}</b><br>
+      ስልክ፡ <b>${esc(empPhone)}</b><br>
+      የሥራ ቦታ / አድራሻ፡ <b>${esc(empLoc)}</b></p>
+    <p><b>አንቀጽ ፫ — ዋስ (Guarantor)</b><br>
+      ስም፡ <b>${esc(gName)}</b><br>
+      ስልክ፡ <b>${esc(gPhone)}</b><br>
+      ዋሱ የሰራተኛውን ማንነት እና ታማኝነት ያረጋግጣል።</p>
+    <p><b>አንቀጽ ፬ — ደመወዝ እና ክፍያ (Wages)</b><br>
+      የተስማሙበት ደመወዝ፡ <b>${esc(pay)}</b> ብር (${esc(payType)})<br>
+      ${feeLine}<br>
+      የኤጀንሲ ኮሚሽን መጠን፡ <b>${esc(commission)}%</b> (በቢሮ ፖሊሲ መሠረት)።</p>
+    ${trialBlock}
+    ${hoursBlock}
+    ${leaveBlock}
+    <p><b>አንቀጽ — የሥራ ግዴታዎች / Job duties (${esc(skill)})</b><br>${duties}</p>
+    <p><b>የአሰሪ ግዴታዎች / Employer obligations</b><br>${obligationsEmp}</p>
+    <p><b>የሰራተኛ ግዴታዎች / Worker obligations</b><br>${obligationsWrk}</p>
+    ${termBlock}
     ${extra}
-    <p style="font-size:12px;color:#64748b">ይህ ሰነድ በአማርኛ ተዘጋጅቷል። የተፈረመ ቅጂ በኤጀንሲው ስርዓት ላይ ይቀመጣል። ሁሉም ወገኖች ቅጂ ማግኘት ይችላሉ።</p>
+    <p style="font-size:12px;color:#64748b;margin-top:12px">ይህ ሰነድ በአማርኛ ተዘጋጅቷል። የተፈረመ ቅጂ በኤጀንሲው ስርዓት ላይ ይቀመጣል። ሁሉም ወገኖች ቅጂ ማግኘት ይችላሉ። ይህ አብነት ለመመሪያነት ነው፤ ለተወሳሰቡ ጉዳዮች ህጋዊ ምክር ይጠይቁ።</p>
     <hr style="border:none;border-top:1px solid #e2e8f0;margin:16px 0">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;font-size:12px">
       <div><b>የሰራተኛ ፊርማ</b><br><br>___________________________<br>ስም፡ ${esc(workerName)}<br>ቀን፡ ____________</div>
