@@ -899,7 +899,7 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, writeBatch, query, orderBy, limit, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, writeBatch, query, orderBy, limit, serverTimestamp, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const ADMIN_EMAIL = "henokj2000@gmail.com";   // owner = Super Admin. Other staff are listed in the admin_users collection.
@@ -2867,7 +2867,7 @@ ol li{margin-bottom:8px}.sig{display:flex;justify-content:space-between;gap:20px
 .note{font-size:12px;color:#666;margin-top:28px}button{padding:10px 18px;font-size:14px;margin-bottom:12px}@media print{button{display:none}}</style></head><body>
 <button onclick="window.print()">🖨 Print / Save as PDF</button>
 <h1>የሰራተኛ ቅጥር ስምምነት</h1><div class="sub">Employment Placement Agreement · ታማኝ ደላላ</div>
-<p>ቁጥር / Ref: <b>${L(sid("M", p.id))}</b> &nbsp;·&nbsp; ቀን / Date: <b>${L(today)}</b></p>
+<p>ቁጥር / Ref: <b>${L(p.agreementRef || formatAgreementRef(skillCode((w && w.skill) || p.jobTitle || "Other"), new Date().getFullYear(), String(p.id || "").replace(/\D/g, "").slice(-4) || "0001"))}</b> &nbsp;·&nbsp; ቀን / Date: <b>${L(today)}</b></p>
 <table>
 <tr><td>አሠሪ / Employer</td><td>${L(emp.name || p.employerName)}<br>${L(emp.phone || "")} ${L(emp.location || "")}${emp.tin ? "<br>TIN: " + L(emp.tin) : ""}</td></tr>
 <tr><td>ሰራተኛ / Worker</td><td>${L(w.name || p.workerName)} (${L(sid("W", p.workerId))})<br>${L(pr.phone || "")}<br>ፋይዳ/ቀበሌ መታወቂያ / ID: ${L(pr.nationalId || "—")}</td></tr>
@@ -2891,7 +2891,7 @@ function toast(msg) { const t = $("toast"); if (!t) return; t.textContent = msg;
 
 // ================= agreements (Amharic) =================
 let infoCtx = null;                                   // which profile is open in the info modal (so lists refresh after a delete)
-let agReqId = null, agWorkerId = null, agSignedData = null, agCurrent = null;
+let agReqId = null, agWorkerId = null, agSignedData = null, agCurrent = null, agOfficialRef = null;
 const hasAg = r => !!(r.agreementSigned || r.agreementData);
 const agSigned = a => a.status === "signed" || !!a.agreementSignedAt;
 const agHasFile = a => !!a.signedAgreementUrl && a.signedAgreementUrl !== "uploaded_large_file";
@@ -3087,6 +3087,68 @@ function skillAm(skill) {
   return SKILL_AM[s] || s || "—";
 }
 
+/** Official agreement reference: TD/{skill-acronym}/{year}/{serial}
+ *  e.g. TD/HM/2026/0001  (House Maid, 2026, serial 1)
+ */
+const SKILL_CODE = {
+  "House Maid": "HM",
+  "Babysitter": "BB",
+  "Cook / Chef": "CK",
+  "Gardener": "GD",
+  "Security Guard": "SG",
+  "Plumber": "PL",
+  "Electrician": "EL",
+  "Construction Worker": "CW",
+  "Daily Laborer": "DL",
+  "Driver": "DR",
+  "Cleaner": "CL",
+  "Laundry Worker": "LW",
+  "Waiter / Waitress": "WT",
+  "Office Assistant": "OA",
+  "Nanny": "NY",
+  "Warehouse Associate": "WH",
+  "Nurse": "NR",
+  "Hospitality Staff": "HS",
+  "Other": "OT"
+};
+function skillCode(skill) {
+  const s = String(skill || "").trim();
+  if (SKILL_CODE[s]) return SKILL_CODE[s];
+  const parts = s.replace(/[^A-Za-z\s]/g, " ").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "OT";
+  if (parts.length === 1) return parts[0].slice(0, 3).toUpperCase();
+  return parts.map(p => p[0]).join("").slice(0, 3).toUpperCase();
+}
+function formatAgreementRef(code, year, serial) {
+  return `TD/${code}/${year}/${String(serial).padStart(4, "0")}`;
+}
+/** Allocate the next sequential Ref for this year (atomic via Firestore transaction). */
+async function nextAgreementRef(skill) {
+  const year = new Date().getFullYear();
+  const code = skillCode(skill);
+  const settingsRef = doc(db, "agency_settings", "main");
+  try {
+    const serial = await runTransaction(db, async (tx) => {
+      const snap = await tx.get(settingsRef);
+      const data = snap.exists() ? snap.data() : {};
+      const counters = { ...(data.agreementCounters || {}) };
+      const key = String(year);
+      const next = (Number(counters[key]) || 0) + 1;
+      counters[key] = next;
+      tx.set(settingsRef, { agreementCounters: counters, updatedAt: serverTimestamp() }, { merge: true });
+      return next;
+    });
+    return formatAgreementRef(code, year, serial);
+  } catch (e) {
+    console.warn("Agreement ref counter failed, using fallback:", e);
+    const fallback = String(Date.now()).slice(-4);
+    return formatAgreementRef(code, year, fallback);
+  }
+}
+function currentAgreementRef() {
+  return agOfficialRef || (agCurrent && (agCurrent.agreementRef || (agCurrent.agreementData && agCurrent.agreementData.ref))) || "—";
+}
+
 function payTypeAm(pt) {
   const m = {
     "monthly": "ወርሃዊ", "ወርሃዊ": "ወርሃዊ",
@@ -3192,7 +3254,7 @@ function agToday() {
 }
 function refreshAgPreview() {
   $("agreementBody").innerHTML = buildAmharicAgreementHtml({
-    ref: agReqId || "—", today: agToday(), workerName: agVal("agWorkerName") || "—", skill: agVal("agSkill") || "—", workerPhone: agVal("agWorkerPhone") || "—",
+    ref: currentAgreementRef(), today: agToday(), workerName: agVal("agWorkerName") || "—", skill: agVal("agSkill") || "—", workerPhone: agVal("agWorkerPhone") || "—",
     nationalId: agVal("agNationalId") || "—", empName: agVal("agEmpName") || "—", empPhone: agVal("agEmpPhone") || "—", empLoc: agVal("agEmpLoc") || "—",
     gName: agVal("agGName") || "—", gPhone: agVal("agGPhone") || "—", pay: agVal("agPay") || "በስምምነት", payType: agVal("agPayType") || "ወርሃዊ",
     serviceFee: agVal("agServiceFee"), commission: settings.defaultCommissionPct, extraTerms: agVal("agExtraTerms")
@@ -3230,6 +3292,13 @@ async function openAgreementForRequest(requestId) {
   $("agFeeCollected").checked = !!(r.serviceFeeCollected || sv.feeCollected); $("agPartiesPresent").checked = !!(r.partiesPresent || sv.partiesPresent);
   if (agSignedData && agSignedData !== "uploaded_large_file") setSigned(agSignedData, "✓ Signed document already on file");
   else { clearSigned(); if (r.signedAgreementNote) $("agSignedPreview").textContent = r.signedAgreementNote; }
+  // Official Ref: TD/{skill}/{year}/{serial} — reuse if already assigned
+  const skillForRef = agVal("agSkill") || sv.skill || w.skill || r.workerSkill || "Other";
+  agOfficialRef = r.agreementRef || sv.ref || null;
+  if (!agOfficialRef || !String(agOfficialRef).startsWith("TD/")) {
+    agOfficialRef = await nextAgreementRef(skillForRef);
+    try { await updateDoc(doc(db, "requests", r.id), { agreementRef: agOfficialRef, agreementPrepared: true }); } catch (_) {}
+  }
   setAgMode(false); refreshAgPreview(); $("agreementModal").classList.remove("hid");
 }
 
@@ -3237,8 +3306,9 @@ function viewAgreementById(id) {
   const a = agFor(id); if (!a) { toast("Agreement not found"); return; }
   const x = a.agreementData || {};
   agCurrent = a; agReqId = a.requestId || null;
+  agOfficialRef = a.agreementRef || x.ref || null;
   $("agreementBody").innerHTML = buildAmharicAgreementHtml({
-    ref: a.requestId || a.id, today: fmtDate(a.agreementSignedAt || a.createdAt) || "—", workerName: x.workerName || a.workerName || "—", skill: x.skill || a.skill || "—",
+    ref: a.agreementRef || (a.agreementData && a.agreementData.ref) || a.requestId || a.id, today: fmtDate(a.agreementSignedAt || a.createdAt) || "—", workerName: x.workerName || a.workerName || "—", skill: x.skill || a.skill || "—",
     workerPhone: x.workerPhone || "—", nationalId: x.nationalId || "—", empName: x.empName || a.employerName || "—", empPhone: x.empPhone || a.employerPhone || "—",
     empLoc: x.empLoc || "—", gName: x.gName || "—", gPhone: x.gPhone || "—", pay: x.pay || a.pay || "—", payType: x.payType || a.payType || "—",
     serviceFee: x.serviceFee ?? a.serviceFee ?? "", commission: settings.defaultCommissionPct, extraTerms: x.extraTerms || ""
@@ -3272,7 +3342,8 @@ async function finalizeAgreement() {
   if (agSignedData) { if (agSignedData.length < 900000) signedUrl = agSignedData; else { signedUrl = "uploaded_large_file"; signedNote = "File too large for Firestore; keep the printed copy"; } }
   const b = $("agFinalize"); b.disabled = true;
   try {
-    const patch = { status: "on_work", agreementPrepared: true, agreementSigned: true, agreementSignedAt: serverTimestamp(), agreementData: x, serviceFee: feeAmt, serviceFeeCollected: true, partiesPresent: true, workerId, employerId: employerId || null };
+    if (agOfficialRef) x.ref = agOfficialRef;
+    const patch = { status: "on_work", agreementPrepared: true, agreementSigned: true, agreementSignedAt: serverTimestamp(), agreementData: x, agreementRef: agOfficialRef || null, serviceFee: feeAmt, serviceFeeCollected: true, partiesPresent: true, workerId, employerId: employerId || null };
     if (feeAmt > 0) patch.paymentReceived = true;
     if (signedUrl) patch.signedAgreementUrl = signedUrl;
     if (signedNote) patch.signedAgreementNote = signedNote;
@@ -3281,7 +3352,7 @@ async function finalizeAgreement() {
     try {                                                                                     // 2) archive copy (needs a Firestore rule for /agreements)
       const ref = doc(collection(db, "agreements"));
       await setDoc(ref, { requestId: agReqId, workerId, employerId: employerId || null, workerName: x.workerName, employerName: x.empName, employerPhone: x.empPhone, skill: x.skill, pay: x.pay, payType: x.payType,
-        serviceFee: feeAmt, serviceFeeCollected: true, agreementData: x, signedAgreementUrl: signedUrl || null, signedAgreementNote: signedNote || null, status: "signed", agreementSignedAt: serverTimestamp(), createdAt: serverTimestamp() });
+        serviceFee: feeAmt, serviceFeeCollected: true, agreementData: x, agreementRef: agOfficialRef || x.ref || null, signedAgreementUrl: signedUrl || null, signedAgreementNote: signedNote || null, status: "signed", agreementSignedAt: serverTimestamp(), createdAt: serverTimestamp() });
       agId = ref.id;
     } catch (e) { console.warn("agreements write failed (check Firestore rules):", e); }
     if (workerId) {                                                                           // 3) worker → on work
