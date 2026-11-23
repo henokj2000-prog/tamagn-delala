@@ -851,11 +851,14 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
         <div><label>የደመወዝ መጠን / Salary (ETB)</label><input id="agPay" placeholder="e.g. 5000"></div>
         <div><label>የክፍያ አይነት / Pay type</label>
           <select id="agPayType"><option value="ወርሃዊ">ወርሃዊ / Monthly</option><option value="ሳምንታዊ">ሳምንታዊ / Weekly</option><option value="ዕለታዊ">ዕለታዊ / Daily</option></select></div>
-        <div><label>የአገልግሎት ክፍያ (ETB) / Service fee</label><input id="agServiceFee" type="number" min="0" step="50" placeholder="0"></div>
+        <div><label>የአገልግሎት ክፍያ (ETB) / Service fee <span id="agFeeRateHint" style="font-weight:500;color:#64748b"></span></label>
+          <input id="agServiceFee" type="number" min="0" step="1" placeholder="Auto" readonly style="background:#f1f5f9;font-weight:700;color:#0f172a">
+          <div class="who" id="agFeeExplain" style="margin-top:-6px;margin-bottom:8px">Salary × agency commission % (Settings)</div>
+        </div>
         <div class="full"><label>ተጨማሪ ውሎች / Extra terms</label><textarea id="agExtraTerms" rows="2" placeholder="ተጨማሪ ሁኔታዎች ካሉ እዚህ ይጻፉ…"></textarea></div>
       </div>
       <button type="button" class="btn-secondary" id="agRefreshPreview">↻ ቅድመ እይታ አድስ · Refresh preview</button>
-      <label class="switch"><input type="checkbox" id="agFeeCollected"><span></span>የአገልግሎት ክፍያ ተሰብስቧል · Service fee collected</label>
+      <label class="switch"><input type="checkbox" id="agFeeCollected"><span></span>የአገልግሎት ክፍያ ተሰብስቷል · Service fee collected (= marks Paid)</label>
       <label class="switch"><input type="checkbox" id="agPartiesPresent"><span></span>አሰሪ እና ሰራተኛ በአካል መጥተዋል (OTP ተረጋግጧል) · Parties present / OTP verified</label>
     </div>
     <div id="agreementBody" class="ag-body"></div>
@@ -2172,7 +2175,6 @@ const reqBtns = r =>
   (!["on_process", "on_work"].includes(reqStatus(r)) ? `<button class="btn-secondary btn-info" data-status="${esc(r.id)}" data-val="on_process">${tt("On Process")}</button>` : "") +
   (can("agree") ? A("openAgreement", hasAg(r) ? "📄 " + tt("Agreement") : "📄 " + tt("Prepare Agreement"), "btn-info", `data-id="${esc(r.id)}"`) : "") +
   (reqStatus(r) !== "closed" ? `<button class="btn-secondary btn-success" data-status="${esc(r.id)}" data-val="closed">${tt("Close")}</button>` : "") +
-  (!r.paymentReceived ? `<button class="btn-secondary" data-pay="${esc(r.id)}">${tt("Mark Paid")}</button>` : "") +
   `<button class="btn-secondary" data-showphone="${esc(r.workerId)}">${tt("Show Phone")}</button>` +
   `<button class="btn-secondary btn-danger" data-dr="${esc(r.id)}">${tt("Delete")}</button>`;
 const empVerBtns = e => !can("verify") ? "" : eVer(e) === "pending"
@@ -3248,11 +3250,47 @@ function buildAmharicAgreementHtml(x) {
     </div>`;
 }
 
+
+/** Parse salary number from free text (e.g. "5000", "5,000 ETB"). */
+function parseSalaryAmount(raw) {
+  const s = String(raw || "").replace(/,/g, " ");
+  const m = s.match(/(\d+(?:\.\d+)?)/);
+  return m ? Number(m[1]) : 0;
+}
+/** Service fee = salary × defaultCommissionPct / 100 (Settings). */
+function calcServiceFeeFromSalary(salaryRaw, pct) {
+  const pay = parseSalaryAmount(salaryRaw);
+  const rate = Number(pct != null ? pct : (settings && settings.defaultCommissionPct)) || 0;
+  if (!(pay > 0) || !(rate >= 0)) return 0;
+  return round2(pay * rate / 100);
+}
+function updateAgServiceFeeField() {
+  const feeEl = $("agServiceFee");
+  if (!feeEl) return;
+  const pct = Number(settings.defaultCommissionPct) || 0;
+  const fee = calcServiceFeeFromSalary(agVal("agPay"), pct);
+  feeEl.value = fee > 0 ? String(fee) : "";
+  const hint = $("agFeeRateHint");
+  if (hint) hint.textContent = pct ? "(" + pct + "%)" : "";
+  const expl = $("agFeeExplain");
+  if (expl) {
+    const pay = parseSalaryAmount(agVal("agPay"));
+    expl.textContent = pay > 0
+      ? (lang === "am"
+          ? ("ደመወዝ " + pay.toLocaleString() + " × " + pct + "% = " + fee.toLocaleString() + " ብር")
+          : ("Salary " + pay.toLocaleString() + " × " + pct + "% = ETB " + fee.toLocaleString()))
+      : (lang === "am"
+          ? "ደመወዝ ሲያስገቡ ክፍያው በራስ-ሰር ይሰላል (ደመወዝ × ኮሚሽን %)"
+          : "Enter salary — fee is calculated automatically (salary × commission %)");
+  }
+}
+
 function agToday() {
   const o = { day: "2-digit", month: "long", year: "numeric" };
   try { return new Date().toLocaleDateString("am-ET", o); } catch (_) { return new Date().toLocaleDateString("en-GB", o); }
 }
 function refreshAgPreview() {
+  updateAgServiceFeeField();
   $("agreementBody").innerHTML = buildAmharicAgreementHtml({
     ref: currentAgreementRef(), today: agToday(), workerName: agVal("agWorkerName") || "—", skill: agVal("agSkill") || "—", workerPhone: agVal("agWorkerPhone") || "—",
     nationalId: agVal("agNationalId") || "—", empName: agVal("agEmpName") || "—", empPhone: agVal("agEmpPhone") || "—", empLoc: agVal("agEmpLoc") || "—",
@@ -3288,7 +3326,7 @@ async function openAgreementForRequest(requestId) {
   set("agEmpName", sv.empName || r.employerName); set("agEmpPhone", sv.empPhone || r.employerPhone); set("agEmpLoc", sv.empLoc || r.employerLocation);
   set("agGName", sv.gName || pr.guarantorName); set("agGPhone", sv.gPhone || pr.guarantorPhone);
   set("agPay", sv.pay || (w.pay && w.pay !== "Negotiable" ? w.pay : "")); set("agPayType", sv.payType || ({ weekly: "ሳምንታዊ", daily: "ዕለታዊ" }[r.paymentType] || "ወርሃዊ"));
-  set("agServiceFee", sv.serviceFee != null ? sv.serviceFee : (r.serviceFee || "")); set("agExtraTerms", sv.extraTerms);
+  set("agExtraTerms", sv.extraTerms); updateAgServiceFeeField();
   $("agFeeCollected").checked = !!(r.serviceFeeCollected || sv.feeCollected); $("agPartiesPresent").checked = !!(r.partiesPresent || sv.partiesPresent);
   if (agSignedData && agSignedData !== "uploaded_large_file") setSigned(agSignedData, "✓ Signed document already on file");
   else { clearSigned(); if (r.signedAgreementNote) $("agSignedPreview").textContent = r.signedAgreementNote; }
@@ -3334,17 +3372,28 @@ async function finalizeAgreement() {
   if (!$("agPartiesPresent").checked) { toast("አሰሪ እና ሰራተኛ በአካል መገኘታቸውን (ወይም OTP) ያረጋግጡ · Confirm both parties were present"); return; }
   if (!$("agFeeCollected").checked) { toast("የአገልግሎት ክፍያ መሰብሰቡን ያረጋግጡ · Confirm the service fee was collected"); return; }
   if (!agSignedData && !confirm("የተፈረመ ስምምነት አልተሰቀለም። ቢቀጥሉ?\nNo signed agreement uploaded. Continue anyway?")) return;
-  const feeAmt = Number($("agServiceFee").value) || 0;
+  updateAgServiceFeeField();
+  const feeAmt = calcServiceFeeFromSalary(agVal("agPay"), settings.defaultCommissionPct);
+  $("agServiceFee").value = feeAmt > 0 ? String(feeAmt) : "0";
+  const feeCollected = !!($("agFeeCollected") && $("agFeeCollected").checked);
+  const partiesPresent = !!($("agPartiesPresent") && $("agPartiesPresent").checked);
+  if (!feeCollected) {
+    if (!confirm(lang === "am"
+      ? "የአገልግሎት ክፍያ አልተሰበሰበም። ቢቀጥሉ ክፍያው «ያልተከፈለ» ይቆያል። ቀጥል?"
+      : "Service fee is not marked as collected. The request will stay Unpaid. Continue?")) return;
+  }
   const x = { workerName: agVal("agWorkerName"), skill: agVal("agSkill"), workerPhone: agVal("agWorkerPhone"), nationalId: agVal("agNationalId"), empName: agVal("agEmpName"), empPhone: agVal("agEmpPhone"),
-    empLoc: agVal("agEmpLoc"), gName: agVal("agGName"), gPhone: agVal("agGPhone"), pay: agVal("agPay"), payType: agVal("agPayType"), serviceFee: feeAmt, extraTerms: agVal("agExtraTerms"), feeCollected: true, partiesPresent: true };
+    empLoc: agVal("agEmpLoc"), gName: agVal("agGName"), gPhone: agVal("agGPhone"), pay: agVal("agPay"), payType: agVal("agPayType"), serviceFee: feeAmt, commissionPct: Number(settings.defaultCommissionPct) || 0, extraTerms: agVal("agExtraTerms"), feeCollected: feeCollected, partiesPresent: partiesPresent };
   const r = reqs.find(q => q.id === agReqId) || {}, employerId = findEmployerIdForRequest(r, x), workerId = agWorkerId || r.workerId || null;
   let signedUrl = null, signedNote = null;
   if (agSignedData) { if (agSignedData.length < 900000) signedUrl = agSignedData; else { signedUrl = "uploaded_large_file"; signedNote = "File too large for Firestore; keep the printed copy"; } }
   const b = $("agFinalize"); b.disabled = true;
   try {
     if (agOfficialRef) x.ref = agOfficialRef;
-    const patch = { status: "on_work", agreementPrepared: true, agreementSigned: true, agreementSignedAt: serverTimestamp(), agreementData: x, agreementRef: agOfficialRef || null, serviceFee: feeAmt, serviceFeeCollected: true, partiesPresent: true, workerId, employerId: employerId || null };
-    if (feeAmt > 0) patch.paymentReceived = true;
+    const patch = { status: "on_work", agreementPrepared: true, agreementSigned: true, agreementSignedAt: serverTimestamp(), agreementData: x, agreementRef: agOfficialRef || null, serviceFee: feeAmt, serviceFeePct: Number(settings.defaultCommissionPct) || 0, serviceFeeCollected: feeCollected, partiesPresent: partiesPresent, workerId, employerId: employerId || null };
+    // Ticking "Service fee collected" on the agreement is the only way to mark paid — no separate Mark Paid button
+    if (feeCollected) { patch.paymentReceived = true; patch.paymentReceivedAt = serverTimestamp(); }
+    else { patch.paymentReceived = false; }
     if (signedUrl) patch.signedAgreementUrl = signedUrl;
     if (signedNote) patch.signedAgreementNote = signedNote;
     await updateDoc(doc(db, "requests", agReqId), patch);                                   // 1) the hire request (core path)
@@ -3352,7 +3401,7 @@ async function finalizeAgreement() {
     try {                                                                                     // 2) archive copy (needs a Firestore rule for /agreements)
       const ref = doc(collection(db, "agreements"));
       await setDoc(ref, { requestId: agReqId, workerId, employerId: employerId || null, workerName: x.workerName, employerName: x.empName, employerPhone: x.empPhone, skill: x.skill, pay: x.pay, payType: x.payType,
-        serviceFee: feeAmt, serviceFeeCollected: true, agreementData: x, agreementRef: agOfficialRef || x.ref || null, signedAgreementUrl: signedUrl || null, signedAgreementNote: signedNote || null, status: "signed", agreementSignedAt: serverTimestamp(), createdAt: serverTimestamp() });
+        serviceFee: feeAmt, serviceFeeCollected: feeCollected, agreementData: x, agreementRef: agOfficialRef || x.ref || null, signedAgreementUrl: signedUrl || null, signedAgreementNote: signedNote || null, status: "signed", agreementSignedAt: serverTimestamp(), createdAt: serverTimestamp() });
       agId = ref.id;
     } catch (e) { console.warn("agreements write failed (check Firestore rules):", e); }
     if (workerId) {                                                                           // 3) worker → on work
@@ -3378,8 +3427,9 @@ async function finalizeAgreement() {
         payRate: x.pay || null,
         payType: x.payType || "monthly",
         status: "Active Placement",
-        commissionPaid: feeAmt > 0,
-        commissionAmount: feeAmt || null,
+        commissionPaid: feeCollected && feeAmt > 0,
+        commissionAmount: feeCollected ? (feeAmt || null) : null,
+        commissionPaidAt: feeCollected && feeAmt > 0 ? serverTimestamp() : null,
         handoverReceiptSigned: true,
         officeHandoverCompletedAt: serverTimestamp(),
         source: "agreement",
@@ -3420,7 +3470,12 @@ async function refreshInfo() {
 }
 
 // modal wiring
-$("agRefreshPreview").onclick = refreshAgPreview;
+$("agRefreshPreview").onclick = () => { updateAgServiceFeeField(); refreshAgPreview(); };
+if ($("agPay") && !$("agPay").dataset.feeBound) {
+  $("agPay").dataset.feeBound = "1";
+  $("agPay").addEventListener("input", () => updateAgServiceFeeField());
+  $("agPay").addEventListener("change", () => { updateAgServiceFeeField(); refreshAgPreview(); });
+}
 $("agreementModal").addEventListener("input", e => { if (e.target.closest("#agEditPanel")) refreshAgPreview(); });
 $("agClose").onclick = () => { $("agreementModal").classList.add("hid"); agCurrent = null; };
 $("agFinalize").onclick = finalizeAgreement;
@@ -3692,6 +3747,35 @@ const ACTIONS = {
   async staffDelete(d) { if (!confirm("Remove this staff member?")) return false; await deleteDoc(doc(db, "admin_users", d.id)); }
 };
 
+
+/** Deep link the employer opens in Telegram to rate the worker themselves. */
+function employerRateLink(kind, id) {
+  const param = kind === "placement" ? ("ratepl_" + id) : ("rate_" + id);
+  return "https://t.me/TamagnDelalaETBot?startapp=" + encodeURIComponent(param);
+}
+function openEmployerRateAsk({ name, username, tgId, workerName, jobTitle, days, kind, id }) {
+  const link = employerRateLink(kind, id);
+  const daysLine = days != null ? (
+    lang === "am"
+      ? (workerName + " ከእርስዎ ጋር ለ" + days + " ቀን(ናት) ሰርቷል" + (jobTitle ? " (" + jobTitle + ")" : "") + "።")
+      : (workerName + " has been with you for about " + days + " day(s)" + (jobTitle ? " (" + jobTitle + ")" : "") + ".")
+  ) : "";
+  const msg = lang === "am"
+    ? ("ሰላም " + (name || "") + "\n\nከታማኝ ደላላ፡ እባክዎ የቀጠሩትን ሰራተኛ (" + (workerName || "") + ") ይገምግሙ።\n" + daysLine + "\n\n👇 ይህን ሊንክ በቴሌግራም ይክፈቱ — ኮከብ ይምረጡ እና አስተያየት መጻፍ ይችላሉ፡\n" + link + "\n\nእናመሰግናለን!")
+    : ("Hello " + (name || "") + "\n\nFrom Tamagn Delala: please rate the worker you hired (" + (workerName || "") + ").\n" + daysLine + "\n\n👇 Open this link in Telegram to rate (1–5 stars) and optionally leave a comment:\n" + link + "\n\nThank you!");
+  const uname = username ? String(username).replace(/^@/, "") : "";
+  let url = null;
+  if (uname) url = "https://t.me/" + uname + "?text=" + encodeURIComponent(msg);
+  else if (tgId) url = "tg://user?id=" + tgId;
+  if (url) {
+    try { window.open(url, "_blank"); } catch (_) { location.href = url; }
+  } else {
+    prompt("No Telegram on file for this employer. Copy and send this message:", msg);
+  }
+  try { navigator.clipboard && navigator.clipboard.writeText(msg); } catch (_) {}
+  return link;
+}
+
 // ================= click handler =================
 async function onAction(e) {
   const kp = e.target.closest(".kpi");
@@ -3711,9 +3795,14 @@ async function onAction(e) {
     else if (d.reject) { if(!confirm("Reject?"))return; await updateDoc(doc(db,"workers",d.reject),{status:"rejected",available:false}); }
     else if (d.ask) {
       const r = reqs.find(x=>x.id===d.ask); if(!r)return;
-      const msg = `Hello ${r.employerName}\n\nFrom Tamagn Delala: please rate the worker you hired (${r.workerName}).\n\nReply with 1–5 stars and a short comment.\n\nሰላም ${r.employerName}\nከታማኝ ደላላ የቀጠሩትን ሰራተኛ (${r.workerName}) በተመለከተ አስተያየትዎን እንጠይቃለን።\nእባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ።`;
-      const url = r.employerUsername ? `https://t.me/${r.employerUsername}?text=${encodeURIComponent(msg)}` : `tg://user?id=${r.employerTgId}`;
-      window.open(url,"_blank"); return;
+      openEmployerRateAsk({
+        name: r.employerName, username: r.employerUsername, tgId: r.employerTgId,
+        workerName: r.workerName, jobTitle: r.jobTitle || r.workerSkill || "",
+        kind: "request", id: r.id
+      });
+      try { await updateDoc(doc(db, "requests", r.id), { followUpSent: true, ratingLinkSentAt: serverTimestamp() }); } catch (_) {}
+      toast(lang === "am" ? "የደረጃ ሊንክ ለአሰሪው ተልኳል" : "Rating link opened for the employer");
+      return;
     }
     else if (d.rate) {
       ratingRequestId=d.rate; ratingWorkerId=d.wid; ratingPlacementId=null;
@@ -3743,12 +3832,15 @@ async function onAction(e) {
       const p = plById(d.askpl); if (!p) return;
       const e = eById(p.employerId) || {};
       const days = placementDaysStayed(p);
-      const msg = `Hello ${p.employerName}\n\nFrom Tamagn Delala: ${p.workerName} has been with you for about ${days} day(s) (${p.jobTitle}).\nPlease rate the worker 1–5 stars and add a short comment.\n\nሰላም ${p.employerName}\n${p.workerName} ከእርስዎ ጋር ለ${days} ቀን(ናት) ሰርቷል። እባክዎ ከ1 እስከ 5 ኮከብ + አጭር አስተያየት ይጻፉ።`;
-      const username = e.username || p.employerUsername;
-      const tgId = e.tgId || e.telegramId || p.employerTgId;
-      const url = username ? `https://t.me/${String(username).replace(/^@/, "")}?text=${encodeURIComponent(msg)}` : (tgId ? `tg://user?id=${tgId}` : null);
-      if (url) window.open(url, "_blank");
-      else prompt("No Telegram on file. Copy and send this message manually:", msg);
+      openEmployerRateAsk({
+        name: p.employerName,
+        username: e.username || p.employerUsername,
+        tgId: e.tgId || e.telegramId || p.employerTgId,
+        workerName: p.workerName, jobTitle: p.jobTitle, days,
+        kind: "placement", id: p.id
+      });
+      try { await savePlacementRatingFields(p.id, { ratingFollowUpSent: true, ratingLinkSentAt: serverTimestamp() }); } catch (_) {}
+      toast(lang === "am" ? "የደረጃ ሊንክ ለአሰሪው ተልኳል" : "Rating link opened for the employer");
       return;
     }
     else if (d.ratepl) {
