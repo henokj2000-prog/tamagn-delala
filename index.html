@@ -754,6 +754,40 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
       </div>
     </div>
   </section>
+
+  <!-- Employer rates a worker (opened via Telegram deep link) -->
+  <section id="vRate" class="hid">
+    <button class="back-btn" id="backFromRate" type="button">← Back</button>
+    <div class="form-card" id="rateCard" style="max-width:480px;margin:0 auto">
+      <h2 style="text-align:center;margin-bottom:6px" id="rateTitle">Rate the worker</h2>
+      <p class="who" style="text-align:center;margin-bottom:14px" id="rateSub">Your feedback helps us keep quality high.</p>
+      <div id="rateWorkerBox" style="text-align:center;margin-bottom:16px;padding:12px;background:var(--bg);border-radius:12px;border:1px solid var(--border)">
+        <div style="font-size:28px;margin-bottom:4px">👤</div>
+        <div style="font-weight:700;font-size:16px" id="rateWorkerName">—</div>
+        <div class="who" id="rateWorkerMeta" style="margin:4px 0 0"></div>
+      </div>
+      <label id="lblRateStars">Stars (1–5) *</label>
+      <div id="rateStarsRow" style="display:flex;gap:8px;justify-content:center;margin:8px 0 14px">
+        <button type="button" class="rate-star" data-stars="1" style="font-size:28px;background:none;border:0;cursor:pointer;line-height:1;padding:4px">☆</button>
+        <button type="button" class="rate-star" data-stars="2" style="font-size:28px;background:none;border:0;cursor:pointer;line-height:1;padding:4px">☆</button>
+        <button type="button" class="rate-star" data-stars="3" style="font-size:28px;background:none;border:0;cursor:pointer;line-height:1;padding:4px">☆</button>
+        <button type="button" class="rate-star" data-stars="4" style="font-size:28px;background:none;border:0;cursor:pointer;line-height:1;padding:4px">☆</button>
+        <button type="button" class="rate-star" data-stars="5" style="font-size:28px;background:none;border:0;cursor:pointer;line-height:1;padding:4px">☆</button>
+      </div>
+      <input type="hidden" id="rateStarsVal" value="">
+      <label id="lblRateComment">Comment (optional)</label>
+      <textarea id="rateComment" rows="3" maxlength="500" placeholder="How was their work? Any recommendation?"></textarea>
+      <button class="btn-primary" id="rateSubmitBtn" type="button">Submit rating</button>
+      <p class="who" id="rateHint" style="text-align:center;margin-top:10px"></p>
+    </div>
+    <div class="form-card hid" id="rateDone" style="max-width:480px;margin:16px auto;text-align:center">
+      <div style="font-size:40px;margin-bottom:8px">✅</div>
+      <h3 id="rateDoneTitle">Thank you!</h3>
+      <p class="who" id="rateDoneText">Your rating was saved.</p>
+      <button class="btn-primary" id="rateDoneHome" type="button" style="margin-top:12px">Home</button>
+    </div>
+  </section>
+
 </main>
 
 <!-- Hire success modal -->
@@ -1083,7 +1117,20 @@ const i18n = {
     ratingTitle: "Save Rating",
     stars: "Stars (1-5)",
     comment: "Comment / Recommendation",
-    saveRating: "Save Rating"
+    saveRating: "Save Rating",
+    ratePageTitle: "Rate the worker",
+    ratePageSub: "Your feedback helps Tamagn Delala keep quality high.",
+    rateStars: "Stars (1–5) *",
+    rateComment: "Comment (optional)",
+    rateCommentPh: "How was their work? Any recommendation?",
+    rateSubmit: "Submit rating",
+    rateThanks: "Thank you!",
+    rateThanksSub: "Your rating was saved. You can close this page.",
+    rateAlready: "You already rated this worker. Thank you!",
+    rateMissing: "This rating link is invalid or expired.",
+    rateNeedStars: "Please choose 1 to 5 stars.",
+    rateHome: "Home",
+    rateHint: "Tap the stars, add a short comment if you like, then submit.",
   },
   am: {
     tagline: "ታማኝ ሰራተኞች",
@@ -1200,7 +1247,20 @@ const i18n = {
     ratingTitle: "ደረጃ አስቀምጥ",
     stars: "ኮከቦች (1-5)",
     comment: "አስተያየት / ምክር",
-    saveRating: "ደረጃ አስቀምጥ"
+    saveRating: "ደረጃ አስቀምጥ",
+    ratePageTitle: "ሰራተኛውን ይገምግሙ",
+    ratePageSub: "አስተያየትዎ ታማኝ ደላላ ጥራት እንዲጠብቅ ይረዳል።",
+    rateStars: "ኮከቦች (1–5) *",
+    rateComment: "አስተያየት (አማራጭ)",
+    rateCommentPh: "ስራቸው እንዴት ነበር? ምክር ካለዎት ይጻፉ።",
+    rateSubmit: "ደረጃ ላክ",
+    rateThanks: "እናመሰግናለን!",
+    rateThanksSub: "ደረጃዎ ተቀምጧል። ይህን ገጽ መዝጋት ይችላሉ።",
+    rateAlready: "ይህን ሰራተኛ አስቀድመው ገምግመዋል። እናመሰግናለን!",
+    rateMissing: "ይህ የደረጃ ሊንክ ልክ ያልሆነ ወይም ጊዜው ያለፈ ነው።",
+    rateNeedStars: "እባክዎ ከ1 እስከ 5 ኮከብ ይምረጡ።",
+    rateHome: "መነሻ",
+    rateHint: "ኮከቦቹን ይንኩ፣ ከፈለጉ አጭር አስተያየት ይጻፉ፣ ከዚያ ይላኩ።",
   }
 };
 
@@ -1433,7 +1493,7 @@ $("langBtn").onclick = () => { lang = lang === "en" ? "am" : "en"; localStorage.
 function show(view) {
   document.body.classList.toggle("home", view === "Landing");
   window.scrollTo(0, 0);
-  ["Landing","E","R","W"].forEach(v => {
+  ["Landing","E","R","W","Rate"].forEach(v => {
     const el = $("v" + v);
     if (el) el.classList.toggle("hid", v !== view);
   });
@@ -2201,6 +2261,187 @@ if ($("wUpdateBtn")) $("wUpdateBtn").onclick = async () => {
     alert(lang==="am" ? "መገለጫ ተዘምኗል" : "Profile updated");
   } catch (e) { alert("Error: " + e.message); }
 };
+
+
+// ================= Employer rating page (deep link) =================
+// Opened via: https://t.me/TamagnDelalaETBot?startapp=rate_<requestId>
+//         or: https://t.me/TamagnDelalaETBot?startapp=ratepl_<placementId>
+let rateCtx = { type: null, id: null, workerId: null, workerName: "", meta: "" };
+let rateStarsChosen = 0;
+
+function applyRateStarsUI(n) {
+  rateStarsChosen = n;
+  $("rateStarsVal").value = n ? String(n) : "";
+  document.querySelectorAll(".rate-star").forEach(btn => {
+    const s = Number(btn.dataset.stars);
+    btn.textContent = s <= n ? "★" : "☆";
+    btn.style.color = s <= n ? "#eab308" : "#94a3b8";
+  });
+}
+
+function applyRateLang() {
+  if (!$("rateTitle")) return;
+  $("rateTitle").textContent = t("ratePageTitle");
+  $("rateSub").textContent = t("ratePageSub");
+  $("lblRateStars").textContent = t("rateStars");
+  $("lblRateComment").textContent = t("rateComment");
+  $("rateComment").placeholder = t("rateCommentPh");
+  $("rateSubmitBtn").textContent = t("rateSubmit");
+  $("rateDoneTitle").textContent = t("rateThanks");
+  $("rateDoneText").textContent = t("rateThanksSub");
+  $("rateDoneHome").textContent = t("rateHome");
+  $("rateHint").textContent = t("rateHint");
+}
+
+function parseRateStartParam() {
+  let sp = "";
+  try { sp = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || ""; } catch (_) {}
+  if (!sp) {
+    try {
+      const q = new URLSearchParams(location.search);
+      sp = q.get("startapp") || q.get("start") || "";
+    } catch (_) {}
+  }
+  if (!sp) {
+    try {
+      const h = (location.hash || "").replace(/^#/, "");
+      if (h.startsWith("rate_") || h.startsWith("ratepl_")) sp = h;
+    } catch (_) {}
+  }
+  sp = String(sp || "").trim();
+  if (sp.startsWith("ratepl_")) return { type: "placement", id: sp.slice(7) };
+  if (sp.startsWith("rate_")) return { type: "request", id: sp.slice(5) };
+  return null;
+}
+
+async function openRatePageFromStart() {
+  const parsed = parseRateStartParam();
+  if (!parsed || !parsed.id) return false;
+  show("Rate");
+  applyRateLang();
+  $("rateCard").classList.remove("hid");
+  $("rateDone").classList.add("hid");
+  $("rateWorkerName").textContent = "…";
+  $("rateWorkerMeta").textContent = "";
+  applyRateStarsUI(0);
+  $("rateComment").value = "";
+  try {
+    if (parsed.type === "request") {
+      const snap = await getDoc(doc(db, "requests", parsed.id));
+      if (!snap.exists()) { $("rateHint").textContent = t("rateMissing"); return true; }
+      const r = snap.data();
+      if (r.rating != null && Number(r.rating) >= 1) {
+        $("rateCard").classList.add("hid");
+        $("rateDone").classList.remove("hid");
+        $("rateDoneText").textContent = t("rateAlready");
+        return true;
+      }
+      rateCtx = {
+        type: "request", id: parsed.id,
+        workerId: r.workerId || null,
+        workerName: r.workerName || "Worker",
+        meta: (r.employerName ? ("← " + r.employerName) : "")
+      };
+    } else {
+      const snap = await getDoc(doc(db, "placements", parsed.id));
+      if (!snap.exists()) { $("rateHint").textContent = t("rateMissing"); return true; }
+      const p = snap.data();
+      if (p.rating != null && Number(p.rating) >= 1) {
+        $("rateCard").classList.add("hid");
+        $("rateDone").classList.remove("hid");
+        $("rateDoneText").textContent = t("rateAlready");
+        return true;
+      }
+      rateCtx = {
+        type: "placement", id: parsed.id,
+        workerId: p.workerId || null,
+        workerName: p.workerName || "Worker",
+        meta: [p.jobTitle, p.employerName].filter(Boolean).join(" · ")
+      };
+    }
+    $("rateWorkerName").textContent = rateCtx.workerName;
+    $("rateWorkerMeta").textContent = rateCtx.meta;
+  } catch (e) {
+    console.error(e);
+    $("rateHint").textContent = t("rateMissing");
+  }
+  return true;
+}
+
+async function submitEmployerRating() {
+  const stars = Number(rateStarsChosen || $("rateStarsVal").value);
+  const comment = ($("rateComment").value || "").trim();
+  if (!(stars >= 1 && stars <= 5)) {
+    alert(t("rateNeedStars"));
+    return;
+  }
+  if (!rateCtx.id) { alert(t("rateMissing")); return; }
+  const btn = $("rateSubmitBtn");
+  btn.disabled = true;
+  btn.textContent = "…";
+  try {
+    if (rateCtx.type === "request") {
+      await updateDoc(doc(db, "requests", rateCtx.id), {
+        rating: stars,
+        ratingComment: comment,
+        followUpSent: true,
+        ratedAt: serverTimestamp(),
+        ratedByTgId: tgUser.id ? String(tgUser.id) : null
+      });
+    } else {
+      await updateDoc(doc(db, "placements", rateCtx.id), {
+        rating: stars,
+        ratingComment: comment,
+        ratingFollowUpSent: true,
+        ratedAt: serverTimestamp(),
+        ratedByTgId: tgUser.id ? String(tgUser.id) : null
+      });
+    }
+    if (rateCtx.workerId) {
+      const wRef = doc(db, "workers", rateCtx.workerId);
+      const wSnap = await getDoc(wRef);
+      if (wSnap.exists()) {
+        const w = wSnap.data();
+        const prevN = Number(w.ratingCount) || 0;
+        const prevSum = (w.ratingSum != null && w.ratingSum !== "")
+          ? Number(w.ratingSum) || 0
+          : (prevN > 0 ? (Number(w.ratingAvg) || 0) * prevN : 0);
+        const n = prevN + 1;
+        const sum = prevSum + stars;
+        const avg = sum / n;
+        const score = (3 * 3.5 + sum) / (3 + n);
+        await updateDoc(wRef, {
+          ratingCount: n,
+          ratingSum: sum,
+          ratingAvg: Math.round(avg * 100) / 100,
+          ratingScore: Math.round(score * 100) / 100,
+          lastRatedAt: serverTimestamp()
+        });
+      }
+    }
+    $("rateCard").classList.add("hid");
+    $("rateDone").classList.remove("hid");
+    try { if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("success"); } catch (_) {}
+  } catch (e) {
+    console.error(e);
+    alert((lang === "am" ? "መቀመጥ አልተቻለም: " : "Could not save: ") + (e.message || e));
+  }
+  btn.disabled = false;
+  btn.textContent = t("rateSubmit");
+}
+
+document.querySelectorAll(".rate-star").forEach(btn => {
+  btn.addEventListener("click", () => applyRateStarsUI(Number(btn.dataset.stars)));
+});
+if ($("rateSubmitBtn")) $("rateSubmitBtn").onclick = () => submitEmployerRating();
+if ($("backFromRate")) $("backFromRate").onclick = () => show("Landing");
+if ($("rateDoneHome")) $("rateDoneHome").onclick = () => show("Landing");
+
+// Boot: if opened from rating deep link, show the form first
+openRatePageFromStart().then(opened => {
+  if (opened) applyRateLang();
+}).catch(() => {});
+
 
 applyLang();
 loadWorkers();
