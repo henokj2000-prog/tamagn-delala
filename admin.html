@@ -622,8 +622,8 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
     <p id="loginNote" class="who" style="margin-bottom:12px">Sign in with the manager or staff Google account (<b>henokj2000@gmail.com</b> for owner).</p>
     <p id="loginStatus" class="who" style="margin-bottom:10px;color:#b45309;white-space:pre-wrap"></p>
     <p id="loginDiag" class="who" style="margin-bottom:12px;font-size:12px;color:#64748b"></p>
-    <button class="btn-primary" id="signIn">Sign in with Google</button>
-    <button class="btn-secondary" id="signInRedirect" style="width:100%;margin-top:8px">Sign in (redirect — if pop-up fails)</button>
+    <button class="btn-primary" id="signIn" type="button" onclick="window.__tdSignIn&&window.__tdSignIn(false)">Sign in with Google</button>
+    <button class="btn-secondary" id="signInRedirect" type="button" style="width:100%;margin-top:8px" onclick="window.__tdSignIn&&window.__tdSignIn(true)">Sign in (redirect — if pop-up fails)</button>
     <button class="btn-secondary hid" id="installBtn" style="width:100%;margin:10px 0 0;padding:11px">📲 Install as app</button>
     <p id="iosHint" class="who hid" style="margin-top:10px">To install on iPhone: tap the Share button, then "Add to Home Screen".</p>
     <p id="tgNote" class="who hid" style="margin-top:10px">This page does not work inside Telegram. Open it in Chrome or Safari.</p>
@@ -962,6 +962,16 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
   </div>
 </div>
 
+<script>
+window.addEventListener("error", function (ev) {
+  var el = document.getElementById("loginStatus");
+  if (el && ev && ev.message) el.textContent = "Script error: " + ev.message;
+}, true);
+window.addEventListener("unhandledrejection", function (ev) {
+  var el = document.getElementById("loginStatus");
+  if (el && ev && ev.reason) el.textContent = "Error: " + (ev.reason.message || ev.reason);
+});
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, writeBatch, query, orderBy, limit, serverTimestamp, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -1005,7 +1015,17 @@ const FILL = [...BUSY, "Completed"];                                            
 
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
+
 const auth = getAuth(fbApp);
+// Early stub so login buttons always respond even if later code throws
+window.__tdSignIn = function (preferRedirect) {
+  const el = document.getElementById("loginStatus");
+  if (el) el.textContent = "Loading sign-in…";
+  return window.__tdSignInReady
+    ? window.__tdSignInReady(preferRedirect)
+    : alert("App script still loading or failed. Open Console (F12) for errors.\n\nAlso check Firebase Authorized domains includes: " + location.hostname);
+};
+
 
 const tg = window.Telegram?.WebApp;
 const inTelegram = /Telegram/i.test(navigator.userAgent) || !!(tg && tg.initData);
@@ -1875,7 +1895,7 @@ function renderAdminSkillTags(selected) {
   syncFTagsFromChips();
 }
 if ($("f_skillTags")) {
-  $("f_skillTags").onclick = e => {
+  if ($("f_skillTags")) $("f_skillTags").onclick = e => {
     const chip = e.target.closest(".skill-chip");
     if (!chip) return;
     chip.classList.toggle("on");
@@ -1895,7 +1915,7 @@ if (!document.getElementById("skillChipStyle")) {
   st.textContent = `.skill-chip{border:1px solid #cbd5e1;background:#f8fafc;border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;color:#0f172a}.skill-chip.on{background:#0ea5e9;border-color:#0284c7;color:#fff;font-weight:700}`;
   document.head.appendChild(st);
 }
-$("eInd").innerHTML = '<option value="">All industries</option>' + INDUSTRIES.map(s => `<option>${s}</option>`).join("");
+if ($("eInd")) $("eInd").innerHTML = '<option value="">All industries</option>' + INDUSTRIES.map(s => `<option>${s}</option>`).join("");
 
 // ---- Live camera capture (passport 7:9 frame). Gallery picking is not offered. ----
 function takePassportPhoto(L) {
