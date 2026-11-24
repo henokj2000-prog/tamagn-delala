@@ -620,6 +620,7 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 <main><div class="wrap">
   <div id="login" class="form-card" style="margin-top:16px">
     <p id="loginNote" class="who" style="margin-bottom:12px">Sign in with the manager or staff Google account.</p>
+    <p id="loginStatus" class="who" style="margin-bottom:10px;color:#b45309"></p>
     <button class="btn-primary" id="signIn">Sign in with Google</button>
     <button class="btn-secondary hid" id="installBtn" style="width:100%;margin:10px 0 0;padding:11px">📲 Install as app</button>
     <p id="iosHint" class="who hid" style="margin-top:10px">To install on iPhone: tap the Share button, then "Add to Home Screen".</p>
@@ -962,7 +963,7 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, writeBatch, query, orderBy, limit, serverTimestamp, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const ADMIN_EMAIL = "henokj2000@gmail.com";   // owner = Super Admin. Other staff are listed in the admin_users collection.
 const firebaseConfig = {
@@ -1966,18 +1967,80 @@ function shrink(file) {
 
 
 // ---------- auth ----------
+function setLoginStatus(msg) {
+  const el = $("loginStatus");
+  if (el) el.textContent = msg || "";
+}
+
+function authErrorHelp(e) {
+  const code = (e && e.code) || "";
+  const msg = (e && e.message) || String(e);
+  if (code === "auth/unauthorized-domain") {
+    return "This site domain is not allowed for Google sign-in.\n\nFirebase Console → Authentication → Settings → Authorized domains\nAdd: henokj2000-prog.github.io\n(and localhost for testing)";
+  }
+  if (code === "auth/popup-blocked") {
+    return "Pop-up was blocked. Allow pop-ups for this site, or the page will try redirect sign-in.";
+  }
+  if (code === "auth/operation-not-supported-in-this-environment") {
+    return "Pop-up sign-in not supported here. Trying redirect…";
+  }
+  if (code === "auth/network-request-failed") {
+    return "Network error. Check internet connection.";
+  }
+  if (code === "auth/internal-error") {
+    return "Google sign-in internal error. Enable Google provider in Firebase Authentication → Sign-in method.";
+  }
+  return (code ? code + "\n" : "") + msg;
+}
+
 $("signIn").onclick = async () => {
+  const btn = $("signIn");
   const provider = new GoogleAuthProvider();
-  try { await signInWithPopup(auth, provider); }
-  catch (e) {
-    if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") {
-      try { await signInWithRedirect(auth, provider); } catch (e2) { alert(e2.code || e2.message); }
-    } else if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
-      alert(e.code || e.message);
+  provider.setCustomParameters({ prompt: "select_account" });
+  if (btn) { btn.disabled = true; btn.textContent = "Signing in…"; }
+  setLoginStatus("Opening Google sign-in…");
+  try {
+    await signInWithPopup(auth, provider);
+    setLoginStatus("Signed in — loading…");
+  } catch (e) {
+    console.error("signIn popup", e);
+    if (e.code === "auth/popup-closed-by-user" || e.code === "auth/cancelled-popup-request") {
+      setLoginStatus("Sign-in cancelled. Click the button again.");
+    } else if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") {
+      setLoginStatus("Pop-up blocked — redirecting to Google…");
+      try {
+        await signInWithRedirect(auth, provider);
+      } catch (e2) {
+        console.error("signIn redirect", e2);
+        setLoginStatus(authErrorHelp(e2));
+        alert(authErrorHelp(e2));
+      }
+    } else if (e.code === "auth/unauthorized-domain") {
+      setLoginStatus(authErrorHelp(e));
+      alert(authErrorHelp(e));
+    } else {
+      // Fallback: try redirect once
+      setLoginStatus(authErrorHelp(e) + " — trying redirect…");
+      try {
+        await signInWithRedirect(auth, provider);
+      } catch (e2) {
+        setLoginStatus(authErrorHelp(e2));
+        alert(authErrorHelp(e) + "\n\n" + authErrorHelp(e2));
+      }
     }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = t("signIn") || "Sign in with Google"; }
   }
 };
 $("signOut").onclick = () => signOut(auth);
+
+// Complete redirect-based sign-in (returns to this page after Google)
+getRedirectResult(auth).then(result => {
+  if (result && result.user) setLoginStatus("Signed in — loading…");
+}).catch(e => {
+  console.error("getRedirectResult", e);
+  setLoginStatus(authErrorHelp(e));
+});
 
 onAuthStateChanged(auth, async user => {
   if (!user) {
@@ -1988,38 +2051,49 @@ onAuthStateChanged(auth, async user => {
     if ($("signOut")) $("signOut").classList.add("hid");
     return;
   }
+  setLoginStatus("Checking access…");
   const email = (user.email || "").trim().toLowerCase();
   if (!email) { alert("No email on this Google account."); signOut(auth); return; }
-  if (email === ADMIN_EMAIL.toLowerCase()) me = { email, name: "Owner", role: R_SA };
-  else {
-    let s = null, data = null;
-    try { s = await getDoc(doc(db, "admin_users", email)); } catch (e) { console.error("admin_users read", e); }
-    if (s && s.exists()) data = s.data();
-    if (!data) {
-      try {
-        const qsnap = await getDocs(query(collection(db, "admin_users"), where("email", "==", email), limit(1)));
-        if (!qsnap.empty) { s = qsnap.docs[0]; data = s.data(); }
-      } catch (e) { console.warn("admin_users query", e); }
+  try {
+    if (email === ADMIN_EMAIL.toLowerCase()) {
+      me = { email, name: "Owner", role: R_SA };
+    } else {
+      let s = null, data = null;
+      try { s = await getDoc(doc(db, "admin_users", email)); } catch (e) { console.error("admin_users read", e); }
+      if (s && s.exists()) data = s.data();
+      if (!data) {
+        try {
+          const qsnap = await getDocs(query(collection(db, "admin_users"), where("email", "==", email), limit(1)));
+          if (!qsnap.empty) { s = qsnap.docs[0]; data = s.data(); }
+        } catch (e) { console.warn("admin_users query", e); }
+      }
+      if (!data) {
+        alert("This Google email is not invited as staff: " + email + "\n\nOwner must add this exact email under Settings → Invite Staff.");
+        setLoginStatus("Not invited: " + email);
+        signOut(auth); return;
+      }
+      if (String(data.status || "") !== "Active") {
+        alert("Your staff account is not Active. Ask the owner to Activate it in Settings.");
+        setLoginStatus("Account inactive");
+        signOut(auth); return;
+      }
+      me = { email, name: data.name || email, role: data.role || R_PC, staffId: s && s.id };
     }
-    if (!data) {
-      alert("This Google email is not invited as staff: " + email + "\n\nOwner must add this exact email under Settings → Invite Staff.");
-      signOut(auth); return;
-    }
-    if (String(data.status || "") !== "Active") {
-      alert("Your staff account is not Active. Ask the owner to Activate it in Settings.");
-      signOut(auth); return;
-    }
-    me = { email, name: data.name || email, role: data.role || R_PC, staffId: s && s.id };
+    $("who").textContent = me.email + " · " + me.role;
+    $("who").classList.remove("hid");
+    $("signOut").classList.remove("hid");
+    $("login").classList.add("hid");
+    $("panel").classList.remove("hid");
+    document.body.classList.add("is-app");
+    setLoginStatus("");
+    try { await loadAdmin(); } catch (err) { console.error(err); alert("Loaded sign-in but data sync failed: " + (err.message || err)); }
+    showView(location.hash.slice(1) || "dashboard");
+    applyAdminLang();
+  } catch (err) {
+    console.error("onAuthStateChanged", err);
+    setLoginStatus("Sign-in error: " + (err.message || err));
+    alert("Sign-in error: " + (err.message || err));
   }
-  $("who").textContent = me.email + " · " + me.role;
-  $("who").classList.remove("hid");
-  $("signOut").classList.remove("hid");
-  $("login").classList.add("hid");
-  $("panel").classList.remove("hid");
-  document.body.classList.add("is-app");
-  try { await loadAdmin(); } catch (err) { console.error(err); }
-  showView(location.hash.slice(1) || "dashboard");
-  applyAdminLang();
 });
 
 // ---------- load (live sync across all devices) ----------
