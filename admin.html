@@ -635,7 +635,9 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
         <button class="nav-btn" data-view="matches"><span class="ni">🔎</span><span>Job Matches</span></button>
         <button class="nav-btn" data-view="placements"><span class="ni">🤝</span><span>Placements</span><span class="nb hid" id="nbPl"></span></button>
         <button class="nav-btn" data-view="agreements"><span class="ni">📄</span><span>Agreements</span></button>
-        <button class="nav-btn" data-view="timesheets"><span class="ni">🧾</span><span>Payroll</span><span class="nb hid" id="nbTs"></span></button>
+        <button class="nav-btn" data-view="timesheets"><span class="ni">🧾</span><span>Worker Payroll</span><span class="nb hid" id="nbTs"></span></button>
+        <button class="nav-btn" data-view="staffhr"><span class="ni">👥</span><span>Staff HR</span></button>
+        <button class="nav-btn" data-view="finance"><span class="ni">💼</span><span>Finance</span></button>
         <button class="nav-btn" data-view="requests"><span class="ni">📋</span><span>Requests</span><span class="nb hid" id="nbReq"></span></button>
         <button class="nav-btn" data-view="settings"><span class="ni">⚙️</span><span>Settings</span></button>
       </nav>
@@ -737,6 +739,54 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
           <div class="chips" id="rChips"></div>
           <div class="toolbar"><input id="rSearch" type="search" placeholder="Search worker, employer or phone..."></div>
           <div id="tbReq"></div>
+        </div>
+
+        <!-- Staff HR: employees, attendance, salary calc -->
+        <div id="v-staffhr" class="view hid">
+          <div class="view-head"><h2>Staff HR &amp; Attendance</h2>
+            <div class="acts">
+              <button class="btn-add" data-act="staffInvite" id="btnHrInvite">+ Add / Invite Staff</button>
+              <button class="btn-add" data-act="staffAttMark" id="btnHrAtt">+ Mark attendance</button>
+              <button class="btn-add" data-act="staffPayCalc" id="btnHrPay">+ Calculate &amp; record salary</button>
+            </div>
+          </div>
+          <div class="kpis" id="hrKpis"></div>
+          <div class="panel-card" style="margin-bottom:14px">
+            <h3>Employees</h3>
+            <div class="sub">Date hired, guarantor, salary components. Net pay uses attendance. Only Unjustified Leave deducts from basic salary.</div>
+            <div id="tbHrStaff" style="margin-top:10px"></div>
+          </div>
+          <div class="panel-card" style="margin-bottom:14px">
+            <h3 style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
+              <span>Attendance</span>
+              <span style="display:flex;gap:8px;align-items:center;font-weight:500;font-size:13px">
+                <label style="margin:0">Month <input id="hrAttMonth" type="month" style="width:auto;margin:0;padding:6px 8px"></label>
+              </span>
+            </h3>
+            <div id="tbHrAtt" style="margin-top:10px"></div>
+          </div>
+          <div class="panel-card">
+            <h3>Staff salary payments</h3>
+            <div class="sub">Calculated from basic + allowances + bonus − absence deductions</div>
+            <div id="tbHrPay" style="margin-top:10px"></div>
+          </div>
+        </div>
+
+        <!-- Agency income & expense -->
+        <div id="v-finance" class="view hid">
+          <div class="view-head"><h2>Income &amp; Expense</h2>
+            <div class="acts">
+              <button class="btn-add" data-act="finIncome" id="btnFinIn">+ Income</button>
+              <button class="btn-add" data-act="finExpense" id="btnFinEx">+ Expense</button>
+            </div>
+          </div>
+          <div class="kpis" id="finKpis"></div>
+          <div class="chips" id="finChips"></div>
+          <div class="toolbar">
+            <input id="finSearch" type="search" placeholder="Search description, category...">
+            <select id="finPeriodSel"><option value="all">All time</option><option value="month">This month</option><option value="year">This year</option></select>
+          </div>
+          <div id="tbFin"></div>
         </div>
 
         <!-- Settings & roles -->
@@ -941,8 +991,8 @@ const ROLES = [R_SA, R_PC, R_PO, R_VS];
 const ROLE_SCOPE = { [R_SA]: "Full System, Payroll & Settings", [R_PC]: "Workers, Employers, Job Matches", [R_PO]: "Timesheets, Invoices & Payouts", [R_VS]: "Approve/Reject Workers & Employers" };
 const PERMS = { verify: [R_SA, R_VS], manage: [R_SA, R_PC], place: [R_SA, R_PC], payroll: [R_SA, R_PO], settings: [R_SA], agree: [R_SA, R_PC] };
 const ROLE_VIEWS = {
-  [R_SA]: ["dashboard", "employers", "workers", "matches", "placements", "agreements", "timesheets", "requests", "settings", "add"],
-  [R_PC]: ["dashboard", "employers", "workers", "matches", "placements", "agreements", "requests", "add"],
+  [R_SA]: ["dashboard", "employers", "workers", "matches", "placements", "agreements", "timesheets", "staffhr", "finance", "requests", "settings", "add"],
+  [R_PC]: ["dashboard", "employers", "workers", "matches", "placements", "agreements", "requests", "staffhr", "add"],
   [R_PO]: ["dashboard", "timesheets"],
   [R_VS]: ["dashboard", "employers", "workers"]
 };
@@ -1975,10 +2025,14 @@ onAuthStateChanged(auth, async user => {
 // ---------- load (live sync across all devices) ----------
 let unsubs = [];
 let staffPayroll = [];
+let staffAttendance = [];
+let financeEntries = [];
+let finFilter = "all";
+let finPeriod = "month";
 let rebuildTimer = null;
 const raw = {
   reqs: [], workers: [], employers: [], jobs: [], places: [], timesheets: [],
-  staff: [], staffPayroll: [], checkins: [], agreements: [], privs: {}, interests: [], settingsDoc: null
+  staff: [], staffPayroll: [], staffAttendance: [], finance: [], checkins: [], agreements: [], privs: {}, interests: [], settingsDoc: null
 };
 
 function byNew(a, b) { return ts(b.createdAt) - ts(a.createdAt); }
@@ -1992,6 +2046,8 @@ function rebuildFromRaw() {
   sheets = [...raw.timesheets].sort(byNewLocal);
   staff = [...raw.staff];
   staffPayroll = [...(raw.staffPayroll || [])];
+  staffAttendance = [...(raw.staffAttendance || [])];
+  financeEntries = [...(raw.finance || [])];
   checkins = [...raw.checkins];
   privs = { ...raw.privs };
 
@@ -2096,16 +2152,31 @@ async function loadAdmin() {
     if (!loadErrors.includes("workers_private")) loadErrors.push("workers_private");
   }));
 
-  if (me.role === R_SA || me.role === R_PO) {
+  if (me.role === R_SA || me.role === R_PO || me.role === R_PC) {
     listenCol(collection(db, "admin_users"), "staff", "admin_users");
+  } else {
+    raw.staff = [];
+  }
+  if (me.role === R_SA || me.role === R_PO) {
     try {
-      listenCol(query(collection(db, "staff_payroll"), orderBy("paidAt", "desc"), limit(100)), "staffPayroll", "staff_payroll");
+      listenCol(query(collection(db, "staff_payroll"), orderBy("paidAt", "desc"), limit(120)), "staffPayroll", "staff_payroll");
     } catch (e) {
       listenCol(collection(db, "staff_payroll"), "staffPayroll", "staff_payroll");
     }
+    try {
+      listenCol(query(collection(db, "staff_attendance"), orderBy("date", "desc"), limit(400)), "staffAttendance", "staff_attendance");
+    } catch (e) {
+      listenCol(collection(db, "staff_attendance"), "staffAttendance", "staff_attendance");
+    }
+    try {
+      listenCol(query(collection(db, "agency_finance"), orderBy("date", "desc"), limit(200)), "finance", "agency_finance");
+    } catch (e) {
+      listenCol(collection(db, "agency_finance"), "finance", "agency_finance");
+    }
   } else {
-    raw.staff = [];
     raw.staffPayroll = [];
+    raw.staffAttendance = [];
+    raw.finance = [];
   }
 
   unsubs.push(onSnapshot(query(collection(db, "checkins"), orderBy("at", "desc"), limit(20)), snap => {
@@ -2263,7 +2334,7 @@ function renderAdmin() {
   $("banner").classList.toggle("hid", !loadErrors.length);
   if (loadErrors.length) $("banner").textContent = "⚠️ Could not load: " + loadErrors.join(", ") + ". Update your Firestore rules for these collections (see setup notes).";
   // each page renders on its own, so one broken panel can never blank the others or the sidebar
-  [renderNav, renderDash, renderEmployers, renderWorkers, renderMatches, renderPlacements, renderAgreements, renderSheets, renderRequests, renderSettings]
+  [renderNav, renderDash, renderEmployers, renderWorkers, renderMatches, renderPlacements, renderAgreements, renderSheets, renderStaffHR, renderFinance, renderRequests, renderSettings]
     .forEach(fn => { try { fn(); } catch (err) { console.error(fn.name, err); } });
   $("btnNewEmp").classList.toggle("hid", !can("manage")); $("btnNewW").classList.toggle("hid", !can("manage"));
   $("btnNewJob").classList.toggle("hid", !can("place")); $("btnNewSheet").classList.toggle("hid", !can("payroll")); $("btnApproveAll").classList.toggle("hid", !can("payroll"));
@@ -2781,10 +2852,16 @@ function renderSettings() {
 }
 
 // live search / dropdown filters: re-render only the affected screen
-const LIVE = { rSearch: renderRequests, wSearch: renderWorkers, wSkill: renderWorkers, wType: renderWorkers, wFee: renderWorkers, wStat: renderWorkers, eSearch: renderEmployers, eInd: renderEmployers, jSearch: renderMatches, jStatus: renderMatches, jUrg: renderMatches, pSearch: renderPlacements, tSearch: renderSheets, aSearch: renderAgreements };
+const LIVE = { rSearch: renderRequests, wSearch: renderWorkers, wSkill: renderWorkers, wType: renderWorkers, wFee: renderWorkers, wStat: renderWorkers, eSearch: renderEmployers, eInd: renderEmployers, jSearch: renderMatches, jStatus: renderMatches, jUrg: renderMatches, pSearch: renderPlacements, tSearch: renderSheets, aSearch: renderAgreements, finSearch: renderFinance };
 $("panel").addEventListener("input", e => {
   if (e.target.id === "tPeriodSel") { tPeriod = e.target.value; return renderSheets(); }
+  if (e.target.id === "finPeriodSel") { finPeriod = e.target.value; return renderFinance(); }
+  if (e.target.id === "hrAttMonth") { return renderStaffHR(); }
   const fn = LIVE[e.target.id]; if (fn) fn();
+});
+$("panel").addEventListener("click", e => {
+  const fin = e.target.closest && e.target.closest("[data-fin]");
+  if (fin) { finFilter = fin.dataset.fin; renderFinance(); }
 });
 
 // ================= generic form modal =================
@@ -2884,33 +2961,423 @@ function jobForm(j) {
     }
   });
 }
+function staffGross(s) {
+  const n = x => Number(x) || 0;
+  return n(s.basicSalary) + n(s.transportAllowance) + n(s.houseAllowance) + n(s.mobileAllowance) + n(s.medicalAllowance) + n(s.bonus);
+}
 function staffForm(s) {
   const fields = [
     ...(s ? [] : [{ k: "email", label: "Google account email (login)", type: "email", req: 1 }]),
     { k: "name", label: "Full name", req: 1 },
     { k: "role", label: "Role", type: "select", opts: ROLES },
     { k: "status", label: "Status", type: "select", opts: ["Active", "Inactive"] },
-    { k: "phone", label: "Phone (optional)" },
-    { k: "monthlySalary", label: "Monthly salary ETB (staff payroll)", type: "number" },
-    { k: "bankInfo", label: "Bank / payment info (optional)" }
+    { k: "dateHired", label: "Date hired", type: "date" },
+    { k: "phone", label: "Phone" },
+    { k: "guarantorName", label: "Guarantor name" },
+    { k: "guarantorPhone", label: "Guarantor phone" },
+    { k: "basicSalary", label: "Basic salary (ETB)", type: "number" },
+    { k: "transportAllowance", label: "Transport allowance", type: "number" },
+    { k: "houseAllowance", label: "House allowance", type: "number" },
+    { k: "mobileAllowance", label: "Mobile allowance", type: "number" },
+    { k: "medicalAllowance", label: "Medical allowance", type: "number" },
+    { k: "bonus", label: "Bonus (monthly default)", type: "number" },
+    { k: "bankInfo", label: "Bank / payment info" },
+    { k: "workingDaysPerMonth", label: "Working days / month (for absence deduction)", type: "number" }
   ];
   openForm({
-    title: s ? "Edit Staff" : "Invite Staff",
+    title: s ? "Edit employee" : "Add / Invite staff",
     fields,
-    values: s || { role: R_PC, status: "Active", monthlySalary: "" },
-    note: "They must Sign in with Google using this exact email. Firestore rules need read on admin_users for signed-in users.",
+    values: s || { role: R_PC, status: "Active", workingDaysPerMonth: 26 },
+    note: "Login = Google email. Salary net = basic + allowances + bonus − (basic ÷ working days × unexcused absence days).",
     onSave: async v => {
       const email = String(s ? (s.email || s.id) : v.email).trim().toLowerCase();
       if (!email || !email.includes("@")) { alert("Valid Google email required"); throw new Error("email"); }
-      const salary = v.monthlySalary !== "" && v.monthlySalary != null ? Number(v.monthlySalary) : null;
+      const num = k => (v[k] !== "" && v[k] != null ? Number(v[k]) : 0);
       await setDoc(doc(db, "admin_users", email), {
         email, name: v.name, role: v.role, scope: ROLE_SCOPE[v.role] || "",
-        status: v.status || "Active", phone: v.phone || "",
-        monthlySalary: salary, bankInfo: v.bankInfo || "",
-        invitedBy: me.email || null, updatedAt: serverTimestamp(),
+        status: v.status || "Active",
+        dateHired: v.dateHired || null,
+        phone: v.phone || "",
+        guarantorName: v.guarantorName || "",
+        guarantorPhone: v.guarantorPhone || "",
+        basicSalary: num("basicSalary"),
+        transportAllowance: num("transportAllowance"),
+        houseAllowance: num("houseAllowance"),
+        mobileAllowance: num("mobileAllowance"),
+        medicalAllowance: num("medicalAllowance"),
+        bonus: num("bonus"),
+        monthlySalary: num("basicSalary") + num("transportAllowance") + num("houseAllowance") + num("mobileAllowance") + num("medicalAllowance") + num("bonus"),
+        bankInfo: v.bankInfo || "",
+        workingDaysPerMonth: num("workingDaysPerMonth") || 26,
+        invitedBy: me.email || null,
+        updatedAt: serverTimestamp(),
         ...(s ? {} : { createdAt: serverTimestamp() })
       }, { merge: true });
-      toast(s ? "Staff updated" : "Staff invited — they can sign in with " + email);
+      toast(s ? "Employee updated" : "Staff invited — sign in with " + email);
+    }
+  });
+}
+
+function hrMonthValue() {
+  const el = $("hrAttMonth");
+  if (el && el.value) return el.value;
+  return new Date().toISOString().slice(0, 7);
+}
+
+function attForStaffMonth(email, month) {
+  const em = String(email || "").toLowerCase();
+  return (staffAttendance || []).filter(a => String(a.staffEmail || "").toLowerCase() === em && String(a.date || "").startsWith(month));
+}
+
+/** Attendance / leave types for agency staff */
+const STAFF_ATT_TYPES = [
+  { id: "present", label: "Present", deduct: false },
+  { id: "late", label: "Late", deduct: false },
+  { id: "leave_of_absence", label: "Leave of Absence", deduct: false },
+  { id: "sick_leave", label: "Sick Leave", deduct: false },
+  { id: "mourning_leave", label: "Mourning Leave (3 days)", deduct: false, maxDays: 3 },
+  { id: "marriage_leave", label: "Marriage Leave (3 days)", deduct: false, maxDays: 3 },
+  { id: "birth_leave_female", label: "Birth Leave — Women (3 months)", deduct: false, maxDays: 90 },
+  { id: "birth_leave_male", label: "Birth Leave — Male (1 week)", deduct: false, maxDays: 7 },
+  { id: "unjustified_leave", label: "Unjustified Leave (salary deducted)", deduct: true }
+];
+const STAFF_ATT_LABEL = Object.fromEntries(STAFF_ATT_TYPES.map(x => [x.id, x.label]));
+function staffAttDeducts(status) {
+  const st = String(status || "").toLowerCase();
+  const row = STAFF_ATT_TYPES.find(x => x.id === st);
+  if (row) return !!row.deduct;
+  // legacy rows
+  if (st === "absent" && !arguments[1]) return true; // status only
+  return st === "absent" || st === "unjustified_leave";
+}
+function staffAttIsPresent(status) {
+  const st = String(status || "").toLowerCase();
+  return st === "present" || st === "late";
+}
+function calcStaffPayForMonth(s, month) {
+  const basic = Number(s.basicSalary) || 0;
+  const wd = Number(s.workingDaysPerMonth) || 26;
+  const rows = attForStaffMonth(s.email || s.id, month);
+  let present = 0, absent = 0, excused = 0, leave = 0, late = 0;
+  rows.forEach(a => {
+    const st = String(a.status || "").toLowerCase();
+    const deduct = a.deductsSalary != null
+      ? !!a.deductsSalary
+      : (st === "unjustified_leave" || (st === "absent" && !a.adequateReason));
+    if (st === "present") present++;
+    else if (st === "late") { present++; late++; }
+    else if (deduct) absent++;
+    else {
+      excused++;
+      leave++;
+    }
+  });
+  const dailyBasic = wd > 0 ? basic / wd : 0;
+  const deduction = round2(dailyBasic * absent);
+  const allowances = round2(
+    (Number(s.transportAllowance) || 0) + (Number(s.houseAllowance) || 0) +
+    (Number(s.mobileAllowance) || 0) + (Number(s.medicalAllowance) || 0)
+  );
+  const bonus = Number(s.bonus) || 0;
+  const gross = round2(basic + allowances + bonus);
+  const net = round2(Math.max(0, gross - deduction));
+  return { basic, allowances, bonus, gross, deduction, net, present, absent, excused, leave, late, workingDays: wd, dailyBasic };
+}
+
+function renderStaffHR() {
+  if (!$("tbHrStaff")) return;
+  const canEdit = me && (me.role === R_SA || me.role === R_PO);
+  const month = hrMonthValue();
+  if ($("hrAttMonth") && !$("hrAttMonth").value) $("hrAttMonth").value = month;
+
+  const active = (staff || []).filter(s => s.status === "Active");
+  if ($("hrKpis")) {
+    $("hrKpis").innerHTML = kpiHtml([
+      ["Active staff", active.length, "", "", "Active staff"],
+      ["Attendance rows", (staffAttendance || []).filter(a => String(a.date || "").startsWith(month)).length, "", month, "Attendance"],
+      ["Payroll records", (staffPayroll || []).length, "", "", "Payroll"]
+    ]);
+  }
+
+  $("tbHrStaff").innerHTML = table(
+    ["Employee", "Hired", "Guarantor", "Basic", "Allowances", "Bonus", "Gross", "Actions"],
+    (staff || []).map(s => {
+      const allw = (Number(s.transportAllowance)||0)+(Number(s.houseAllowance)||0)+(Number(s.mobileAllowance)||0)+(Number(s.medicalAllowance)||0);
+      return `<tr>
+        <td class="c-id"><b>${esc(s.name)}</b><div class="who">${esc(s.email || s.id)} · ${esc(s.role || "")}</div></td>
+        <td data-l="Hired">${esc(s.dateHired || "—")}</td>
+        <td data-l="Guarantor">${esc(s.guarantorName || "—")}<div class="who">${esc(s.guarantorPhone || "")}</div></td>
+        <td class="num">${etb(s.basicSalary)}</td>
+        <td class="num" title="Transport+House+Mobile+Medical">${etb(allw)}</td>
+        <td class="num">${etb(s.bonus)}</td>
+        <td class="num"><b>${etb(staffGross(s))}</b></td>
+        <td class="c-act"><div class="acts">${canEdit ? A("staffEdit", "Edit", "", `data-id="${esc(s.id)}"`) : ""}${A("staffAttMarkOne", "Attendance", "", `data-email="${esc(s.email || s.id)}"`)}</div></td>
+      </tr>`;
+    }),
+    "No staff yet — Invite Staff"
+  );
+
+  // Attendance table for month
+  const attRows = (staffAttendance || []).filter(a => String(a.date || "").startsWith(month))
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  $("tbHrAtt").innerHTML = attRows.length ? table(
+    ["Date", "Staff", "Status", "Reason", "Actions"],
+    attRows.map(a => `<tr>
+      <td>${esc(a.date)}</td>
+      <td><b>${esc(a.staffName || a.staffEmail)}</b></td>
+      <td>${(() => {
+        const st = String(a.status || "");
+        const lab = STAFF_ATT_LABEL[st] || st;
+        const deduct = a.deductsSalary != null ? a.deductsSalary : (st === "unjustified_leave" || (st === "absent" && !a.adequateReason));
+        return bdg(staffAttIsPresent(st) ? "ok" : (deduct ? "bad" : "warn"), lab) + (deduct ? ' <span class="who">· deduct</span>' : "");
+      })()}</td>
+      <td>${esc(a.reason || "—")}</td>
+      <td class="c-act">${canEdit ? A("staffAttDel", "Delete", "btn-danger", `data-id="${esc(a.id)}"`) : ""}</td>
+    </tr>`),
+    ""
+  ) : `<div class="empty">No attendance for ${esc(month)}. Use + Mark attendance.</div>`;
+
+  // Reuse payroll list
+  if ($("tbHrPay")) {
+    const rows = (staffPayroll || []).slice().sort((a, b) => ts(b.paidAt) - ts(a.paidAt));
+    $("tbHrPay").innerHTML = rows.length ? table(
+      ["Staff", "Period", "Gross", "Deduction", "Net", "Paid"],
+      rows.map(p => `<tr>
+        <td><b>${esc(p.staffName || p.staffEmail)}</b></td>
+        <td>${esc(p.period || "—")}</td>
+        <td class="num">${etb(p.gross != null ? p.gross : p.amount)}</td>
+        <td class="num">${etb(p.deduction || 0)}</td>
+        <td class="num"><b>${etb(p.net != null ? p.net : p.amount)}</b></td>
+        <td>${fmtDate(p.paidAt) || "—"}</td>
+      </tr>`),
+      ""
+    ) : `<div class="empty">No salary payments yet</div>`;
+  }
+}
+
+function staffAttForm(preEmail) {
+  const active = (staff || []).filter(s => s.status === "Active");
+  if (!active.length) { alert("Add Active staff first."); return; }
+  const opts = active.map(s => (s.email || s.id) + " · " + (s.name || ""));
+  const typeOpts = STAFF_ATT_TYPES.map(x => x.label);
+  const today = new Date().toISOString().slice(0, 10);
+  openForm({
+    title: "Mark staff attendance / leave",
+    note: "Unjustified Leave only reduces salary (basic ÷ working days × days). Other leave types are paid.",
+    fields: [
+      { k: "staffKey", label: "Staff", type: "select", opts, req: 1 },
+      { k: "date", label: "Date", type: "date", req: 1 },
+      { k: "leaveType", label: "Attendance / leave type", type: "select", opts: typeOpts, req: 1 },
+      { k: "reason", label: "Note / reason (optional)" }
+    ],
+    values: {
+      staffKey: preEmail ? (opts.find(o => o.startsWith(preEmail)) || opts[0]) : opts[0],
+      date: today,
+      leaveType: STAFF_ATT_TYPES[0].label
+    },
+    submitText: "Save attendance",
+    onSave: async v => {
+      const key = String(v.staffKey || "").split(" · ")[0].trim().toLowerCase();
+      const s = active.find(x => String(x.email || x.id).toLowerCase() === key);
+      const typeRow = STAFF_ATT_TYPES.find(x => x.label === v.leaveType) || STAFF_ATT_TYPES[0];
+      const id = key + "_" + v.date;
+      await setDoc(doc(db, "staff_attendance", id), {
+        staffEmail: key,
+        staffName: (s && s.name) || key,
+        date: v.date,
+        status: typeRow.id,
+        leaveTypeLabel: typeRow.label,
+        deductsSalary: !!typeRow.deduct,
+        maxDaysHint: typeRow.maxDays || null,
+        adequateReason: !typeRow.deduct,
+        reason: v.reason || "",
+        recordedBy: me.email || null,
+        updatedAt: serverTimestamp(),
+        createdAt: serverTimestamp()
+      }, { merge: true });
+      toast(typeRow.deduct
+        ? "Saved (Unjustified Leave — salary will be deducted)"
+        : "Attendance / leave saved");
+    }
+  });
+}
+
+function staffPayCalcForm() {
+  const active = (staff || []).filter(s => s.status === "Active");
+  if (!active.length) { alert("No active staff."); return; }
+  const opts = active.map(s => (s.email || s.id) + " · " + (s.name || ""));
+  const month = hrMonthValue();
+  openForm({
+    title: "Calculate salary from attendance",
+    note: "Only Unjustified Leave deducts: basic ÷ working days × days. Other leave types (sick, mourning, marriage, birth, leave of absence) do not deduct.",
+    fields: [
+      { k: "staffKey", label: "Staff", type: "select", opts, req: 1 },
+      { k: "period", label: "Period (YYYY-MM)", req: 1 },
+      { k: "method", label: "Payment method", type: "select", opts: ["Bank transfer", "Cash", "Mobile money", "Other"] },
+      { k: "notes", label: "Notes" }
+    ],
+    values: { period: month, method: "Bank transfer" },
+    submitText: "Record net salary",
+    onSave: async v => {
+      const key = String(v.staffKey || "").split(" · ")[0].trim().toLowerCase();
+      const s = active.find(x => String(x.email || x.id).toLowerCase() === key);
+      if (!s) throw new Error("staff");
+      const c = calcStaffPayForMonth(s, v.period);
+      await addDoc(collection(db, "staff_payroll"), {
+        staffEmail: key,
+        staffName: s.name || key,
+        staffRole: s.role || "",
+        period: v.period,
+        basic: c.basic,
+        allowances: c.allowances,
+        bonus: c.bonus,
+        gross: c.gross,
+        deduction: c.deduction,
+        net: c.net,
+        amount: c.net,
+        presentDays: c.present,
+        absentDays: c.absent,
+        excusedDays: c.excused,
+        workingDays: c.workingDays,
+        method: v.method || "Bank transfer",
+        notes: v.notes || "",
+        paidAt: serverTimestamp(),
+        recordedBy: me.email || null,
+        createdAt: serverTimestamp(),
+        source: "attendance_calc"
+      });
+      // Optional: also log as expense in finance
+      try {
+        await addDoc(collection(db, "agency_finance"), {
+          type: "expense",
+          category: "Staff salary",
+          amount: c.net,
+          date: new Date().toISOString().slice(0, 10),
+          description: "Salary " + (s.name || key) + " · " + v.period + " (net)",
+          staffEmail: key,
+          period: v.period,
+          recordedBy: me.email || null,
+          createdAt: serverTimestamp()
+        });
+      } catch (e) { console.warn("finance auto expense", e); }
+      toast("Net salary recorded: " + c.net + " ETB (deduction " + c.deduction + ")");
+    }
+  });
+}
+
+function renderStaffPayroll() {
+  const box = $("tbStaffPay");
+  if (!box) return;
+  const canPay = me && (me.role === R_SA || me.role === R_PO);
+  if ($("btnStaffPayNew")) $("btnStaffPayNew").classList.toggle("hid", !canPay);
+  const rows = (staffPayroll || []).slice().sort((a, b) => ts(b.paidAt) - ts(a.paidAt));
+  if (!rows.length) {
+    box.innerHTML = `<div class="empty">No staff payments recorded yet</div>`;
+    return;
+  }
+  box.innerHTML = table(
+    ["Staff", "Period", "Net", "Deduction", "Method", "Paid", "Actions"],
+    rows.map(p => `<tr>
+      <td class="c-id"><b>${esc(p.staffName || p.staffEmail || "—")}</b><div class="who">${esc(p.staffEmail || "")}</div></td>
+      <td>${esc(p.period || "—")}</td>
+      <td class="num"><b>${etb(p.net != null ? p.net : p.amount)}</b></td>
+      <td class="num">${etb(p.deduction || 0)}</td>
+      <td>${esc(p.method || "—")}</td>
+      <td>${fmtDate(p.paidAt) || "—"}</td>
+      <td class="c-act">${canPay ? A("staffPayDel", "Delete", "btn-danger", `data-id="${esc(p.id)}"`) : ""}</td>
+    </tr>`),
+    ""
+  );
+}
+
+function staffPayForm() {
+  // Legacy quick pay — prefer attendance calc
+  staffPayCalcForm();
+}
+
+function finInPeriod(d) {
+  if (finPeriod === "all") return true;
+  const t = ts(d.date) || ts(d.createdAt);
+  if (!t) {
+    const ds = String(d.date || "");
+    const now = new Date();
+    if (finPeriod === "month") return ds.startsWith(now.toISOString().slice(0, 7));
+    if (finPeriod === "year") return ds.startsWith(String(now.getFullYear()));
+    return true;
+  }
+  const dt = new Date(t * 1000);
+  const now = new Date();
+  if (finPeriod === "month") return dt.getMonth() === now.getMonth() && dt.getFullYear() === now.getFullYear();
+  if (finPeriod === "year") return dt.getFullYear() === now.getFullYear();
+  return true;
+}
+
+function renderFinance() {
+  if (!$("tbFin")) return;
+  const canEdit = me && (me.role === R_SA || me.role === R_PO);
+  if ($("btnFinIn")) $("btnFinIn").classList.toggle("hid", !canEdit);
+  if ($("btnFinEx")) $("btnFinEx").classList.toggle("hid", !canEdit);
+  let rows = (financeEntries || []).filter(finInPeriod);
+  if (finFilter === "income") rows = rows.filter(r => r.type === "income");
+  if (finFilter === "expense") rows = rows.filter(r => r.type === "expense");
+  const q = ($("finSearch") && $("finSearch").value || "").trim().toLowerCase();
+  if (q) rows = rows.filter(r => hay(r.description, r.category, r.type, r.amount).includes(q));
+  rows = rows.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")) || ts(b.createdAt) - ts(a.createdAt));
+
+  const income = rows.filter(r => r.type === "income").reduce((a, r) => a + (Number(r.amount) || 0), 0);
+  const expense = rows.filter(r => r.type === "expense").reduce((a, r) => a + (Number(r.amount) || 0), 0);
+  if ($("finKpis")) {
+    $("finKpis").innerHTML = kpiHtml([
+      ["Income", etb(income), "ok", finPeriod, "Income"],
+      ["Expense", etb(expense), expense ? "alert" : "", finPeriod, "Expense"],
+      ["Net", etb(income - expense), income - expense >= 0 ? "ok" : "alert", "", "Net"]
+    ]);
+  }
+  if ($("finChips")) {
+    $("finChips").innerHTML = [
+      ["all", "All"], ["income", "Income"], ["expense", "Expense"]
+    ].map(([id, lab]) => `<button type="button" class="chip ${finFilter === id ? "active" : ""}" data-fin="${id}">${lab}</button>`).join("");
+  }
+  $("tbFin").innerHTML = rows.length ? table(
+    ["Date", "Type", "Category", "Description", "Amount", "Actions"],
+    rows.map(r => `<tr>
+      <td>${esc(r.date || fmtDate(r.createdAt) || "—")}</td>
+      <td>${bdg(r.type === "income" ? "ok" : "bad", r.type)}</td>
+      <td>${esc(r.category || "—")}</td>
+      <td>${esc(r.description || "—")}</td>
+      <td class="num"><b>${etb(r.amount)}</b></td>
+      <td class="c-act">${canEdit ? A("finDel", "Delete", "btn-danger", `data-id="${esc(r.id)}"`) : ""}</td>
+    </tr>`),
+    ""
+  ) : `<div class="empty">No finance entries</div>`;
+}
+
+function financeForm(type) {
+  const incomeCats = ["Service fees", "Placement commission", "Other income"];
+  const expenseCats = ["Staff salary", "Office rent", "Utilities", "Transport", "Marketing", "Supplies", "Tax", "Other expense"];
+  openForm({
+    title: type === "income" ? "Record income" : "Record expense",
+    fields: [
+      { k: "date", label: "Date", type: "date", req: 1 },
+      { k: "category", label: "Category", type: "select", opts: type === "income" ? incomeCats : expenseCats },
+      { k: "amount", label: "Amount ETB", type: "number", req: 1 },
+      { k: "description", label: "Description" }
+    ],
+    values: { date: new Date().toISOString().slice(0, 10), category: type === "income" ? incomeCats[0] : expenseCats[0] },
+    submitText: "Save",
+    onSave: async v => {
+      const amount = Number(v.amount);
+      if (!(amount > 0)) { alert("Enter amount"); throw new Error("amount"); }
+      await addDoc(collection(db, "agency_finance"), {
+        type,
+        category: v.category,
+        amount,
+        date: v.date,
+        description: v.description || "",
+        recordedBy: me.email || null,
+        createdAt: serverTimestamp()
+      });
+      toast((type === "income" ? "Income" : "Expense") + " recorded");
     }
   });
 }
@@ -3857,11 +4324,26 @@ const ACTIONS = {
   staffEdit(d) { staffForm(staff.find(s => s.id === d.id)); return false; },
   async staffToggle(d) { const s = staff.find(x => x.id === d.id); if (!s) return; await updateDoc(doc(db, "admin_users", d.id), { status: s.status === "Active" ? "Inactive" : "Active" }); },
   async staffDelete(d) { if (!confirm("Remove this staff member?")) return false; await deleteDoc(doc(db, "admin_users", d.id)); },
-  staffPayNew() { staffPayForm(); return false; },
+  staffPayNew() { staffPayCalcForm(); return false; },
+  staffAttMark() { staffAttForm(); return false; },
+  staffAttMarkOne(d) { staffAttForm(d.email); return false; },
+  staffPayCalc() { staffPayCalcForm(); return false; },
+  async staffAttDel(d) {
+    if (!confirm("Delete this attendance row?")) return false;
+    await deleteDoc(doc(db, "staff_attendance", d.id));
+    toast("Attendance deleted");
+  },
   async staffPayDel(d) {
     if (!confirm("Delete this staff payment record?")) return false;
     await deleteDoc(doc(db, "staff_payroll", d.id));
     toast("Payment deleted");
+  },
+  finIncome() { financeForm("income"); return false; },
+  finExpense() { financeForm("expense"); return false; },
+  async finDel(d) {
+    if (!confirm("Delete this finance entry?")) return false;
+    await deleteDoc(doc(db, "agency_finance", d.id));
+    toast("Entry deleted");
   }
 };
 
