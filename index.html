@@ -796,7 +796,7 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
     <h3 id="doneTitle">Request Delivered!</h3>
     <p id="doneText">Your request has been sent successfully. Our team will contact you shortly.</p>
     <div class="phone-box">
-      <div style="font-size:12px;color:#166534;margin-bottom:4px" id="callAdminLabel">Call The Agency</div>
+      <div style="font-size:12px;color:#166534;margin-bottom:4px" id="callAdminLabel">Call Admin now</div>
       <a id="adminPhoneLink" href="tel:">09xxxxxxxx</a>
     </div>
     <button class="btn-primary" id="doneBtn" style="margin-bottom:8px">Message Admin on Telegram</button>
@@ -1032,10 +1032,13 @@ const i18n = {
     age: "Age", experience: "Experience", pay: "Pay", negotiable: "Negotiable",
     requestTitle: "Request Delivered!",
     requestText: "Your request has been sent successfully. Our team will contact you shortly.",
-    callAdmin: "Call The Agency",
+    callAdmin: "Call Admin now",
     messageAdmin: "Message Admin on Telegram",
     close: "Close",
     confirmHire: "Send hire request? The agency will prepare a proper employment agreement based on the job type (Ethiopian law).",
+    hireAlready: "You already sent a hire request for this worker. Wait for the agency to process it — duplicate requests are not allowed.",
+    hireAlreadyBtn: "Request sent",
+    hireWorkerBusy: "This worker is already on a placement / not available.",
     langBtn: "አማርኛ",
     verifiedId: "ID Verified",
     policeClearance: "Police Clearance",
@@ -1162,7 +1165,7 @@ const i18n = {
     age: "ዕድሜ", experience: "ልምድ", pay: "ክፍያ", negotiable: "በድርድር",
     requestTitle: "ጥያቄዎ ተልኳል!",
     requestText: "ጥያቄዎ በተሳካ ሁኔታ ተልኳል። ቡድናችን በቅርቡ ያገኝዎታል።",
-    callAdmin: "የደላላ ቢሮ ይደውሉ",
+    callAdmin: "አሁን አድሚንን ይደውሉ",
     messageAdmin: "አድሚንን በቴሌግራም ያግኙ",
     close: "ዝጋ",
     confirmHire: "የቅጥር ጥያቄ መላክ ይፈልጋሉ? ኤጀንሲው በሥራ ዓይነቱ መሠረት ትክክለኛ የሥራ ውል (በኢትዮጵያ ህግ) ያዘጋጃል።",
@@ -1512,6 +1515,7 @@ async function checkEmployer() {
     currentEmployer = { name: "Guest", phone: "", location: "" };
     $("empRegisterGate").classList.add("hid");
     $("empMain").classList.remove("hid");
+    refreshMyActiveHires().then(() => { try { if (typeof renderList === "function") renderList(); else if (typeof loadWorkers === "function") {} } catch (_) {} });
     if ($("empHello")) $("empHello").textContent = "";
     if ($("empEditBtn")) $("empEditBtn").classList.add("hid");
     return;
@@ -1525,6 +1529,7 @@ async function checkEmployer() {
       if ($("empHello")) $("empHello").textContent = (lang==="am" ? "ሰላም " : "Hello ") + (currentEmployer.name || "");
       if ($("empEditBtn")) $("empEditBtn").classList.remove("hid");
       if ($("empEditForm")) $("empEditForm").classList.add("hid");
+      try { await refreshMyActiveHires(); renderWorkers(); } catch (_) {}
     } else {
       $("empRegisterGate").classList.remove("hid");
       $("empMain").classList.add("hid");
@@ -1548,6 +1553,7 @@ $("empSaveBtn").onclick = async () => {
     $("empMain").classList.remove("hid");
     if ($("empHello")) $("empHello").textContent = (lang==="am" ? "ሰላም " : "Hello ") + name;
     if ($("empEditBtn")) $("empEditBtn").classList.remove("hid");
+    try { await refreshMyActiveHires(); renderWorkers(); } catch (_) {}
   } catch (e) { alert("Error: " + e.message); }
 };
 
@@ -1588,6 +1594,7 @@ async function loadWorkers() {
       if (cn) return cn;
       return ts(b.createdAt) - ts(a.createdAt);
     });
+    try { await refreshMyActiveHires(); } catch (_) {}
     renderWorkers();
   } catch (e) {
     console.error(e);
@@ -1659,37 +1666,179 @@ function renderWorkers() {
       <div class="meta"><span>💼 ${t("experience")}: ${esc(w.experience)}</span></div>
       ${place}
       <div class="pay">💰 ${esc(w.pay || t("negotiable"))} · ${t(w.paymentType||"monthly")}</div>
-      <button class="btn-hire" data-hire="${esc(w.id)}">${t("hire")}</button>
+      ${myActiveHireWorkerIds.has(String(w.id))
+        ? `<button class="btn-hire" type="button" disabled style="opacity:.7;cursor:default">${t("hireAlreadyBtn")}</button>`
+        : `<button class="btn-hire" data-hire="${esc(w.id)}">${t("hire")}</button>`}
     </div></div>`;
   }).join("");
 }
 $("list").onclick = e => { if (e.target.dataset.hire) hire(e.target.dataset.hire); };
 
+/** Active hire request statuses — block a second request for same worker+employer. */
+const HIRE_ACTIVE = ["open", "on_process", "on_work", "pending"];
+let myActiveHireWorkerIds = new Set(); // workerIds this employer already requested (active)
+
+function employerIdentity() {
+  const tgId = Number(tgUser.id) || 0;
+  const empId = currentEmployer && currentEmployer.id ? String(currentEmployer.id) : "";
+  return { tgId, empId, phone: (currentEmployer && currentEmployer.phone) || "" };
+}
+
+function isSameEmployer(req) {
+  const me = employerIdentity();
+  if (me.tgId && Number(req.employerTgId) === me.tgId) return true;
+  if (me.empId && String(req.employerId || "") === me.empId) return true;
+  if (me.tgId && String(req.employerId || "") === String(me.tgId)) return true;
+  if (me.phone && req.employerPhone && String(req.employerPhone).replace(/\s+/g, "") === String(me.phone).replace(/\s+/g, "")) return true;
+  return false;
+}
+
+function isActiveHireStatus(st) {
+  return HIRE_ACTIVE.includes(String(st || "open").toLowerCase());
+}
+
+/** Load this employer's active hire worker IDs (for UI + guard). */
+async function refreshMyActiveHires() {
+  myActiveHireWorkerIds = new Set();
+  const me = employerIdentity();
+  if (!me.tgId && !me.empId && !me.phone) return;
+  try {
+    let snap;
+    if (me.tgId) {
+      snap = await getDocs(query(collection(db, "requests"), where("employerTgId", "==", me.tgId), limit(50)));
+    } else {
+      snap = await getDocs(query(collection(db, "requests"), orderBy("createdAt", "desc"), limit(80)));
+    }
+    snap.docs.forEach(d => {
+      const r = d.data();
+      if (!isSameEmployer(r)) return;
+      if (!isActiveHireStatus(r.status)) return;
+      if (r.interestOnly) return; // job-interest rows are not hire requests
+      if (r.workerId) myActiveHireWorkerIds.add(String(r.workerId));
+    });
+  } catch (e) {
+    console.warn("refreshMyActiveHires", e);
+  }
+}
+
+async function findActiveHireRequest(workerId) {
+  const me = employerIdentity();
+  try {
+    let docs = [];
+    try {
+      if (me.tgId) {
+        const snap = await getDocs(query(
+          collection(db, "requests"),
+          where("workerId", "==", workerId),
+          where("employerTgId", "==", me.tgId),
+          limit(10)
+        ));
+        docs = snap.docs;
+      }
+    } catch (idxErr) {
+      // Composite index may be missing — fall back to workerId-only
+      console.warn("hire query fallback", idxErr);
+    }
+    if (!docs.length) {
+      const snap = await getDocs(query(collection(db, "requests"), where("workerId", "==", workerId), limit(40)));
+      docs = snap.docs;
+    }
+    for (const d of docs) {
+      const r = d.data();
+      if (r.interestOnly) continue;
+      if (!isSameEmployer(r)) continue;
+      if (isActiveHireStatus(r.status)) return { id: d.id, ...r };
+    }
+  } catch (e) {
+    console.warn("findActiveHireRequest", e);
+  }
+  return null;
+}
+
 async function hire(id) {
   if (!currentEmployer || !currentEmployer.name || currentEmployer.name === "Guest") {
-    alert(lang==="am" ? "እባክዎ መጀመሪያ ይመዝገቡ" : "Please register first");
+    alert(lang === "am" ? "እባክዎ መጀመሪያ ይመዝገቡ" : "Please register first");
     $("empRegisterGate").classList.remove("hid");
     $("empMain").classList.add("hid");
     return;
   }
   const w = workers.find(x => x.id === id);
   if (!w) return;
-  const ok = inTelegram ? await new Promise(r => tg.showConfirm(t("confirmHire")+"\n"+w.name, r)) : confirm(t("confirmHire")+"\n"+w.name);
+  if (w.available === false || w.status === "pending" || w.status === "rejected") {
+    alert(t("hireWorkerBusy"));
+    return;
+  }
+  // Block duplicate: one active hire request per employer + worker
+  if (myActiveHireWorkerIds.has(String(id))) {
+    alert(t("hireAlready"));
+    return;
+  }
+  const existing = await findActiveHireRequest(id);
+  if (existing) {
+    myActiveHireWorkerIds.add(String(id));
+    alert(t("hireAlready"));
+    try { renderList && renderList(); } catch (_) {}
+    return;
+  }
+  const ok = inTelegram
+    ? await new Promise(r => tg.showConfirm(t("confirmHire") + "\n" + w.name, r))
+    : confirm(t("confirmHire") + "\n" + w.name);
   if (!ok) return;
   try {
     const now = new Date();
-    const followUpAt = (w.paymentType==="hourly"||w.paymentType==="daily")
-      ? new Date(now.getTime()+86400000) : new Date(now.getTime()+30*86400000);
-    await addDoc(collection(db, "requests"), {
-      workerId: id, workerName: w.name, paymentType: w.paymentType||"monthly",
-      employerTgId: Number(tgUser.id)||0, employerName: currentEmployer.name,
-      employerPhone: currentEmployer.phone||"", employerUsername: tgUser.username||currentEmployer.username||"",
-      employerLocation: currentEmployer.location||"",
-      createdAt: serverTimestamp(), followUpAt: Timestamp.fromDate(followUpAt),
-      followUpSent: false, status: "open", paymentReceived: false, rating: null, ratingComment: null
-    });
+    const followUpAt = (w.paymentType === "hourly" || w.paymentType === "daily")
+      ? new Date(now.getTime() + 86400000)
+      : new Date(now.getTime() + 30 * 86400000);
+    const empTg = Number(tgUser.id) || 0;
+    // Deterministic id prevents double-submit races for the same pair while open
+    const docId = empTg
+      ? ("hire_" + empTg + "_" + id)
+      : null;
+    const payload = {
+      workerId: id,
+      workerName: w.name,
+      paymentType: w.paymentType || "monthly",
+      employerTgId: empTg,
+      employerId: currentEmployer.id || (empTg ? String(empTg) : null),
+      employerName: currentEmployer.name,
+      employerPhone: currentEmployer.phone || "",
+      employerUsername: tgUser.username || currentEmployer.username || "",
+      employerLocation: currentEmployer.location || "",
+      createdAt: serverTimestamp(),
+      followUpAt: Timestamp.fromDate(followUpAt),
+      followUpSent: false,
+      status: "open",
+      paymentReceived: false,
+      rating: null,
+      ratingComment: null,
+      source: "employer_app"
+    };
+    if (docId) {
+      const ref = doc(db, "requests", docId);
+      const prev = await getDoc(ref);
+      if (prev.exists()) {
+        const pr = prev.data();
+        if (isActiveHireStatus(pr.status) && !pr.interestOnly) {
+          myActiveHireWorkerIds.add(String(id));
+          alert(t("hireAlready"));
+          return;
+        }
+        // Previous request closed — keep history; create a new document for the new cycle
+        await addDoc(collection(db, "requests"), payload);
+      } else {
+        // First active request for this employer+worker (stable id blocks double-tap races)
+        await setDoc(ref, payload);
+      }
+    } else {
+      await addDoc(collection(db, "requests"), payload);
+    }
+    myActiveHireWorkerIds.add(String(id));
     showDone(w);
-  } catch (e) { console.error(e); alert("Error"); }
+    try { renderList && renderList(); } catch (_) {}
+  } catch (e) {
+    console.error(e);
+    alert((lang === "am" ? "ስህተት: " : "Error: ") + (e.message || e));
+  }
 }
 
 function showDone(w) {
