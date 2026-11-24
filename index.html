@@ -1768,35 +1768,37 @@ async function hire(id) {
     alert(t("hireWorkerBusy"));
     return;
   }
-  // Block duplicate: one active hire request per employer + worker
+  // Local guard (server rules may block reading requests without staff auth)
   if (myActiveHireWorkerIds.has(String(id))) {
     alert(t("hireAlready"));
     return;
   }
-  const existing = await findActiveHireRequest(id);
-  if (existing) {
-    myActiveHireWorkerIds.add(String(id));
-    alert(t("hireAlready"));
-    try { renderList && renderList(); } catch (_) {}
-    return;
-  }
+  // Best-effort remote check — ignore permission errors
+  try {
+    const existing = await findActiveHireRequest(id);
+    if (existing) {
+      myActiveHireWorkerIds.add(String(id));
+      alert(t("hireAlready"));
+      try { if (typeof renderWorkers === "function") renderWorkers(); } catch (_) {}
+      return;
+    }
+  } catch (_) {}
+
   const ok = inTelegram
     ? await new Promise(r => tg.showConfirm(t("confirmHire") + "\n" + w.name, r))
     : confirm(t("confirmHire") + "\n" + w.name);
   if (!ok) return;
+
   try {
     const now = new Date();
     const followUpAt = (w.paymentType === "hourly" || w.paymentType === "daily")
       ? new Date(now.getTime() + 86400000)
       : new Date(now.getTime() + 30 * 86400000);
     const empTg = Number(tgUser.id) || 0;
-    // Deterministic id prevents double-submit races for the same pair while open
-    const docId = empTg
-      ? ("hire_" + empTg + "_" + id)
-      : null;
     const payload = {
       workerId: id,
       workerName: w.name,
+      workerSkill: w.skill || "",
       paymentType: w.paymentType || "monthly",
       employerTgId: empTg,
       employerId: currentEmployer.id || (empTg ? String(empTg) : null),
@@ -1811,33 +1813,29 @@ async function hire(id) {
       paymentReceived: false,
       rating: null,
       ratingComment: null,
-      source: "employer_app"
+      source: "employer_app",
+      interestOnly: false
     };
-    if (docId) {
-      const ref = doc(db, "requests", docId);
-      const prev = await getDoc(ref);
-      if (prev.exists()) {
-        const pr = prev.data();
-        if (isActiveHireStatus(pr.status) && !pr.interestOnly) {
-          myActiveHireWorkerIds.add(String(id));
-          alert(t("hireAlready"));
-          return;
-        }
-        // Previous request closed — keep history; create a new document for the new cycle
-        await addDoc(collection(db, "requests"), payload);
-      } else {
-        // First active request for this employer+worker (stable id blocks double-tap races)
-        await setDoc(ref, payload);
-      }
-    } else {
-      await addDoc(collection(db, "requests"), payload);
-    }
+
+    // Prefer create-only path: no prior getDoc (Mini App has no Firebase Auth → cannot read requests)
+    // Always use addDoc (create). Mini App users are not Firebase-authenticated,
+    // so rules must allow: match /requests/{id} { allow create: if true; }
+    // Reading requests is staff-only — do not getDoc/query before create.
+    await addDoc(collection(db, "requests"), payload);
+
     myActiveHireWorkerIds.add(String(id));
     showDone(w);
-    try { renderList && renderList(); } catch (_) {}
+    try { if (typeof renderWorkers === "function") renderWorkers(); } catch (_) {}
   } catch (e) {
     console.error(e);
-    alert((lang === "am" ? "ስህተት: " : "Error: ") + (e.message || e));
+    const msg = String(e && (e.message || e.code) || e);
+    if (/permission/i.test(msg)) {
+      alert(lang === "am"
+        ? "ፍቃድ የለም። Firebase Rules ላይ requests create መፍቀድ አለበት (allow create: if true)."
+        : "Missing permissions. In Firestore rules, allow creating requests:\nmatch /requests/{id} { allow create: if true; }");
+    } else {
+      alert((lang === "am" ? "ስህተት: " : "Error: ") + msg);
+    }
   }
 }
 
