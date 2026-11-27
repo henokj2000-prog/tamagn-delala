@@ -1058,7 +1058,7 @@ const i18n = {
     callAdmin: "Call the agency",
     messageAdmin: "Message Admin on Telegram",
     close: "Close",
-    confirmHire: "Send hire request?",
+    confirmHire: "Send hire request? The agency will prepare a proper employment agreement based on the job type (Ethiopian law).",
     hireAlready: "You already sent a hire request for this worker. Wait for the agency to process it — duplicate requests are not allowed.",
     hireAlreadyBtn: "Request already sent",
     hireWorkerBusy: "This worker is already on a placement / not available.",
@@ -1191,7 +1191,7 @@ const i18n = {
     callAdmin: "ኤጀንሲውን ይደውሉ",
     messageAdmin: "አድሚንን በቴሌግራም ያግኙ",
     close: "ዝጋ",
-    confirmHire: "የቅጥር ጥያቄ መላክ ይፈልጋሉ?",
+    confirmHire: "የቅጥር ጥያቄ መላክ ይፈልጋሉ? ኤጀንሲው በሥራ ዓይነቱ መሠረት ትክክለኛ የሥራ ውል (በኢትዮጵያ ህግ) ያዘጋጃል።",
     hireAlready: "ለዚህ ሰራተኛ ቀድሞ የቅጥር ጥያቄ ልከዋል። ኤጀንሲው እስኪያስተናግድ ድረስ ይጠብቁ — ተደጋጋሚ ጥያቄ አይፈቀድም።",
     hireAlreadyBtn: "ጥያቄ አስቀድሞ ተልኳል",
     langBtn: "English",
@@ -1630,22 +1630,52 @@ if ($("empUpdateBtn")) $("empUpdateBtn").onclick = async () => {
   } catch (e) { alert("Error: " + e.message); }
 };
 
-// Workers list
+// Workers list (live — no manual refresh needed)
 let workers = [];
+let workersUnsub = null;
+function sortWorkersList(list) {
+  return list.slice().sort((a, b) => {
+    const d = ratingScoreOf(b) - ratingScoreOf(a);
+    if (Math.abs(d) > 0.001) return d;
+    const cn = (Number(b.ratingCount) || 0) - (Number(a.ratingCount) || 0);
+    if (cn) return cn;
+    return ts(b.createdAt) - ts(a.createdAt);
+  });
+}
+async function applyWorkersSnapshot(docs) {
+  workers = sortWorkersList(docs.map(d => ({ id: d.id, ...d.data() })));
+  try { await refreshMyActiveHires(); } catch (_) {}
+  renderWorkers();
+}
 async function loadWorkers() {
   try {
-    const snap = await getDocs(query(collection(db, "workers"), where("status","==","approved"), where("available","==",true), limit(100)));
-    workers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    // Best-ranked workers first (Bayesian score), then more reviews, then newest
-    workers.sort((a, b) => {
-      const d = ratingScoreOf(b) - ratingScoreOf(a);
-      if (Math.abs(d) > 0.001) return d;
-      const cn = (Number(b.ratingCount) || 0) - (Number(a.ratingCount) || 0);
-      if (cn) return cn;
-      return ts(b.createdAt) - ts(a.createdAt);
+    if (workersUnsub) { try { workersUnsub(); } catch (_) {} workersUnsub = null; }
+    const q = query(
+      collection(db, "workers"),
+      where("status", "==", "approved"),
+      where("available", "==", true),
+      limit(100)
+    );
+    // One-shot first so the list appears immediately
+    try {
+      const snap = await getDocs(q);
+      await applyWorkersSnapshot(snap.docs);
+    } catch (e) { console.warn("workers one-shot", e); }
+    // Live updates (approve / hire / availability changes)
+    workersUnsub = onSnapshot(q, async snap => {
+      try { await applyWorkersSnapshot(snap.docs); } catch (e) { console.error(e); }
+    }, async err => {
+      console.error("workers live", err);
+      try {
+        const snap = await getDocs(query(collection(db, "workers"), where("status", "==", "approved"), limit(100)));
+        workers = sortWorkersList(
+          snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(w => w.available !== false)
+        );
+        renderWorkers();
+      } catch (e2) {
+        $("list").innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Error</h3></div>`;
+      }
     });
-    try { await refreshMyActiveHires(); } catch (_) {}
-    renderWorkers();
   } catch (e) {
     console.error(e);
     $("list").innerHTML = `<div class="state"><div class="state-icon">⚠️</div><h3>Error</h3></div>`;
@@ -2661,6 +2691,17 @@ loadAgencyPhone().then(() => {
   } catch (_) {}
 }).catch(() => {});
 loadWorkers();
+
+// Telegram / mobile WebViews often pause JS; refresh when the user comes back
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    try { loadWorkers(); } catch (_) {}
+    try { loadAgencyPhone(); } catch (_) {}
+  }
+});
+window.addEventListener("pageshow", () => {
+  try { loadWorkers(); } catch (_) {}
+});
 </script>
 </body>
 </html>
