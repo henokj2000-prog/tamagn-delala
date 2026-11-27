@@ -793,17 +793,18 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
           <div class="kpis" id="hrKpis"></div>
           <div class="panel-card" style="margin-bottom:14px">
             <h3>Employees</h3>
-            <div class="sub">Date hired, guarantor, salary components. Net pay uses attendance. Only Unjustified Leave deducts from basic salary.</div>
+            <div class="sub">Date hired, guarantor, salary components. Net pay uses attendance. Click <b>Attendance</b> on a row to open that employee’s calendar. Only Unjustified Leave deducts from basic salary.</div>
             <div id="tbHrStaff" style="margin-top:10px"></div>
           </div>
-          <div class="panel-card" style="margin-bottom:14px">
+          <div id="hrAttPanel" class="panel-card hid" style="margin-bottom:14px">
             <h3 style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
               <span>Attendance calendar</span>
               <span style="display:flex;gap:8px;align-items:center;font-weight:500;font-size:13px">
                 <label style="margin:0">Month <input id="hrAttMonth" type="month" style="width:auto;margin:0;padding:6px 8px"></label>
+                <button type="button" class="btn-secondary" id="hrAttClose" style="margin:0;padding:6px 10px">Close</button>
               </span>
             </h3>
-            <p class="who" style="margin:4px 0 0">Select a staff member, then tap a day to mark attendance / leave. Only <b>Unjustified Leave</b> deducts from basic salary.</p>
+            <p class="who" style="margin:4px 0 0">Tap a day to mark attendance / leave. Only <b>Unjustified Leave</b> deducts from basic salary.</p>
             <div id="tbHrAtt" style="margin-top:10px"></div>
           </div>
           <div class="panel-card">
@@ -2405,6 +2406,14 @@ function showView(v) {
   window.scrollTo({ top: 0 });
   const c = document.querySelector(".content"); if (c) c.scrollTop = 0;
   try { history.replaceState(null, "", "#" + v); } catch (e) {}
+  // Attendance calendar is shown only after "Attendance" on an employee row —
+  // hide it when entering Staff HR from the nav (unless already opened this session via that button).
+  // staffAttMarkOne removes "hid" after calling showView, so order matters there.
+  if (v === "staffhr" && !window.__keepHrAttPanel) {
+    const panel = $("hrAttPanel");
+    if (panel) panel.classList.add("hid");
+  }
+  window.__keepHrAttPanel = false;
 }
 
 // ================= matching =================
@@ -3086,6 +3095,11 @@ $("panel").addEventListener("input", e => {
 $("panel").addEventListener("click", e => {
   const fin = e.target.closest && e.target.closest("[data-fin]");
   if (fin) { finFilter = fin.dataset.fin; renderFinance(); }
+  if (e.target && e.target.id === "hrAttClose") {
+    const panel = $("hrAttPanel");
+    if (panel) panel.classList.add("hid");
+    hrAttStaffEmail = "";
+  }
 });
 
 // ================= generic form modal =================
@@ -3379,8 +3393,11 @@ function renderStaffHR() {
     "No staff yet — Invite Staff"
   );
 
-  // Attendance calendar for selected staff + month
-  renderHrAttendanceCalendar(month, canEdit);
+  // Attendance calendar — only when opened via "Attendance" on an employee row
+  const attPanel = $("hrAttPanel");
+  if (attPanel && !attPanel.classList.contains("hid")) {
+    renderHrAttendanceCalendar(month, canEdit);
+  }
 
   // Reuse payroll list
   if ($("tbHrPay")) {
@@ -4796,10 +4813,17 @@ const ACTIONS = {
   staffAttMark() { staffAttForm(); return false; },
   staffAttMarkOne(d) {
     if (d.email) hrAttStaffEmail = String(d.email).toLowerCase();
+    window.__keepHrAttPanel = true;
     showView("staffhr");
+    const panel = $("hrAttPanel");
+    if (panel) panel.classList.remove("hid");
     renderStaffHR();
-    // Scroll calendar into view
-    setTimeout(() => { try { $("tbHrAtt") && $("tbHrAtt").scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {} }, 50);
+    setTimeout(() => {
+      try {
+        const el = $("hrAttPanel") || $("tbHrAtt");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (_) {}
+    }, 50);
     return false;
   },
   staffPayCalc() { staffPayCalcForm(); return false; },
