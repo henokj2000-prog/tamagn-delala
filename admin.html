@@ -2449,33 +2449,48 @@ function candidates(job) {
 }
 
 // ================= badges =================
-/** Effective hire-request status. If the worker is already placed / agreement signed, treat as on_work even when the stored status lagged behind. */
+function sameEmployer(a, b) {
+  if (!a || !b) return false;
+  const idA = a.employerId || a.assignedEmployerId || null;
+  const idB = b.employerId || b.assignedEmployerId || null;
+  if (idA && idB && String(idA) === String(idB)) return true;
+  const nA = String(a.employerName || a.assignedEmployerName || a.assigned_employer || "").trim().toLowerCase();
+  const nB = String(b.employerName || b.assignedEmployerName || b.assigned_employer || "").trim().toLowerCase();
+  return !!(nA && nB && nA === nB);
+}
+
+/** Effective hire-request status for UI.
+ *  Do NOT mark a request on_work just because the worker was placed with someone else before.
+ *  Only this request's own flags, matching employer assignment, or a placement tied to this request. */
 function reqStatus(r) {
   if (!r) return "open";
   const st = String(r.status || "open").toLowerCase();
   if (st === "closed") return "closed";
   if (st === "on_work") return "on_work";
-  // Already signed / paid placement via agreement
-  if (r.agreementSigned || r.serviceFeeCollected || r.paymentReceived) {
-    // still allow explicit on_process before finalize; once signed → on work
-    if (r.agreementSigned) return "on_work";
-  }
-  // Worker record says on work / assigned
+
+  // This request's own agreement / payment → on work
+  if (r.agreementSigned) return "on_work";
+
   if (r.workerId) {
     const w = (typeof wById === "function" ? wById(r.workerId) : null) || (allW || []).find(x => x.id === r.workerId);
-    if (w) {
-      const placed = !!(w.work_status === "on_work" || w.assignedEmployerId || w.assignedEmployerName || w.assigned_employer);
-      if (placed) return "on_work";
+    // Only treat as on_work from the worker record when work_status is explicitly on_work
+    // for THIS employer. assignedEmployerName alone is also set during "On Process", so it
+    // must not force on_work or open requests disappear from the active list.
+    if (w && w.work_status === "on_work" && sameEmployer(r, w)) {
+      return "on_work";
     }
-    // Active placement for this worker (+ matching employer when possible)
-    const live = (places || []).find(p =>
-      p.workerId === r.workerId &&
-      (p.status === "Active Placement" || BUSY.includes(p.status)) &&
-      (!r.employerId || !p.employerId || p.employerId === r.employerId ||
-        String(p.employerName || "").toLowerCase() === String(r.employerName || "").toLowerCase())
-    );
-    if (live && (live.status === "Active Placement" || live.handoverReceiptSigned || live.source === "agreement")) return "on_work";
+    // Live placement for this worker linked to this request, or matching employer
+    const live = (places || []).find(p => {
+      if (p.workerId !== r.workerId) return false;
+      if (!(p.status === "Active Placement" || BUSY.includes(p.status))) return false;
+      if (p.requestId && p.requestId === r.id) return true;
+      return sameEmployer(r, p);
+    });
+    if (live && (live.status === "Active Placement" || live.handoverReceiptSigned || live.source === "agreement" || (live.requestId && live.requestId === r.id))) {
+      return "on_work";
+    }
   }
+
   if (st === "on_process") return "on_process";
   return st || "open";
 }
