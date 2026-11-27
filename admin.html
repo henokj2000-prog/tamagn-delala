@@ -2175,7 +2175,7 @@ let staffPayroll = [];
 let staffAttendance = [];
 let financeEntries = [];
 let finFilter = "all";
-let finPeriod = "month";
+let finPeriod = "all";
 let rebuildTimer = null;
 const raw = {
   reqs: [], workers: [], employers: [], jobs: [], places: [], timesheets: [],
@@ -2256,6 +2256,8 @@ function rebuildFromRaw() {
   renderAdmin();
   // Best-effort: persist on_work when UI already treats the hire as placed (avoids "pending" forever)
   try { healStaleHireRequestStatuses(); } catch (_) {}
+  // Copy paid commissions / service fees into agency_finance so Finance page matches Dashboard
+  try { healFinanceFromPaidFees(); } catch (_) {}
 }
 
 let _healBusy = false;
@@ -2348,8 +2350,9 @@ async function loadAdmin(force) {
     } catch (e) {
       listenCol(collection(db, "staff_attendance"), "staffAttendance", "staff_attendance");
     }
+    // Prefer createdAt order (reliable Timestamp); fall back to plain collection if index missing
     try {
-      listenCol(query(collection(db, "agency_finance"), orderBy("date", "desc"), limit(200)), "finance", "agency_finance");
+      listenCol(query(collection(db, "agency_finance"), orderBy("createdAt", "desc"), limit(300)), "finance", "agency_finance");
     } catch (e) {
       listenCol(collection(db, "agency_finance"), "finance", "agency_finance");
     }
@@ -2612,12 +2615,48 @@ function periodBounds() {
   };
 }
 function inPeriod(t, from) { return t && t >= from; }
+function financeHasSource(sourceId) {
+  const sid = String(sourceId || "");
+  if (!sid) return false;
+  return (financeEntries || []).some(r => String(r.sourceId || "") === sid);
+}
+/** Timestamp (seconds) for a finance row date string or createdAt. */
+function financeTime(r) {
+  if (!r) return 0;
+  if (r.date && /^\d{4}-\d{2}-\d{2}/.test(String(r.date))) {
+    const t = Date.parse(String(r.date).slice(0, 10) + "T12:00:00");
+    if (!isNaN(t)) return t / 1000;
+  }
+  return ts(r.createdAt) || ts(r.date) || 0;
+}
 function sumCommission(from) {
-  const fromPl = places.filter(p => p.commissionPaid && inPeriod(ts(p.commissionPaidAt), from))
+  // Prefer the Finance ledger (agency_finance) so Dashboard matches the Finance page
+  const fromFin = (financeEntries || [])
+    .filter(r => r.type === "income" && inPeriod(financeTime(r), from))
+    .reduce((a, r) => a + (Number(r.amount) || 0), 0);
+  // Historical placement commissions not yet written to the ledger
+  const fromPl = places.filter(p =>
+      p.commissionPaid && Number(p.commissionAmount) > 0
+      && inPeriod(ts(p.commissionPaidAt) || ts(p.createdAt), from)
+      && !financeHasSource("fee_pl_" + p.id)
+    )
     .reduce((a, p) => a + Number(p.commissionAmount || 0), 0);
-  const fromTs = sheets.filter(s => s.approvalStatus === "Paid" && inPeriod(ts(s.paidAt), from))
+  // Paid timesheet commissions not yet in the ledger
+  const fromTs = sheets.filter(s =>
+      s.approvalStatus === "Paid" && Number(s.commission) > 0
+      && inPeriod(ts(s.paidAt), from)
+      && !financeHasSource("fee_ts_" + s.id)
+    )
     .reduce((a, s) => a + Number(s.commission || 0), 0);
-  return fromPl + fromTs;
+  // Hire-request service fees marked paid but missing from ledger
+  const fromReq = (reqs || []).filter(r =>
+      (r.paymentReceived || r.serviceFeeCollected)
+      && Number(r.serviceFee || (r.agreementData && r.agreementData.serviceFee)) > 0
+      && inPeriod(ts(r.paymentReceivedAt) || ts(r.agreementSignedAt) || ts(r.createdAt), from)
+      && !financeHasSource("fee_req_" + r.id)
+    )
+    .reduce((a, r) => a + Number(r.serviceFee || (r.agreementData && r.agreementData.serviceFee) || 0), 0);
+  return fromFin + fromPl + fromTs + fromReq;
 }
 function countCreated(list, from) {
   return list.filter(x => inPeriod(ts(x.createdAt), from)).length;
@@ -3855,7 +3894,7 @@ function renderFinance() {
 
 
 /** Write income to agency_finance; skip if same sourceId already exists (idempotent). */
-async function recordFinanceIncome({ amount, category, description, source, sourceId, method, meta }) {
+async function recordFinanceIncome({ amount, category, description, source, sourceId, method, meta, date }) {
   const amt = Number(amount);
   if (!(amt > 0)) return null;
   const sid = sourceId ? String(sourceId) : "";
@@ -3865,11 +3904,19 @@ async function recordFinanceIncome({ amount, category, description, source, sour
     );
     if (exists) return null;
   }
+  let dateStr = date || new Date().toISOString().slice(0, 10);
+  if (dateStr && typeof dateStr !== "string") {
+    try {
+      const sec = ts(dateStr);
+      if (sec) dateStr = new Date(sec * 1000).toISOString().slice(0, 10);
+      else dateStr = new Date().toISOString().slice(0, 10);
+    } catch (_) { dateStr = new Date().toISOString().slice(0, 10); }
+  }
   const ref = await addDoc(collection(db, "agency_finance"), {
     type: "income",
     category: category || "Service fees",
     amount: round2(amt),
-    date: new Date().toISOString().slice(0, 10),
+    date: dateStr,
     description: description || "",
     source: source || "manual",
     sourceId: sid || null,
@@ -3879,6 +3926,59 @@ async function recordFinanceIncome({ amount, category, description, source, sour
     createdAt: serverTimestamp()
   });
   return ref.id;
+}
+
+/** Copy paid placement commissions / request service fees into agency_finance if missing. */
+let _healFinBusy = false;
+async function healFinanceFromPaidFees() {
+  if (_healFinBusy || !me) return;
+  if (!(me.role === R_SA || me.role === R_PO)) return;
+  _healFinBusy = true;
+  try {
+    let n = 0;
+    for (const p of (places || [])) {
+      if (p._synthetic) continue;
+      const amt = Number(p.commissionAmount);
+      if (!p.commissionPaid || !(amt > 0)) continue;
+      const sid = "fee_pl_" + p.id;
+      if (financeHasSource(sid)) continue;
+      try {
+        await recordFinanceIncome({
+          amount: amt,
+          category: "Placement commission",
+          description: `Commission · ${p.workerName || ""} → ${p.employerName || ""} · ${p.jobTitle || ""}`,
+          source: "placement_commission",
+          sourceId: sid,
+          method: p.commissionMethod || null,
+          date: p.commissionPaidAt || p.createdAt,
+          meta: { placementId: p.id, workerId: p.workerId, employerId: p.employerId, healed: true }
+        });
+        n++;
+      } catch (e) { console.warn("heal finance placement", p.id, e); }
+    }
+    for (const r of (reqs || [])) {
+      if (!(r.paymentReceived || r.serviceFeeCollected)) continue;
+      const amt = Number(r.serviceFee || (r.agreementData && r.agreementData.serviceFee) || 0);
+      if (!(amt > 0)) continue;
+      const sid = "fee_req_" + r.id;
+      if (financeHasSource(sid)) continue;
+      try {
+        await recordFinanceIncome({
+          amount: amt,
+          category: "Service fees",
+          description: `Service fee · ${r.workerName || ""} → ${r.employerName || ""}`,
+          source: "request_mark_paid",
+          sourceId: sid,
+          date: r.paymentReceivedAt || r.agreementSignedAt || r.createdAt,
+          meta: { requestId: r.id, healed: true }
+        });
+        n++;
+      } catch (e) { console.warn("heal finance request", r.id, e); }
+    }
+    if (n) console.info("Finance ledger backfilled", n, "income row(s)");
+  } finally {
+    _healFinBusy = false;
+  }
 }
 
 function financeForm(type) {
