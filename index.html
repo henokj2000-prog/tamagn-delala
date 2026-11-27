@@ -1169,7 +1169,7 @@ const i18n = {
     shareTitle: "ታማኝ ደላላን ያጋሩ",
     shareText: "በታማኝ ደላላ የታመኑ ሰራተኞችን ያግኙ ወይም ስራ ያግኙ — Tamagn Delala",
     shareCopied: "ሊንኩ ተቀድቷል! በዋትስአፕ፣ ቴሌግራም፣ SMS፣ ፌስቡክ፣ ቲክቶክ ወይም በሌላ ቦታ ይለጥፉ።",
-    shareTikTokHint: "ሊንኩ ተቀድቷል። ቲክቶክ → አዲስ ልጥፍ ወይም መገለጫ አርትዕ → ሊንኩን ይለጥፉ።",
+    shareTikTokHint: "ሊንኩ ተቀድቷል። ቲክቶክ → አዲስ ልጥፍ ወይም ፕሮፋይልዎን ያዘምኑ → ሊንኩን ይለጥፉ።",
     shareSms: "የታመኑ ሰራተኞችን ያግኙ ወይም ስራ ያግኙ: ",
     shareFail: "ማጋራት አልተቻለም። ሊንኩ ተቀድቷል — እራስዎ ይለጥፉ።",
     shareOpenTip: "መተግበሪያውን ለመክፈት ይህን ሊንክ በቴሌግራም ውስጥ ይክፈቱ።",
@@ -1204,9 +1204,9 @@ const i18n = {
     empPhone: "ስልክ ቁጥር *",
     empLoc: "አካባቢ / ከተማ *",
     empSave: "አስቀምጥ እና ቀጥል",
-    empEditTitle: "መገለጫ አርትዕ",
+    empEditTitle: "ፕሮፋይልዎን ያዘምኑ",
     empUpdate: "ለውጦችን አስቀምጥ",
-    empEditBtn: "✏️ መገለጫ አርትዕ",
+    empEditBtn: "✏️ ፕሮፋይልዎን ያዘምኑ",
     workerRegTitle: "እንደ ሰራተኛ ይመዝገቡ",
     workerRegNote: "ቅጹን ይሙሉ። አስተዳዳሪው ከገመገመ በኋላ ይፀድቃል።",
     wrName: "ሙሉ ስም *", wrAge: "ዕድሜ *", wrGender: "ጾታ *", wrSkill: "ክህሎቶች * (ሁሉንም ይምረጡ)", wrLoc: "አካባቢ *",
@@ -1231,8 +1231,8 @@ const i18n = {
     wGateTitle: "የሰራተኛ መግቢያ",
     wGateNote: "በምዝገባዎ የተጠቀሙበት ቴሌግራም ይክፈቱ፣ ወይም መጀመሪያ ይመዝገቡ።",
     wGoRegister: "እንደ ሰራተኛ ይመዝገቡ",
-    wEditTitle: "መገለጫ አርትዕ",
-    wEditBtn: "✏️ መገለጫ አርትዕ",
+    wEditTitle: "ፕሮፋይልዎን ያዘምኑ",
+    wEditBtn: "✏️ ፕሮፋይልዎን ያዘምኑ",
     wUpdate: "ለውጦችን አስቀምጥ",
     wJobsTitle: "ከክህሎትዎ ጋር የሚመቹ ስራዎች",
     wJobsSub: "የተረጋገጡ (የታተሙ) የስራ ጥያቄዎች ብቻ እዚህ ይታያሉ። አዲስ የሚመቹ ስራዎች ከዚህ በታች ይታያሉ።",
@@ -1640,7 +1640,7 @@ if ($("empUpdateBtn")) $("empUpdateBtn").onclick = async () => {
     currentEmployer = { ...currentEmployer, name, phone, location };
     if ($("empHello")) $("empHello").textContent = (lang==="am" ? "ሰላም " : "Hello ") + name;
     $("empEditForm").classList.add("hid");
-    alert(lang==="am" ? "መገለጫ ተዘምኗል" : "Profile updated");
+    alert(lang==="am" ? "መገለጫ ዘምኗል" : "Profile updated");
   } catch (e) { alert("Error: " + e.message); }
 };
 
@@ -2509,7 +2509,7 @@ if ($("wUpdateBtn")) $("wUpdateBtn").onclick = async () => {
       (pending ? " — " + t("wPendingProfile") : "") +
       " · " + skillLabel(currentWorker.skill);
     $("wEditForm").classList.add("hid");
-    alert(lang==="am" ? "መገለጫ ተዘምኗል" : "Profile updated");
+    alert(lang==="am" ? "መገለጫ ዘምኗል" : "Profile updated");
   } catch (e) { alert("Error: " + e.message); }
 };
 
