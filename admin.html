@@ -787,6 +787,7 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
               <button class="btn-add" data-act="staffInvite" id="btnHrInvite">+ Add / Invite Staff</button>
               <button class="btn-add" data-act="staffAttMark" id="btnHrAtt">+ Mark attendance</button>
               <button class="btn-add" data-act="staffPayCalc" id="btnHrPay">+ Calculate &amp; record salary</button>
+              <button class="btn-secondary" data-act="payrollExport" id="btnHrPayrollCsv">⬇ Monthly payroll CSV</button>
             </div>
           </div>
           <div class="kpis" id="hrKpis"></div>
@@ -2252,6 +2253,32 @@ function rebuildFromRaw() {
   settings = { ...DEFAULTS, ...(raw.settingsDoc || {}) };
 
   renderAdmin();
+  // Best-effort: persist on_work when UI already treats the hire as placed (avoids "pending" forever)
+  try { healStaleHireRequestStatuses(); } catch (_) {}
+}
+
+let _healBusy = false;
+async function healStaleHireRequestStatuses() {
+  if (_healBusy || !me) return;
+  const stale = (reqs || []).filter(r => {
+    const stored = String(r.status || "open").toLowerCase();
+    if (stored === "closed" || stored === "on_work") return false;
+    return reqStatus(r) === "on_work";
+  }).slice(0, 8);
+  if (!stale.length) return;
+  _healBusy = true;
+  try {
+    for (const r of stale) {
+      try {
+        await updateDoc(doc(db, "requests", r.id), {
+          status: "on_work",
+          statusHealedAt: serverTimestamp(),
+          statusHealNote: "Auto-set on_work: worker already assigned / agreement active"
+        });
+        r.status = "on_work";
+      } catch (e) { console.warn("heal request status", r.id, e); }
+    }
+  } finally { _healBusy = false; }
 }
 
 function scheduleRebuild() {
@@ -2413,8 +2440,48 @@ function candidates(job) {
 }
 
 // ================= badges =================
-const reqStatus = r => r.status || "open";
-const reqBadge = r => reqStatus(r) === "closed" ? bdg("ok", tt("Closed")) : reqStatus(r) === "on_work" ? bdg("ok", tt("On work")) : reqStatus(r) === "on_process" ? bdg("warn", tt("On process")) : bdg("info", tt("Open"));
+/** Effective hire-request status. If the worker is already placed / agreement signed, treat as on_work even when the stored status lagged behind. */
+function reqStatus(r) {
+  if (!r) return "open";
+  const st = String(r.status || "open").toLowerCase();
+  if (st === "closed") return "closed";
+  if (st === "on_work") return "on_work";
+  // Already signed / paid placement via agreement
+  if (r.agreementSigned || r.serviceFeeCollected || r.paymentReceived) {
+    // still allow explicit on_process before finalize; once signed → on work
+    if (r.agreementSigned) return "on_work";
+  }
+  // Worker record says on work / assigned
+  if (r.workerId) {
+    const w = (typeof wById === "function" ? wById(r.workerId) : null) || (allW || []).find(x => x.id === r.workerId);
+    if (w) {
+      const placed = !!(w.work_status === "on_work" || w.assignedEmployerId || w.assignedEmployerName || w.assigned_employer);
+      if (placed) return "on_work";
+    }
+    // Active placement for this worker (+ matching employer when possible)
+    const live = (places || []).find(p =>
+      p.workerId === r.workerId &&
+      (p.status === "Active Placement" || BUSY.includes(p.status)) &&
+      (!r.employerId || !p.employerId || p.employerId === r.employerId ||
+        String(p.employerName || "").toLowerCase() === String(r.employerName || "").toLowerCase())
+    );
+    if (live && (live.status === "Active Placement" || live.handoverReceiptSigned || live.source === "agreement")) return "on_work";
+  }
+  if (st === "on_process") return "on_process";
+  return st || "open";
+}
+const reqBadge = r => {
+  const st = reqStatus(r);
+  return st === "closed" ? bdg("ok", tt("Closed"))
+    : st === "on_work" ? bdg("ok", tt("On work"))
+    : st === "on_process" ? bdg("warn", tt("On process"))
+    : bdg("info", tt("Open"));
+};
+/** Hire requests that still need agency action (not yet working / closed). */
+function isPendingHireRequest(r) {
+  const st = reqStatus(r);
+  return st === "open" || st === "on_process";
+}
 const payBadge = r => r.paymentReceived ? bdg("ok", tt("Paid")) : bdg("mute", tt("Unpaid"));
 const availBadge = w => { const a = wAvail(w); return bdg({ Available: "ok", Placed: "info", Pending: "warn", Rejected: "bad", Inactive: "mute" }[a], tt(a)); };
 const verBadge = w => w.status === "approved" ? bdg("ok", tt("Verified")) : w.status === "rejected" ? bdg("bad", tt("Rejected")) : bdg("warn", tt("Pending"));
@@ -2561,7 +2628,7 @@ function renderDash() {
 
   $("kpis").innerHTML = kpiHtml([
     ["Pending Approvals", pending.length + pe.length, (pending.length + pe.length) ? "alert" : "", `${pending.length} ${tt("workers")} · ${pe.length} ${tt("employers")}`, "Pending Approvals"],
-    ["Active Hire Requests", reqs.filter(r => reqStatus(r) !== "closed").length, reqs.filter(r => reqStatus(r) !== "closed").length ? "alert" : "", `${reqsWeek} ${tt("this week")}`, "Active Hire Requests"],
+    ["Active Hire Requests", reqs.filter(isPendingHireRequest).length, reqs.filter(isPendingHireRequest).length ? "alert" : "", `${reqsWeek} ${tt("this week")} · ${reqs.filter(r => reqStatus(r) === "on_work").length} ${tt("onWork")}`, "Active Hire Requests"],
     ["Ratings Due", dueTotal, dueTotal ? "alert" : "", `${tt("After")} ${settings.ratingFollowUpDays || 7} ${tt("days")} · ${duePlaces.length} ${tt("placements")}`, "Ratings Due"],
     ["Worker Payouts Due", etb(payouts), payouts ? "alert" : "", tt("Approved timesheets"), "Worker Payouts Due"],
     ["Open Job Orders", openJobs.length, "", `${openJobs.filter(j => j.urgency === "Urgent").length} ${tt("urgent")}`, "Open Job Orders"],
@@ -2582,7 +2649,7 @@ function renderDash() {
     <div class="row-item"><div class="row-main"><b>${esc(j.title)}</b><span class="who">${esc(j.employerName)} · Start ${esc(j.startDate || "—")} · ${filledCount(j.id)}/${esc(j.workersNeeded)}</span></div>
       ${can("place") ? `<div class="row-act">${A("findMatch", "Find Match", "btn-info", `data-id="${esc(j.id)}"`)}</div>` : ""}</div>`).join("") : `<div class="empty">${t("noUrgent")}</div>`;
 
-  const act = reqs.filter(r => reqStatus(r) !== "closed").slice(0, 6);
+  const act = reqs.filter(isPendingHireRequest).slice(0, 6);
   const newInterests = interests.filter(i => i.status !== "done" && i.status !== "closed").slice(0, 4);
   const interestRows = newInterests.map(i => `
     <div class="row-item">${avatar(wm.get(i.workerId) || { name: i.workerName })}
@@ -3211,7 +3278,24 @@ function staffAttIsPresent(status) {
   const st = String(status || "").toLowerCase();
   return st === "present" || st === "late";
 }
-function calcStaffPayForMonth(s, month) {
+/** Ethiopian monthly employment income tax (Proclamation 1395/2025 bands). */
+function ethiopianIncomeTax(taxableMonthly) {
+  const t = Math.max(0, Number(taxableMonthly) || 0);
+  if (t <= 2000) return 0;
+  if (t <= 4000) return round2(t * 0.15 - 300);
+  if (t <= 7000) return round2(t * 0.20 - 500);
+  if (t <= 10000) return round2(t * 0.25 - 850);
+  if (t <= 14000) return round2(t * 0.30 - 1350);
+  return round2(t * 0.35 - 2050);
+}
+const ET_PENSION_EMPLOYEE = 0.07;
+const ET_PENSION_EMPLOYER = 0.11;
+
+/**
+ * Full staff payslip for a month.
+ * @param taxExempt manual exemption amount (ETB) subtracted from taxable base
+ */
+function calcStaffPayForMonth(s, month, taxExempt) {
   const basic = Number(s.basicSalary) || 0;
   const wd = Number(s.workingDaysPerMonth) || 26;
   const rows = attForStaffMonth(s.email || s.id, month);
@@ -3230,15 +3314,36 @@ function calcStaffPayForMonth(s, month) {
     }
   });
   const dailyBasic = wd > 0 ? basic / wd : 0;
-  const deduction = round2(dailyBasic * absent);
+  const absenceDeduction = round2(dailyBasic * absent);
+  const basicAfterAbsence = round2(Math.max(0, basic - absenceDeduction));
   const allowances = round2(
     (Number(s.transportAllowance) || 0) + (Number(s.houseAllowance) || 0) +
     (Number(s.mobileAllowance) || 0) + (Number(s.medicalAllowance) || 0)
   );
   const bonus = Number(s.bonus) || 0;
-  const gross = round2(basic + allowances + bonus);
-  const net = round2(Math.max(0, gross - deduction));
-  return { basic, allowances, bonus, gross, deduction, net, present, absent, excused, leave, late, workingDays: wd, dailyBasic };
+  const gross = round2(basicAfterAbsence + allowances + bonus);
+  // Pension on basic after absence (common private-sector practice)
+  const pensionBase = basicAfterAbsence;
+  const pensionEmployee = round2(pensionBase * ET_PENSION_EMPLOYEE);
+  const pensionEmployer = round2(pensionBase * ET_PENSION_EMPLOYER);
+  // Taxable employment income: gross less manual exemptions (per Ethiopian law; overrides allowed)
+  const exempt = Math.max(0, Number(taxExempt) || 0);
+  const taxable = round2(Math.max(0, gross - exempt));
+  const incomeTax = ethiopianIncomeTax(taxable);
+  const totalDeductions = round2(absenceDeduction + pensionEmployee + incomeTax);
+  const net = round2(Math.max(0, gross - pensionEmployee - incomeTax));
+  // company cost = net to staff is separate; employer also pays pension
+  const employerCost = round2(gross + pensionEmployer);
+  return {
+    basic, allowances, bonus, gross,
+    deduction: absenceDeduction, // keep legacy name = absence only
+    absenceDeduction,
+    basicAfterAbsence,
+    pensionEmployee, pensionEmployer, pensionBase,
+    taxExempt: exempt, taxable, incomeTax,
+    totalDeductions, net, employerCost,
+    present, absent, excused, leave, late, workingDays: wd, dailyBasic
+  };
 }
 
 function renderStaffHR() {
@@ -3281,12 +3386,13 @@ function renderStaffHR() {
   if ($("tbHrPay")) {
     const rows = (staffPayroll || []).slice().sort((a, b) => ts(b.paidAt) - ts(a.paidAt));
     $("tbHrPay").innerHTML = rows.length ? table(
-      ["Staff", "Period", "Gross", "Deduction", "Net", "Paid"],
+      ["Staff", "Period", "Gross", "Tax", "Pension", "Net", "Paid"],
       rows.map(p => `<tr>
         <td><b>${esc(p.staffName || p.staffEmail)}</b></td>
         <td>${esc(p.period || "—")}</td>
         <td class="num">${etb(p.gross != null ? p.gross : p.amount)}</td>
-        <td class="num">${etb(p.deduction || 0)}</td>
+        <td class="num">${etb(p.incomeTax || 0)}</td>
+        <td class="num">${etb(p.pensionEmployee || 0)}</td>
         <td class="num"><b>${etb(p.net != null ? p.net : p.amount)}</b></td>
         <td>${fmtDate(p.paidAt) || "—"}</td>
       </tr>`),
@@ -3496,39 +3602,92 @@ function staffAttForm(preEmail) {
   });
 }
 
+
+function exportMonthlyPayrollCsv() {
+  const month = hrMonthValue();
+  const active = (staff || []).filter(s => s.status === "Active");
+  if (!active.length) { alert("No active staff."); return; }
+  const headers = [
+    "Name", "Email", "Role", "Period",
+    "Basic", "Basic after absence", "Allowances", "Bonus", "Gross",
+    "Unjustified days", "Absence deduction",
+    "Taxable", "Tax exempt", "Income tax",
+    "Pension employee 7%", "Pension employer 11%",
+    "Net pay", "Employer cost",
+    "Present days", "Excused leave days", "Working days/month"
+  ];
+  const cell = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+  const lines = [headers.map(cell).join(",")];
+  active.forEach(s => {
+    const c = calcStaffPayForMonth(s, month, 0);
+    lines.push([
+      s.name, s.email || s.id, s.role, month,
+      c.basic, c.basicAfterAbsence, c.allowances, c.bonus, c.gross,
+      c.absent, c.absenceDeduction,
+      c.taxable, c.taxExempt, c.incomeTax,
+      c.pensionEmployee, c.pensionEmployer,
+      c.net, c.employerCost,
+      c.present, c.excused, c.workingDays
+    ].map(cell).join(","));
+  });
+  const blob = new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "Tamagn_Delala_Payroll_" + month + ".csv";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast("Payroll summary downloaded for " + month);
+}
+
 function staffPayCalcForm() {
   const active = (staff || []).filter(s => s.status === "Active");
   if (!active.length) { alert("No active staff."); return; }
   const opts = active.map(s => (s.email || s.id) + " · " + (s.name || ""));
   const month = hrMonthValue();
+  // Preview first staff for note
+  const previewKey = String(opts[0] || "").split(" · ")[0].trim().toLowerCase();
+  const previewS = active.find(x => String(x.email || x.id).toLowerCase() === previewKey);
+  const prev = previewS ? calcStaffPayForMonth(previewS, month, 0) : null;
+  const notePreview = prev
+    ? `Preview (${previewS.name}): Gross ${prev.gross} · Absence −${prev.absenceDeduction} · Tax ${prev.incomeTax} · Pension(7%) ${prev.pensionEmployee} → Net ${prev.net} ETB. Employer pension(11%) ${prev.pensionEmployer}.`
+    : "";
   openForm({
-    title: "Calculate salary from attendance",
-    note: "Only Unjustified Leave deducts: basic ÷ working days × days. Other leave types (sick, mourning, marriage, birth, leave of absence) do not deduct.",
+    title: "Calculate salary (attendance + ET tax + pension)",
+    note: "Unjustified Leave reduces basic. Income tax: Ethiopian progressive bands (Proc. 1395/2025). Pension: employee 7% + employer 11% on basic. Use Tax-exempt for lawful manual exceptions. " + notePreview,
     fields: [
       { k: "staffKey", label: "Staff", type: "select", opts, req: 1 },
       { k: "period", label: "Period (YYYY-MM)", req: 1 },
+      { k: "taxExempt", label: "Tax-exempt amount (ETB, optional)", type: "number", min: 0, step: "0.01" },
       { k: "method", label: "Payment method", type: "select", opts: ["Bank transfer", "Cash", "Mobile money", "Other"] },
       { k: "notes", label: "Notes" }
     ],
-    values: { period: month, method: "Bank transfer" },
+    values: { period: month, method: "Bank transfer", taxExempt: 0 },
     submitText: "Record net salary",
     onSave: async v => {
       const key = String(v.staffKey || "").split(" · ")[0].trim().toLowerCase();
       const s = active.find(x => String(x.email || x.id).toLowerCase() === key);
       if (!s) throw new Error("staff");
-      const c = calcStaffPayForMonth(s, v.period);
+      const c = calcStaffPayForMonth(s, v.period, v.taxExempt);
       await addDoc(collection(db, "staff_payroll"), {
         staffEmail: key,
         staffName: s.name || key,
         staffRole: s.role || "",
         period: v.period,
         basic: c.basic,
+        basicAfterAbsence: c.basicAfterAbsence,
         allowances: c.allowances,
         bonus: c.bonus,
         gross: c.gross,
-        deduction: c.deduction,
+        deduction: c.absenceDeduction,
+        absenceDeduction: c.absenceDeduction,
+        pensionEmployee: c.pensionEmployee,
+        pensionEmployer: c.pensionEmployer,
+        taxExempt: c.taxExempt,
+        taxable: c.taxable,
+        incomeTax: c.incomeTax,
         net: c.net,
         amount: c.net,
+        employerCost: c.employerCost,
         presentDays: c.present,
         absentDays: c.absent,
         excusedDays: c.excused,
@@ -3538,23 +3697,37 @@ function staffPayCalcForm() {
         paidAt: serverTimestamp(),
         recordedBy: me.email || null,
         createdAt: serverTimestamp(),
-        source: "attendance_calc"
+        source: "attendance_calc_et_tax"
       });
-      // Optional: also log as expense in finance
       try {
         await addDoc(collection(db, "agency_finance"), {
           type: "expense",
           category: "Staff salary",
           amount: c.net,
           date: new Date().toISOString().slice(0, 10),
-          description: "Salary " + (s.name || key) + " · " + v.period + " (net)",
+          description: "Salary net " + (s.name || key) + " · " + v.period + " (tax " + c.incomeTax + ", pension " + c.pensionEmployee + ")",
           staffEmail: key,
           period: v.period,
+          source: "staff_payroll",
           recordedBy: me.email || null,
           createdAt: serverTimestamp()
         });
+        if (c.pensionEmployer > 0) {
+          await addDoc(collection(db, "agency_finance"), {
+            type: "expense",
+            category: "Tax",
+            amount: c.pensionEmployer,
+            date: new Date().toISOString().slice(0, 10),
+            description: "Employer pension 11% · " + (s.name || key) + " · " + v.period,
+            staffEmail: key,
+            period: v.period,
+            source: "staff_pension_employer",
+            recordedBy: me.email || null,
+            createdAt: serverTimestamp()
+          });
+        }
       } catch (e) { console.warn("finance auto expense", e); }
-      toast("Net salary recorded: " + c.net + " ETB (deduction " + c.deduction + ")");
+      toast("Net pay " + c.net + " ETB · Tax " + c.incomeTax + " · Emp.pension " + c.pensionEmployee);
     }
   });
 }
@@ -3570,12 +3743,14 @@ function renderStaffPayroll() {
     return;
   }
   box.innerHTML = table(
-    ["Staff", "Period", "Net", "Deduction", "Method", "Paid", "Actions"],
+    ["Staff", "Period", "Gross", "Tax", "Pension", "Net", "Method", "Paid", "Actions"],
     rows.map(p => `<tr>
       <td class="c-id"><b>${esc(p.staffName || p.staffEmail || "—")}</b><div class="who">${esc(p.staffEmail || "")}</div></td>
       <td>${esc(p.period || "—")}</td>
+      <td class="num">${etb(p.gross != null ? p.gross : p.amount)}</td>
+      <td class="num">${etb(p.incomeTax || 0)}</td>
+      <td class="num">${etb(p.pensionEmployee || 0)}</td>
       <td class="num"><b>${etb(p.net != null ? p.net : p.amount)}</b></td>
-      <td class="num">${etb(p.deduction || 0)}</td>
       <td>${esc(p.method || "—")}</td>
       <td>${fmtDate(p.paidAt) || "—"}</td>
       <td class="c-act">${canPay ? A("staffPayDel", "Delete", "btn-danger", `data-id="${esc(p.id)}"`) : ""}</td>
@@ -3644,6 +3819,34 @@ function renderFinance() {
     </tr>`),
     ""
   ) : `<div class="empty">No finance entries</div>`;
+}
+
+
+/** Write income to agency_finance; skip if same sourceId already exists (idempotent). */
+async function recordFinanceIncome({ amount, category, description, source, sourceId, method, meta }) {
+  const amt = Number(amount);
+  if (!(amt > 0)) return null;
+  const sid = sourceId ? String(sourceId) : "";
+  if (sid) {
+    const exists = (financeEntries || []).some(r =>
+      r.type === "income" && String(r.sourceId || "") === sid
+    );
+    if (exists) return null;
+  }
+  const ref = await addDoc(collection(db, "agency_finance"), {
+    type: "income",
+    category: category || "Service fees",
+    amount: round2(amt),
+    date: new Date().toISOString().slice(0, 10),
+    description: description || "",
+    source: source || "manual",
+    sourceId: sid || null,
+    method: method || null,
+    meta: meta || null,
+    recordedBy: (me && me.email) || null,
+    createdAt: serverTimestamp()
+  });
+  return ref.id;
 }
 
 function financeForm(type) {
@@ -4213,6 +4416,19 @@ async function finalizeAgreement() {
     if (signedUrl) patch.signedAgreementUrl = signedUrl;
     if (signedNote) patch.signedAgreementNote = signedNote;
     await updateDoc(doc(db, "requests", agReqId), patch);                                   // 1) the hire request (core path)
+    // Sync service fee → Finance (Income)
+    if (feeCollected && feeAmt > 0) {
+      try {
+        await recordFinanceIncome({
+          amount: feeAmt,
+          category: "Service fees",
+          description: `Service fee · ${x.workerName || ""} → ${x.empName || ""} · Ref ${agOfficialRef || agReqId}`,
+          source: "agreement",
+          sourceId: "fee_req_" + agReqId,
+          meta: { requestId: agReqId, workerId, employerId: employerId || null, agreementRef: agOfficialRef || null }
+        });
+      } catch (e) { console.warn("finance income from agreement failed:", e); }
+    }
     let agId = null;
     try {                                                                                     // 2) archive copy (needs a Firestore rule for /agreements)
       const ref = doc(collection(db, "agreements"));
@@ -4452,7 +4668,20 @@ const ACTIONS = {
     openForm({ title: "Record Commission Payment", note: `${p.employerName} → ${p.workerName}`, fields: [
       { k: "amount", label: "Amount received (ETB)", type: "number", min: 0, step: "0.01", req: 1 },
       { k: "method", label: "Payment method", type: "select", opts: [...PAY_METHODS, "Office"] }],
-      onSave: async v => { await updateDoc(doc(db, "placements", p.id), { commissionPaid: true, commissionAmount: v.amount, commissionMethod: v.method, commissionPaidAt: serverTimestamp() }); } });
+      onSave: async v => {
+        await updateDoc(doc(db, "placements", p.id), { commissionPaid: true, commissionAmount: v.amount, commissionMethod: v.method, commissionPaidAt: serverTimestamp() });
+        try {
+          await recordFinanceIncome({
+            amount: v.amount,
+            category: "Placement commission",
+            description: `Commission · ${p.workerName || ""} → ${p.employerName || ""} · ${p.jobTitle || ""}`,
+            source: "placement_commission",
+            sourceId: "fee_pl_" + p.id,
+            method: v.method,
+            meta: { placementId: p.id, workerId: p.workerId, employerId: p.employerId }
+          });
+        } catch (e) { console.warn("finance income from commission failed:", e); }
+      } });
     return false;
   },
   async handover(d) {
@@ -4574,6 +4803,7 @@ const ACTIONS = {
     return false;
   },
   staffPayCalc() { staffPayCalcForm(); return false; },
+  payrollExport() { exportMonthlyPayrollCsv(); return false; },
   async staffAttDel(d) {
     if (!confirm("Delete this attendance row?")) return false;
     await deleteDoc(doc(db, "staff_attendance", d.id));
@@ -4715,7 +4945,23 @@ async function onAction(e) {
         return;
       }
     }
-    else if (d.pay) await updateDoc(doc(db,"requests",d.pay),{paymentReceived:true});
+    else if (d.pay) {
+      await updateDoc(doc(db,"requests",d.pay),{paymentReceived:true, paymentReceivedAt: serverTimestamp(), serviceFeeCollected: true});
+      const rr = reqs.find(x => x.id === d.pay);
+      const fee = Number(rr && (rr.serviceFee || (rr.agreementData && rr.agreementData.serviceFee))) || 0;
+      if (fee > 0) {
+        try {
+          await recordFinanceIncome({
+            amount: fee,
+            category: "Service fees",
+            description: `Service fee · ${(rr && rr.workerName) || ""} → ${(rr && rr.employerName) || ""}`,
+            source: "request_mark_paid",
+            sourceId: "fee_req_" + d.pay,
+            meta: { requestId: d.pay }
+          });
+        } catch (e) { console.warn(e); }
+      }
+    }
     else if (d.showphone) {
       const p = await getDoc(doc(db,"workers_private",d.showphone));
       alert("Phone: "+(p.exists()?p.data().phone:"N/A")); return;
