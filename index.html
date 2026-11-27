@@ -794,7 +794,7 @@ body.home .skill-pill:active { background: rgba(255,255,255,0.28); }
 <div id="done" class="modal-overlay hid">
   <div class="modal-box">
     <h3 id="doneTitle">Request Delivered!</h3>
-    <p id="doneText">Your request has been sent successfully. Our team will contact you shortly.</p>
+    <p id="doneText">Your request has been sent to the agency. For more information please contact the agency phone number.</p>
     <div class="phone-box">
       <div style="font-size:12px;color:#166534;margin-bottom:4px" id="callAdminLabel">Call Admin now</div>
       <a id="adminPhoneLink" href="tel:">09xxxxxxxx</a>
@@ -1031,13 +1031,13 @@ const i18n = {
     hire: "Hire this worker",
     age: "Age", experience: "Experience", pay: "Pay", negotiable: "Negotiable",
     requestTitle: "Request Delivered!",
-    requestText: "Your request has been sent successfully. Our team will contact you shortly.",
-    callAdmin: "Call Admin now",
+    requestText: "Your request has been sent to the agency. For more information please contact {phone}.",
+    callAdmin: "Call the agency",
     messageAdmin: "Message Admin on Telegram",
     close: "Close",
     confirmHire: "Send hire request? The agency will prepare a proper employment agreement based on the job type (Ethiopian law).",
     hireAlready: "You already sent a hire request for this worker. Wait for the agency to process it — duplicate requests are not allowed.",
-    hireAlreadyBtn: "Request sent",
+    hireAlreadyBtn: "Request already sent",
     hireWorkerBusy: "This worker is already on a placement / not available.",
     langBtn: "አማርኛ",
     verifiedId: "ID Verified",
@@ -1164,11 +1164,13 @@ const i18n = {
     hire: "ይህን ሰራተኛ ቅጠር",
     age: "ዕድሜ", experience: "ልምድ", pay: "ክፍያ", negotiable: "በድርድር",
     requestTitle: "ጥያቄዎ ተልኳል!",
-    requestText: "ጥያቄዎ በተሳካ ሁኔታ ተልኳል። ቡድናችን በቅርቡ ያገኝዎታል።",
-    callAdmin: "አሁን አድሚንን ይደውሉ",
+    requestText: "ጥያቄዎ ወደ ኤጀንሲው ተልኳል። ለተጨማሪ መረጃ እባክዎ የኤጀንሲውን ስልክ ይደውሉ፡ {phone}።",
+    callAdmin: "ኤጀንሲውን ይደውሉ",
     messageAdmin: "አድሚንን በቴሌግራም ያግኙ",
     close: "ዝጋ",
     confirmHire: "የቅጥር ጥያቄ መላክ ይፈልጋሉ? ኤጀንሲው በሥራ ዓይነቱ መሠረት ትክክለኛ የሥራ ውል (በኢትዮጵያ ህግ) ያዘጋጃል።",
+    hireAlready: "ለዚህ ሰራተኛ ቀድሞ የቅጥር ጥያቄ ልከዋል። ኤጀንሲው እስኪያስተናግድ ድረስ ይጠብቁ — ተደጋጋሚ ጥያቄ አይፈቀድም።",
+    hireAlreadyBtn: "ጥያቄ አስቀድሞ ተልኳል",
     langBtn: "English",
     verifiedId: "መታወቂያ አረጋግጧል",
     policeClearance: "የፖሊስ ማረጋገጫ",
@@ -1429,7 +1431,7 @@ function applyLang() {
   $("wr_police").innerHTML = `<option value="no">${t("policeNo")}</option><option value="yes">${t("policeYes")}</option>`;
 
   $("doneTitle").textContent = t("requestTitle");
-  $("doneText").textContent = t("requestText");
+  $("doneText").textContent = String(t("requestText") || "").replace(/\{phone\}/g, ADMIN_PHONE);
   $("callAdminLabel").textContent = t("callAdmin");
   $("doneBtn").textContent = t("messageAdmin");
   $("doneClose").textContent = t("close");
@@ -1824,8 +1826,9 @@ async function hire(id) {
     await addDoc(collection(db, "requests"), payload);
 
     myActiveHireWorkerIds.add(String(id));
-    showDone(w);
+    // Instant UI refresh: flip Hire button to "Request already sent" without waiting
     try { if (typeof renderWorkers === "function") renderWorkers(); } catch (_) {}
+    showDone(w);
   } catch (e) {
     console.error(e);
     const msg = String(e && (e.message || e.code) || e);
@@ -1843,6 +1846,15 @@ function showDone(w) {
   const text = lang==="am"
     ? `ሰላም፣ ከታማኝ ደላላ ${w.name} (${w.skill||""}) መቅጠር እፈልጋለሁ። ስሜ፦ ${currentEmployer.name}፣ ስልክ፦ ${currentEmployer.phone}። እባክዎ በሥራ ዓይነቱ መሠረት የሥራ ውል ያዘጋጁ።`
     : `Hello, I want to hire ${w.name} (${w.skill||""}) from Tamagn Delala. My name: ${currentEmployer.name}, Phone: ${currentEmployer.phone}. Please prepare the employment agreement according to the job type.`;
+  if ($("doneTitle")) $("doneTitle").textContent = t("requestTitle");
+  if ($("doneText")) $("doneText").textContent = String(t("requestText") || "").replace(/\{phone\}/g, ADMIN_PHONE);
+  if ($("callAdminLabel")) $("callAdminLabel").textContent = t("callAdmin");
+  if ($("adminPhoneLink")) {
+    $("adminPhoneLink").textContent = ADMIN_PHONE;
+    $("adminPhoneLink").href = "tel:" + ADMIN_PHONE;
+  }
+  if ($("doneBtn")) $("doneBtn").textContent = t("messageAdmin");
+  if ($("doneClose")) $("doneClose").textContent = t("close");
   $("doneBtn").onclick = () => {
     const url = `https://t.me/${MANAGER}?text=${encodeURIComponent(text)}`;
     if (inTelegram) tg.openTelegramLink(url); else window.open(url,"_blank");
