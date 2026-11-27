@@ -674,7 +674,6 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
         <button class="nav-btn" data-view="matches"><span class="ni">🔎</span><span>Job Matches</span></button>
         <button class="nav-btn" data-view="placements"><span class="ni">🤝</span><span>Placements</span><span class="nb hid" id="nbPl"></span></button>
         <button class="nav-btn" data-view="agreements"><span class="ni">📄</span><span>Agreements</span></button>
-        <button class="nav-btn" data-view="timesheets"><span class="ni">🧾</span><span>Worker Payroll</span><span class="nb hid" id="nbTs"></span></button>
         <button class="nav-btn" data-view="staffhr"><span class="ni">👥</span><span>Staff HR</span></button>
         <button class="nav-btn" data-view="finance"><span class="ni">💼</span><span>Finance</span></button>
         <button class="nav-btn" data-view="requests"><span class="ni">📋</span><span>Requests</span><span class="nb hid" id="nbReq"></span></button>
@@ -755,16 +754,6 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
           <div class="chips" id="agChips"></div>
           <div class="toolbar"><input id="aSearch" type="search" placeholder="Search worker, employer or skill..."></div>
           <div id="tbAg"></div>
-        </div>
-
-        <!-- Timesheets & payroll -->
-        <div id="v-timesheets" class="view hid">
-          <div class="view-head"><h2>Timesheets &amp; Payroll</h2>
-            <div class="acts"><button class="btn-add" data-act="sheetApproveAll" id="btnApproveAll">✓ Approve All</button><button class="btn-add" data-act="newSheet" id="btnNewSheet">+ New Timesheet</button></div></div>
-          <div class="kpis" id="tKpis"></div>
-          <div class="chips" id="tChips"></div>
-          <div class="toolbar"><input id="tSearch" type="search" placeholder="Search timesheets, workers or employers..."><select id="tPeriodSel"><option value="all">All time</option><option value="week">This week</option><option value="month">This month</option></select></div>
-          <div id="tbTs"></div>
         </div>
 
         <!-- Hire requests -->
@@ -1043,12 +1032,12 @@ const BILLING = ["Current", "Pending", "Overdue", "Suspended", "Not Started"];
 const PAY_METHODS = ["Telebirr", "CBE Birr", "Bank Transfer", "Cash"];
 const R_SA = "Super Admin", R_PC = "Placement Coordinator", R_PO = "Payroll Officer", R_VS = "Verification Specialist";
 const ROLES = [R_SA, R_PC, R_PO, R_VS];
-const ROLE_SCOPE = { [R_SA]: "Full System, Payroll & Settings", [R_PC]: "Workers, Employers, Job Matches", [R_PO]: "Timesheets, Invoices & Payouts", [R_VS]: "Approve/Reject Workers & Employers" };
+const ROLE_SCOPE = { [R_SA]: "Full System, Staff HR & Settings", [R_PC]: "Workers, Employers, Job Matches", [R_PO]: "Staff HR, Finance & Agency Income", [R_VS]: "Approve/Reject Workers & Employers" };
 const PERMS = { verify: [R_SA, R_VS], manage: [R_SA, R_PC], place: [R_SA, R_PC], payroll: [R_SA, R_PO], settings: [R_SA], agree: [R_SA, R_PC] };
 const ROLE_VIEWS = {
-  [R_SA]: ["dashboard", "employers", "workers", "matches", "placements", "agreements", "timesheets", "staffhr", "finance", "requests", "settings", "add"],
+  [R_SA]: ["dashboard", "employers", "workers", "matches", "placements", "agreements", "staffhr", "finance", "requests", "settings", "add"],
   [R_PC]: ["dashboard", "employers", "workers", "matches", "placements", "agreements", "requests", "staffhr", "add"],
-  [R_PO]: ["dashboard", "timesheets"],
+  [R_PO]: ["dashboard", "staffhr", "finance"],
   [R_VS]: ["dashboard", "employers", "workers"]
 };
 const DEFAULTS = { defaultCommissionPct: 18, requireIdVerification: true, checkinReminders: true, invoiceTerms: "Net 15 Days", ratingFollowUpDays: 7, agencyPhone: "" };
@@ -2567,13 +2556,12 @@ function chartHtml(series) {
 // each card opens the page that holds its numbers, with the matching filter already applied
 const KPI_MAP = {
   kpis:   { _: ["dashboard"], "Pending Approvals": ["workers", "wFilter", "Pending"], "Active Hire Requests": ["requests", "rFilter", "open"], "Ratings Due": ["requests", "rFilter", "all"],
-            "Worker Payouts Due": ["timesheets", "tFilter", "Approved"], "Open Job Orders": ["matches"], "Active Placements": ["placements", "pFilter", "Active Placement"],
+            "Open Job Orders": ["matches"], "Active Placements": ["placements", "pFilter", "Active Placement"],
             "Revenue This Month": ["finance"], "Workers \u00b7 Employers": ["workers", "wFilter", "all"] },
   eKpis:  { _: ["employers", "eFilter", "all"], "Verified Partners": ["employers", "eFilter", "verified"], "Pending Verification": ["employers", "eFilter", "pending"], "Active Job Orders": ["matches"] },
   wKpis:  { _: ["workers", "wFilter", "all"], "Available Now": ["workers", "wFilter", "Available"], "Currently Placed": ["workers", "wFilter", "Placed"], "Pending Verification": ["workers", "wFilter", "Pending"] },
   mKpis:  { _: ["matches"], "Pending Employer Review": ["placements", "pFilter", "Pending Employer Review"], "Active Placements": ["placements", "pFilter", "Active Placement"] },
   pKpis:  { _: ["placements", "pFilter", "all"], "Awaiting OTP": ["placements", "pFilter", "Pending Employer Review"], "Ready for Handover": ["placements", "pFilter", "OTP Verified"], "Active Placements": ["placements", "pFilter", "Active Placement"], "Completed": ["placements", "pFilter", "Completed"] },
-  tKpis:  { _: ["timesheets", "tFilter", "all"], "Pending Approval": ["timesheets", "tFilter", "Pending"], "Worker Payouts Due": ["timesheets", "tFilter", "Approved"] },
   agKpis: { _: ["agreements", "aFilter", "all"], "Signed": ["agreements", "aFilter", "signed"], "Signed File Stored": ["agreements", "aFilter", "signed"] },
   sKpis:  { _: ["settings"] }
 };
@@ -2601,10 +2589,10 @@ function renderAdmin() {
   [renderNav, renderDash, renderEmployers, renderWorkers, renderMatches, renderPlacements, renderAgreements, renderSheets, renderStaffHR, renderFinance, renderRequests, renderSettings]
     .forEach(fn => { try { fn(); } catch (err) { console.error(fn.name, err); } });
   $("btnNewEmp").classList.toggle("hid", !can("manage")); $("btnNewW").classList.toggle("hid", !can("manage"));
-  $("btnNewJob").classList.toggle("hid", !can("place")); $("btnNewSheet").classList.toggle("hid", !can("payroll")); $("btnApproveAll").classList.toggle("hid", !can("payroll"));
+  $("btnNewJob").classList.toggle("hid", !can("place"));
 }
 
-function setBadge(id, n) { $(id).textContent = n; $(id).classList.toggle("hid", !n); }
+function setBadge(id, n) { if (!$(id)) return; $(id).textContent = n; $(id).classList.toggle("hid", !n); }
 function renderNav() {
   const views = ROLE_VIEWS[me.role] || [];
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("hid", !views.includes(b.dataset.view)));
@@ -2612,9 +2600,8 @@ function renderNav() {
   setBadge("nbEmp", employers.filter(e => eVer(e) === "pending").length);
   setBadge("nbW", pending.length);
   setBadge("nbPl", places.filter(p => p.status === "Pending Employer Review").length);
-  setBadge("nbTs", sheets.filter(s => s.approvalStatus === "Pending").length);
   setBadge("nbReq", reqs.filter(r => reqStatus(r) === "open").length + interests.filter(i => i.status !== "done" && i.status !== "closed").length);
-  $("nbDash").classList.add("hid");
+  if ($("nbDash")) $("nbDash").classList.add("hid");
 }
 
 function periodBounds() {
@@ -2717,7 +2704,6 @@ function renderDash() {
   const workersApproved = allW.filter(w => w.status === "approved").length;
   const employersTotal = employers.length;
   const employersVerified = employers.filter(e => eVer(e) === "verified").length;
-  const payouts = sheets.filter(s => s.approvalStatus === "Approved").reduce((a, s) => a + Number(s.workerPay || 0), 0);
   const dueReqs = reqs.filter(isDue);
   const duePlaces = places.filter(isPlacementRatingDue);
   const dueTotal = dueReqs.length + duePlaces.length;
@@ -2727,7 +2713,6 @@ function renderDash() {
     ["Pending Approvals", pending.length + pe.length, (pending.length + pe.length) ? "alert" : "", `${pending.length} ${tt("workers")} · ${pe.length} ${tt("employers")}`, "Pending Approvals"],
     ["Active Hire Requests", reqs.filter(isPendingHireRequest).length, reqs.filter(isPendingHireRequest).length ? "alert" : "", `${reqsWeek} ${tt("this week")} · ${reqs.filter(r => reqStatus(r) === "on_work").length} ${tt("onWork")}`, "Active Hire Requests"],
     ["Ratings Due", dueTotal, dueTotal ? "alert" : "", `${tt("After")} ${settings.ratingFollowUpDays || 7} ${tt("days")} · ${duePlaces.length} ${tt("placements")}`, "Ratings Due"],
-    ["Worker Payouts Due", etb(payouts), payouts ? "alert" : "", tt("Approved timesheets"), "Worker Payouts Due"],
     ["Open Job Orders", openJobs.length, "", `${openJobs.filter(j => j.urgency === "Urgent").length} ${tt("urgent")}`, "Open Job Orders"],
     ["Active Placements", active.length, "", `${places.filter(p => p.status === "Pending Employer Review").length} ${tt("awaiting review")}`, "Active Placements"],
     ["Revenue This Month", etb(revMonth), "", `${tt("Today")} ${etb(revToday)} · ${tt("Week")} ${etb(revWeek)} · ${tt("YTD")} ${etb(revYtd)}`, "Revenue This Month"],
@@ -3062,6 +3047,8 @@ function renderPlacements() {
 }
 
 function renderSheets() {
+  // Worker timesheets UI removed — agency tracks placement fees in Finance only
+  if (!$("tbTs") || !$("tKpis")) return;
   const base = sheets.filter(sheetInPeriod), cnt = st => base.filter(s => s.approvalStatus === st).length;
   const sum = (arr, k) => arr.reduce((a, s) => a + Number(s[k] || 0), 0);
   const hrs = sum(base.filter(s => s.unitType === "hours"), "units"), days = sum(base.filter(s => s.unitType === "days"), "units"), mon = sum(base.filter(s => s.unitType === "months"), "units");
