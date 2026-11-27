@@ -810,7 +810,30 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, where, orderBy, limit, serverTimestamp, Timestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const MANAGER = "TamagnDelalaETBot";
-const ADMIN_PHONE = "09xxxxxxxx";
+let ADMIN_PHONE = "09xxxxxxxx"; // fallback until loaded from agency_settings
+
+/** Load agency contact phone from admin Settings (Firestore). */
+async function loadAgencyPhone() {
+  try {
+    const snap = await getDoc(doc(db, "agency_settings", "main"));
+    if (snap.exists()) {
+      const p = String(snap.data().agencyPhone || "").trim();
+      if (p) ADMIN_PHONE = p;
+    }
+  } catch (e) {
+    console.warn("Could not load agency phone from settings:", e);
+  }
+  // Refresh any visible phone UI
+  try {
+    if ($("adminPhoneLink")) {
+      $("adminPhoneLink").textContent = ADMIN_PHONE;
+      $("adminPhoneLink").href = "tel:" + ADMIN_PHONE;
+    }
+    if ($("doneText") && !$("done").classList.contains("hid")) {
+      $("doneText").textContent = String(t("requestText") || "").replace(/\{phone\}/g, ADMIN_PHONE);
+    }
+  } catch (_) {}
+}
 
 function appShareUrl() {
   // Universal Telegram link — works inside & outside Telegram on modern clients.
@@ -2603,6 +2626,15 @@ openRatePageFromStart().then(opened => {
 
 
 applyLang();
+loadAgencyPhone().then(() => {
+  // Re-apply phone into any static labels after settings load
+  try {
+    if ($("adminPhoneLink")) {
+      $("adminPhoneLink").textContent = ADMIN_PHONE;
+      $("adminPhoneLink").href = "tel:" + ADMIN_PHONE;
+    }
+  } catch (_) {}
+}).catch(() => {});
 loadWorkers();
 </script>
 </body>
