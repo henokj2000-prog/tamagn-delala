@@ -541,6 +541,42 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
 .kpi:active { transform: scale(0.98); }
 .kpi:focus-visible { outline: 2px solid #0284c7; outline-offset: 2px; }
 
+
+/* ===== Staff attendance calendar ===== */
+.att-cal-wrap { margin-top: 4px; }
+.att-cal-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px; }
+.att-cal-toolbar select { width:auto; min-width:180px; margin:0; flex:1 1 200px; padding:8px 10px; font-size:13px; }
+.att-legend { display:flex; flex-wrap:wrap; gap:8px 12px; margin:0 0 10px; font-size:11px; color:var(--hint); }
+.att-legend span { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+.att-dot { width:10px; height:10px; border-radius:3px; flex:none; }
+.att-cal { display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:4px; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:8px; box-shadow:var(--shadow); }
+.att-cal .dow { text-align:center; font-size:11px; font-weight:700; color:var(--hint); padding:4px 0 6px; text-transform:uppercase; letter-spacing:.03em; }
+.att-day {
+  min-height:64px; border:1px solid var(--border); border-radius:10px; padding:5px 6px;
+  background:#f8fafc; cursor:pointer; display:flex; flex-direction:column; gap:2px;
+  transition: transform .1s, box-shadow .15s, border-color .15s; -webkit-tap-highlight-color:transparent;
+}
+.att-day:hover { border-color:#0284c7; box-shadow:0 2px 8px rgba(2,132,199,.12); }
+.att-day:active { transform:scale(0.97); }
+.att-day.out { visibility:hidden; pointer-events:none; }
+.att-day.today { outline:2px solid #0284c7; outline-offset:0; }
+.att-day .dn { font-size:12px; font-weight:700; color:#0f172a; }
+.att-day .st { font-size:10px; font-weight:600; line-height:1.2; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.att-day.present { background:#ecfdf5; border-color:#86efac; }
+.att-day.present .st { color:#166534; }
+.att-day.late { background:#eff6ff; border-color:#93c5fd; }
+.att-day.late .st { color:#1e40af; }
+.att-day.leave { background:#fefce8; border-color:#fde047; }
+.att-day.leave .st { color:#a16207; }
+.att-day.unjustified { background:#fef2f2; border-color:#fca5a5; }
+.att-day.unjustified .st { color:#991b1b; }
+.att-day.empty:not(.out) { background:#fff; }
+@media (max-width:600px) {
+  .att-day { min-height:52px; padding:3px 4px; }
+  .att-day .dn { font-size:11px; }
+  .att-day .st { font-size:9px; }
+}
+
 /* ===== Workers Directory = Worker Placement Register ===== */
 #v-workers { font-family: Calibri, "Segoe UI", system-ui, sans-serif; }
 .reg-title { background: #1B365D; color: #fff; border-radius: 8px 8px 0 0; padding: 8px 14px; }
@@ -761,11 +797,12 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
           </div>
           <div class="panel-card" style="margin-bottom:14px">
             <h3 style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
-              <span>Attendance</span>
+              <span>Attendance calendar</span>
               <span style="display:flex;gap:8px;align-items:center;font-weight:500;font-size:13px">
                 <label style="margin:0">Month <input id="hrAttMonth" type="month" style="width:auto;margin:0;padding:6px 8px"></label>
               </span>
             </h3>
+            <p class="who" style="margin:4px 0 0">Select a staff member, then tap a day to mark attendance / leave. Only <b>Unjustified Leave</b> deducts from basic salary.</p>
             <div id="tbHrAtt" style="margin-top:10px"></div>
           </div>
           <div class="panel-card">
@@ -2973,6 +3010,10 @@ $("panel").addEventListener("input", e => {
   if (e.target.id === "tPeriodSel") { tPeriod = e.target.value; return renderSheets(); }
   if (e.target.id === "finPeriodSel") { finPeriod = e.target.value; return renderFinance(); }
   if (e.target.id === "hrAttMonth") { return renderStaffHR(); }
+  if (e.target.id === "hrAttStaffSel") {
+    hrAttStaffEmail = String(e.target.value || "").toLowerCase();
+    return renderStaffHR();
+  }
   const fn = LIVE[e.target.id]; if (fn) fn();
 });
 $("panel").addEventListener("click", e => {
@@ -3233,25 +3274,8 @@ function renderStaffHR() {
     "No staff yet — Invite Staff"
   );
 
-  // Attendance table for month
-  const attRows = (staffAttendance || []).filter(a => String(a.date || "").startsWith(month))
-    .sort((a, b) => String(b.date).localeCompare(String(a.date)));
-  $("tbHrAtt").innerHTML = attRows.length ? table(
-    ["Date", "Staff", "Status", "Reason", "Actions"],
-    attRows.map(a => `<tr>
-      <td>${esc(a.date)}</td>
-      <td><b>${esc(a.staffName || a.staffEmail)}</b></td>
-      <td>${(() => {
-        const st = String(a.status || "");
-        const lab = STAFF_ATT_LABEL[st] || st;
-        const deduct = a.deductsSalary != null ? a.deductsSalary : (st === "unjustified_leave" || (st === "absent" && !a.adequateReason));
-        return bdg(staffAttIsPresent(st) ? "ok" : (deduct ? "bad" : "warn"), lab) + (deduct ? ' <span class="who">· deduct</span>' : "");
-      })()}</td>
-      <td>${esc(a.reason || "—")}</td>
-      <td class="c-act">${canEdit ? A("staffAttDel", "Delete", "btn-danger", `data-id="${esc(a.id)}"`) : ""}</td>
-    </tr>`),
-    ""
-  ) : `<div class="empty">No attendance for ${esc(month)}. Use + Mark attendance.</div>`;
+  // Attendance calendar for selected staff + month
+  renderHrAttendanceCalendar(month, canEdit);
 
   // Reuse payroll list
   if ($("tbHrPay")) {
@@ -3268,6 +3292,160 @@ function renderStaffHR() {
       </tr>`),
       ""
     ) : `<div class="empty">No salary payments yet</div>`;
+  }
+}
+
+
+let hrAttStaffEmail = "";
+
+function attCssClass(status) {
+  const st = String(status || "").toLowerCase();
+  if (st === "present") return "present";
+  if (st === "late") return "late";
+  if (st === "unjustified_leave" || st === "absent") return "unjustified";
+  if (st) return "leave";
+  return "empty";
+}
+
+function attShortLabel(status) {
+  const st = String(status || "").toLowerCase();
+  const map = {
+    present: "Present", late: "Late", leave_of_absence: "Leave",
+    sick_leave: "Sick", mourning_leave: "Mourning", marriage_leave: "Marriage",
+    birth_leave_female: "Birth (F)", birth_leave_male: "Birth (M)",
+    unjustified_leave: "Unjustified", absent: "Absent"
+  };
+  return map[st] || (STAFF_ATT_LABEL[st] || st || "");
+}
+
+function renderHrAttendanceCalendar(month, canEdit) {
+  const box = $("tbHrAtt");
+  if (!box) return;
+  const active = (staff || []).filter(s => s.status === "Active");
+  if (!active.length) {
+    box.innerHTML = `<div class="empty">No active staff yet — Invite Staff first.</div>`;
+    return;
+  }
+  if (!hrAttStaffEmail || !active.some(s => String(s.email || s.id).toLowerCase() === String(hrAttStaffEmail).toLowerCase())) {
+    hrAttStaffEmail = String(active[0].email || active[0].id || "").toLowerCase();
+  }
+  const staffOpts = active.map(s => {
+    const em = String(s.email || s.id).toLowerCase();
+    return `<option value="${esc(em)}"${em === String(hrAttStaffEmail).toLowerCase() ? " selected" : ""}>${esc(s.name || em)} · ${esc(em)}</option>`;
+  }).join("");
+
+  const [yy, mm] = String(month || hrMonthValue()).split("-").map(Number);
+  const first = new Date(yy, mm - 1, 1);
+  const daysInMonth = new Date(yy, mm, 0).getDate();
+  // Monday-first grid
+  let startPad = (first.getDay() + 6) % 7; // 0=Mon … 6=Sun
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const byDate = {};
+  attForStaffMonth(hrAttStaffEmail, month).forEach(a => { if (a.date) byDate[a.date] = a; });
+
+  const dow = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(d => `<div class="dow">${d}</div>`).join("");
+  let cells = "";
+  for (let i = 0; i < startPad; i++) cells += `<div class="att-day out"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${yy}-${String(mm).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const row = byDate[dateStr];
+    const st = row ? String(row.status || "") : "";
+    const cls = attCssClass(st);
+    const isToday = dateStr === todayStr ? " today" : "";
+    const label = row ? attShortLabel(st) : "";
+    const title = row
+      ? `${dateStr}: ${STAFF_ATT_LABEL[st] || st}${row.reason ? " — " + row.reason : ""}`
+      : `${dateStr}: not marked — click to set`;
+    cells += `<button type="button" class="att-day ${cls}${isToday}" data-att-day="${esc(dateStr)}" title="${esc(title)}"${canEdit ? "" : " disabled"}>
+      <span class="dn">${d}</span>
+      ${label ? `<span class="st">${esc(label)}</span>` : ""}
+    </button>`;
+  }
+
+  const legend = [
+    ["#86efac", "Present"], ["#93c5fd", "Late"], ["#fde047", "Paid leave"], ["#fca5a5", "Unjustified (deduct)"]
+  ].map(([c, l]) => `<span><i class="att-dot" style="background:${c}"></i>${l}</span>`).join("");
+
+  const marked = Object.keys(byDate).length;
+  box.innerHTML = `<div class="att-cal-wrap">
+    <div class="att-cal-toolbar">
+      <select id="hrAttStaffSel">${staffOpts}</select>
+      <span class="who" style="margin:0">${marked} day(s) marked · ${esc(month)}</span>
+    </div>
+    <div class="att-legend">${legend}</div>
+    <div class="att-cal">${dow}${cells}</div>
+    ${canEdit ? `<p class="who" style="margin:8px 0 0">Tap a day to mark or change status. Use Delete in the form to clear a mark.</p>` : ""}
+  </div>`;
+}
+
+async function openAttDayEditor(dateStr) {
+  if (!can("payroll") && !(me && (me.role === R_SA || me.role === R_PO))) {
+    toast("No permission to edit attendance");
+    return;
+  }
+  const active = (staff || []).filter(s => s.status === "Active");
+  if (!active.length) { alert("Add Active staff first."); return; }
+  const key = String(hrAttStaffEmail || "").toLowerCase();
+  const s = active.find(x => String(x.email || x.id).toLowerCase() === key) || active[0];
+  const em = String(s.email || s.id).toLowerCase();
+  hrAttStaffEmail = em;
+  const existing = (staffAttendance || []).find(a =>
+    String(a.staffEmail || "").toLowerCase() === em && String(a.date) === dateStr
+  );
+  const typeOpts = STAFF_ATT_TYPES.map(x => x.label);
+  const curLabel = existing
+    ? (STAFF_ATT_LABEL[existing.status] || existing.leaveTypeLabel || STAFF_ATT_TYPES[0].label)
+    : STAFF_ATT_TYPES[0].label;
+  openForm({
+    title: existing ? "Edit attendance" : "Mark attendance",
+    note: `${s.name || em} · ${dateStr}. Only Unjustified Leave reduces salary.`,
+    fields: [
+      { k: "leaveType", label: "Attendance / leave type", type: "select", opts: typeOpts, req: 1 },
+      { k: "reason", label: "Note / reason (optional)" }
+    ],
+    values: {
+      leaveType: typeOpts.includes(curLabel) ? curLabel : STAFF_ATT_TYPES[0].label,
+      reason: (existing && existing.reason) || ""
+    },
+    submitText: "Save",
+    onSave: async v => {
+      const typeRow = STAFF_ATT_TYPES.find(x => x.label === v.leaveType) || STAFF_ATT_TYPES[0];
+      const id = em + "_" + dateStr;
+      await setDoc(doc(db, "staff_attendance", id), {
+        staffEmail: em,
+        staffName: (s && s.name) || em,
+        date: dateStr,
+        status: typeRow.id,
+        leaveTypeLabel: typeRow.label,
+        deductsSalary: !!typeRow.deduct,
+        maxDaysHint: typeRow.maxDays || null,
+        adequateReason: !typeRow.deduct,
+        reason: v.reason || "",
+        recordedBy: me.email || null,
+        updatedAt: serverTimestamp(),
+        createdAt: existing ? (existing.createdAt || serverTimestamp()) : serverTimestamp()
+      }, { merge: true });
+      toast(typeRow.deduct
+        ? "Saved (Unjustified Leave — salary will be deducted)"
+        : "Attendance saved");
+    }
+  });
+  // Extra: allow clear when editing existing
+  if (existing && $("fmForm")) {
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "btn-secondary btn-danger";
+    delBtn.style.cssText = "width:100%;margin-top:8px";
+    delBtn.textContent = "Clear this day";
+    delBtn.onclick = async () => {
+      if (!confirm("Clear attendance for " + dateStr + "?")) return;
+      try {
+        await deleteDoc(doc(db, "staff_attendance", existing.id || (em + "_" + dateStr)));
+        closeForm();
+        toast("Attendance cleared");
+      } catch (e) { alert(e.message); }
+    };
+    $("fmForm").appendChild(delBtn);
   }
 }
 
@@ -4387,7 +4565,14 @@ const ACTIONS = {
   async staffDelete(d) { if (!confirm("Remove this staff member?")) return false; await deleteDoc(doc(db, "admin_users", d.id)); },
   staffPayNew() { staffPayCalcForm(); return false; },
   staffAttMark() { staffAttForm(); return false; },
-  staffAttMarkOne(d) { staffAttForm(d.email); return false; },
+  staffAttMarkOne(d) {
+    if (d.email) hrAttStaffEmail = String(d.email).toLowerCase();
+    showView("staffhr");
+    renderStaffHR();
+    // Scroll calendar into view
+    setTimeout(() => { try { $("tbHrAtt") && $("tbHrAtt").scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {} }, 50);
+    return false;
+  },
   staffPayCalc() { staffPayCalcForm(); return false; },
   async staffAttDel(d) {
     if (!confirm("Delete this attendance row?")) return false;
@@ -4441,6 +4626,12 @@ function openEmployerRateAsk({ name, username, tgId, workerName, jobTitle, days,
 async function onAction(e) {
   const kp = e.target.closest(".kpi");
   if (kp && !e.target.closest("button, a") && kpiSpec(kp)) return kpiGo(kpiSpec(kp));
+  const dayBtn = e.target.closest("[data-att-day]");
+  if (dayBtn && dayBtn.dataset.attDay) {
+    e.preventDefault();
+    await openAttDayEditor(dayBtn.dataset.attDay);
+    return;
+  }
   const el = e.target.closest("button, [data-act]");
   const d = el ? el.dataset : {};
   try {
