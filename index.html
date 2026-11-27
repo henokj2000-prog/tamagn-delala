@@ -1204,9 +1204,9 @@ const i18n = {
     empPhone: "ስልክ ቁጥር *",
     empLoc: "አካባቢ / ከተማ *",
     empSave: "አስቀምጥ እና ቀጥል",
-    empEditTitle: "የራሳችሁን ፕሮፋይል ማስተካከል",
+    empEditTitle: "መገለጫ አርትዕ",
     empUpdate: "ለውጦችን አስቀምጥ",
-    empEditBtn: "✏️ የራሳችሁን ፕሮፋይል ማስተካከል",
+    empEditBtn: "✏️ መገለጫ አርትዕ",
     workerRegTitle: "እንደ ሰራተኛ ይመዝገቡ",
     workerRegNote: "ቅጹን ይሙሉ። አስተዳዳሪው ከገመገመ በኋላ ይፀድቃል።",
     wrName: "ሙሉ ስም *", wrAge: "ዕድሜ *", wrGender: "ጾታ *", wrSkill: "ክህሎቶች * (ሁሉንም ይምረጡ)", wrLoc: "አካባቢ *",
@@ -1329,15 +1329,29 @@ function placementLabel(v) {
   return key ? t(key) : String(v);
 }
 
+/** True when pay is empty or "Negotiable" (no fixed amount). */
+function isNegotiablePay(pay) {
+  const raw = String(pay == null ? "" : pay).trim();
+  return !raw || /^negotiable$/i.test(raw);
+}
+
 /** Show pay; translate stored "Negotiable" and empty values. */
 function payLabel(pay) {
   const raw = String(pay == null ? "" : pay).trim();
-  if (!raw || /^negotiable$/i.test(raw)) return t("negotiable");
+  if (isNegotiablePay(pay)) return t("negotiable");
   // If it's a plain number, show with ETB
   if (/^\d+(\.\d+)?$/.test(raw)) return raw + " ETB";
   // Replace leading/trailing English "Negotiable" inside mixed strings
   if (/negotiable/i.test(raw)) return raw.replace(/negotiable/ig, t("negotiable"));
   return raw;
+}
+
+/** Full pay line for cards: if negotiable / empty, do NOT append monthly/daily/hourly. */
+function payLine(pay, paymentType) {
+  const label = payLabel(pay);
+  if (isNegotiablePay(pay)) return label;
+  const pt = paymentType || "monthly";
+  return label + " · " + t(pt);
 }
 
 function applyLang() {
@@ -1745,7 +1759,7 @@ function renderWorkers() {
       <div class="meta"><span>🎂 ${t("age")} ${esc(w.age)}</span><span>📍 ${esc(w.location)}</span></div>
       <div class="meta"><span>💼 ${t("experience")}: ${esc(w.experience)}</span></div>
       ${place}
-      <div class="pay">💰 ${esc(payLabel(w.pay))} · ${t(w.paymentType||"monthly")}</div>
+      <div class="pay">💰 ${esc(payLine(w.pay, w.paymentType))}</div>
       ${myActiveHireWorkerIds.has(String(w.id))
         ? `<button class="btn-hire" type="button" disabled style="opacity:.7;cursor:default">${t("hireAlreadyBtn")}</button>`
         : `<button class="btn-hire" data-hire="${esc(w.id)}">${t("hire")}</button>`}
