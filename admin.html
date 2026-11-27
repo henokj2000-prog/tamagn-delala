@@ -4003,7 +4003,9 @@ async function recordFinanceIncome({ amount, category, description, source, sour
   return id;
 }
 
-/** Copy paid placement commissions / request service fees into agency_finance if missing. */
+/** Copy paid placement commissions / request service fees into agency_finance if missing.
+ *  One real payment → one income row. Prefer placement commission; skip request fee when a
+ *  matching placement commission already exists (or is about to be written). */
 let _healFinBusy = false;
 async function healFinanceFromPaidFees() {
   if (_healFinBusy || !me) return;
@@ -4011,6 +4013,7 @@ async function healFinanceFromPaidFees() {
   _healFinBusy = true;
   try {
     let n = 0;
+    // First: placement commissions
     for (const p of (places || [])) {
       if (p._synthetic) continue;
       const amt = Number(p.commissionAmount);
@@ -4031,12 +4034,21 @@ async function healFinanceFromPaidFees() {
         n++;
       } catch (e) { console.warn("heal finance placement", p.id, e); }
     }
+    // Second: request service fees only when no placement commission covers the same hire
     for (const r of (reqs || [])) {
       if (!(r.paymentReceived || r.serviceFeeCollected)) continue;
       const amt = Number(r.serviceFee || (r.agreementData && r.agreementData.serviceFee) || 0);
       if (!(amt > 0)) continue;
       const sid = "fee_req_" + r.id;
       if (financeHasSource(sid)) continue;
+      const covered = (places || []).some(p =>
+        !p._synthetic && p.commissionPaid && Number(p.commissionAmount) > 0
+        && (
+          (p.requestId && p.requestId === r.id)
+          || (p.workerId && r.workerId && p.workerId === r.workerId && sameEmployer(r, p))
+        )
+      );
+      if (covered) continue;
       try {
         await recordFinanceIncome({
           amount: amt,
@@ -4050,9 +4062,44 @@ async function healFinanceFromPaidFees() {
         n++;
       } catch (e) { console.warn("heal finance request", r.id, e); }
     }
+    // Remove duplicate request-fee rows when a placement commission for the same hire exists
+    await dedupeFinanceDuplicates();
     if (n) console.info("Finance ledger backfilled", n, "income row(s)");
   } finally {
     _healFinBusy = false;
+  }
+}
+
+/** Delete fee_req_* income when a fee_pl_* already records the same worker→employer amount. */
+async function dedupeFinanceDuplicates() {
+  const entries = financeEntries || [];
+  const plRows = entries.filter(r =>
+    r.type === "income" && (String(r.sourceId || "").startsWith("fee_pl_") || r.source === "placement_commission")
+  );
+  const reqRows = entries.filter(r =>
+    r.type === "income" && (String(r.sourceId || "").startsWith("fee_req_") || r.source === "request_mark_paid" || r.source === "agreement")
+  );
+  for (const req of reqRows) {
+    const amt = Number(req.amount) || 0;
+    const desc = String(req.description || "").toLowerCase();
+    // Extract "worker → employer" fragment
+    const m = desc.match(/·\s*(.+?)\s*→\s*(.+?)(?:\s*·|$)/);
+    const pair = m ? (m[1].trim() + "→" + m[2].trim().split("·")[0].trim()) : "";
+    const dup = plRows.some(pl => {
+      if (Number(pl.amount) !== amt) return false;
+      const pd = String(pl.description || "").toLowerCase();
+      if (pair && pd.includes(m[1].trim()) && pd.includes(m[2].trim().split("·")[0].trim())) return true;
+      // Same meta workerId
+      if (req.meta && pl.meta && req.meta.workerId && pl.meta.workerId && req.meta.workerId === pl.meta.workerId) return true;
+      return false;
+    });
+    if (!dup) continue;
+    try {
+      await deleteDoc(doc(db, "agency_finance", req.id));
+      financeEntries = (financeEntries || []).filter(x => x.id !== req.id);
+      raw.finance = financeEntries;
+      console.info("Removed duplicate finance row", req.id, req.description);
+    } catch (e) { console.warn("dedupe finance failed", req.id, e); }
   }
 }
 
@@ -4878,15 +4925,20 @@ const ACTIONS = {
       onSave: async v => {
         await updateDoc(doc(db, "placements", p.id), { commissionPaid: true, commissionAmount: v.amount, commissionMethod: v.method, commissionPaidAt: serverTimestamp() });
         try {
-          await recordFinanceIncome({
-            amount: v.amount,
-            category: "Placement commission",
-            description: `Commission · ${p.workerName || ""} → ${p.employerName || ""} · ${p.jobTitle || ""}`,
-            source: "placement_commission",
-            sourceId: "fee_pl_" + p.id,
-            method: v.method,
-            meta: { placementId: p.id, workerId: p.workerId, employerId: p.employerId }
-          });
+          // Don't double-book if agreement already recorded this hire's service fee
+          if (p.requestId && financeHasSource("fee_req_" + p.requestId)) {
+            toast("Commission saved (fee already in Finance from agreement)");
+          } else {
+            await recordFinanceIncome({
+              amount: v.amount,
+              category: "Placement commission",
+              description: `Commission · ${p.workerName || ""} → ${p.employerName || ""} · ${p.jobTitle || ""}`,
+              source: "placement_commission",
+              sourceId: "fee_pl_" + p.id,
+              method: v.method,
+              meta: { placementId: p.id, workerId: p.workerId, employerId: p.employerId, requestId: p.requestId || null }
+            });
+          }
         } catch (e) { console.warn("finance income from commission failed:", e); }
       } });
     return false;
