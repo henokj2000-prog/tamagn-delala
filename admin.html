@@ -818,6 +818,9 @@ a.btn-secondary { display: inline-block; text-decoration: none; }
             <label>Rating follow-up after (days the worker has stayed)</label>
             <input id="s_ratingDays" type="number" min="1" max="90" step="1" placeholder="7">
             <p class="who" style="margin-top:-6px;margin-bottom:12px">When an active placement reaches this many days, it appears under “Rating Follow-up Due” so you can ask the employer for a rating.</p>
+            <label>Agency contact phone (shown to employers after hire request)</label>
+            <input id="s_agencyPhone" type="tel" maxlength="20" placeholder="e.g. 0912345678">
+            <p class="who" style="margin-top:-6px;margin-bottom:12px">This number appears in the success message and Call button in the Telegram app.</p>
             <button class="btn-primary" data-act="saveSettings">Save Changes</button>
           </div>
         </div>
@@ -1009,7 +1012,7 @@ const ROLE_VIEWS = {
   [R_PO]: ["dashboard", "timesheets"],
   [R_VS]: ["dashboard", "employers", "workers"]
 };
-const DEFAULTS = { defaultCommissionPct: 18, requireIdVerification: true, checkinReminders: true, invoiceTerms: "Net 15 Days", ratingFollowUpDays: 7 };
+const DEFAULTS = { defaultCommissionPct: 18, requireIdVerification: true, checkinReminders: true, invoiceTerms: "Net 15 Days", ratingFollowUpDays: 7, agencyPhone: "" };
 const BUSY = ["Pending Employer Review", "OTP Verified", "Active Placement"];           // worker is tied up
 const FILL = [...BUSY, "Completed"];                                                    // counts toward "workers needed"
 
@@ -2960,6 +2963,7 @@ function renderSettings() {
   $("s_commission").value = settings.defaultCommissionPct; $("s_terms").value = settings.invoiceTerms;
   $("s_verify").checked = !!settings.requireIdVerification; $("s_remind").checked = !!settings.checkinReminders;
   if ($("s_ratingDays")) $("s_ratingDays").value = settings.ratingFollowUpDays ?? DEFAULTS.ratingFollowUpDays;
+  if ($("s_agencyPhone")) $("s_agencyPhone").value = settings.agencyPhone || "";
   document.querySelectorAll("#v-settings [data-act='saveSettings'], #v-settings [data-act='staffInvite']").forEach(b => b.classList.toggle("hid", !can("settings")));
 }
 
@@ -4365,12 +4369,14 @@ const ACTIONS = {
     const pct = Number($("s_commission").value); if (!(pct >= 0 && pct <= 100)) { alert("Commission must be between 0 and 100."); return false; }
     const ratingDays = Number($("s_ratingDays")?.value);
     if (!(ratingDays >= 1 && ratingDays <= 90)) { alert("Rating follow-up days must be between 1 and 90."); return false; }
+    const agencyPhone = ($("s_agencyPhone") && $("s_agencyPhone").value || "").trim();
     await setDoc(doc(db, "agency_settings", "main"), {
       defaultCommissionPct: pct,
       invoiceTerms: $("s_terms").value,
       requireIdVerification: $("s_verify").checked,
       checkinReminders: $("s_remind").checked,
       ratingFollowUpDays: ratingDays,
+      agencyPhone,
       updatedAt: serverTimestamp()
     }, { merge: true });
     alert(t("saveSettingsOk"));
