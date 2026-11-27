@@ -2156,7 +2156,10 @@ onAuthStateChanged(auth, async user => {
     $("panel").classList.remove("hid");
     document.body.classList.add("is-app");
     setLoginStatus("");
-    try { await loadAdmin(true); } catch (err) {
+    try {
+      // Only force-reattach listeners if none are running (prevents blank flash on every auth event)
+      await loadAdmin(!(typeof unsubs !== "undefined" && unsubs.length));
+    } catch (err) {
       console.error(err);
       alert("Signed in, but loading data failed: " + (err.message || err));
     }
@@ -2166,6 +2169,18 @@ onAuthStateChanged(auth, async user => {
     console.error("onAuthStateChanged", err);
     setLoginStatus("Sign-in error: " + (err.message || err));
     alert("Sign-in error: " + (err.message || err));
+  }
+});
+
+// Rebuild UI when returning to the tab (mobile / Telegram WebView pause JS)
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && typeof me !== "undefined" && me) {
+    try { scheduleRebuild(); } catch (_) {}
+  }
+});
+window.addEventListener("pageshow", () => {
+  if (typeof me !== "undefined" && me) {
+    try { scheduleRebuild(); } catch (_) {}
   }
 });
 
@@ -2553,7 +2568,7 @@ function chartHtml(series) {
 const KPI_MAP = {
   kpis:   { _: ["dashboard"], "Pending Approvals": ["workers", "wFilter", "Pending"], "Active Hire Requests": ["requests", "rFilter", "open"], "Ratings Due": ["requests", "rFilter", "all"],
             "Worker Payouts Due": ["timesheets", "tFilter", "Approved"], "Open Job Orders": ["matches"], "Active Placements": ["placements", "pFilter", "Active Placement"],
-            "Revenue This Month": ["requests", "rFilter", "all"], "Workers \u00b7 Employers": ["workers", "wFilter", "all"] },
+            "Revenue This Month": ["finance"], "Workers \u00b7 Employers": ["workers", "wFilter", "all"] },
   eKpis:  { _: ["employers", "eFilter", "all"], "Verified Partners": ["employers", "eFilter", "verified"], "Pending Verification": ["employers", "eFilter", "pending"], "Active Job Orders": ["matches"] },
   wKpis:  { _: ["workers", "wFilter", "all"], "Available Now": ["workers", "wFilter", "Available"], "Currently Placed": ["workers", "wFilter", "Placed"], "Pending Verification": ["workers", "wFilter", "Pending"] },
   mKpis:  { _: ["matches"], "Pending Employer Review": ["placements", "pFilter", "Pending Employer Review"], "Active Placements": ["placements", "pFilter", "Active Placement"] },
@@ -2571,7 +2586,10 @@ function kpiGo(spec) {
   const [view, key, val] = spec.split("|");
   if (key === "wFilter") wFilter = val; else if (key === "rFilter") rFilter = val; else if (key === "eFilter") eFilter = val;
   else if (key === "pFilter") pFilter = val; else if (key === "tFilter") tFilter = val; else if (key === "aFilter") aFilter = val;
-  try { renderWorkers(); renderRequests(); renderEmployers(); renderPlacements(); renderSheets(); renderAgreements(); } catch (err) { console.error(err); }
+  try {
+    renderWorkers(); renderRequests(); renderEmployers(); renderPlacements();
+    renderSheets(); renderAgreements(); renderFinance();
+  } catch (err) { console.error(err); }
   showView(view);
 }
 
