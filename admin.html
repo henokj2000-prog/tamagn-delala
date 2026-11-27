@@ -2805,7 +2805,7 @@ function renderEmployers() {
       <td data-l="${esc(tt("Verification"))}">${empVerBadge(e)}</td><td data-l="${esc(tt("Billing"))}">${billBadge(e)}</td>
       <td class="c-act"><div class="acts">${A("viewEmp", tt("View"), "", `data-id="${esc(e.id)}"`)}${empVerBtns(e)}${can("manage") ? A("editEmp", tt("Edit"), "", `data-id="${esc(e.id)}"`) + `<button class="btn-secondary btn-danger" data-de="${esc(e.id)}">${tt("Delete")}</button>` : ""}</div></td>
     </tr>`;
-  }), tt("noMatch"));
+  }), t("noMatch"));
 }
 
 // ================= Workers Directory = Worker Placement Register =================
@@ -2919,7 +2919,7 @@ function renderWorkers(keepFocus) {
     <td class="act">${acts(w)}</td></tr>`; }).join("");
   const keep = (() => { const a = document.activeElement; return keepFocus === true && a && a.dataset && a.dataset.f ? { f: a.dataset.f, id: a.dataset.id } : null; })();
   const hint = canEdit ? (regEditId ? " · editing row — changes save automatically · tap ✓ when done" : " · click ✏️ to edit a row") : "";
-  $("tbWorkers").innerHTML = `<div class="reg-wrap"><table class="reg"><colgroup>${RC.map(([, wd]) => `<col style="width:${wd}px">`).join("")}<col style="width:150px"></colgroup><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="19" class="reg-empty">${esc(tt("noMatch"))}</td></tr>`}</tbody></table></div><div class="reg-count">${rows.length} / ${allW.length}</div>`;
+  $("tbWorkers").innerHTML = `<div class="reg-wrap"><table class="reg"><colgroup>${RC.map(([, wd]) => `<col style="width:${wd}px">`).join("")}<col style="width:150px"></colgroup><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="19" class="reg-empty">${esc(t("noMatch"))}</td></tr>`}</tbody></table></div><div class="reg-count">${rows.length} / ${allW.length}</div>`;
   if (keep) { const el = document.querySelector(`#tbWorkers [data-f="${keep.f}"][data-id="${keep.id}"]`); if (el) el.focus(); }
   fillPrivs();
 }
@@ -2983,10 +2983,14 @@ function renderMatches() {
       <div class="m">${etb(j.payRate)}/${rateWord(j.payType)} · ${esc(j.city || "—")}${j.placementType ? " · " + esc(j.placementType) : ""} · Start ${esc(j.startDate || "—")}</div>
       <div>${jobBadge(j)} ${urgBadge(j)} ${bdg("mute", filledCount(j.id) + "/" + (j.workersNeeded || 1) + " workers")}</div>
       ${can("place") ? `<div class="acts">${A("editJob", tt("Edit"), "", `data-id="${esc(j.id)}"`)}${j.status === "Pending Review" ? A("approveJob", tt("Approve"), "btn-success", `data-id="${esc(j.id)}"`) : ""}${j.status === "Closed" ? A("reopenJob", tt("Open"), "btn-info", `data-id="${esc(j.id)}"`) : (j.status !== "Pending Review" ? A("closeJob", tt("Close"), "", `data-id="${esc(j.id)}"`) : "")}<button class="btn-secondary btn-danger" data-act="delJob" data-id="${esc(j.id)}">${tt("Delete")}</button></div>` : ""}
-    </div>`).join("") : `<div class="empty">${tt("noMatch")}</div>`;
+    </div>`).join("") : `<div class="empty">${t("noMatch")}</div>`;
 
   const job = jById(selJobId);
-  if (!job) { $("candSub").textContent = tt("openJobReqsSub"); $("cList").innerHTML = `<div class="empty">${tt("noMatch")}</div>`; return; }
+  if (!job) {
+    $("candSub").textContent = t("openJobReqsSub");
+    $("cList").innerHTML = `<div class="empty">${t("noMatch")}</div>`;
+    return;
+  }
   const full = filledCount(job.id) >= Number(job.workersNeeded || 1) || job.status === "Closed";
   const cands = candidates(job);
   $("candSub").textContent = `${job.title} · ${job.employerName} — ${cands.length}`;
@@ -2996,7 +3000,7 @@ function renderMatches() {
         <div style="margin-top:4px">${verBadge(w)} ${bdg("ok", tt("Available"))} ${w.ratingCount ? starsHtml(ratingAvgOf(w), w.ratingCount) : bdg("mute", tt("No rating"))}</div></div>
       <span class="score ${s >= 90 ? "hi" : s >= 75 ? "mid" : "lo"}">${s}% ${tt("Match")}</span>
       ${can("place") && !full ? A("assign", tt("Assign Worker"), "btn-info", `data-job="${esc(job.id)}" data-w="${esc(w.id)}" data-s="${s}"`) : ""}
-    </div>`).join("") : `<div class="empty">${tt("noMatch")}</div>`;
+    </div>`).join("") : `<div class="empty">${t("noMatch")}</div>`;
 }
 
 function renderPlacements() {
@@ -3054,7 +3058,7 @@ function renderPlacements() {
       <td data-l="${esc(tt("Commission"))}">${p.commissionPaid ? bdg("ok", etb(p.commissionAmount)) : bdg("mute", tt("Unpaid"))}</td>
       <td data-l="${esc(tt("Handover"))}">${p.handoverReceiptSigned ? bdg("ok", "✓ " + fmtDate(p.officeHandoverCompletedAt)) : bdg("mute", "—")}</td>
       <td class="c-act"><div class="acts">${acts(p)}</div></td>
-    </tr>`), tt("noMatch"));
+    </tr>`), t("noMatch"));
 }
 
 function renderSheets() {
@@ -4876,7 +4880,7 @@ const ACTIONS = {
     const rAvg = ratingAvgOf(w), rScore = ratingScoreOf(w), rConf = ratingConfidenceOf(w);
     $("imBody").innerHTML = `<div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">${pic(w.photo, "Profile photo", nm + "_photo.jpg")}${pic(pr.idPhoto, "National ID photo", nm + "_ID.jpg")}</div>` + `<h3>${esc(w.name)}</h3><p style="text-align:center">${availBadge(w)} ${verBadge(w)}</p><p style="text-align:center;margin:6px 0">${ratingBlock(w, { showScore: true })}</p>` + kv([
       ["Worker ID", sid("W", w.id)], ["Primary skill", esc(w.skill)], ["Other skills", esc((w.skillTags || []).join(", "))], ["Experience", esc(w.experience) + (w.experienceYears != null ? " (" + esc(w.experienceYears) + " yrs)" : "")],
-      ["Age", esc(w.age)], ["Location", esc(w.location)], ["Pay", esc(w.pay) + " · " + esc(w.paymentType)], ["Desired placement", esc(w.placementType || "—")],
+      ["Age", esc(w.age)], ["Location", esc(w.location)], ["Pay", (!w.pay || /^negotiable$/i.test(String(w.pay).trim())) ? "Negotiable" : (esc(w.pay) + (w.paymentType ? " · " + esc(w.paymentType) : ""))], ["Desired placement", esc(w.placementType || "—")],
       ["Rating (avg)", w.ratingCount ? `${rAvg} / 5 (${w.ratingCount} review${w.ratingCount === 1 ? "" : "s"})` : "No ratings yet"],
       ["Rank score", w.ratingCount ? `${rScore.toFixed(2)} / 5 (${rConf}% confidence)` : `Baseline ${RATING_PRIOR_MEAN} (unrated)`],
       ["Fayda / Kebele ID", esc(pr.nationalId)], ["Phone", esc(pr.phone)], ["Telegram ID", esc(pr.telegramUserId)],
