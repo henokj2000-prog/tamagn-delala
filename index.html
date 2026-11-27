@@ -1315,6 +1315,31 @@ const ts = x => (x?.seconds) ? x.seconds : 0;
 const t = key => i18n[lang][key] || key;
 const skillLabel = en => { const s = SKILLS.find(x => x.en === en); return s ? (lang === "am" ? s.am : s.en) : en; };
 
+/** Map stored English placementType values to the current language. */
+const PLACE_TYPE_KEYS = {
+  "Live-in": "placeLiveIn",
+  "Full-Time (Live-out)": "placeFullTime",
+  "Part-Time / Shift": "placePartTime",
+  "On-Call / Daily": "placeOnCall",
+  "Fixed-Term Contract": "placeFixed"
+};
+function placementLabel(v) {
+  if (!v) return "";
+  const key = PLACE_TYPE_KEYS[String(v).trim()];
+  return key ? t(key) : String(v);
+}
+
+/** Show pay; translate stored "Negotiable" and empty values. */
+function payLabel(pay) {
+  const raw = String(pay == null ? "" : pay).trim();
+  if (!raw || /^negotiable$/i.test(raw)) return t("negotiable");
+  // If it's a plain number, show with ETB
+  if (/^\d+(\.\d+)?$/.test(raw)) return raw + " ETB";
+  // Replace leading/trailing English "Negotiable" inside mixed strings
+  if (/negotiable/i.test(raw)) return raw.replace(/negotiable/ig, t("negotiable"));
+  return raw;
+}
+
 function applyLang() {
   $("tagline").textContent = t("tagline");
   $("langBtn").textContent = t("langBtn");
@@ -1681,7 +1706,7 @@ function renderWorkers() {
     const ratingBlock = w.ratingCount
       ? starsHtml(ratingAvgOf(w), w.ratingCount)
       : `<div class="stars" style="color:var(--hint)">☆☆☆☆☆ <span style="font-size:12px">(${t("noRating")})</span></div>`;
-    const place = w.placementType ? `<div class="meta"><span>🏠 ${esc(w.placementType)}</span></div>` : "";
+    const place = w.placementType ? `<div class="meta"><span>🏠 ${esc(placementLabel(w.placementType))}</span></div>` : "";
     return `<div class="card">${img}<div class="card-body">
       <div class="card-name">${esc(w.name)}</div>
       <div class="card-skill">${esc(skillLabel(w.skill))}</div>
@@ -1690,7 +1715,7 @@ function renderWorkers() {
       <div class="meta"><span>🎂 ${t("age")} ${esc(w.age)}</span><span>📍 ${esc(w.location)}</span></div>
       <div class="meta"><span>💼 ${t("experience")}: ${esc(w.experience)}</span></div>
       ${place}
-      <div class="pay">💰 ${esc(w.pay || t("negotiable"))} · ${t(w.paymentType||"monthly")}</div>
+      <div class="pay">💰 ${esc(payLabel(w.pay))} · ${t(w.paymentType||"monthly")}</div>
       ${myActiveHireWorkerIds.has(String(w.id))
         ? `<button class="btn-hire" type="button" disabled style="opacity:.7;cursor:default">${t("hireAlreadyBtn")}</button>`
         : `<button class="btn-hire" data-hire="${esc(w.id)}">${t("hire")}</button>`}
@@ -2161,7 +2186,7 @@ function renderWorkerJobs(w, allJobs) {
     return `<div class="job-card" style="${isNew ? "border:2px solid #0284c7;background:#f0f9ff" : ""}">
       <div class="jt">${esc(j.title || j.requiredSkill)} ${j.urgency === "Urgent" ? `<span class="urgent">Urgent</span>` : ""} ${isNew ? `<span class="urgent" style="background:#dbeafe;color:#1e40af">NEW</span>` : ""}</div>
       <div class="jm">🛠 ${esc(skillLabel(j.requiredSkill))}</div>
-      ${j.placementType ? `<div class="jm">🏠 ${esc(j.placementType)}</div>` : ""}
+      ${j.placementType ? `<div class="jm">🏠 ${esc(placementLabel(j.placementType))}</div>` : ""}
       <div class="jm">📍 ${esc(j.city || "—")}</div>
       <div class="jm">👔 ${esc(j.employerName || "")}</div>
       <div class="jp">💰 ${esc(pay)}</div>
