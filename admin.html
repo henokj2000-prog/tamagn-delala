@@ -1016,7 +1016,7 @@ window.addEventListener("unhandledrejection", function (ev) {
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, writeBatch, query, orderBy, limit, serverTimestamp, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, writeBatch, query, orderBy, limit, serverTimestamp, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const ADMIN_EMAIL = "henokj2000@gmail.com";   // owner = Super Admin. Other staff are listed in the admin_users collection.
@@ -2630,32 +2630,48 @@ function financeTime(r) {
   return ts(r.createdAt) || ts(r.date) || 0;
 }
 function sumCommission(from) {
-  // Prefer the Finance ledger (agency_finance) so Dashboard matches the Finance page
+  // 1) Ledger income when present
   const fromFin = (financeEntries || [])
     .filter(r => r.type === "income" && inPeriod(financeTime(r), from))
     .reduce((a, r) => a + (Number(r.amount) || 0), 0);
-  // Historical placement commissions not yet written to the ledger
-  const fromPl = places.filter(p =>
-      p.commissionPaid && Number(p.commissionAmount) > 0
+
+  // 2) Placement commissions not yet in the ledger
+  const fromPl = (places || []).filter(p =>
+      !p._synthetic
+      && p.commissionPaid && Number(p.commissionAmount) > 0
       && inPeriod(ts(p.commissionPaidAt) || ts(p.createdAt), from)
       && !financeHasSource("fee_pl_" + p.id)
     )
     .reduce((a, p) => a + Number(p.commissionAmount || 0), 0);
-  // Paid timesheet commissions not yet in the ledger
-  const fromTs = sheets.filter(s =>
+
+  // 3) Timesheet commissions not yet in the ledger
+  const fromTs = (sheets || []).filter(s =>
       s.approvalStatus === "Paid" && Number(s.commission) > 0
       && inPeriod(ts(s.paidAt), from)
       && !financeHasSource("fee_ts_" + s.id)
     )
     .reduce((a, s) => a + Number(s.commission || 0), 0);
-  // Hire-request service fees marked paid but missing from ledger
-  const fromReq = (reqs || []).filter(r =>
-      (r.paymentReceived || r.serviceFeeCollected)
-      && Number(r.serviceFee || (r.agreementData && r.agreementData.serviceFee)) > 0
-      && inPeriod(ts(r.paymentReceivedAt) || ts(r.agreementSignedAt) || ts(r.createdAt), from)
-      && !financeHasSource("fee_req_" + r.id)
-    )
+
+  // 4) Request service fees — skip if same fee already counted on a placement
+  //    (agreement finalize often marks BOTH request + placement → was doubling to 1,800)
+  const fromReq = (reqs || []).filter(r => {
+      if (!(r.paymentReceived || r.serviceFeeCollected)) return false;
+      const amt = Number(r.serviceFee || (r.agreementData && r.agreementData.serviceFee) || 0);
+      if (!(amt > 0)) return false;
+      if (!inPeriod(ts(r.paymentReceivedAt) || ts(r.agreementSignedAt) || ts(r.createdAt), from)) return false;
+      if (financeHasSource("fee_req_" + r.id)) return false;
+      const dupPl = (places || []).some(p =>
+        !p._synthetic && p.commissionPaid && Number(p.commissionAmount) > 0
+        && (
+          (p.requestId && p.requestId === r.id)
+          || (p.workerId && r.workerId && p.workerId === r.workerId && sameEmployer(r, p))
+        )
+      );
+      if (dupPl) return false;
+      return true;
+    })
     .reduce((a, r) => a + Number(r.serviceFee || (r.agreementData && r.agreementData.serviceFee) || 0), 0);
+
   return fromFin + fromPl + fromTs + fromReq;
 }
 function countCreated(list, from) {
@@ -3852,12 +3868,57 @@ function finInPeriod(d) {
   return true;
 }
 
+/** Build virtual income rows from paid placements / requests not yet in agency_finance. */
+function virtualFinanceIncome() {
+  const out = [];
+  for (const p of (places || [])) {
+    if (p._synthetic) continue;
+    const amt = Number(p.commissionAmount);
+    if (!p.commissionPaid || !(amt > 0)) continue;
+    const sid = "fee_pl_" + p.id;
+    if (financeHasSource(sid)) continue;
+    const sec = ts(p.commissionPaidAt) || ts(p.createdAt);
+    const dateStr = sec ? new Date(sec * 1000).toISOString().slice(0, 10) : "";
+    out.push({
+      id: sid, _virtual: true, type: "income", category: "Placement commission",
+      amount: amt, date: dateStr, createdAt: p.commissionPaidAt || p.createdAt,
+      description: `Commission · ${p.workerName || ""} → ${p.employerName || ""} · ${p.jobTitle || ""}`,
+      sourceId: sid, source: "placement_commission"
+    });
+  }
+  for (const r of (reqs || [])) {
+    if (!(r.paymentReceived || r.serviceFeeCollected)) continue;
+    const amt = Number(r.serviceFee || (r.agreementData && r.agreementData.serviceFee) || 0);
+    if (!(amt > 0)) continue;
+    const sid = "fee_req_" + r.id;
+    if (financeHasSource(sid)) continue;
+    // Skip if a placement commission already covers this hire
+    const dupPl = (places || []).some(p =>
+      !p._synthetic && p.commissionPaid && Number(p.commissionAmount) > 0
+      && ((p.requestId && p.requestId === r.id)
+        || (p.workerId && r.workerId && p.workerId === r.workerId && sameEmployer(r, p)))
+    );
+    if (dupPl) continue;
+    const sec = ts(r.paymentReceivedAt) || ts(r.agreementSignedAt) || ts(r.createdAt);
+    const dateStr = sec ? new Date(sec * 1000).toISOString().slice(0, 10) : "";
+    out.push({
+      id: sid, _virtual: true, type: "income", category: "Service fees",
+      amount: amt, date: dateStr, createdAt: r.paymentReceivedAt || r.createdAt,
+      description: `Service fee · ${r.workerName || ""} → ${r.employerName || ""}`,
+      sourceId: sid, source: "request_mark_paid"
+    });
+  }
+  return out;
+}
+
 function renderFinance() {
   if (!$("tbFin")) return;
   const canEdit = me && (me.role === R_SA || me.role === R_PO);
   if ($("btnFinIn")) $("btnFinIn").classList.toggle("hid", !canEdit);
   if ($("btnFinEx")) $("btnFinEx").classList.toggle("hid", !canEdit);
-  let rows = (financeEntries || []).filter(finInPeriod);
+
+  // Merge saved ledger + virtual (paid fees not yet written to agency_finance)
+  let rows = [...(financeEntries || []), ...virtualFinanceIncome()].filter(finInPeriod);
   if (finFilter === "income") rows = rows.filter(r => r.type === "income");
   if (finFilter === "expense") rows = rows.filter(r => r.type === "expense");
   const q = ($("finSearch") && $("finSearch").value || "").trim().toLowerCase();
@@ -3881,12 +3942,12 @@ function renderFinance() {
   $("tbFin").innerHTML = rows.length ? table(
     ["Date", "Type", "Category", "Description", "Amount", "Actions"],
     rows.map(r => `<tr>
-      <td>${esc(r.date || fmtDate(r.createdAt) || "—")}</td>
+      <td>${esc(r.date || fmtDate(r.createdAt) || "—")}${r._virtual ? ` <span class="mini">(from placement)</span>` : ""}</td>
       <td>${bdg(r.type === "income" ? "ok" : "bad", r.type)}</td>
       <td>${esc(r.category || "—")}</td>
       <td>${esc(r.description || "—")}</td>
       <td class="num"><b>${etb(r.amount)}</b></td>
-      <td class="c-act">${canEdit ? A("finDel", "Delete", "btn-danger", `data-id="${esc(r.id)}"`) : ""}</td>
+      <td class="c-act">${canEdit && !r._virtual ? A("finDel", "Delete", "btn-danger", `data-id="${esc(r.id)}"`) : (r._virtual ? `<span class="mini">auto</span>` : "")}</td>
     </tr>`),
     ""
   ) : `<div class="empty">No finance entries</div>`;
@@ -3912,7 +3973,7 @@ async function recordFinanceIncome({ amount, category, description, source, sour
       else dateStr = new Date().toISOString().slice(0, 10);
     } catch (_) { dateStr = new Date().toISOString().slice(0, 10); }
   }
-  const ref = await addDoc(collection(db, "agency_finance"), {
+  const payload = {
     type: "income",
     category: category || "Service fees",
     amount: round2(amt),
@@ -3924,8 +3985,22 @@ async function recordFinanceIncome({ amount, category, description, source, sour
     meta: meta || null,
     recordedBy: (me && me.email) || null,
     createdAt: serverTimestamp()
-  });
-  return ref.id;
+  };
+  let id = sid || null;
+  if (sid) {
+    // Fixed doc id prevents duplicates and survives reloads
+    await setDoc(doc(db, "agency_finance", sid), payload, { merge: true });
+    id = sid;
+  } else {
+    const ref = await addDoc(collection(db, "agency_finance"), payload);
+    id = ref.id;
+  }
+  // Optimistic local update so Finance UI updates even before the snapshot
+  if (id && !(financeEntries || []).some(r => r.id === id || (sid && r.sourceId === sid))) {
+    financeEntries = [{ id, ...payload, createdAt: { seconds: Date.now() / 1000 } }, ...(financeEntries || [])];
+    raw.finance = financeEntries;
+  }
+  return id;
 }
 
 /** Copy paid placement commissions / request service fees into agency_finance if missing. */
